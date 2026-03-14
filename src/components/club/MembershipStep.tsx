@@ -52,7 +52,7 @@ export default function MembershipStep() {
               </div>
             ) : (
               <Button variant="brass" onClick={handleMint} disabled={!unlocked} className="w-full sm:w-auto">
-                🏛️ Mint Explorer Membership NFT
+                Join Club ✦
               </Button>
             )}
           </div>

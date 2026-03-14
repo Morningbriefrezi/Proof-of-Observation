@@ -7,7 +7,7 @@ export interface Mission {
   name: string;
   emoji: string;
   difficulty: Difficulty;
-  points: number;
+  stars: number;
   type: ObsType;
   desc: string;
   hint: string;
@@ -38,7 +38,7 @@ export interface CompletedMission {
   id: string;
   name: string;
   emoji: string;
-  points: number;
+  stars: number;
   txId: string;
   photo: string;
   timestamp: string;
@@ -60,4 +60,5 @@ export interface AppState {
   telescope: { brand: string; model: string; aperture: string } | null;
   telescopeTx: string;
   completedMissions: CompletedMission[];
+  claimedRewards: string[];
 }

@@ -137,6 +137,19 @@ h1, h2, h3 { font-family: Georgia, Palatino, serif; }
 .glow-cyan { box-shadow: 0 0 20px rgba(34,211,238,0.3); }
 .glow-solana { box-shadow: 0 0 20px rgba(153,69,255,0.3); }
 
+/* Reward progress bar */
+.reward-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(148, 163, 184, 0.15);
+  overflow: hidden;
+}
+.reward-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
 /* Prevent horizontal scroll */
 html, body { overflow-x: hidden; width: 100%; }
 

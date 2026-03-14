@@ -9,14 +9,14 @@ interface VerificationProps {
   photo: string;
   farmhawk: FarmHawkResult;
   pollinet: PollinetStatus;
-  points: number;
+  stars: number;
   timestamp: string;
   latitude: number;
   longitude: number;
   onMint: () => void;
 }
 
-export default function Verification({ photo, farmhawk, pollinet, points, timestamp, latitude, longitude, onMint }: VerificationProps) {
+export default function Verification({ photo, farmhawk, pollinet, stars, timestamp, latitude, longitude, onMint }: VerificationProps) {
   return (
     <div className="flex flex-col gap-4">
       <img src={photo} alt="Captured observation" className="w-full max-w-md mx-auto rounded-xl border-2 border-[#34d399]" />
@@ -78,7 +78,7 @@ export default function Verification({ photo, farmhawk, pollinet, points, timest
 
       <Button variant="brass" onClick={onMint} className="w-full py-3.5 rounded-xl flex items-center justify-center gap-2">
         <Trophy size={18} />
-        Mint Observation NFT (+{points} pts)
+        Create Proof ✦ (+{stars} stars)
       </Button>
     </div>
   );

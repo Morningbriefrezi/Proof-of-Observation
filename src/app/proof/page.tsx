@@ -4,12 +4,13 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { ExternalLink, Trash2, Clock, CheckCircle2, Cloud, Wifi } from 'lucide-react';
 import { useAppState } from '@/hooks/useAppState';
+import { getUnlockedRewards, getRank } from '@/lib/rewards';
 import type { CompletedMission } from '@/lib/types';
 
-function NFTCard({ mission, onDelete }: { mission: CompletedMission; onDelete: () => void }) {
+function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete: () => void }) {
   const [confirming, setConfirming] = useState(false);
-
   const isPending = mission.status === 'pending';
+
   return (
     <div className={`glass-card rounded-xl overflow-hidden flex flex-col ${isPending ? '!border-amber-500/50' : ''}`} style={isPending ? { borderColor: 'rgba(245,158,11,0.5)' } : {}}>
       <img src={mission.photo} alt={mission.name} className="w-full aspect-[4/3] object-cover" />
@@ -40,31 +41,21 @@ function NFTCard({ mission, onDelete }: { mission: CompletedMission; onDelete: (
             href={isPending ? '#' : `https://explorer.solana.com/tx/${mission.txId}?cluster=devnet`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 text-center text-xs px-2 py-1.5 border border-[#1a2d4d] hover:border-[#22d3ee] text-slate-400 hover:text-[#22d3ee] rounded transition-all"
+            className="flex-1 text-center text-xs px-2 py-1.5 border border-[#1a2d4d] hover:border-[#22d3ee] text-slate-400 hover:text-[#22d3ee] rounded transition-all flex items-center justify-center gap-1"
           >
             <ExternalLink size={12} /> Explorer
           </a>
           {!confirming ? (
             <button
               onClick={() => setConfirming(true)}
-              className="flex-1 text-xs px-2 py-1.5 border border-[#1a2d4d] hover:border-red-500 text-slate-400 hover:text-red-400 rounded transition-all"
+              className="flex-1 text-xs px-2 py-1.5 border border-[#1a2d4d] hover:border-red-500 text-slate-400 hover:text-red-400 rounded transition-all flex items-center justify-center gap-1"
             >
               <Trash2 size={12} /> Delete
             </button>
           ) : (
             <div className="flex-1 flex gap-1">
-              <button
-                onClick={onDelete}
-                className="flex-1 text-xs px-2 py-1.5 bg-red-500/20 border border-red-500 text-red-400 rounded transition-all"
-              >
-                Confirm
-              </button>
-              <button
-                onClick={() => setConfirming(false)}
-                className="flex-1 text-xs px-2 py-1.5 border border-[#1a2d4d] text-slate-400 rounded transition-all"
-              >
-                Cancel
-              </button>
+              <button onClick={onDelete} className="flex-1 text-xs px-2 py-1.5 bg-red-500/20 border border-red-500 text-red-400 rounded">Confirm</button>
+              <button onClick={() => setConfirming(false)} className="flex-1 text-xs px-2 py-1.5 border border-[#1a2d4d] text-slate-400 rounded">Cancel</button>
             </div>
           )}
         </div>
@@ -73,53 +64,77 @@ function NFTCard({ mission, onDelete }: { mission: CompletedMission; onDelete: (
   );
 }
 
-export default function NFTsPage() {
+export default function ProofPage() {
   const { state, removeMission } = useAppState();
   const clubDone = state.walletConnected && state.membershipMinted && !!state.telescope;
-  const nfts = [...state.completedMissions].reverse();
+  const proofs = [...state.completedMissions].reverse();
 
   if (!clubDone) {
     return (
       <div className="max-w-md mx-auto px-4 py-24 text-center">
         <p className="text-4xl mb-4">🔒</p>
         <h2 className="text-2xl font-bold text-[#c9a84c] mb-3" style={{ fontFamily: 'Georgia, serif' }}>
-          Join AstroClub First
+          Join Club First
         </h2>
         <Link href="/club" className="px-6 py-3 bg-gradient-to-r from-[#c9a84c] to-[#a07840] text-black font-bold rounded-lg hover:from-[#d4b05c] transition-all duration-200">
-          🏛️ Go to AstroClub →
+          Join Club ✦
         </Link>
       </div>
     );
   }
 
+  const completedIds = state.completedMissions.filter(m => m.status === 'completed').map(m => m.id);
+  const rank = getRank(completedIds.length).name;
+  const rewards = getUnlockedRewards(completedIds, rank);
+  const unlockedCount = rewards.filter(r => r.unlocked).length;
+  const nextReward = rewards.find(r => !r.unlocked && r.progress > 0);
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-[#c9a84c]" style={{ fontFamily: 'Georgia, serif' }}>
-            🖼️ NFT Gallery
+            My Proof
           </h1>
-          <p className="text-slate-400 mt-1">{nfts.length} observation{nfts.length !== 1 ? 's' : ''} minted</p>
+          <p className="text-slate-400 mt-1">{proofs.length} observation{proofs.length !== 1 ? 's' : ''} sealed on Solana</p>
         </div>
-        {nfts.length > 0 && (
-          <Link href="/sky" className="text-sm text-[#22d3ee] hover:underline">
+        {proofs.length > 0 && (
+          <Link href="/missions" className="text-sm text-[#22d3ee] hover:underline">
             + Add more →
           </Link>
         )}
       </div>
 
-      {nfts.length === 0 ? (
+      {/* Rewards summary */}
+      <div className="glass-card border border-[#c9a84c]/20 p-4 mb-6 flex flex-col gap-2">
+        <p className="text-[#c9a84c] text-sm font-semibold">
+          Rewards: {unlockedCount}/{rewards.length} unlocked
+          {nextReward && (
+            <span className="text-slate-400 font-normal"> · Next: {nextReward.name}</span>
+          )}
+        </p>
+        {nextReward?.requiredMissions && (
+          <p className="text-slate-500 text-xs">
+            Observe {nextReward.requiredMissions.filter(id => !completedIds.includes(id)).join(', ')} to unlock
+          </p>
+        )}
+        <Link href="/missions" className="text-[#22d3ee] text-xs hover:underline">
+          View All Rewards →
+        </Link>
+      </div>
+
+      {proofs.length === 0 ? (
         <div className="text-center py-20 border border-dashed border-[#1a2d4d] rounded-xl">
           <p className="text-4xl mb-4">🌌</p>
           <p className="text-slate-400 mb-4">No observations minted yet</p>
-          <Link href="/sky" className="px-6 py-3 bg-gradient-to-r from-[#c9a84c] to-[#a07840] text-black font-bold rounded-lg">
-            🔭 Start Observing
+          <Link href="/missions" className="px-6 py-3 bg-gradient-to-r from-[#c9a84c] to-[#a07840] text-black font-bold rounded-lg">
+            Begin Observation →
           </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {nfts.map(m => (
-            <NFTCard key={m.txId} mission={m} onDelete={() => removeMission(m.id)} />
+          {proofs.map(m => (
+            <ProofCard key={m.txId} mission={m} onDelete={() => removeMission(m.id)} />
           ))}
         </div>
       )}

@@ -5,7 +5,7 @@ import AstroLogo from '@/components/shared/AstroLogo';
 
 const ecoCards = [
   { icon: '🛒', title: 'astroman.ge', subtitle: 'Main Store', desc: 'Browse telescopes', href: ECOSYSTEM.store, ext: true },
-  { icon: '🏛️', title: 'club.astroman.ge', subtitle: 'Loyalty Club', desc: 'Earn points', href: ECOSYSTEM.club, ext: true },
+  { icon: '🏛️', title: 'club.astroman.ge', subtitle: 'Loyalty Club', desc: 'Earn stars', href: ECOSYSTEM.club, ext: true },
   { icon: '🌌', title: 'sky.astroman.ge', subtitle: 'Sky Resources', desc: 'Star charts', href: ECOSYSTEM.sky, ext: true },
   { icon: '📱', title: 'This App', subtitle: 'Proof of Observation', desc: 'NFT missions', href: '/club', ext: false },
 ];
@@ -18,26 +18,25 @@ export default function HomePage() {
         <AstroLogo heightClass="h-14" />
         <p className="text-[#c9a84c] text-sm tracking-widest uppercase font-mono">✦ Proof of Observation</p>
         <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-[#c9a84c]" style={{ fontFamily: 'Georgia, serif' }}>
-          Strava for Astronomy
+          Observe the night sky.
           <br />
-          <span className="text-white">on Solana</span>
+          <span className="text-white">Capture. Verify. Collect.</span>
         </h1>
         <p className="text-slate-400 max-w-md text-lg">
-          Verify your stargazing. Earn on-chain rewards.<br />
-          Built on Georgia&apos;s first astronomy store.
+          Every observation verified by satellite and sealed on Solana.
         </p>
         <div className="flex gap-4 flex-wrap justify-center w-full sm:w-auto">
           <Link
             href="/club"
             className="px-6 py-3 bg-gradient-to-r from-[#c9a84c] to-[#a07840] text-black font-bold rounded-lg hover:from-[#d4b05c] transition-all duration-200"
           >
-            Enter AstroClub →
+            Enter Club →
           </Link>
           <Link
-            href="/sky"
+            href="/missions"
             className="px-6 py-3 border border-[#22d3ee] text-[#22d3ee] rounded-lg hover:bg-[#22d3ee]/10 transition-all duration-200"
           >
-            Sky Dashboard →
+            Missions →
           </Link>
         </div>
       </div>
@@ -75,6 +74,34 @@ export default function HomePage() {
               </Link>
             )
           ))}
+        </div>
+      </div>
+
+      {/* Observe & Earn */}
+      <div className="w-full">
+        <p className="text-center text-slate-500 text-sm mb-6 tracking-widest uppercase">— Observe &amp; Earn —</p>
+        <div className="glass-card border border-[#c9a84c]/20 p-6 flex flex-col gap-4">
+          <p className="text-slate-300 text-center">Complete missions to unlock real rewards from the Astroman store.</p>
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-xl">🎫</span>
+              <span className="text-slate-300">Discounts up to 20% on telescopes</span>
+            </div>
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-xl">🌕</span>
+              <span className="text-slate-300">Free Moon Lamp for your first lunar observation</span>
+            </div>
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-xl">🏆</span>
+              <span className="text-slate-300">Free Custom Star Map for completing all 5 missions</span>
+            </div>
+          </div>
+          <Link
+            href="/club"
+            className="text-center px-5 py-2.5 bg-gradient-to-r from-[#c9a84c] to-[#a07840] text-black font-bold rounded-lg hover:from-[#d4b05c] transition-all duration-200 text-sm"
+          >
+            Start Earning →
+          </Link>
         </div>
       </div>
 

@@ -47,8 +47,8 @@ export default function Nav() {
   const tabs = [
     { href: '/', label: 'Home', icon: <Home size={13} /> },
     { href: '/club', label: 'Club', icon: <Building2 size={13} /> },
-    { href: '/sky', label: 'Sky', icon: <Sparkles size={13} />, locked: !clubDone },
-    { href: '/nfts', label: 'NFTs', icon: <ImageIcon size={13} />, locked: !clubDone },
+    { href: '/missions', label: 'Missions', icon: <Sparkles size={13} />, locked: !clubDone },
+    { href: '/proof', label: 'Proof', icon: <ImageIcon size={13} />, locked: !clubDone },
   ];
 
   const walletShort = state.walletAddress

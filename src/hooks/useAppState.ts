@@ -13,6 +13,7 @@ const defaultState: AppState = {
   telescope: null,
   telescopeTx: '',
   completedMissions: [],
+  claimedRewards: [],
 };
 
 interface AppStateCtx {
@@ -22,6 +23,7 @@ interface AppStateCtx {
   setTelescope: (data: { brand: string; model: string; aperture: string }, tx: string) => void;
   addMission: (mission: CompletedMission) => void;
   removeMission: (id: string) => void;
+  claimReward: (id: string) => void;
   pendingCount: number;
   reset: () => void;
 }
@@ -101,6 +103,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     removeMission: (id) => setState(s => ({
       ...s,
       completedMissions: s.completedMissions.filter(m => m.id !== id),
+    })),
+    claimReward: (id) => setState(s => ({
+      ...s,
+      claimedRewards: s.claimedRewards.includes(id) ? s.claimedRewards : [...s.claimedRewards, id],
     })),
     pendingCount: state.completedMissions.filter(m => m.status === 'pending').length,
     reset: () => { localStorage.removeItem(STORAGE_KEY); setState(defaultState); },

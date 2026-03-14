@@ -30,7 +30,7 @@ export default function ObservationLog() {
                   </p>
                 )}
               </div>
-              <p className="text-[#c9a84c] font-bold text-sm flex-shrink-0">+{m.points} pts</p>
+              <p className="text-[#c9a84c] font-bold text-sm flex-shrink-0">+{m.stars} stars ✦</p>
             </div>
           </Card>
         ))}

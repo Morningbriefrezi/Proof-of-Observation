@@ -80,7 +80,7 @@ export default function TelescopeStep() {
                   disabled={!form.model || !form.aperture}
                   className="w-full sm:w-auto"
                 >
-                  🔭 Mint Telescope Passport NFT
+                  Register Telescope 🔭
                 </Button>
               </div>
             )}
