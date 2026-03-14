@@ -18,8 +18,8 @@ interface VerificationProps {
 
 export default function Verification({ photo, farmhawk, pollinet, stars, timestamp, latitude, longitude, onMint }: VerificationProps) {
   return (
-    <div className="flex flex-col gap-4">
-      <img src={photo} alt="Captured observation" className="w-full max-w-md mx-auto rounded-xl border-2 border-[#34d399]" />
+    <div className="flex flex-col gap-3">
+      <img src={photo} alt="Captured observation" className="w-full max-w-md max-h-[35vh] object-cover mx-auto rounded-xl border-2 border-[#34d399]" />
 
       <Card glow="emerald">
         <div className="flex items-center gap-2">
@@ -37,7 +37,7 @@ export default function Verification({ photo, farmhawk, pollinet, stars, timesta
           <Satellite size={16} className="text-[#38F0FF]" />
           <p className="text-[#38F0FF] font-semibold text-sm">FarmHawk Satellite Verification</p>
         </div>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-sm">
           {[
             { icon: <Cloud size={13} />, label: 'Cloud Cover', value: `${farmhawk.cloudCover}%` },
             { icon: <Eye size={13} />, label: 'Visibility', value: farmhawk.visibility,
@@ -92,10 +92,12 @@ export default function Verification({ photo, farmhawk, pollinet, stars, timesta
         </p>
       </Card>
 
-      <Button variant="brass" onClick={onMint} className="w-full py-3.5 rounded-xl flex items-center justify-center gap-2">
-        <Trophy size={18} />
-        Create Proof ✦ (+{stars} stars)
-      </Button>
+      <div className="sticky bottom-0 pt-3 pb-2 bg-gradient-to-t from-[#070B14] via-[#070B14]/95 to-transparent -mx-4 px-4 sm:static sm:bg-transparent sm:mx-0 sm:px-0 sm:pt-0 sm:pb-0">
+        <Button variant="brass" onClick={onMint} className="w-full py-3.5 rounded-xl flex items-center justify-center gap-2">
+          <Trophy size={18} />
+          Create Proof ✦ (+{stars} stars)
+        </Button>
+      </div>
     </div>
   );
 }

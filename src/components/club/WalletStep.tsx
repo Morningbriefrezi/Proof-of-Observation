@@ -41,7 +41,13 @@ export default function WalletStep() {
   const [airdropStatus, setAirdropStatus] = useState<'idle' | 'funding' | 'funded' | 'failed'>('idle');
   const done = state.walletConnected;
 
-  const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    setIsMobile(mobile);
+  }, []);
+
   const hasPhantomExtension = typeof window !== 'undefined' && !!(window as { phantom?: { solana?: unknown } }).phantom?.solana;
   // Detect if we're already running inside Phantom's built-in browser
   const inPhantomBrowser = isMobile && hasPhantomExtension;
@@ -51,10 +57,12 @@ export default function WalletStep() {
       // In Phantom browser or on desktop — use adapter modal directly
       setVisible(true);
     } else {
-      // On mobile without Phantom — open page inside Phantom's browser
-      // User will connect there and the flow continues in Phantom's browser
-      const url = typeof window !== 'undefined' ? window.location.href : '';
-      window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(url)}?ref=${encodeURIComponent(url)}`;
+      // Try native Phantom deeplink first; fall back to download page if not installed
+      const timeout = setTimeout(() => {
+        window.open('https://phantom.app/download', '_blank');
+      }, 1500);
+      window.addEventListener('blur', () => clearTimeout(timeout), { once: true });
+      window.location.href = `phantom://browse/${window.location.href}`;
     }
   };
 
@@ -176,10 +184,18 @@ export default function WalletStep() {
               {/* Phantom */}
               <div className="flex flex-col gap-1.5">
                 <Button variant="solana" onClick={handlePhantomClick} className="w-full min-h-[44px]">
-                  👻 {inPhantomBrowser ? 'Connect Phantom' : isMobile ? 'Continue in Phantom Browser' : 'Connect Phantom Wallet'}
+                  👻 {inPhantomBrowser ? 'Connect Phantom' : isMobile ? 'Open Phantom App' : 'Connect Phantom Wallet'}
                 </Button>
                 {isMobile && !inPhantomBrowser && (
-                  <p className="text-slate-600 text-xs text-center">Opens this page inside Phantom&apos;s built-in browser. Camera works there.</p>
+                  <>
+                    <p className="text-slate-600 text-xs text-center">Opens Phantom app. Install it first if you haven&apos;t.</p>
+                    <a
+                      href={`https://phantom.app/ul/browse/${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin + '/club' : '')}`}
+                      className="text-center text-xs text-[#7A5FFF] hover:underline py-1"
+                    >
+                      Or open this page in Phantom Browser →
+                    </a>
+                  </>
                 )}
               </div>
 

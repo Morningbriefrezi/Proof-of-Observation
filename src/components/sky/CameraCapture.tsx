@@ -74,8 +74,8 @@ export default function CameraCapture({ missionName, onCapture }: CameraCaptureP
   }
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="relative w-full max-w-md aspect-[4/3] bg-black rounded-lg overflow-hidden">
+    <div className="flex flex-col items-center gap-3 flex-1 w-full">
+      <div className="relative w-full max-w-md aspect-[4/3] bg-black rounded-lg overflow-hidden flex-shrink-0">
         <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="w-20 h-20 border border-[#FFD166]/60 rounded-full" />

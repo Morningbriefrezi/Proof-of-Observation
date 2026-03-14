@@ -92,6 +92,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
   };
 
   const handleMint = async () => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
     setStep('minting');
     console.log('[Mint] Creating observation proof for', mission.name);
 
@@ -208,8 +209,8 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#070B14]/95 overflow-y-auto scrollbar-hide">
-      <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8">
+    <div className={`fixed inset-0 z-50 bg-[#070B14]/95 ${step === 'minting' ? 'overflow-hidden' : 'overflow-y-auto scrollbar-hide'} flex flex-col`}>
+      <div className="max-w-2xl mx-auto px-4 py-4 sm:py-8 flex-1 flex flex-col w-full">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <span className="text-3xl">{mission.emoji}</span>
@@ -223,7 +224,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
 
         {step === 'observing' && (
           <div className="flex flex-col gap-4">
-            <div className="border-2 border-dashed border-[rgba(56, 240, 255, 0.12)] rounded-xl p-8 text-center">
+            <div className="border-2 border-dashed border-[rgba(56, 240, 255, 0.12)] rounded-xl p-4 sm:p-8 text-center">
               <div className="w-16 h-16 rounded-full bg-[#FFD166]/10 border border-[#FFD166]/20 flex items-center justify-center mb-4 mx-auto">
                 <Telescope size={28} className="text-[#FFD166]" />
               </div>

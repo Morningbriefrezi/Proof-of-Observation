@@ -15,7 +15,7 @@ export const SolanaWalletProvider: FC<{ children: ReactNode }> = ({ children }) 
 
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
+      <WalletProvider wallets={wallets} autoConnect={typeof window !== 'undefined' && !(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent))}>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
