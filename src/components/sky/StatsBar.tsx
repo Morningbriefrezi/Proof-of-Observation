@@ -1,6 +1,6 @@
 'use client';
 
-import { Eye, Zap } from 'lucide-react';
+import { Telescope, Star, Trophy } from 'lucide-react';
 import { useAppState } from '@/hooks/useAppState';
 import { getRank } from '@/lib/rewards';
 
@@ -15,9 +15,9 @@ export default function StatsBar() {
   return (
     <div className="grid grid-cols-3 gap-3 mb-6">
       {[
-        { icon: <Eye size={16} className="text-[var(--text-secondary)]" />, label: 'Observations', value: <span className="text-[#c9a84c] text-xl sm:text-2xl font-bold">{count}</span> },
-        { icon: <Zap size={16} className="text-[var(--text-secondary)]" />, label: 'Stars', value: <span className="text-[#22d3ee] text-xl sm:text-2xl font-bold">{total} ✦</span> },
-        { icon: null, label: 'Rank', value: <div className="flex items-center gap-1.5"><span className="text-xl">{rank.icon}</span><span className="text-xs text-[var(--text-secondary)] hidden sm:inline">{rank.name}</span></div> },
+        { icon: <Telescope size={15} strokeWidth={2} className="text-[#c9a84c]" />, label: 'Observations', value: <span className="text-[#c9a84c] text-xl sm:text-2xl font-bold">{count}</span> },
+        { icon: <Star size={15} strokeWidth={0} fill="#22d3ee" className="text-[#22d3ee]" />, label: 'Stars', value: <span className="text-[#22d3ee] text-xl sm:text-2xl font-bold">{total} ✦</span> },
+        { icon: <Trophy size={15} strokeWidth={2} className="text-[#a78bfa]" />, label: 'Rank', value: <div className="flex items-center gap-1.5"><span className="text-xs font-semibold text-[#a78bfa]">{rank.name}</span></div> },
       ].map(card => (
         <div key={card.label} className="glass-card p-4 text-center">
           <div className="flex items-center justify-center gap-1 mb-1">
