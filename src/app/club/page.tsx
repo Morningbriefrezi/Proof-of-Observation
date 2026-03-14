@@ -51,11 +51,10 @@ export default function ClubPage() {
       <div className="mb-6 text-center">
         <h1 className="text-2xl sm:text-3xl font-bold text-[#FFD166]">Join Stellar Club</h1>
         <p className="text-[var(--text-primary)] mt-2 text-sm sm:text-base">
-          Observe the night sky, earn real rewards from{' '}
-          <a href="https://astroman.ge" target="_blank" rel="noopener noreferrer" className="text-[#38F0FF] hover:underline">astroman.ge</a>
+          Observe the night sky, earn real rewards.
         </p>
         <p className="text-[var(--text-dim)] mt-1 text-xs">
-          Connect → Mint your free membership → Register your telescope → Start earning
+          Connect → claim your free membership → Register your telescope → Get rewards
         </p>
       </div>
 

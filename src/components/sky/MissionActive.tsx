@@ -168,7 +168,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
   // Reward unlock modal
   if (newRewards.length > 0) {
     return (
-      <div className="fixed inset-0 z-[60] bg-[#070B14]/95 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[60] bg-[#070B14] grid place-items-center p-4">
         <div className="glass-card glow-emerald max-w-sm w-full p-5 flex flex-col gap-3 text-center max-h-[85vh] overflow-y-auto">
           <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-[#34d399]/10 border border-[#34d399]/20 flex items-center justify-center mx-auto">
             <Award size={22} className="text-[#34d399]" />
@@ -214,8 +214,8 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
   }
 
   return (
-    <div className={`fixed inset-0 z-50 bg-[#070B14]/95 ${step === 'minting' ? 'overflow-hidden' : 'overflow-y-auto scrollbar-hide'} flex flex-col`}>
-      <div className="max-w-2xl mx-auto px-4 py-4 sm:py-8 flex-1 flex flex-col w-full">
+    <div className={`fixed inset-0 z-50 bg-[#070B14] ${step === 'minting' ? 'overflow-hidden' : 'overflow-y-auto scrollbar-hide'} flex flex-col`}>
+      <div className="max-w-2xl mx-auto px-4 py-4 sm:py-8 w-full flex flex-col">
         <div className="flex items-center justify-between mb-3 sm:mb-6">
           <div className="flex items-center gap-3">
             <span className="text-2xl sm:text-3xl">{mission.emoji}</span>
