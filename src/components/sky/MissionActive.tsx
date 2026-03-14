@@ -4,7 +4,8 @@ import { useState } from 'react';
 import type { Mission, FarmHawkResult, PollinetStatus, MissionState } from '@/lib/types';
 import { verifyWithFarmHawk } from '@/lib/farmhawk';
 import { getPollinetStatus } from '@/lib/pollinet';
-import { mintNFT } from '@/lib/solana';
+import { mintObservation } from '@/lib/solana';
+import { useWallet } from '@solana/wallet-adapter-react';
 import { useAppState } from '@/hooks/useAppState';
 import { getUnlockedRewards, getRank } from '@/lib/rewards';
 import CameraCapture from './CameraCapture';
@@ -27,6 +28,7 @@ interface NewReward {
 
 export default function MissionActive({ mission, onClose }: MissionActiveProps) {
   const { state, addMission } = useAppState();
+  const wallet = useWallet();
   const [step, setStep] = useState<MissionState>('observing');
   const [photo, setPhoto] = useState('');
   const [farmhawk, setFarmhawk] = useState<FarmHawkResult | null>(null);
@@ -86,7 +88,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
 
   const handleMint = async () => {
     setStep('minting');
-    console.log('[Mint] Minting observation NFT for', mission.name);
+    console.log('[Mint] Creating observation proof for', mission.name);
 
     // Snapshot unlocked rewards before minting
     const prevCompleted = state.completedMissions
@@ -97,7 +99,15 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
       .filter(r => r.unlocked)
       .map(r => r.id);
 
-    const result = await mintNFT(`${mission.name} Observation`, 'OBS');
+    const result = await mintObservation(wallet, {
+      target: mission.name,
+      timestamp,
+      lat: coords.lat,
+      lon: coords.lon,
+      cloudCover: farmhawk?.cloudCover ?? 0,
+      oracleHash: farmhawk?.oracleHash ?? 'sim',
+      stars: mission.stars,
+    });
     setMintDone(true);
     setTimeout(() => {
       const newCompleted = [...prevCompleted, mission.id];
@@ -118,6 +128,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
         farmhawk: farmhawk!,
         pollinet: { mode: pollinet!.mode, peers: pollinet!.peers },
         status: 'completed',
+        method: result.method,
       });
 
       if (justUnlocked.length > 0) {

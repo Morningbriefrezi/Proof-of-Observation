@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { useWallet } from '@solana/wallet-adapter-react';
 import { useAppState } from '@/hooks/useAppState';
-import { mintNFT } from '@/lib/solana';
+import { mintTelescopePassport } from '@/lib/solana';
 import { TELESCOPE_BRANDS } from '@/lib/constants';
 import Card from '@/components/shared/Card';
 import Button from '@/components/shared/Button';
@@ -10,17 +11,19 @@ import MintAnimation from '@/components/shared/MintAnimation';
 
 export default function TelescopeStep() {
   const { state, setTelescope } = useAppState();
+  const wallet = useWallet();
   const unlocked = state.membershipMinted;
   const done = !!state.telescope;
   const [form, setForm] = useState({ brand: 'Celestron', model: '', aperture: '' });
   const [minting, setMinting] = useState(false);
   const [mintDone, setMintDone] = useState(false);
+  const [method, setMethod] = useState<'memo' | 'simulated' | null>(null);
 
   const handleMint = async () => {
     if (!form.model || !form.aperture) return;
     setMinting(true);
-    console.log('[Mint] Starting telescope NFT mint', form);
-    const result = await mintNFT(`${form.brand} ${form.model} Passport`, 'SCOPE');
+    const result = await mintTelescopePassport(wallet, form);
+    setMethod(result.method);
     setMintDone(true);
     setTimeout(() => {
       setMinting(false);
@@ -41,7 +44,7 @@ export default function TelescopeStep() {
           </div>
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-white">Register Telescope</h3>
-            <p className="text-slate-400 text-sm mb-4">Mint your telescope passport NFT</p>
+            <p className="text-slate-400 text-sm mb-4">Seal your telescope passport on Solana</p>
             {done ? (
               <div className="bg-[#0f1a2e] border border-[#22d3ee]/40 rounded-lg p-4 flex items-center gap-4">
                 <span className="text-3xl">🔭</span>
@@ -51,6 +54,11 @@ export default function TelescopeStep() {
                   <p className="font-mono text-xs text-slate-500 mt-1">
                     {state.telescopeTx.slice(0, 8)}...{state.telescopeTx.slice(-8)}
                   </p>
+                  {method === 'memo' && (
+                    <a href={`https://explorer.solana.com/tx/${state.telescopeTx}?cluster=devnet`} target="_blank" rel="noopener noreferrer" className="text-xs text-[#34d399] hover:underline mt-1 block">
+                      ✅ View on Solana Explorer ↗
+                    </a>
+                  )}
                 </div>
               </div>
             ) : (

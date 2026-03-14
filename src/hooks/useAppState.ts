@@ -38,7 +38,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) setState(JSON.parse(saved));
+      if (saved) setState({ ...defaultState, ...JSON.parse(saved) });
     } catch {}
     setLoaded(true);
   }, []);

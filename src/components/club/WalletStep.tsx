@@ -3,11 +3,26 @@
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { useEffect, useState } from 'react';
-import { Keypair } from '@solana/web3.js';
+import { Keypair, Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import { Mail, CheckCircle2 } from 'lucide-react';
 import { useAppState } from '@/hooks/useAppState';
 import Card from '@/components/shared/Card';
 import Button from '@/components/shared/Button';
+
+async function ensureDevnetSol(publicKey: PublicKey) {
+  try {
+    const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
+    const balance = await connection.getBalance(publicKey);
+    if (balance < 50_000_000) {
+      console.log('[Airdrop] Requesting devnet SOL...');
+      const sig = await connection.requestAirdrop(publicKey, LAMPORTS_PER_SOL);
+      await connection.confirmTransaction(sig);
+      console.log('[Airdrop] ✅ 1 SOL airdropped');
+    }
+  } catch {
+    console.log('[Airdrop] Rate limited — user may need faucet.solana.com');
+  }
+}
 
 function createWalletFromEmail(email: string) {
   const keypair = Keypair.generate();
@@ -29,6 +44,7 @@ export default function WalletStep() {
     if (connected && publicKey && !state.walletConnected) {
       console.log('[Wallet] Phantom connected:', publicKey.toBase58());
       setWallet(publicKey.toBase58());
+      ensureDevnetSol(publicKey);
     }
   }, [connected, publicKey]);
 
@@ -116,6 +132,7 @@ export default function WalletStep() {
                   Create Wallet &amp; Sign In →
                 </Button>
                 <p className="text-slate-600 text-xs text-center">No wallet? No problem. We&apos;ll create one for you automatically.</p>
+                <p className="text-amber-500/70 text-xs text-center">📧 Email wallets use simulated transactions. Connect Phantom for real on-chain proof.</p>
               </div>
             </div>
           )}

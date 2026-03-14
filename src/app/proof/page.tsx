@@ -31,15 +31,23 @@ function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete:
         {isPending ? (
           <p className="text-amber-400 text-xs italic flex items-center gap-1"><Clock size={11} /> Awaiting connectivity</p>
         ) : (
-          <p className="font-hash text-xs text-[var(--text-dim)] truncate">
-            {mission.txId.slice(0, 8)}...{mission.txId.slice(-8)}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="font-hash text-xs text-[var(--text-dim)] truncate flex-1">
+              {mission.txId.slice(0, 8)}...{mission.txId.slice(-8)}
+            </p>
+            {mission.method === 'memo' && (
+              <span className="text-[#34d399] text-xs shrink-0">✅ On-chain</span>
+            )}
+            {mission.method === 'simulated' && (
+              <span className="text-amber-400 text-xs shrink-0">⚠️ Sim</span>
+            )}
+          </div>
         )}
 
         <div className="flex gap-2 mt-auto pt-2">
           <a
-            href={isPending ? '#' : `https://explorer.solana.com/tx/${mission.txId}?cluster=devnet`}
-            target="_blank"
+            href={isPending || mission.method === 'simulated' ? '#' : `https://explorer.solana.com/tx/${mission.txId}?cluster=devnet`}
+            target={isPending || mission.method === 'simulated' ? undefined : '_blank'}
             rel="noopener noreferrer"
             className="flex-1 text-center text-xs px-2 py-1.5 border border-[#1a2d4d] hover:border-[#22d3ee] text-slate-400 hover:text-[#22d3ee] rounded transition-all flex items-center justify-center gap-1"
           >
