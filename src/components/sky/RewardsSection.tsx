@@ -37,7 +37,7 @@ function RewardCard({ reward, completedIds, claimed, onClaim }: {
     : 'bg-[#34d399]';
 
   return (
-    <div className={`glass-card border ${borderColor} ${reward.unlocked ? 'glow-emerald' : ''} p-5 flex flex-col gap-4 ${!reward.unlocked && reward.progress === 0 ? 'opacity-50' : ''}`}>
+    <div className={`glass-card border ${borderColor} ${reward.unlocked ? 'glow-emerald' : ''} p-3.5 sm:p-5 flex flex-col gap-2.5 sm:gap-4 ${!reward.unlocked && reward.progress === 0 ? 'opacity-50' : ''}`}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
           <RewardIcon emoji={reward.icon} />
@@ -57,12 +57,12 @@ function RewardCard({ reward, completedIds, claimed, onClaim }: {
 
       {/* Mission progress chips */}
       {reward.requiredMissions && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {reward.requiredMissions.map(mId => {
             const m = MISSIONS.find(x => x.id === mId);
             const done = completedIds.includes(mId);
             return (
-              <span key={mId} className={`text-xs px-2 py-1 rounded-full border ${done ? 'border-[#34d399]/50 text-[#34d399]' : 'border-[rgba(56, 240, 255, 0.12)] text-slate-500'}`}>
+              <span key={mId} className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full border ${done ? 'border-[#34d399]/50 text-[#34d399]' : 'border-[rgba(56, 240, 255, 0.12)] text-slate-500'}`}>
                 {m?.emoji} {m?.name} {done ? '✓' : '○'}
               </span>
             );
@@ -81,7 +81,7 @@ function RewardCard({ reward, completedIds, claimed, onClaim }: {
         <div className="mt-2">
           <p className="text-[var(--text-dim)] text-[10px] uppercase tracking-wider mb-1.5">Your Code</p>
           <div className="flex items-center gap-2">
-            <code className="bg-[#070B14] border border-[#FFD166]/30 px-4 py-2.5 rounded-lg text-sm text-[#FFD166] font-mono flex-1 tracking-wide">
+            <code className="bg-[#070B14] border border-[#FFD166]/30 px-3 py-2 rounded-lg text-xs sm:text-sm text-[#FFD166] font-mono flex-1 tracking-wide">
               {reward.code}
             </code>
             <button onClick={copyCode} className="p-2.5 border border-[rgba(56,240,255,0.12)] hover:border-[#38F0FF] rounded-lg text-slate-400 hover:text-[#38F0FF] transition-all" title="Copy code">
@@ -116,7 +116,7 @@ export default function RewardsSection() {
   const rewards = getUnlockedRewards(completedIds, rank);
 
   return (
-    <div className="mt-8 mb-6">
+    <div className="mt-5 sm:mt-8 mb-4 sm:mb-6">
       <p className="text-center text-slate-500 text-sm mb-4 tracking-widest uppercase">— Rewards —</p>
       <div className="flex flex-col gap-3">
         {rewards.map(r => (

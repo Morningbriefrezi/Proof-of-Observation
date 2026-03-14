@@ -168,12 +168,12 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
     return (
       <div className="fixed inset-0 z-[60] bg-[#070B14]/95 overflow-y-auto flex items-start sm:items-center justify-center p-4 pt-12 sm:pt-4">
         <div className="glass-card glow-emerald max-w-sm w-full p-5 flex flex-col gap-3 text-center">
-          <div className="w-14 h-14 rounded-full bg-[#34d399]/10 border border-[#34d399]/20 flex items-center justify-center mx-auto">
-            <Award size={28} className="text-[#34d399]" />
+          <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-[#34d399]/10 border border-[#34d399]/20 flex items-center justify-center mx-auto">
+            <Award size={22} className="text-[#34d399]" />
           </div>
-          <h2 className="text-xl font-bold text-[#34d399]">Reward Unlocked!</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-[#34d399]">Reward Unlocked!</h2>
           {newRewards.map(r => (
-            <div key={r.name} className="bg-[#070B14] border border-[#34d399]/20 rounded-xl p-4 text-left flex flex-col gap-2">
+            <div key={r.name} className="bg-[#070B14] border border-[#34d399]/20 rounded-xl p-3 sm:p-4 text-left flex flex-col gap-1.5">
               <div className="flex items-center gap-3">
                 <RewardIcon emoji={r.icon} />
                 <div>
@@ -196,7 +196,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
               )}
             </div>
           ))}
-          <div className="flex gap-3 mt-1">
+          <div className="flex gap-2 sm:gap-3">
             <a href="https://astroman.ge" target="_blank" rel="noopener noreferrer"
               className="flex-1 text-center text-xs py-2.5 px-3 border border-[#FFD166]/30 text-[#FFD166] rounded-lg hover:bg-[#FFD166]/10 transition-all">
               Visit astroman.ge →
@@ -214,22 +214,22 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
   return (
     <div className={`fixed inset-0 z-50 bg-[#070B14]/95 ${step === 'minting' ? 'overflow-hidden' : 'overflow-y-auto scrollbar-hide'} flex flex-col`}>
       <div className="max-w-2xl mx-auto px-4 py-4 sm:py-8 flex-1 flex flex-col w-full">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-3 sm:mb-6">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">{mission.emoji}</span>
+            <span className="text-2xl sm:text-3xl">{mission.emoji}</span>
             <div>
-              <h2 className="text-xl font-bold text-white">{mission.name}</h2>
-              <p className="text-slate-400 text-sm">{mission.desc}</p>
+              <h2 className="text-lg sm:text-xl font-bold text-white">{mission.name}</h2>
+              <p className="text-slate-400 text-xs sm:text-sm line-clamp-2">{mission.desc}</p>
             </div>
           </div>
           <button onClick={onClose} className="text-slate-500 hover:text-white text-xl px-2">✕</button>
         </div>
 
         {step === 'observing' && (
-          <div className="flex flex-col gap-4">
-            <div className="border-2 border-dashed border-[rgba(56, 240, 255, 0.12)] rounded-xl p-4 sm:p-8 text-center">
-              <div className="w-16 h-16 rounded-full bg-[#FFD166]/10 border border-[#FFD166]/20 flex items-center justify-center mb-4 mx-auto">
-                <Telescope size={28} className="text-[#FFD166]" />
+          <div className="flex flex-col gap-3">
+            <div className="border-2 border-dashed border-[rgba(56, 240, 255, 0.12)] rounded-xl p-4 sm:p-6 text-center">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-[#FFD166]/10 border border-[#FFD166]/20 flex items-center justify-center mb-3 mx-auto">
+                <Telescope size={22} className="text-[#FFD166]" />
               </div>
               <p className="text-slate-300 mb-2">Point your telescope at <span className="text-[#FFD166]">{mission.name}</span></p>
               <p className="text-slate-500 text-sm italic">{mission.hint}</p>
@@ -245,8 +245,8 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
         )}
 
         {step === 'verifying' && (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 rounded-full bg-[#38F0FF]/10 border border-[#38F0FF]/20 flex items-center justify-center mb-4 mx-auto animate-spin-slow">
+          <div className="text-center py-6 sm:py-12">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-[#38F0FF]/10 border border-[#38F0FF]/20 flex items-center justify-center mb-4 mx-auto animate-spin-slow">
               <Satellite size={28} className="text-[#38F0FF]" />
             </div>
             <p className="text-[#38F0FF] font-semibold">Scanning sky conditions at your location...</p>
@@ -268,15 +268,15 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
         )}
 
         {step === 'minting' && (
-          <div>
+          <>
             <MintAnimation done={mintDone} />
             {mintError && (
-              <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+              <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 z-[70] p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg backdrop-blur-sm">
                 <p className="text-amber-400 text-xs font-medium">⚠️ Saved locally — on-chain failed</p>
                 <p className="text-slate-500 text-xs mt-0.5">{mintError}</p>
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>

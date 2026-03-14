@@ -46,9 +46,9 @@ export default function CameraCapture({ missionName, onCapture }: CameraCaptureP
   // Review screen
   if (preview) {
     return (
-      <div className="flex flex-col items-center gap-4">
-        <img src={preview} alt="Preview" className="w-full max-w-md rounded-lg border border-[rgba(56, 240, 255, 0.12)]" />
-        <div className="flex gap-4 w-full max-w-md">
+      <div className="flex flex-col items-center gap-3">
+        <img src={preview} alt="Preview" className="w-full max-w-md max-h-[40vh] object-cover rounded-lg border border-[rgba(56,240,255,0.12)]" />
+        <div className="flex gap-3 w-full max-w-md">
           <Button variant="ghost" onClick={handleRetake} className="flex-1">
             <RefreshCw size={16} className="inline mr-1" /> Retake
           </Button>

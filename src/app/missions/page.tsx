@@ -52,12 +52,12 @@ export default function MissionsPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 sm:py-12 animate-page-enter">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#38F0FF] flex items-center gap-3" style={{ fontFamily: 'Georgia, serif' }}>
-          <Satellite size={26} strokeWidth={1.5} className="text-[#38F0FF]" />
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#38F0FF] flex items-center gap-2" style={{ fontFamily: 'Georgia, serif' }}>
+          <Satellite size={22} strokeWidth={1.5} className="text-[#38F0FF]" />
           Missions
         </h1>
-        <p className="text-slate-400 mt-1">Observe. Verify. Collect.</p>
+        <p className="text-slate-400 mt-0.5 text-sm">Observe. Verify. Collect.</p>
       </div>
 
       <StatsBar />

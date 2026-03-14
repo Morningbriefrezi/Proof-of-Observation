@@ -32,8 +32,8 @@ export default function Verification({ photo, farmhawk, pollinet, stars, timesta
       </Card>
 
       {/* FarmHawk card */}
-      <div className="glass-card border border-[#38F0FF]/30 p-5 glow-cyan">
-        <div className="flex items-center gap-2 mb-4">
+      <div className="glass-card border border-[#38F0FF]/30 p-3.5 sm:p-5 glow-cyan">
+        <div className="flex items-center gap-2 mb-2 sm:mb-4">
           <Satellite size={16} className="text-[#38F0FF]" />
           <p className="text-[#38F0FF] font-semibold text-sm">FarmHawk Satellite Verification</p>
         </div>
@@ -66,7 +66,7 @@ export default function Verification({ photo, farmhawk, pollinet, stars, timesta
       </div>
 
       {farmhawk.receipt && (
-        <details className="glass-card border border-[var(--accent-cyan)]/10 p-4">
+        <details className="glass-card border border-[var(--accent-cyan)]/10 p-3">
           <summary className="text-[var(--text-secondary)] text-xs cursor-pointer hover:text-[var(--accent-cyan)] transition-colors">
             View Oracle Receipt (FarmHawk v1)
           </summary>
@@ -82,15 +82,13 @@ export default function Verification({ photo, farmhawk, pollinet, stars, timesta
       )}
 
       {/* Pollinet card */}
-      <Card>
-        <div className="flex items-center gap-2 mb-1">
-          {pollinet.online ? <Wifi size={14} className="text-[#34d399]" /> : <WifiOff size={14} className="text-amber-400" />}
-          <p className="text-[var(--text-secondary)] text-sm font-medium">Pollinet Network</p>
-        </div>
-        <p className="text-sm text-[var(--text-primary)]">
-          {pollinet.online ? 'Online — submitting directly to Solana' : `Offline — mesh relay (${pollinet.peers} peers)`}
+      <div className="glass-card p-3 flex items-center gap-2">
+        {pollinet.online ? <Wifi size={14} className="text-[#34d399] flex-shrink-0" /> : <WifiOff size={14} className="text-amber-400 flex-shrink-0" />}
+        <p className="text-xs text-[var(--text-secondary)]">
+          <span className="font-medium text-[var(--text-primary)]">Pollinet</span>{' '}
+          {pollinet.online ? '· Direct to Solana' : `· Mesh relay (${pollinet.peers} peers)`}
         </p>
-      </Card>
+      </div>
 
       <div className="sticky bottom-0 pt-3 pb-2 bg-gradient-to-t from-[#070B14] via-[#070B14]/95 to-transparent -mx-4 px-4 sm:static sm:bg-transparent sm:mx-0 sm:px-0 sm:pt-0 sm:pb-0">
         <Button variant="brass" onClick={onMint} className="w-full py-3.5 rounded-xl flex items-center justify-center gap-2">

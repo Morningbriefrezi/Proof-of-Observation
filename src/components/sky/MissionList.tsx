@@ -46,7 +46,7 @@ export default function MissionList() {
   return (
     <>
       {active && <MissionActive mission={active} onClose={() => setActive(null)} />}
-      <div className="flex flex-col gap-2.5 mb-2">
+      <div className="flex flex-col gap-2 mb-2">
         {MISSIONS.map(mission => {
           const done = completedIds.has(mission.id);
           const pending = pendingIds.has(mission.id);
@@ -68,7 +68,7 @@ export default function MissionList() {
                       {mission.type === 'telescope' ? <><Telescope size={10} className="inline mr-0.5" /> Telescope</> : <><Eye size={10} className="inline mr-0.5" /> Naked Eye</>}
                     </Badge>
                     {mission.context && (
-                      <span className="text-[var(--text-dim)] text-[9px] font-mono">
+                      <span className="text-[var(--text-dim)] text-[9px] font-mono hidden sm:inline">
                         ctx: {mission.context}
                       </span>
                     )}
