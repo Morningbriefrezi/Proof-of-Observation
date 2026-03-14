@@ -18,15 +18,15 @@ export default function Verification({ photo, farmhawk, pollinet, stars, timesta
   const conditionOk = farmhawk.verified;
 
   return (
-    <div className="flex flex-col w-full -mx-4 -mt-4 sm:-mx-0 sm:-mt-0">
+    <div className="flex flex-col w-full gap-4">
 
-      {/* Photo header */}
-      <div className="relative bg-black" style={{ height: '38vh', minHeight: 180 }}>
+      {/* Photo */}
+      <div className="relative rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
         <img
           src={photo}
           alt="Observation"
-          className="w-full h-full object-cover"
-          style={{ opacity: 0.9 }}
+          className="w-full object-cover"
+          style={{ maxHeight: '40vh', opacity: 0.9 }}
         />
         {/* Verified badge overlay */}
         <div
@@ -44,7 +44,7 @@ export default function Verification({ photo, farmhawk, pollinet, stars, timesta
       </div>
 
       {/* Data panel */}
-      <div className="px-4 pt-5 pb-4 flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
 
         {/* Location + time */}
         <div className="flex items-center justify-between">

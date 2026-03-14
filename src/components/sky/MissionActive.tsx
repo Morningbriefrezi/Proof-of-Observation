@@ -213,28 +213,19 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
     );
   }
 
-  const fullBleed = step === 'camera' || step === 'verified';
-
   return (
     <div className={`fixed inset-0 z-50 bg-[#070B14] ${step === 'minting' ? 'overflow-hidden' : 'overflow-y-auto scrollbar-hide'} flex flex-col`}>
 
-      {/* Top bar — always visible */}
+      {/* Top bar */}
       <div
-        className="flex-shrink-0 flex items-center justify-between px-4 py-3 z-10"
-        style={{
-          borderBottom: fullBleed ? 'none' : '1px solid rgba(255,255,255,0.05)',
-          position: fullBleed ? 'absolute' : 'relative',
-          top: 0, left: 0, right: 0,
-          background: fullBleed ? 'linear-gradient(to bottom, rgba(7,11,20,0.9), transparent)' : '#070B14',
-        }}
+        className="flex-shrink-0 flex items-center justify-between px-4 py-3"
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
       >
         <div className="flex items-center gap-2">
           <span className="text-lg">{mission.emoji}</span>
           <div>
             <p className="text-white text-sm font-semibold leading-tight">{mission.name}</p>
-            {!fullBleed && (
-              <p className="text-slate-600 text-[11px]">{mission.desc}</p>
-            )}
+            <p className="text-slate-600 text-[11px]">{mission.desc}</p>
           </div>
         </div>
         <button
@@ -247,7 +238,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
       </div>
 
       {/* Content */}
-      <div className={`flex flex-col flex-1 ${fullBleed ? '' : 'px-4 py-4 max-w-2xl mx-auto w-full'}`}>
+      <div className="flex flex-col flex-1 px-4 py-4 max-w-2xl mx-auto w-full">
 
         {step === 'observing' && (
           <div className="flex flex-col gap-4 mt-2">
