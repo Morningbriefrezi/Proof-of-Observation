@@ -38,6 +38,7 @@ export default function WalletStep() {
   const { state, setWallet } = useAppState();
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [airdropStatus, setAirdropStatus] = useState<'idle' | 'funding' | 'funded' | 'failed'>('idle');
   const done = state.walletConnected;
 
   const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -77,18 +78,22 @@ export default function WalletStep() {
     setEmailError('');
     const address = createWalletFromEmail(email);
     setWallet(address);
-    // Airdrop devnet SOL so email wallet can sign real transactions
+    setAirdropStatus('funding');
     try {
       const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
       const pk = new PublicKey(address);
       const balance = await connection.getBalance(pk);
-      if (balance < 50_000_000) {
-        const sig = await connection.requestAirdrop(pk, LAMPORTS_PER_SOL);
-        await connection.confirmTransaction(sig);
-        console.log('[Wallet] Airdropped 1 SOL to email wallet');
+      if (balance >= 50_000_000) {
+        setAirdropStatus('funded');
+        return;
       }
+      const sig = await connection.requestAirdrop(pk, LAMPORTS_PER_SOL);
+      await connection.confirmTransaction(sig, 'confirmed');
+      console.log('[Wallet] Airdropped 1 SOL to email wallet');
+      setAirdropStatus('funded');
     } catch {
-      console.log('[Wallet] Airdrop rate limited — transactions may simulate');
+      console.log('[Wallet] Airdrop rate limited');
+      setAirdropStatus('failed');
     }
   };
 
@@ -115,6 +120,35 @@ export default function WalletStep() {
                 <p className="text-xs text-[var(--text-dim)] ml-5">
                   Signed in as {localStorage.getItem('stellar_wallet_email')}
                 </p>
+              )}
+              {airdropStatus === 'funding' && (
+                <p className="text-xs text-[#38F0FF] ml-5 animate-pulse">Funding wallet with devnet SOL...</p>
+              )}
+              {airdropStatus === 'funded' && (
+                <p className="text-xs text-[#34d399] ml-5">✓ 1 devnet SOL funded</p>
+              )}
+              {airdropStatus === 'failed' && (
+                <div className="ml-5 mt-1 flex flex-col gap-1">
+                  <p className="text-xs text-amber-400">⚠ Airdrop rate limited — fund manually:</p>
+                  <div className="flex items-center gap-2">
+                    <code className="text-[10px] text-slate-400 font-mono bg-[#070B14] px-2 py-1 rounded truncate max-w-[180px]">
+                      {state.walletAddress}
+                    </code>
+                    <button
+                      onClick={() => navigator.clipboard.writeText(state.walletAddress)}
+                      className="text-[10px] text-[#38F0FF] hover:underline whitespace-nowrap"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <a
+                    href="https://faucet.solana.com"
+                    target="_blank" rel="noopener noreferrer"
+                    className="text-xs text-amber-400 hover:text-amber-300 transition-colors"
+                  >
+                    Get devnet SOL at faucet.solana.com ↗
+                  </a>
+                </div>
               )}
               <a
                 href={`https://explorer.solana.com/address/${state.walletAddress}?cluster=devnet`}
@@ -157,7 +191,7 @@ export default function WalletStep() {
                   Create Wallet &amp; Sign In →
                 </Button>
                 <p className="text-slate-600 text-xs text-center">No wallet? No problem. We&apos;ll create one for you automatically.</p>
-                <p className="text-amber-500/70 text-xs text-center">📧 Email wallets use simulated transactions. Connect Phantom for real on-chain proof.</p>
+                <p className="text-slate-600 text-xs text-center">A real Solana keypair is generated and stored locally in your browser.</p>
               </div>
             </div>
           )}
