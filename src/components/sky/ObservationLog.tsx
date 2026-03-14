@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useAppState } from '@/hooks/useAppState';
-import Card from '@/components/shared/Card';
+import { Clock } from 'lucide-react';
 
 export default function ObservationLog() {
   const { state } = useAppState();
@@ -12,40 +12,57 @@ export default function ObservationLog() {
   if (missions.length === 0) return null;
 
   return (
-    <div className="mt-4 sm:mt-8">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-base font-semibold text-slate-300" style={{ fontFamily: 'Georgia, serif' }}>
-          Observation Log
-        </h2>
-        {all.length > 3 && (
-          <Link href="/proof" className="text-xs text-[#38F0FF] hover:underline">
-            View all in Proof →
-          </Link>
-        )}
+    <div className="mb-4">
+      {/* Section header */}
+      <div className="flex items-center gap-3 mb-3">
+        <div className="ornament-line flex-1" />
+        <span className="text-[10px] text-slate-600 uppercase tracking-widest font-medium whitespace-nowrap">Recent Observations</span>
+        <div className="ornament-line flex-1" />
       </div>
-      <div className="flex flex-col gap-2.5">
-        {missions.map(m => (
-          <Card key={m.txId}>
-            <div className="flex items-center gap-3">
-              <img src={m.photo} alt={m.name} className="w-14 h-10 object-cover rounded flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-white text-sm">{m.name}</p>
-                <p className="text-slate-400 text-xs">{new Date(m.timestamp).toLocaleString()}</p>
-                {m.status === 'pending' && (
-                  <p className="text-amber-400 text-xs mt-0.5">⏳ Pending</p>
-                )}
-              </div>
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <p className="text-[#FFD166] font-bold text-sm flex-shrink-0">+{m.stars ?? (m as any).points ?? 0} ✦</p>
+
+      <div className="flex flex-col gap-1.5">
+        {missions.map((m, i) => (
+          <div
+            key={m.txId}
+            className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all"
+            style={{
+              background: 'rgba(15,31,61,0.35)',
+              border: '1px solid rgba(255,255,255,0.04)',
+              animationDelay: `${i * 60}ms`,
+            }}
+          >
+            <img
+              src={m.photo}
+              alt={m.name}
+              className="w-12 h-9 object-cover rounded-lg flex-shrink-0"
+              style={{ border: '1px solid rgba(255,255,255,0.06)' }}
+            />
+            <div className="flex-1 min-w-0">
+              <p className="text-white text-sm font-medium leading-tight">{m.emoji} {m.name}</p>
+              <p className="text-slate-600 text-[11px] mt-0.5">
+                {new Date(m.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              </p>
             </div>
-          </Card>
+            <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              <span className="text-sm font-bold text-[#FFD166]">+{m.stars ?? (m as any).points ?? 0} ✦</span>
+              {m.status === 'pending'
+                ? <span className="text-[10px] text-amber-400 flex items-center gap-0.5"><Clock size={9} /> Pending</span>
+                : <span className="text-[10px] text-[#34d399]">Verified</span>
+              }
+            </div>
+          </div>
         ))}
-        {all.length > 0 && (
-          <Link href="/proof" className="text-center text-xs text-[var(--text-dim)] hover:text-[#38F0FF] transition-colors py-1">
-            View all in My Proof →
-          </Link>
-        )}
       </div>
+
+      {all.length > 0 && (
+        <Link
+          href="/proof"
+          className="flex items-center justify-center gap-1 mt-3 text-[11px] text-slate-600 hover:text-[#38F0FF] transition-colors"
+        >
+          View full gallery →
+        </Link>
+      )}
     </div>
   );
 }
