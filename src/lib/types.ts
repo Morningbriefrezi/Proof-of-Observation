@@ -16,10 +16,14 @@ export interface Mission {
 export interface FarmHawkResult {
   verified: boolean;
   cloudCover: number;
-  visibility: 'Excellent' | 'Good' | 'Poor';
+  visibility: 'Excellent' | 'Good' | 'Fair' | 'Poor';
   conditions: string;
+  humidity: number;
+  temperature: number;
+  windSpeed: number;
   oracleHash: string;
   scanTimestamp: string;
+  source: string;
 }
 
 export interface PollinetStatus {

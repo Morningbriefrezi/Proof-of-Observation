@@ -1,6 +1,6 @@
 'use client';
 
-import { Satellite, Cloud, Eye, Thermometer, Link2, Wifi, WifiOff, CheckCircle2, Trophy } from 'lucide-react';
+import { Satellite, Cloud, Eye, Thermometer, Link2, Wifi, WifiOff, CheckCircle2, Trophy, Droplets, Wind, AlertTriangle } from 'lucide-react';
 import type { FarmHawkResult, PollinetStatus } from '@/lib/types';
 import Card from '@/components/shared/Card';
 import Button from '@/components/shared/Button';
@@ -37,30 +37,32 @@ export default function Verification({ photo, farmhawk, pollinet, points, timest
           <Satellite size={16} className="text-[#22d3ee]" />
           <p className="text-[#22d3ee] font-semibold text-sm">FarmHawk Satellite Verification</p>
         </div>
-        <div className="flex flex-col gap-2.5 text-sm">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2 text-[var(--text-secondary)]"><Cloud size={13} /> Cloud Cover</div>
-            <span className="text-[var(--text-primary)] font-medium">{farmhawk.cloudCover}%</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2 text-[var(--text-secondary)]"><Eye size={13} /> Visibility</div>
-            <span className={farmhawk.visibility === 'Excellent' ? 'text-[#34d399] font-medium' : farmhawk.visibility === 'Good' ? 'text-[#c9a84c] font-medium' : 'text-red-400 font-medium'}>
-              {farmhawk.visibility}
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2 text-[var(--text-secondary)]"><Thermometer size={13} /> Conditions</div>
-            <span className="text-[var(--text-primary)] text-right max-w-[55%] text-xs">{farmhawk.conditions}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2 text-[var(--text-secondary)]"><Link2 size={13} /> Oracle</div>
-            <span className="font-hash text-xs text-[var(--text-secondary)]">{farmhawk.oracleHash.slice(0, 10)}...{farmhawk.oracleHash.slice(-6)}</span>
-          </div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
+          {[
+            { icon: <Cloud size={13} />, label: 'Cloud Cover', value: `${farmhawk.cloudCover}%` },
+            { icon: <Eye size={13} />, label: 'Visibility', value: farmhawk.visibility,
+              color: farmhawk.visibility === 'Excellent' ? 'text-[#34d399]' : farmhawk.visibility === 'Good' ? 'text-[#c9a84c]' : farmhawk.visibility === 'Fair' ? 'text-amber-400' : 'text-red-400' },
+            { icon: <Thermometer size={13} />, label: 'Temperature', value: `${farmhawk.temperature}°C` },
+            { icon: <Droplets size={13} />, label: 'Humidity', value: `${farmhawk.humidity}%` },
+            { icon: <Wind size={13} />, label: 'Wind', value: `${farmhawk.windSpeed} km/h` },
+          ].map(row => (
+            <div key={row.label} className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1 text-[var(--text-dim)] text-xs">{row.icon}{row.label}</div>
+              <span className={`font-medium text-sm ${row.color ?? 'text-[var(--text-primary)]'}`}>{row.value}</span>
+            </div>
+          ))}
         </div>
-        <div className="flex items-center gap-1.5 mt-4 pt-3 border-t border-[var(--border-glass)]">
-          <CheckCircle2 size={14} className="text-[#34d399]" />
-          <p className="text-[#34d399] font-semibold text-xs uppercase tracking-wide">Sky Conditions Verified</p>
+        <p className="text-[var(--text-secondary)] text-xs mt-3 col-span-2 italic">{farmhawk.conditions}</p>
+        <div className="flex justify-between items-center mt-3 pt-3 border-t border-[var(--border-glass)]">
+          <div className="flex items-center gap-1.5">
+            {farmhawk.verified
+              ? <><CheckCircle2 size={14} className="text-[#34d399]" /><p className="text-[#34d399] font-semibold text-xs uppercase tracking-wide">Conditions Verified</p></>
+              : <><AlertTriangle size={14} className="text-amber-400" /><p className="text-amber-400 font-semibold text-xs uppercase tracking-wide">Poor Conditions — proceed at own risk</p></>
+            }
+          </div>
+          <span className="font-hash text-xs text-[var(--text-dim)]">{farmhawk.oracleHash.slice(0, 8)}...{farmhawk.oracleHash.slice(-4)}</span>
         </div>
+        <p className="text-[var(--text-dim)] text-xs mt-1">{farmhawk.source}</p>
       </div>
 
       {/* Pollinet card */}

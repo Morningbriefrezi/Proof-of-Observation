@@ -14,12 +14,15 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+      </head>
       <body className="bg-void text-slate-200 min-h-screen font-sans flex flex-col">
         <SolanaWalletProvider>
           <AppStateProvider>
             <StarField />
             <Nav />
-            <main className="relative z-10 pt-16 flex-1">{children}</main>
+            <main className="relative z-10 pt-14 sm:pt-14 flex-1">{children}</main>
             <Footer />
           </AppStateProvider>
         </SolanaWalletProvider>

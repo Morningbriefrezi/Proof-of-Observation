@@ -137,10 +137,16 @@ h1, h2, h3 { font-family: Georgia, Palatino, serif; }
 .glow-cyan { box-shadow: 0 0 20px rgba(34,211,238,0.3); }
 .glow-solana { box-shadow: 0 0 20px rgba(153,69,255,0.3); }
 
+/* Prevent horizontal scroll */
+html, body { overflow-x: hidden; width: 100%; }
+
+/* Prevent iOS zoom on input focus (needs font-size >= 16px) */
+input, select, textarea { font-size: 16px !important; }
+
 /* Mobile */
 @media (max-width: 640px) {
-  body { font-size: 14px; overflow-x: hidden; }
-  button, a, select, input { min-height: 44px; }
+  body { font-size: 14px; }
+  button, a[role="button"], select, input { min-height: 44px; }
 }
 
 /* Wallet adapter */

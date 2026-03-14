@@ -1,14 +1,19 @@
 'use client';
 import { useState } from 'react';
 
-export default function AstroLogo({ className = 'h-8 w-8' }: { className?: string }) {
+interface AstroLogoProps {
+  heightClass?: string; // e.g. 'h-8', 'h-7', 'h-4'
+  className?: string;
+}
+
+export default function AstroLogo({ heightClass = 'h-8', className = '' }: AstroLogoProps) {
   const [err, setErr] = useState(false);
-  if (err) return <span className="text-2xl">🔭</span>;
+  if (err) return <span className="text-2xl leading-none">🔭</span>;
   return (
     <img
       src="https://club.astroman.ge/logo.png"
       alt="Astroman"
-      className={className}
+      className={`${heightClass} w-auto object-contain ${className}`}
       onError={() => setErr(true)}
     />
   );

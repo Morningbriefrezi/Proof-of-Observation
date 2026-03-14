@@ -15,7 +15,7 @@ export default function HomePage() {
     <div className="max-w-3xl mx-auto px-4 py-16 flex flex-col items-center gap-12">
       {/* Hero */}
       <div className="text-center flex flex-col items-center gap-5">
-        <AstroLogo className="h-14 w-14" />
+        <AstroLogo heightClass="h-14" />
         <p className="text-[#c9a84c] text-sm tracking-widest uppercase font-mono">✦ Proof of Observation</p>
         <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-[#c9a84c]" style={{ fontFamily: 'Georgia, serif' }}>
           Strava for Astronomy
