@@ -67,6 +67,11 @@ export default function MissionList() {
                     <Badge color={mission.type === 'telescope' ? 'cyan' : 'dim'}>
                       {mission.type === 'telescope' ? <><Telescope size={10} className="inline mr-0.5" /> Telescope</> : <><Eye size={10} className="inline mr-0.5" /> Naked Eye</>}
                     </Badge>
+                    {mission.context && (
+                      <span className="text-[var(--text-dim)] text-[9px] font-mono">
+                        ctx: {mission.context}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="flex-shrink-0 mt-1">

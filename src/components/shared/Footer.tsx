@@ -15,6 +15,10 @@ export default function Footer() {
           <a href="https://solana.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#7A5FFF] transition-colors">Solana</a>
           <span className="text-white/10">·</span>
           <a href="https://superteam.fun" target="_blank" rel="noopener noreferrer" className="hover:text-[#38F0FF] transition-colors">Superteam Georgia</a>
+          <span className="text-white/10">·</span>
+          <a href="https://cyreneai.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#7A5FFF] transition-colors">CyreneAI</a>
+          <span className="text-white/10">·</span>
+          <a href="https://scriptonia.xyz" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent-gold)] transition-colors">Scriptonia</a>
         </div>
         <p className="text-[10px] text-[var(--text-dim)]/60">
           Vibecoding From 0 · March 14–15, 2026

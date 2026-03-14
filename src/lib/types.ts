@@ -11,6 +11,7 @@ export interface Mission {
   type: ObsType;
   desc: string;
   hint: string;
+  context?: string; // Scriptonia context tag
 }
 
 export interface FarmHawkResult {
@@ -24,6 +25,15 @@ export interface FarmHawkResult {
   oracleHash: string;
   scanTimestamp: string;
   source: string;
+  receipt?: {
+    oracle: string;
+    feed: string;
+    endpoint: string;
+    hash: string;
+    timestamp: string;
+    coordinates: { lat: number; lon: number };
+    dataPoints: Record<string, number>;
+  };
 }
 
 export interface PollinetStatus {

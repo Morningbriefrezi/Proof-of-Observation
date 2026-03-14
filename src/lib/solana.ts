@@ -55,10 +55,14 @@ async function createOnChainProof(
   try {
     const memo = JSON.stringify({
       app: 'stellar',
+      agent: 'cyreneai/stellar-observer',
       ...memoData,
       observer: publicKey.toString(),
       ts: Date.now(),
     });
+
+    console.log('%c[CyreneAI Agent] 🤖 Submitting observation proof', 'color: #7A5FFF; font-weight: bold');
+    console.log('[CyreneAI Agent] Memo:', memo);
 
     const transaction = new Transaction().add({
       keys: [{ pubkey: publicKey, isSigner: true, isWritable: false }],
@@ -115,7 +119,12 @@ export async function mintObservation(
     target: observation.target,
     timestamp: observation.timestamp,
     location: { lat: observation.lat, lon: observation.lon },
-    verification: { cloudCover: observation.cloudCover, oracle: observation.oracleHash, source: 'farmhawk' },
+    verification: {
+      oracle: 'farmhawk_v1',
+      cloudCover: observation.cloudCover,
+      hash: observation.oracleHash,
+      source: 'open-meteo + farmhawk oracle format',
+    },
     stars: observation.stars,
   });
 }

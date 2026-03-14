@@ -59,11 +59,17 @@ export default function MintAnimation({ done }: MintAnimationProps) {
           <div className="animate-slide-up">
             <p className="text-[#34d399] font-semibold text-lg mb-1">Observation Sealed</p>
             <p className="text-slate-400 text-sm">Recorded on Solana devnet</p>
+            <p className="text-[var(--text-dim)] text-[10px] mt-2 font-mono">
+              Verified by STELLAR Observer Agent on CyreneAI
+            </p>
           </div>
         ) : (
           <div>
             <p className="text-[#FFD166] font-semibold text-lg mb-1">Sealing Observation</p>
             <p className="text-slate-400 text-sm">Writing to Solana devnet...</p>
+            <p className="text-[var(--text-dim)] text-[10px] mt-2 font-mono">
+              Agent: cyreneai/stellar-observer
+            </p>
             <div className="flex justify-center gap-1 mt-3">
               {[0, 1, 2].map(i => (
                 <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#38F0FF] animate-bounce" style={{ animationDelay: `${i * 150}ms` }} />

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import type { Mission, FarmHawkResult, PollinetStatus, MissionState } from '@/lib/types';
 import { verifyWithFarmHawk } from '@/lib/farmhawk';
-import { getPollinetStatus } from '@/lib/pollinet';
+import { getPollinetStatus, queueOfflineObservation } from '@/lib/pollinet';
 import { mintObservation } from '@/lib/solana';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useAppState } from '@/hooks/useAppState';
@@ -63,7 +63,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
 
     if (!navigator.onLine) {
       console.log('[Pollinet] Offline — queuing observation');
-      addMission({
+      const offlineMission = {
         id: mission.id,
         name: mission.name,
         emoji: mission.emoji,
@@ -74,9 +74,11 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
         latitude: lat,
         longitude: lon,
         farmhawk: null,
-        pollinet: { mode: 'queued', peers: ps.peers },
-        status: 'pending',
-      });
+        pollinet: { mode: 'queued' as const, peers: ps.peers },
+        status: 'pending' as const,
+      };
+      await queueOfflineObservation(offlineMission);
+      addMission(offlineMission);
       onClose();
       return;
     }

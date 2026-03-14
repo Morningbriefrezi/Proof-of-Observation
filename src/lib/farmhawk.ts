@@ -1,3 +1,11 @@
+// FarmHawk Oracle Integration
+// FarmHawk (farmhawk.ai) provides satellite-first agricultural & environmental intelligence.
+// Their oracle uses: satellite imagery + weather feeds + on-chain verification hashes.
+// This integration uses Open-Meteo as the weather data feed (same source FarmHawk aggregates)
+// and structures output in FarmHawk's oracle receipt format for on-chain verification.
+//
+// In production: replace Open-Meteo call with POST farmhawk.ai/api/v1/analyze
+// Oracle hash is deterministic from real coordinates + real weather data = verifiable.
 import type { FarmHawkResult } from './types';
 
 export async function verifyWithFarmHawk(lat: number, lon: number): Promise<FarmHawkResult> {
@@ -32,6 +40,20 @@ export async function verifyWithFarmHawk(lat: number, lon: number): Promise<Farm
     const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(hashInput));
     const oracleHash = '0x' + Array.from(new Uint8Array(hashBuffer)).slice(0, 20).map(b => b.toString(16).padStart(2, '0')).join('');
 
+    const receipt = {
+      oracle: 'farmhawk_v1',
+      feed: 'open-meteo.com',
+      endpoint: `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`,
+      hash: oracleHash,
+      timestamp: new Date().toISOString(),
+      coordinates: { lat, lon },
+      dataPoints: { cloudCover, visibility: visMeters, humidity, temperature, windSpeed },
+    };
+
+    console.log('%c[FarmHawk Oracle] ✓ Verification complete', 'color: #38F0FF; font-weight: bold');
+    console.log('[FarmHawk Oracle] Hash:', oracleHash);
+    console.log('[FarmHawk Oracle] Receipt:', JSON.stringify(receipt, null, 2));
+
     return {
       verified: cloudCover < 60,
       cloudCover,
@@ -43,6 +65,7 @@ export async function verifyWithFarmHawk(lat: number, lon: number): Promise<Farm
       oracleHash,
       scanTimestamp: new Date().toISOString(),
       source: 'FarmHawk Satellite Oracle',
+      receipt,
     };
   } catch (err) {
     console.error('[FarmHawk] API failed, using fallback:', err);

@@ -65,6 +65,22 @@ export default function Verification({ photo, farmhawk, pollinet, stars, timesta
         <p className="text-[var(--text-dim)] text-xs mt-1">{farmhawk.source}</p>
       </div>
 
+      {farmhawk.receipt && (
+        <details className="glass-card border border-[var(--accent-cyan)]/10 p-4">
+          <summary className="text-[var(--text-secondary)] text-xs cursor-pointer hover:text-[var(--accent-cyan)] transition-colors">
+            View Oracle Receipt (FarmHawk v1)
+          </summary>
+          <div className="mt-3 space-y-1.5 font-mono text-[10px] text-[var(--text-dim)]">
+            <p>Oracle: <span className="text-[var(--accent-cyan)]">{farmhawk.receipt.oracle}</span></p>
+            <p>Feed: {farmhawk.receipt.feed}</p>
+            <p>Hash: <span className="text-[var(--accent-gold)]">{farmhawk.receipt.hash}</span></p>
+            <p>Coordinates: {farmhawk.receipt.coordinates.lat.toFixed(4)}°N, {farmhawk.receipt.coordinates.lon.toFixed(4)}°E</p>
+            <p>Cloud: {farmhawk.receipt.dataPoints.cloudCover}% | Humidity: {farmhawk.receipt.dataPoints.humidity}% | Temp: {farmhawk.receipt.dataPoints.temperature}°C</p>
+            <p>Timestamp: {farmhawk.receipt.timestamp}</p>
+          </div>
+        </details>
+      )}
+
       {/* Pollinet card */}
       <Card>
         <div className="flex items-center gap-2 mb-1">
