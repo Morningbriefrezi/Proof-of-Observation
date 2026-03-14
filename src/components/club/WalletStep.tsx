@@ -43,15 +43,28 @@ export default function WalletStep() {
 
   const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   const hasPhantomExtension = typeof window !== 'undefined' && !!(window as { phantom?: { solana?: unknown } }).phantom?.solana;
+  // Detect if we're already running inside Phantom's built-in browser
+  const inPhantomBrowser = isMobile && hasPhantomExtension;
 
   const handlePhantomClick = () => {
-    if (isMobile && !hasPhantomExtension) {
+    if (inPhantomBrowser || !isMobile) {
+      // In Phantom browser or on desktop — use adapter modal directly
+      setVisible(true);
+    } else {
+      // On mobile without Phantom — open page inside Phantom's browser
+      // User will connect there and the flow continues in Phantom's browser
       const url = typeof window !== 'undefined' ? window.location.href : '';
       window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(url)}?ref=${encodeURIComponent(url)}`;
-    } else {
-      setVisible(true);
     }
   };
+
+  // If arriving in Phantom's browser, auto-open connect modal
+  useEffect(() => {
+    if (inPhantomBrowser && !state.walletConnected && !done) {
+      const timer = setTimeout(() => setVisible(true), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [inPhantomBrowser]);
 
   useEffect(() => {
     if (connected && publicKey && !state.walletConnected) {
@@ -161,9 +174,14 @@ export default function WalletStep() {
           ) : (
             <div className="mt-3 flex flex-col gap-4">
               {/* Phantom */}
-              <Button variant="solana" onClick={handlePhantomClick} className="w-full min-h-[44px]">
-                👻 {isMobile && !hasPhantomExtension ? 'Open in Phantom App' : 'Connect Phantom Wallet'}
-              </Button>
+              <div className="flex flex-col gap-1.5">
+                <Button variant="solana" onClick={handlePhantomClick} className="w-full min-h-[44px]">
+                  👻 {inPhantomBrowser ? 'Connect Phantom' : isMobile ? 'Continue in Phantom Browser' : 'Connect Phantom Wallet'}
+                </Button>
+                {isMobile && !inPhantomBrowser && (
+                  <p className="text-slate-600 text-xs text-center">Opens this page inside Phantom&apos;s built-in browser. Camera works there.</p>
+                )}
+              </div>
 
               {/* Divider */}
               <div className="flex items-center gap-3">

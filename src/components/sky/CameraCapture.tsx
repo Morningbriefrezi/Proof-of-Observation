@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useCamera, generateSimPhoto } from '@/hooks/useCamera';
 import { Camera, RefreshCw, CheckCircle2 } from 'lucide-react';
 import Button from '@/components/shared/Button';
@@ -13,11 +13,20 @@ interface CameraCaptureProps {
 export default function CameraCapture({ missionName, onCapture }: CameraCaptureProps) {
   const { videoRef, stream, error, facingMode, startCamera, flipCamera, stopCamera, capture } = useCamera();
   const [preview, setPreview] = useState<string | null>(null);
+  const autoSimDone = useRef(false);
 
   useEffect(() => {
     startCamera('environment');
     return () => stopCamera();
   }, []);
+
+  // Auto-generate simulated photo when camera is unavailable (WebView, no permission)
+  useEffect(() => {
+    if (error === 'permission_denied' && !autoSimDone.current && !preview) {
+      autoSimDone.current = true;
+      setPreview(generateSimPhoto(missionName));
+    }
+  }, [error, missionName, preview]);
 
   const handleCapture = () => {
     const photo = capture(missionName);

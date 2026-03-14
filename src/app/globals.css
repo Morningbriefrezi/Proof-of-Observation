@@ -208,9 +208,12 @@ h1, h2, h3 { font-family: Georgia, Palatino, serif; }
 }
 
 /* Prevent horizontal scroll + hide scrollbar globally */
-html, body {
-  overflow-x: hidden;
+/* NOTE: overflow-x must NOT be set on html — it breaks vertical scroll in Safari */
+body {
+  overflow-x: clip;
   width: 100%;
+}
+html, body {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }

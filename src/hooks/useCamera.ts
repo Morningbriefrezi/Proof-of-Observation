@@ -22,6 +22,13 @@ export function useCamera() {
   const startCamera = useCallback(async (facing: 'environment' | 'user' = 'environment') => {
     stream?.getTracks().forEach(t => t.stop());
 
+    // Guard: mediaDevices not available (WebView, HTTP, old browser)
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      console.log('[Camera] mediaDevices unavailable, using simulation');
+      setError('permission_denied');
+      return;
+    }
+
     let s: MediaStream | null = null;
     try {
       s = await navigator.mediaDevices.getUserMedia({
@@ -33,7 +40,7 @@ export function useCamera() {
           video: { facingMode: facing },
         });
       } catch {
-        console.log('[Camera] Permission denied, using simulation');
+        console.log('[Camera] Permission denied or unavailable, using simulation');
         setError('permission_denied');
         return;
       }
