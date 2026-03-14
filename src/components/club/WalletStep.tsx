@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { Keypair, Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import { Mail, CheckCircle2 } from 'lucide-react';
 import { useAppState } from '@/hooks/useAppState';
+import { saveEmailKeypair } from '@/lib/emailWallet';
 import Card from '@/components/shared/Card';
 import Button from '@/components/shared/Button';
 
@@ -26,8 +27,7 @@ async function ensureDevnetSol(publicKey: PublicKey) {
 
 function createWalletFromEmail(email: string) {
   const keypair = Keypair.generate();
-  localStorage.setItem('stellar_wallet_email', email);
-  localStorage.setItem('stellar_wallet_address', keypair.publicKey.toString());
+  saveEmailKeypair(keypair, email);
   console.log('[Wallet] Created from email:', email, keypair.publicKey.toString());
   return keypair.publicKey.toString();
 }
@@ -39,6 +39,18 @@ export default function WalletStep() {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const done = state.walletConnected;
+
+  const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const hasPhantomExtension = typeof window !== 'undefined' && !!(window as { phantom?: { solana?: unknown } }).phantom?.solana;
+
+  const handlePhantomClick = () => {
+    if (isMobile && !hasPhantomExtension) {
+      const url = typeof window !== 'undefined' ? window.location.href : '';
+      window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(url)}?ref=${encodeURIComponent(url)}`;
+    } else {
+      setVisible(true);
+    }
+  };
 
   useEffect(() => {
     if (connected && publicKey && !state.walletConnected) {
@@ -57,7 +69,7 @@ export default function WalletStep() {
     }
   }, []);
 
-  const handleEmailWallet = () => {
+  const handleEmailWallet = async () => {
     if (!email || !email.includes('@')) {
       setEmailError('Enter a valid email');
       return;
@@ -65,6 +77,19 @@ export default function WalletStep() {
     setEmailError('');
     const address = createWalletFromEmail(email);
     setWallet(address);
+    // Airdrop devnet SOL so email wallet can sign real transactions
+    try {
+      const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
+      const pk = new PublicKey(address);
+      const balance = await connection.getBalance(pk);
+      if (balance < 50_000_000) {
+        const sig = await connection.requestAirdrop(pk, LAMPORTS_PER_SOL);
+        await connection.confirmTransaction(sig);
+        console.log('[Wallet] Airdropped 1 SOL to email wallet');
+      }
+    } catch {
+      console.log('[Wallet] Airdrop rate limited — transactions may simulate');
+    }
   };
 
   return (
@@ -102,8 +127,8 @@ export default function WalletStep() {
           ) : (
             <div className="mt-3 flex flex-col gap-4">
               {/* Phantom */}
-              <Button variant="solana" onClick={() => setVisible(true)} className="w-full min-h-[44px]">
-                👻 Connect Phantom Wallet
+              <Button variant="solana" onClick={handlePhantomClick} className="w-full min-h-[44px]">
+                👻 {isMobile && !hasPhantomExtension ? 'Open in Phantom App' : 'Connect Phantom Wallet'}
               </Button>
 
               {/* Divider */}

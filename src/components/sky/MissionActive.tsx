@@ -5,6 +5,7 @@ import type { Mission, FarmHawkResult, PollinetStatus, MissionState } from '@/li
 import { verifyWithFarmHawk } from '@/lib/farmhawk';
 import { getPollinetStatus, queueOfflineObservation } from '@/lib/pollinet';
 import { mintObservation } from '@/lib/solana';
+import { getEmailKeypair, getEmailSendTransaction } from '@/lib/emailWallet';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useAppState } from '@/hooks/useAppState';
 import { getUnlockedRewards, getRank } from '@/lib/rewards';
@@ -104,8 +105,13 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
       .map(r => r.id);
 
     setMintError('');
-    const send = publicKey ? (tx: Parameters<typeof sendTransaction>[0]) => sendTransaction(tx, connection) : null;
-    const result = await mintObservation(send, publicKey, {
+    // Use Phantom wallet or fall back to email keypair
+    const emailKeypair = !publicKey ? getEmailKeypair() : null;
+    const effectiveKey = publicKey ?? emailKeypair?.publicKey ?? null;
+    const send = publicKey
+      ? (tx: Parameters<typeof sendTransaction>[0]) => sendTransaction(tx, connection)
+      : (getEmailSendTransaction() as Parameters<typeof mintObservation>[0]);
+    const result = await mintObservation(send, effectiveKey, {
       target: mission.name,
       timestamp,
       lat: coords.lat,
