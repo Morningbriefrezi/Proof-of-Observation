@@ -37,6 +37,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
   const [coords, setCoords] = useState({ lat: 41.7151, lon: 44.8271 });
   const [timestamp, setTimestamp] = useState('');
   const [mintDone, setMintDone] = useState(false);
+  const [mintError, setMintError] = useState('');
   const [newRewards, setNewRewards] = useState<NewReward[]>([]);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
@@ -100,6 +101,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
       .filter(r => r.unlocked)
       .map(r => r.id);
 
+    setMintError('');
     const send = publicKey ? (tx: Parameters<typeof sendTransaction>[0]) => sendTransaction(tx, connection) : null;
     const result = await mintObservation(send, publicKey, {
       target: mission.name,
@@ -110,6 +112,9 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
       oracleHash: farmhawk?.oracleHash ?? 'sim',
       stars: mission.stars,
     });
+    if (result.method === 'simulated' && result.error) {
+      setMintError(result.error);
+    }
     setMintDone(true);
     setTimeout(() => {
       const newCompleted = [...prevCompleted, mission.id];
@@ -241,7 +246,17 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
           />
         )}
 
-        {step === 'minting' && <MintAnimation done={mintDone} />}
+        {step === 'minting' && (
+          <div>
+            <MintAnimation done={mintDone} />
+            {mintError && (
+              <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                <p className="text-amber-400 text-xs font-medium">⚠️ Saved locally — on-chain failed</p>
+                <p className="text-slate-500 text-xs mt-0.5">{mintError}</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

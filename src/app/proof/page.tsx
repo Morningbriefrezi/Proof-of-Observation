@@ -7,12 +7,12 @@ import { useAppState } from '@/hooks/useAppState';
 import { getUnlockedRewards, getRank } from '@/lib/rewards';
 import type { CompletedMission } from '@/lib/types';
 
-function openExplorer(txId: string) {
-  if (!txId || txId.startsWith('sim_') || txId.startsWith('email_') || txId === 'pending' || txId.length < 40) {
-    alert('This observation was recorded locally. Connect Phantom wallet with devnet SOL for on-chain transactions.');
+function openExplorer(mission: CompletedMission) {
+  if (mission.method !== 'onchain' || !mission.txId || mission.txId.length < 40) {
+    alert('This observation was recorded locally.\nConnect Phantom wallet with devnet SOL for real on-chain proof.');
     return;
   }
-  window.open(`https://explorer.solana.com/tx/${txId}?cluster=devnet`, '_blank', 'noopener,noreferrer');
+  window.open(`https://explorer.solana.com/tx/${mission.txId}?cluster=devnet`, '_blank', 'noopener,noreferrer');
 }
 
 function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete: () => void }) {
@@ -20,7 +20,7 @@ function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete:
   const isPending = mission.status === 'pending';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const displayStars = mission.stars ?? (mission as any).points ?? 0;
-  const isRealTx = !isPending && !!mission.txId && !mission.txId.startsWith('sim_') && !mission.txId.startsWith('email_') && mission.txId !== 'pending' && mission.txId.length >= 40;
+  const isRealTx = !isPending && mission.method === 'onchain' && !!mission.txId && mission.txId.length >= 40;
 
   return (
     <div className={`glass-card rounded-xl overflow-hidden flex flex-col ${isPending ? '!border-amber-500/50' : ''}`} style={isPending ? { borderColor: 'rgba(245,158,11,0.5)' } : {}}>
@@ -57,7 +57,7 @@ function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete:
 
         <div className="flex gap-2 mt-auto pt-2">
           <button
-            onClick={() => openExplorer(mission.txId)}
+            onClick={() => openExplorer(mission)}
             className={`flex-1 text-center text-xs px-2 py-1.5 border rounded transition-all flex items-center justify-center gap-1 ${
               isRealTx
                 ? 'border-[#1a2d4d] hover:border-[#22d3ee] text-slate-400 hover:text-[#22d3ee]'

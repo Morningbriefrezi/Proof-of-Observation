@@ -53,8 +53,6 @@ async function createOnChainProof(
 ): Promise<MintResult> {
   const connection = getConnection();
   try {
-    await ensureBalance(publicKey);
-
     const memo = JSON.stringify({
       app: 'skyproof',
       ...memoData,
