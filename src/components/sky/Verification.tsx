@@ -1,9 +1,7 @@
 'use client';
 
-import { Satellite, Cloud, Eye, Thermometer, Link2, Wifi, WifiOff, CheckCircle2, Trophy, Droplets, Wind, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, Wifi, WifiOff } from 'lucide-react';
 import type { FarmHawkResult, PollinetStatus } from '@/lib/types';
-import Card from '@/components/shared/Card';
-import Button from '@/components/shared/Button';
 
 interface VerificationProps {
   photo: string;
@@ -17,86 +15,143 @@ interface VerificationProps {
 }
 
 export default function Verification({ photo, farmhawk, pollinet, stars, timestamp, latitude, longitude, onMint }: VerificationProps) {
-  return (
-    <div className="flex flex-col gap-3">
-      <img src={photo} alt="Captured observation" className="w-full max-w-md max-h-[35vh] object-cover mx-auto rounded-xl border-2 border-[#34d399]" />
+  const conditionOk = farmhawk.verified;
 
-      <div className="elite-border">
-        <Card glow="emerald">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 size={18} className="text-[#34d399]" />
-            <p className="text-[#34d399] font-semibold">Observation Verified!</p>
-          </div>
-          <p className="text-[var(--text-secondary)] text-sm mt-1">
-            {new Date(timestamp).toLocaleString()} · {latitude.toFixed(4)}°N {longitude.toFixed(4)}°E
-          </p>
-        </Card>
+  return (
+    <div className="flex flex-col w-full -mx-4 -mt-4 sm:-mx-0 sm:-mt-0">
+
+      {/* Photo header */}
+      <div className="relative bg-black" style={{ height: '38vh', minHeight: 180 }}>
+        <img
+          src={photo}
+          alt="Observation"
+          className="w-full h-full object-cover"
+          style={{ opacity: 0.9 }}
+        />
+        {/* Verified badge overlay */}
+        <div
+          className="absolute bottom-3 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-lg"
+          style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}
+        >
+          <CheckCircle2 size={12} className="text-[#34d399]" />
+          <span className="text-white text-xs font-medium">Observation Captured</span>
+        </div>
+        <div
+          className="absolute bottom-3 right-4 text-[10px] font-mono text-white/40"
+        >
+          {new Date(timestamp).toLocaleTimeString()}
+        </div>
       </div>
 
-      {/* FarmHawk card */}
-      <div className="glass-card border border-[#38F0FF]/30 p-3.5 sm:p-5 glow-cyan">
-        <div className="flex items-center gap-2 mb-2 sm:mb-4">
-          <Satellite size={16} className="text-[#38F0FF]" />
-          <p className="text-[#38F0FF] font-semibold text-sm">FarmHawk Satellite Verification</p>
+      {/* Data panel */}
+      <div className="px-4 pt-5 pb-4 flex flex-col gap-4">
+
+        {/* Location + time */}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-white text-sm font-semibold">Verified</p>
+            <p className="text-slate-600 text-xs mt-0.5">
+              {latitude.toFixed(4)}°N {longitude.toFixed(4)}°E
+            </p>
+          </div>
+          <div
+            className="px-2.5 py-1 rounded-lg text-[11px] font-semibold"
+            style={{
+              background: conditionOk ? 'rgba(52,211,153,0.08)' : 'rgba(251,191,36,0.08)',
+              border: `1px solid ${conditionOk ? 'rgba(52,211,153,0.2)' : 'rgba(251,191,36,0.2)'}`,
+              color: conditionOk ? '#34d399' : '#fbbf24',
+            }}
+          >
+            {conditionOk ? 'Clear sky' : 'Cloudy'}
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-sm">
+
+        {/* Weather data table */}
+        <div
+          className="rounded-xl overflow-hidden"
+          style={{ border: '1px solid rgba(255,255,255,0.06)' }}
+        >
+          <div
+            className="flex items-center gap-2 px-4 py-2.5"
+            style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.02)' }}
+          >
+            <div className="w-1.5 h-1.5 rounded-full bg-[#38F0FF]/60" />
+            <span className="text-[11px] text-slate-500 uppercase tracking-widest font-medium">Satellite Data</span>
+          </div>
           {[
-            { icon: <Cloud size={13} />, label: 'Cloud Cover', value: `${farmhawk.cloudCover}%` },
-            { icon: <Eye size={13} />, label: 'Visibility', value: farmhawk.visibility,
-              color: farmhawk.visibility === 'Excellent' ? 'text-[#34d399]' : farmhawk.visibility === 'Good' ? 'text-[#FFD166]' : farmhawk.visibility === 'Fair' ? 'text-amber-400' : 'text-red-400' },
-            { icon: <Thermometer size={13} />, label: 'Temperature', value: `${farmhawk.temperature}°C` },
-            { icon: <Droplets size={13} />, label: 'Humidity', value: `${farmhawk.humidity}%` },
-            { icon: <Wind size={13} />, label: 'Wind', value: `${farmhawk.windSpeed} km/h` },
-          ].map(row => (
-            <div key={row.label} className="flex flex-col gap-0.5">
-              <div className="flex items-center gap-1 text-[var(--text-dim)] text-xs">{row.icon}{row.label}</div>
-              <span className={`font-medium text-sm ${row.color ?? 'text-[var(--text-primary)]'}`}>{row.value}</span>
+            { label: 'Cloud Cover',  value: `${farmhawk.cloudCover}%` },
+            { label: 'Visibility',   value: farmhawk.visibility },
+            { label: 'Temperature',  value: `${farmhawk.temperature}°C` },
+            { label: 'Humidity',     value: `${farmhawk.humidity}%` },
+            { label: 'Wind Speed',   value: `${farmhawk.windSpeed} km/h` },
+          ].map((row, i, arr) => (
+            <div
+              key={row.label}
+              className="flex items-center justify-between px-4 py-2.5"
+              style={{
+                borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+              }}
+            >
+              <span className="text-slate-600 text-xs">{row.label}</span>
+              <span className="text-white text-xs font-medium">{row.value}</span>
             </div>
           ))}
         </div>
-        <p className="text-[var(--text-secondary)] text-xs mt-3 col-span-2 italic">{farmhawk.conditions}</p>
-        <div className="flex justify-between items-center mt-3 pt-3 border-t border-[var(--border-glass)]">
+
+        {/* Condition verdict + hash */}
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            {farmhawk.verified
-              ? <><CheckCircle2 size={14} className="text-[#34d399]" /><p className="text-[#34d399] font-semibold text-xs uppercase tracking-wide">Conditions Verified</p></>
-              : <><AlertTriangle size={14} className="text-amber-400" /><p className="text-amber-400 font-semibold text-xs uppercase tracking-wide">Poor Conditions — proceed at own risk</p></>
+            {conditionOk
+              ? <><CheckCircle2 size={12} className="text-[#34d399]" /><span className="text-[#34d399] text-xs">Conditions verified</span></>
+              : <><AlertTriangle size={12} className="text-amber-400" /><span className="text-amber-400 text-xs">Poor — proceed at own risk</span></>
             }
           </div>
-          <span className="font-hash text-xs text-[var(--text-dim)]">{farmhawk.oracleHash.slice(0, 8)}...{farmhawk.oracleHash.slice(-4)}</span>
+          <span className="text-slate-700 text-[10px] font-mono">
+            {farmhawk.oracleHash.slice(0, 6)}…{farmhawk.oracleHash.slice(-4)}
+          </span>
         </div>
-        <p className="text-[var(--text-dim)] text-xs mt-1">{farmhawk.source}</p>
-      </div>
 
-      {farmhawk.receipt && (
-        <details className="glass-card border border-[var(--accent-cyan)]/10 p-3">
-          <summary className="text-[var(--text-secondary)] text-xs cursor-pointer hover:text-[var(--accent-cyan)] transition-colors">
-            View Oracle Receipt (FarmHawk v1)
-          </summary>
-          <div className="mt-3 space-y-1.5 font-mono text-[10px] text-[var(--text-dim)]">
-            <p>Oracle: <span className="text-[var(--accent-cyan)]">{farmhawk.receipt.oracle}</span></p>
-            <p>Feed: {farmhawk.receipt.feed}</p>
-            <p>Hash: <span className="text-[var(--accent-gold)]">{farmhawk.receipt.hash}</span></p>
-            <p>Coordinates: {farmhawk.receipt.coordinates.lat.toFixed(4)}°N, {farmhawk.receipt.coordinates.lon.toFixed(4)}°E</p>
-            <p>Cloud: {farmhawk.receipt.dataPoints.cloudCover}% | Humidity: {farmhawk.receipt.dataPoints.humidity}% | Temp: {farmhawk.receipt.dataPoints.temperature}°C</p>
-            <p>Timestamp: {farmhawk.receipt.timestamp}</p>
-          </div>
-        </details>
-      )}
+        {/* Network */}
+        <div className="flex items-center gap-2">
+          {pollinet.online
+            ? <Wifi size={12} className="text-slate-600" />
+            : <WifiOff size={12} className="text-slate-600" />
+          }
+          <span className="text-slate-600 text-xs">
+            Pollinet · {pollinet.online ? 'Direct to Solana' : `Mesh relay (${pollinet.peers} peers)`}
+          </span>
+        </div>
 
-      {/* Pollinet card */}
-      <div className="glass-card p-3 flex items-center gap-2">
-        {pollinet.online ? <Wifi size={14} className="text-[#34d399] flex-shrink-0" /> : <WifiOff size={14} className="text-amber-400 flex-shrink-0" />}
-        <p className="text-xs text-[var(--text-secondary)]">
-          <span className="font-medium text-[var(--text-primary)]">Pollinet</span>{' '}
-          {pollinet.online ? '· Direct to Solana' : `· Mesh relay (${pollinet.peers} peers)`}
-        </p>
-      </div>
+        {/* Oracle receipt (collapsed) */}
+        {farmhawk.receipt && (
+          <details>
+            <summary className="text-slate-700 text-[10px] cursor-pointer hover:text-slate-500 transition-colors select-none">
+              View oracle receipt ›
+            </summary>
+            <div
+              className="mt-2 p-3 rounded-lg font-mono text-[9px] text-slate-700 leading-relaxed"
+              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}
+            >
+              <p>oracle: <span className="text-slate-500">{farmhawk.receipt.oracle}</span></p>
+              <p>hash: <span className="text-[#FFD166]/60">{farmhawk.receipt.hash}</span></p>
+              <p>feed: {farmhawk.receipt.feed}</p>
+              <p>coords: {farmhawk.receipt.coordinates.lat.toFixed(4)}N {farmhawk.receipt.coordinates.lon.toFixed(4)}E</p>
+              <p>ts: {farmhawk.receipt.timestamp}</p>
+            </div>
+          </details>
+        )}
 
-      <div className="sticky bottom-0 pt-3 pb-2 bg-gradient-to-t from-[#070B14] via-[#070B14]/95 to-transparent -mx-4 px-4 sm:static sm:bg-transparent sm:mx-0 sm:px-0 sm:pt-0 sm:pb-0">
-        <Button variant="brass" onClick={onMint} className="w-full py-3.5 rounded-xl flex items-center justify-center gap-2">
-          <Trophy size={18} />
-          Create Proof ✦ (+{stars} stars)
-        </Button>
+        {/* CTA */}
+        <button
+          onClick={onMint}
+          className="w-full py-4 rounded-xl text-sm font-bold tracking-wide transition-all active:scale-98 mt-1"
+          style={{
+            background: 'linear-gradient(135deg, #FFD166, #CC9A33)',
+            color: '#070B14',
+          }}
+        >
+          Create Proof  ✦  +{stars} stars
+        </button>
       </div>
     </div>
   );

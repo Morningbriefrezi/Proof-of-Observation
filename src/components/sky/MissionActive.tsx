@@ -213,28 +213,58 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
     );
   }
 
+  const fullBleed = step === 'camera' || step === 'verified';
+
   return (
     <div className={`fixed inset-0 z-50 bg-[#070B14] ${step === 'minting' ? 'overflow-hidden' : 'overflow-y-auto scrollbar-hide'} flex flex-col`}>
-      <div className="max-w-2xl mx-auto px-4 py-4 sm:py-8 w-full flex flex-col">
-        <div className="flex items-center justify-between mb-3 sm:mb-6">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl sm:text-3xl">{mission.emoji}</span>
-            <div>
-              <h2 className="text-lg sm:text-xl font-bold text-white">{mission.name}</h2>
-              <p className="text-slate-400 text-xs sm:text-sm line-clamp-2">{mission.desc}</p>
-            </div>
+
+      {/* Top bar — always visible */}
+      <div
+        className="flex-shrink-0 flex items-center justify-between px-4 py-3 z-10"
+        style={{
+          borderBottom: fullBleed ? 'none' : '1px solid rgba(255,255,255,0.05)',
+          position: fullBleed ? 'absolute' : 'relative',
+          top: 0, left: 0, right: 0,
+          background: fullBleed ? 'linear-gradient(to bottom, rgba(7,11,20,0.9), transparent)' : '#070B14',
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-lg">{mission.emoji}</span>
+          <div>
+            <p className="text-white text-sm font-semibold leading-tight">{mission.name}</p>
+            {!fullBleed && (
+              <p className="text-slate-600 text-[11px]">{mission.desc}</p>
+            )}
           </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-white text-xl px-2">✕</button>
         </div>
+        <button
+          onClick={onClose}
+          className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-white transition-colors"
+          style={{ background: 'rgba(255,255,255,0.05)' }}
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className={`flex flex-col flex-1 ${fullBleed ? '' : 'px-4 py-4 max-w-2xl mx-auto w-full'}`}>
 
         {step === 'observing' && (
-          <div className="flex flex-col gap-3">
-            <div className="border-2 border-dashed border-[rgba(56, 240, 255, 0.12)] rounded-xl p-4 sm:p-6 text-center">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-[#FFD166]/10 border border-[#FFD166]/20 flex items-center justify-center mb-3 mx-auto">
+          <div className="flex flex-col gap-4 mt-2">
+            <div
+              className="rounded-xl p-6 text-center"
+              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
+            >
+              <div
+                className="w-14 h-14 rounded-full flex items-center justify-center mb-4 mx-auto"
+                style={{ background: 'rgba(255,209,102,0.08)', border: '1px solid rgba(255,209,102,0.15)' }}
+              >
                 <Telescope size={22} className="text-[#FFD166]" />
               </div>
-              <p className="text-slate-300 mb-2">Point your telescope at <span className="text-[#FFD166]">{mission.name}</span></p>
-              <p className="text-slate-500 text-sm italic">{mission.hint}</p>
+              <p className="text-white text-sm font-medium mb-2">
+                Point your telescope at <span className="text-[#FFD166]">{mission.name}</span>
+              </p>
+              <p className="text-slate-600 text-xs leading-relaxed">{mission.hint}</p>
             </div>
             <Button variant="brass" onClick={() => setStep('camera')} className="w-full">
               Begin Observation →
@@ -247,12 +277,17 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
         )}
 
         {step === 'verifying' && (
-          <div className="text-center py-6 sm:py-12">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-[#38F0FF]/10 border border-[#38F0FF]/20 flex items-center justify-center mb-4 mx-auto animate-spin-slow">
-              <Satellite size={28} className="text-[#38F0FF]" />
+          <div className="flex flex-col items-center justify-center flex-1 gap-4 py-12">
+            <div
+              className="w-14 h-14 rounded-full flex items-center justify-center animate-spin-slow"
+              style={{ border: '1px solid rgba(255,255,255,0.1)' }}
+            >
+              <Satellite size={22} className="text-slate-400" />
             </div>
-            <p className="text-[#38F0FF] font-semibold">Scanning sky conditions at your location...</p>
-            <p className="text-slate-400 text-sm mt-2">Verify with Satellite 🛰️</p>
+            <div className="text-center">
+              <p className="text-white text-sm font-medium">Scanning sky conditions</p>
+              <p className="text-slate-600 text-xs mt-1">Fetching satellite data for your location…</p>
+            </div>
           </div>
         )}
 
@@ -273,9 +308,10 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
           <>
             <MintAnimation done={mintDone} />
             {mintError && (
-              <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 z-[70] p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg backdrop-blur-sm">
-                <p className="text-amber-400 text-xs font-medium">⚠️ Saved locally — on-chain failed</p>
-                <p className="text-slate-500 text-xs mt-0.5">{mintError}</p>
+              <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 z-[70] p-3 rounded-lg backdrop-blur-sm"
+                style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)' }}>
+                <p className="text-amber-400 text-xs font-medium">Saved locally — on-chain failed</p>
+                <p className="text-slate-600 text-xs mt-0.5">{mintError}</p>
               </div>
             )}
           </>

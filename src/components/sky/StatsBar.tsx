@@ -1,6 +1,5 @@
 'use client';
 
-import { Telescope, Sparkles, Award } from 'lucide-react';
 import { useAppState } from '@/hooks/useAppState';
 import { getRank } from '@/lib/rewards';
 
@@ -15,66 +14,46 @@ export default function StatsBar() {
   const rank = getRank(count);
   const pct = (count / TOTAL) * 100;
 
-  const stats = [
-    { icon: <Telescope size={13} />, label: 'Observations', display: `${count}/${TOTAL}`, color: '#FFD166' },
-    { icon: <Sparkles size={13} />, label: 'Stars', display: `${totalStars} ✦`, color: '#38F0FF' },
-    { icon: <Award size={13} />, label: 'Rank', display: rank.name, color: '#a78bfa' },
-  ];
-
   return (
     <div className="mb-6">
-      <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
-        {stats.map(s => (
-          <div
-            key={s.label}
-            className="rounded-xl p-3 sm:p-4 text-center"
-            style={{
-              background: `linear-gradient(145deg, ${s.color}0D 0%, ${s.color}05 100%)`,
-              border: `1px solid ${s.color}1A`,
-            }}
-          >
-            <div className="flex items-center justify-center gap-1 mb-1.5" style={{ color: s.color, opacity: 0.5 }}>
-              {s.icon}
-              <span className="text-[9px] uppercase tracking-widest font-medium">{s.label}</span>
-            </div>
-            <p className="font-bold text-lg sm:text-xl leading-none" style={{ color: s.color }}>
-              {s.display}
-            </p>
+      {/* Stat row */}
+      <div className="flex items-center justify-between mb-4 px-1">
+        {[
+          { label: 'Observations', value: `${count}/${TOTAL}` },
+          { label: 'Stars',        value: `${totalStars} ✦` },
+          { label: 'Rank',         value: rank.name },
+        ].map((s, i) => (
+          <div key={s.label} className={`text-center ${i === 1 ? 'border-x border-white/5 px-6' : ''}`}>
+            <p className="text-white font-bold text-lg leading-none">{s.value}</p>
+            <p className="text-slate-600 text-[10px] uppercase tracking-widest mt-1">{s.label}</p>
           </div>
         ))}
       </div>
 
-      {/* Progress track */}
-      <div className="space-y-2">
-        <div className="relative h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
+      {/* Progress bar */}
+      <div className="space-y-1.5">
+        <div className="h-px rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
           <div
-            className="absolute inset-y-0 left-0 rounded-full transition-all duration-700 ease-out"
+            className="h-full transition-all duration-700 ease-out"
             style={{
               width: `${pct}%`,
-              background: count >= TOTAL
-                ? 'linear-gradient(90deg, #34d399, #38F0FF)'
-                : 'linear-gradient(90deg, #FFD166 0%, #38F0FF 100%)',
-              boxShadow: count > 0 ? '0 0 8px rgba(255,209,102,0.4)' : 'none',
+              background: count >= TOTAL ? '#34d399' : '#FFD166',
             }}
           />
         </div>
-        <div className="flex items-center justify-between">
-          <div className="flex gap-1.5">
+        <div className="flex justify-between items-center">
+          <div className="flex gap-2">
             {Array.from({ length: TOTAL }, (_, i) => (
               <div
                 key={i}
-                className="w-1.5 h-1.5 rounded-full transition-all duration-500"
-                style={{
-                  backgroundColor: i < count ? '#38F0FF' : 'rgba(148,163,184,0.15)',
-                  boxShadow: i < count ? '0 0 4px rgba(56,240,255,0.5)' : 'none',
-                }}
+                className="w-1 h-1 rounded-full transition-colors duration-500"
+                style={{ backgroundColor: i < count ? '#FFD166' : 'rgba(255,255,255,0.1)' }}
               />
             ))}
           </div>
-          {count >= TOTAL
-            ? <span className="text-[10px] text-[#34d399] font-semibold tracking-wide">All missions complete ✦</span>
-            : <span className="text-[10px] text-slate-600">{TOTAL - count} mission{TOTAL - count !== 1 ? 's' : ''} remaining</span>
-          }
+          <span className="text-[10px] text-slate-700">
+            {count >= TOTAL ? 'All complete' : `${TOTAL - count} remaining`}
+          </span>
         </div>
       </div>
     </div>
