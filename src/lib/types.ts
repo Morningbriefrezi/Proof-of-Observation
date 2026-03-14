@@ -1,6 +1,6 @@
 export type Difficulty = 'Beginner' | 'Intermediate' | 'Advanced';
 export type ObsType = 'naked_eye' | 'telescope';
-export type MissionState = 'idle' | 'observing' | 'camera' | 'verifying' | 'verified' | 'minting' | 'done';
+export type MissionState = 'idle' | 'observing' | 'camera' | 'review' | 'verifying' | 'verified' | 'minting' | 'done';
 
 export interface Mission {
   id: string;
@@ -19,6 +19,7 @@ export interface FarmHawkResult {
   visibility: 'Excellent' | 'Good' | 'Poor';
   conditions: string;
   oracleHash: string;
+  scanTimestamp: string;
 }
 
 export interface PollinetStatus {
@@ -26,17 +27,24 @@ export interface PollinetStatus {
   mode: 'direct' | 'mesh' | 'queued';
   peers: number;
   label: string;
+  icon: string;
 }
 
 export interface CompletedMission {
   id: string;
   name: string;
+  emoji: string;
   points: number;
   txId: string;
   photo: string;
   timestamp: string;
+  latitude: number;
+  longitude: number;
   farmhawk: FarmHawkResult;
-  pollinet: PollinetStatus;
+  pollinet: {
+    mode: 'direct' | 'mesh' | 'queued';
+    peers: number;
+  };
 }
 
 export interface AppState {

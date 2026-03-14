@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Mission, FarmHawkResult, PollinetStatus, MissionState } from '@/lib/types';
 import { verifyWithFarmHawk } from '@/lib/farmhawk';
 import { getPollinetStatus } from '@/lib/pollinet';
 import { mintNFT } from '@/lib/solana';
-import { generateSimPhoto } from '@/hooks/useCamera';
 import { useAppState } from '@/hooks/useAppState';
 import CameraCapture from './CameraCapture';
 import Verification from './Verification';
@@ -23,15 +22,31 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
   const [photo, setPhoto] = useState('');
   const [farmhawk, setFarmhawk] = useState<FarmHawkResult | null>(null);
   const [pollinet, setPollinet] = useState<PollinetStatus | null>(null);
+  const [coords, setCoords] = useState({ lat: 41.7151, lon: 44.8271 });
+  const [timestamp, setTimestamp] = useState('');
   const [mintDone, setMintDone] = useState(false);
 
   const handleCapture = async (p: string) => {
     setPhoto(p);
     setStep('verifying');
+    const ts = new Date().toISOString();
+    setTimestamp(ts);
     console.log('[Verify] Starting FarmHawk verification');
-    const [fh] = await Promise.all([
-      verifyWithFarmHawk(41.7151, 44.8271), // Tbilisi coords
-    ]);
+
+    // Get GPS
+    let lat = 41.7151, lon = 44.8271;
+    try {
+      const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 5000 })
+      );
+      lat = pos.coords.latitude;
+      lon = pos.coords.longitude;
+    } catch {
+      console.log('[GPS] Unavailable, using Tbilisi coords');
+    }
+    setCoords({ lat, lon });
+
+    const fh = await verifyWithFarmHawk(lat, lon);
     setFarmhawk(fh);
     setPollinet(getPollinetStatus());
     setStep('verified');
@@ -46,12 +61,15 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
       addMission({
         id: mission.id,
         name: mission.name,
+        emoji: mission.emoji,
         points: mission.points,
         txId: result.txId,
         photo,
-        timestamp: new Date().toISOString(),
+        timestamp,
+        latitude: coords.lat,
+        longitude: coords.lon,
         farmhawk: farmhawk!,
-        pollinet: pollinet!,
+        pollinet: { mode: pollinet!.mode, peers: pollinet!.peers },
       });
       setStep('done');
       onClose();
@@ -92,7 +110,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
         {step === 'verifying' && (
           <div className="text-center py-12">
             <p className="text-4xl animate-spin-slow mb-4">🛰️</p>
-            <p className="text-[#c9a84c] font-semibold">Verifying observation...</p>
+            <p className="text-[#22d3ee] font-semibold">Scanning sky conditions at your location...</p>
             <p className="text-slate-400 text-sm mt-2">Querying FarmHawk satellite oracle</p>
           </div>
         )}
@@ -103,6 +121,9 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
             farmhawk={farmhawk}
             pollinet={pollinet}
             points={mission.points}
+            timestamp={timestamp}
+            latitude={coords.lat}
+            longitude={coords.lon}
             onMint={handleMint}
           />
         )}

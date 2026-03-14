@@ -1,14 +1,18 @@
 import type { FarmHawkResult } from './types';
 
 export async function verifyWithFarmHawk(lat: number, lon: number): Promise<FarmHawkResult> {
-  console.log('[FarmHawk] Verifying observation at', lat, lon);
-  await new Promise(r => setTimeout(r, 1500));
-  const cloud = Math.floor(Math.random() * 25);
+  console.log('[FarmHawk] Scanning sky conditions at', lat, lon);
+  await new Promise(r => setTimeout(r, 2000));
+  const cloudCover = Math.floor(Math.random() * 20) + 5;
   return {
-    verified: cloud < 40,
-    cloudCover: cloud,
-    visibility: cloud < 15 ? 'Excellent' : cloud < 30 ? 'Good' : 'Poor',
-    conditions: cloud < 15 ? 'Clear skies, low humidity' : 'Partly cloudy, acceptable',
-    oracleHash: '0x' + [...Array(40)].map(() => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join(''),
+    verified: true,
+    cloudCover,
+    visibility: cloudCover < 15 ? 'Excellent' : cloudCover < 25 ? 'Good' : 'Poor',
+    conditions: cloudCover < 15
+      ? 'Clear skies, low humidity, excellent seeing'
+      : 'Partly cloudy, acceptable observing conditions',
+    oracleHash: '0x' + Array.from({ length: 40 }, () =>
+      '0123456789abcdef'[Math.floor(Math.random() * 16)]).join(''),
+    scanTimestamp: new Date().toISOString(),
   };
 }

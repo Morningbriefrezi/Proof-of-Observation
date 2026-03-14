@@ -6,21 +6,41 @@ export function useCamera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
 
-  const startCamera = useCallback(async () => {
+  const startCamera = useCallback(async (facing: 'environment' | 'user' = 'environment') => {
+    // Stop existing stream first
+    stream?.getTracks().forEach(t => t.stop());
+
+    let s: MediaStream | null = null;
     try {
-      const s = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', aspectRatio: 4 / 3 },
+      s = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { exact: facing }, width: { ideal: 1280 }, height: { ideal: 960 } },
       });
-      setStream(s);
-      if (videoRef.current) videoRef.current.srcObject = s;
-      setError(null);
-      console.log('[Camera] Started');
-    } catch (err) {
-      console.log('[Camera] Permission denied, using simulation');
-      setError('permission_denied');
+    } catch {
+      try {
+        // Fallback: any camera (desktop without rear cam)
+        s = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: facing },
+        });
+      } catch {
+        console.log('[Camera] Permission denied, using simulation');
+        setError('permission_denied');
+        return;
+      }
     }
-  }, []);
+
+    setStream(s);
+    setFacingMode(facing);
+    if (videoRef.current) videoRef.current.srcObject = s;
+    setError(null);
+    console.log('[Camera] Started, facing:', facing);
+  }, [stream]);
+
+  const flipCamera = useCallback(() => {
+    const next = facingMode === 'environment' ? 'user' : 'environment';
+    startCamera(next);
+  }, [facingMode, startCamera]);
 
   const stopCamera = useCallback(() => {
     stream?.getTracks().forEach(t => t.stop());
@@ -34,7 +54,6 @@ export function useCamera() {
       canvas.height = 480;
       const ctx = canvas.getContext('2d')!;
       ctx.drawImage(videoRef.current, 0, 0, 640, 480);
-      // Add overlay
       ctx.fillStyle = 'rgba(0,0,0,0.4)';
       ctx.fillRect(0, 440, 640, 40);
       ctx.fillStyle = '#c9a84c';
@@ -45,7 +64,7 @@ export function useCamera() {
     return generateSimPhoto(missionName);
   }, [stream]);
 
-  return { videoRef, stream, error, startCamera, stopCamera, capture };
+  return { videoRef, stream, error, facingMode, startCamera, flipCamera, stopCamera, capture };
 }
 
 export function generateSimPhoto(name: string): string {
@@ -54,14 +73,12 @@ export function generateSimPhoto(name: string): string {
   canvas.height = 480;
   const ctx = canvas.getContext('2d')!;
 
-  // Dark sky background
   const grad = ctx.createRadialGradient(320, 240, 20, 320, 240, 300);
   grad.addColorStop(0, '#1a1a3e');
   grad.addColorStop(1, '#05080f');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 640, 480);
 
-  // Stars
   for (let i = 0; i < 200; i++) {
     const x = Math.random() * 640;
     const y = Math.random() * 480;
@@ -72,7 +89,6 @@ export function generateSimPhoto(name: string): string {
     ctx.fill();
   }
 
-  // Main object glow
   const objGrad = ctx.createRadialGradient(320, 200, 5, 320, 200, 60);
   objGrad.addColorStop(0, 'rgba(255,220,150,0.9)');
   objGrad.addColorStop(0.3, 'rgba(200,180,100,0.4)');
@@ -82,7 +98,6 @@ export function generateSimPhoto(name: string): string {
   ctx.arc(320, 200, 60, 0, Math.PI * 2);
   ctx.fill();
 
-  // Crosshair
   ctx.strokeStyle = 'rgba(201,168,76,0.6)';
   ctx.lineWidth = 1;
   ctx.beginPath();
@@ -93,7 +108,6 @@ export function generateSimPhoto(name: string): string {
   ctx.moveTo(320, 160); ctx.lineTo(320, 240);
   ctx.stroke();
 
-  // Overlay bar
   ctx.fillStyle = 'rgba(0,0,0,0.6)';
   ctx.fillRect(0, 440, 640, 40);
   ctx.fillStyle = '#c9a84c';

@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode, createElement } from 'react';
-import type { AppState, FarmHawkResult, PollinetStatus } from '@/lib/types';
+import type { AppState, CompletedMission } from '@/lib/types';
 
 const defaultState: AppState = {
   walletConnected: false,
@@ -18,16 +18,12 @@ interface AppStateCtx {
   setWallet: (address: string) => void;
   setMembership: (tx: string) => void;
   setTelescope: (data: { brand: string; model: string; aperture: string }, tx: string) => void;
-  addMission: (mission: {
-    id: string; name: string; points: number; txId: string;
-    photo: string; timestamp: string;
-    farmhawk: FarmHawkResult; pollinet: PollinetStatus;
-  }) => void;
+  addMission: (mission: CompletedMission) => void;
+  removeMission: (id: string) => void;
   reset: () => void;
 }
 
 const Ctx = createContext<AppStateCtx | null>(null);
-
 const STORAGE_KEY = 'proof_of_observation_state';
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
@@ -56,6 +52,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     addMission: (mission) => setState(s => ({
       ...s,
       completedMissions: [...s.completedMissions.filter(m => m.id !== mission.id), mission],
+    })),
+    removeMission: (id) => setState(s => ({
+      ...s,
+      completedMissions: s.completedMissions.filter(m => m.id !== id),
     })),
     reset: () => { localStorage.removeItem(STORAGE_KEY); setState(defaultState); },
   };
