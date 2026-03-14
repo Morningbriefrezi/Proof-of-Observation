@@ -50,7 +50,7 @@ export interface CompletedMission {
     peers: number;
   };
   status: 'completed' | 'pending';
-  method?: 'memo' | 'simulated';
+  method?: 'onchain' | 'simulated';
 }
 
 export interface AppState {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useAppState } from '@/hooks/useAppState';
 import { mintMembership } from '@/lib/solana';
 import Card from '@/components/shared/Card';
@@ -10,17 +10,20 @@ import MintAnimation from '@/components/shared/MintAnimation';
 
 export default function MembershipStep() {
   const { state, setMembership } = useAppState();
-  const wallet = useWallet();
+  const { publicKey, sendTransaction } = useWallet();
+  const { connection } = useConnection();
   const unlocked = state.walletConnected;
   const done = state.membershipMinted;
   const [minting, setMinting] = useState(false);
   const [mintDone, setMintDone] = useState(false);
-  const [method, setMethod] = useState<'memo' | 'simulated' | null>(null);
+  const [method, setMethod] = useState<'onchain' | 'simulated' | null>(null);
   const isEmailWallet = typeof window !== 'undefined' && !!localStorage.getItem('poo_wallet_email');
 
   const handleMint = async () => {
     setMinting(true);
-    const result = await mintMembership(wallet);
+    const send = publicKey ? (tx: Parameters<typeof sendTransaction>[0]) => sendTransaction(tx, connection) : null;
+    const result = await mintMembership(send, publicKey);
+    if (!result.success) { setMinting(false); return; }
     setMethod(result.method);
     setMintDone(true);
     setTimeout(() => {
@@ -44,18 +47,18 @@ export default function MembershipStep() {
             <h3 className="text-lg font-semibold text-white">Club Membership</h3>
             <p className="text-slate-400 text-sm mb-4">Mint your on-chain membership NFT</p>
             {isEmailWallet && !done && (
-              <p className="text-amber-400 text-xs mb-3">📧 Email wallet — transaction will be simulated. Connect Phantom for real on-chain proof.</p>
+              <p className="text-amber-400 text-xs mb-3">📧 Email wallet — will be simulated. Connect Phantom for real on-chain proof.</p>
             )}
             {done ? (
               <div className="bg-[#0f1a2e] border border-[#c9a84c]/40 rounded-lg p-4 flex items-center gap-4">
                 <span className="text-3xl">🏛️</span>
                 <div>
-                  <p className="text-[#c9a84c] font-semibold">Astroman Club Member</p>
+                  <p className="text-[#c9a84c] font-semibold">Skyproof Club Member</p>
                   <p className="text-slate-400 text-xs">Founding Member</p>
                   <p className="font-mono text-xs text-slate-500 mt-1">
                     {state.membershipTx.slice(0, 8)}...{state.membershipTx.slice(-8)}
                   </p>
-                  {method === 'memo' && (
+                  {method === 'onchain' && (
                     <a href={`https://explorer.solana.com/tx/${state.membershipTx}?cluster=devnet`} target="_blank" rel="noopener noreferrer" className="text-xs text-[#34d399] hover:underline mt-1 block">
                       ✅ View on Solana Explorer ↗
                     </a>

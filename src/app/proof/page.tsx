@@ -8,7 +8,7 @@ import { getUnlockedRewards, getRank } from '@/lib/rewards';
 import type { CompletedMission } from '@/lib/types';
 
 function openExplorer(txId: string) {
-  if (!txId || txId.startsWith('sim_') || txId === 'pending' || txId.length < 20) {
+  if (!txId || txId.startsWith('sim_') || txId.startsWith('email_') || txId === 'pending' || txId.length < 40) {
     alert('This observation was recorded locally. Connect Phantom wallet with devnet SOL for on-chain transactions.');
     return;
   }
@@ -20,7 +20,7 @@ function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete:
   const isPending = mission.status === 'pending';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const displayStars = mission.stars ?? (mission as any).points ?? 0;
-  const isRealTx = !isPending && !!mission.txId && !mission.txId.startsWith('sim_') && mission.txId !== 'pending' && mission.txId.length >= 20;
+  const isRealTx = !isPending && !!mission.txId && !mission.txId.startsWith('sim_') && !mission.txId.startsWith('email_') && mission.txId !== 'pending' && mission.txId.length >= 40;
 
   return (
     <div className={`glass-card rounded-xl overflow-hidden flex flex-col ${isPending ? '!border-amber-500/50' : ''}`} style={isPending ? { borderColor: 'rgba(245,158,11,0.5)' } : {}}>
@@ -46,11 +46,11 @@ function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete:
             <p className="font-hash text-xs text-[var(--text-dim)] truncate flex-1">
               {mission.txId.slice(0, 8)}...{mission.txId.slice(-8)}
             </p>
-            {mission.method === 'memo' && (
+            {isRealTx && (
               <span className="text-[#34d399] text-xs shrink-0">✅ On-chain</span>
             )}
-            {mission.method === 'simulated' && (
-              <span className="text-amber-400 text-xs shrink-0">⚠️ Sim</span>
+            {!isRealTx && !isPending && (
+              <span className="text-amber-400 text-xs shrink-0">⚠️ Local</span>
             )}
           </div>
         )}
@@ -104,6 +104,7 @@ export default function ProofPage() {
     );
   }
 
+  const isEmailWallet = typeof window !== 'undefined' && !!localStorage.getItem('poo_wallet_email');
   const completedIds = state.completedMissions.filter(m => m.status === 'completed').map(m => m.id);
   const rank = getRank(completedIds.length).name;
   const rewards = getUnlockedRewards(completedIds, rank);
@@ -115,7 +116,7 @@ export default function ProofPage() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-[#c9a84c]" style={{ fontFamily: 'Georgia, serif' }}>
-            My Proof
+            My NFTs
           </h1>
           <p className="text-slate-400 mt-1">{proofs.length} observation{proofs.length !== 1 ? 's' : ''} sealed on Solana</p>
         </div>
@@ -125,6 +126,19 @@ export default function ProofPage() {
           </Link>
         )}
       </div>
+
+      {/* Email wallet banner */}
+      {isEmailWallet && (
+        <div className="glass-card border border-amber-500/30 p-4 mb-4 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-amber-400 text-sm font-medium">📧 Email Wallet — observations saved locally</p>
+            <p className="text-slate-500 text-xs">Connect Phantom for real on-chain transactions</p>
+          </div>
+          <Link href="/club" className="text-xs px-3 py-1.5 border border-amber-500/50 text-amber-400 rounded hover:bg-amber-500/10 transition-all whitespace-nowrap">
+            Connect →
+          </Link>
+        </div>
+      )}
 
       {/* Rewards summary */}
       <div className="glass-card border border-[#c9a84c]/20 p-4 mb-6 flex flex-col gap-2">

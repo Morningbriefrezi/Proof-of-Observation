@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useAppState } from '@/hooks/useAppState';
 import { mintTelescopePassport } from '@/lib/solana';
 import { TELESCOPE_BRANDS } from '@/lib/constants';
@@ -11,18 +11,21 @@ import MintAnimation from '@/components/shared/MintAnimation';
 
 export default function TelescopeStep() {
   const { state, setTelescope } = useAppState();
-  const wallet = useWallet();
+  const { publicKey, sendTransaction } = useWallet();
+  const { connection } = useConnection();
   const unlocked = state.membershipMinted;
   const done = !!state.telescope;
   const [form, setForm] = useState({ brand: 'Celestron', model: '', aperture: '' });
   const [minting, setMinting] = useState(false);
   const [mintDone, setMintDone] = useState(false);
-  const [method, setMethod] = useState<'memo' | 'simulated' | null>(null);
+  const [method, setMethod] = useState<'onchain' | 'simulated' | null>(null);
 
   const handleMint = async () => {
     if (!form.model || !form.aperture) return;
     setMinting(true);
-    const result = await mintTelescopePassport(wallet, form);
+    const send = publicKey ? (tx: Parameters<typeof sendTransaction>[0]) => sendTransaction(tx, connection) : null;
+    const result = await mintTelescopePassport(send, publicKey, form);
+    if (!result.success) { setMinting(false); return; }
     setMethod(result.method);
     setMintDone(true);
     setTimeout(() => {
@@ -54,7 +57,7 @@ export default function TelescopeStep() {
                   <p className="font-mono text-xs text-slate-500 mt-1">
                     {state.telescopeTx.slice(0, 8)}...{state.telescopeTx.slice(-8)}
                   </p>
-                  {method === 'memo' && (
+                  {method === 'onchain' && (
                     <a href={`https://explorer.solana.com/tx/${state.telescopeTx}?cluster=devnet`} target="_blank" rel="noopener noreferrer" className="text-xs text-[#34d399] hover:underline mt-1 block">
                       ✅ View on Solana Explorer ↗
                     </a>
@@ -63,31 +66,17 @@ export default function TelescopeStep() {
               </div>
             ) : (
               <div className="flex flex-col gap-3">
-                <select
-                  value={form.brand}
-                  onChange={e => setForm(f => ({ ...f, brand: e.target.value }))}
-                  className="bg-[#0f1a2e] border border-[#1a2d4d] rounded-lg px-3 py-2 text-slate-200 text-sm focus:outline-none focus:border-[#22d3ee]"
-                >
+                <select value={form.brand} onChange={e => setForm(f => ({ ...f, brand: e.target.value }))}
+                  className="bg-[#0f1a2e] border border-[#1a2d4d] rounded-lg px-3 py-2 text-slate-200 text-sm focus:outline-none focus:border-[#22d3ee]">
                   {TELESCOPE_BRANDS.map(b => <option key={b}>{b}</option>)}
                 </select>
-                <input
-                  value={form.model}
-                  onChange={e => setForm(f => ({ ...f, model: e.target.value }))}
+                <input value={form.model} onChange={e => setForm(f => ({ ...f, model: e.target.value }))}
                   placeholder="Model (e.g. NexStar 8SE)"
-                  className="bg-[#0f1a2e] border border-[#1a2d4d] rounded-lg px-3 py-2 text-slate-200 text-sm placeholder-slate-600 focus:outline-none focus:border-[#22d3ee]"
-                />
-                <input
-                  value={form.aperture}
-                  onChange={e => setForm(f => ({ ...f, aperture: e.target.value }))}
+                  className="bg-[#0f1a2e] border border-[#1a2d4d] rounded-lg px-3 py-2 text-slate-200 text-sm placeholder-slate-600 focus:outline-none focus:border-[#22d3ee]" />
+                <input value={form.aperture} onChange={e => setForm(f => ({ ...f, aperture: e.target.value }))}
                   placeholder="Aperture (e.g. 203mm)"
-                  className="bg-[#0f1a2e] border border-[#1a2d4d] rounded-lg px-3 py-2 text-slate-200 text-sm placeholder-slate-600 focus:outline-none focus:border-[#22d3ee]"
-                />
-                <Button
-                  variant="cyan"
-                  onClick={handleMint}
-                  disabled={!form.model || !form.aperture}
-                  className="w-full sm:w-auto"
-                >
+                  className="bg-[#0f1a2e] border border-[#1a2d4d] rounded-lg px-3 py-2 text-slate-200 text-sm placeholder-slate-600 focus:outline-none focus:border-[#22d3ee]" />
+                <Button variant="cyan" onClick={handleMint} disabled={!form.model || !form.aperture} className="w-full sm:w-auto">
                   Register Telescope 🔭
                 </Button>
               </div>

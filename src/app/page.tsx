@@ -7,7 +7,7 @@ const ecoCards = [
   { icon: '🛒', title: 'astroman.ge', subtitle: 'Main Store', desc: 'Browse telescopes', href: ECOSYSTEM.store, ext: true },
   { icon: '🏛️', title: 'club.astroman.ge', subtitle: 'Loyalty Club', desc: 'Earn stars', href: ECOSYSTEM.club, ext: true },
   { icon: '🌌', title: 'sky.astroman.ge', subtitle: 'Sky Resources', desc: 'Star charts', href: ECOSYSTEM.sky, ext: true },
-  { icon: '📱', title: 'This App', subtitle: 'Proof of Observation', desc: 'NFT missions', href: '/club', ext: false },
+  { icon: '📱', title: 'Skyproof', subtitle: 'Proof of Observation', desc: 'NFT missions', href: '/club', ext: false },
 ];
 
 export default function HomePage() {
@@ -16,7 +16,7 @@ export default function HomePage() {
       {/* Hero */}
       <div className="text-center flex flex-col items-center gap-5">
         <AstroLogo heightClass="h-14" />
-        <p className="text-[#c9a84c] text-sm tracking-widest uppercase font-mono">✦ Proof of Observation</p>
+        <p className="text-[#c9a84c] text-sm tracking-widest uppercase font-mono">✦ Skyproof</p>
         <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-[#c9a84c]" style={{ fontFamily: 'Georgia, serif' }}>
           Observe the night sky.
           <br />

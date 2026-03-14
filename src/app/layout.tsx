@@ -7,8 +7,8 @@ import StarField from '@/components/shared/StarField';
 import Footer from '@/components/shared/Footer';
 
 export const metadata: Metadata = {
-  title: 'Proof of Observation — Astroman',
-  description: 'Strava for astronomy on Solana. Verify your stargazing. Earn on-chain rewards.',
+  title: 'Skyproof — Proof of Observation',
+  description: 'Observe the night sky. Capture. Verify. Collect. Every observation verified by satellite and sealed on Solana.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -5,7 +5,7 @@ import type { Mission, FarmHawkResult, PollinetStatus, MissionState } from '@/li
 import { verifyWithFarmHawk } from '@/lib/farmhawk';
 import { getPollinetStatus } from '@/lib/pollinet';
 import { mintObservation } from '@/lib/solana';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useAppState } from '@/hooks/useAppState';
 import { getUnlockedRewards, getRank } from '@/lib/rewards';
 import CameraCapture from './CameraCapture';
@@ -28,7 +28,8 @@ interface NewReward {
 
 export default function MissionActive({ mission, onClose }: MissionActiveProps) {
   const { state, addMission } = useAppState();
-  const wallet = useWallet();
+  const { publicKey, sendTransaction } = useWallet();
+  const { connection } = useConnection();
   const [step, setStep] = useState<MissionState>('observing');
   const [photo, setPhoto] = useState('');
   const [farmhawk, setFarmhawk] = useState<FarmHawkResult | null>(null);
@@ -99,7 +100,8 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
       .filter(r => r.unlocked)
       .map(r => r.id);
 
-    const result = await mintObservation(wallet, {
+    const send = publicKey ? (tx: Parameters<typeof sendTransaction>[0]) => sendTransaction(tx, connection) : null;
+    const result = await mintObservation(send, publicKey, {
       target: mission.name,
       timestamp,
       lat: coords.lat,
@@ -128,7 +130,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
         farmhawk: farmhawk!,
         pollinet: { mode: pollinet!.mode, peers: pollinet!.peers },
         status: 'completed',
-        method: result.method,
+        method: result.method === 'onchain' ? 'onchain' : 'simulated',
       });
 
       if (justUnlocked.length > 0) {

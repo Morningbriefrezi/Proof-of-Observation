@@ -1,135 +1,130 @@
-import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import {
+  Connection,
+  PublicKey,
+  Transaction,
+  LAMPORTS_PER_SOL,
+} from '@solana/web3.js';
 
-const DEVNET_RPC = 'https://api.devnet.solana.com';
+const DEVNET_URL = 'https://api.devnet.solana.com';
 const MEMO_PROGRAM_ID = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
 
-type WalletAdapter = {
-  publicKey: PublicKey | null;
-  signTransaction?: (tx: Transaction) => Promise<Transaction>;
-};
+let _connection: Connection | null = null;
+function getConnection(): Connection {
+  if (!_connection) _connection = new Connection(DEVNET_URL, 'confirmed');
+  return _connection;
+}
 
 export type MintResult = {
   success: boolean;
   txId: string;
-  method: 'memo' | 'simulated';
+  method: 'onchain' | 'simulated';
   error?: string;
 };
 
-async function ensureDevnetSol(connection: Connection, publicKey: PublicKey) {
+function simResult(): MintResult {
+  return {
+    success: true,
+    txId: 'sim_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+    method: 'simulated',
+  };
+}
+
+export async function ensureBalance(publicKey: PublicKey): Promise<void> {
+  const connection = getConnection();
   try {
     const balance = await connection.getBalance(publicKey);
-    if (balance < 10_000_000) {
-      console.log('[Solana] Low balance, requesting airdrop...');
+    console.log(`[Solana] Balance: ${(balance / LAMPORTS_PER_SOL).toFixed(3)} SOL`);
+    if (balance < 0.01 * LAMPORTS_PER_SOL) {
+      console.log('[Solana] Low balance, airdropping...');
       const sig = await connection.requestAirdrop(publicKey, LAMPORTS_PER_SOL);
-      await connection.confirmTransaction(sig);
-      console.log('[Solana] Airdrop successful');
+      await connection.confirmTransaction(sig, 'confirmed');
+      console.log('[Solana] Airdrop done');
     }
-  } catch {
-    console.log('[Solana] Airdrop failed (rate limited), continuing');
+  } catch (e) {
+    console.warn('[Solana] Airdrop failed (rate limited):', e);
   }
 }
 
-async function sendMemoTx(wallet: WalletAdapter, memo: string): Promise<MintResult> {
-  if (!wallet.publicKey || !wallet.signTransaction) {
-    return simulate();
-  }
-
-  const connection = new Connection(DEVNET_RPC, 'confirmed');
-  await ensureDevnetSol(connection, wallet.publicKey);
-
-  const transaction = new Transaction();
-
-  transaction.add({
-    keys: [{ pubkey: wallet.publicKey, isSigner: true, isWritable: false }],
-    programId: MEMO_PROGRAM_ID,
-    data: Buffer.from(memo.slice(0, 500)), // cap memo size
-  });
-
-  transaction.add(
-    SystemProgram.transfer({
-      fromPubkey: wallet.publicKey,
-      toPubkey: wallet.publicKey,
-      lamports: 1,
-    })
-  );
-
-  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-  transaction.recentBlockhash = blockhash;
-  transaction.feePayer = wallet.publicKey;
-
-  const signed = await wallet.signTransaction(transaction);
-  const txId = await connection.sendRawTransaction(signed.serialize());
-  await connection.confirmTransaction({ signature: txId, blockhash, lastValidBlockHeight });
-
-  console.log('[Solana] ✅ TX confirmed:', txId);
-  return { success: true, txId, method: 'memo' };
-}
-
-function simulate(): MintResult {
-  const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-  const txId = [...Array(64)].map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
-  return { success: true, txId, method: 'simulated' };
-}
-
-export async function mintObservation(
-  wallet: WalletAdapter,
-  data: { target: string; timestamp: string; lat: number; lon: number; cloudCover: number; oracleHash: string; stars: number }
+async function createOnChainProof(
+  sendTransaction: (tx: Transaction, connection: Connection) => Promise<string>,
+  publicKey: PublicKey,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  memoData: Record<string, any>
 ): Promise<MintResult> {
+  const connection = getConnection();
   try {
+    await ensureBalance(publicKey);
+
     const memo = JSON.stringify({
-      protocol: 'proof-of-observation',
-      v: '1.0',
-      target: data.target,
-      ts: data.timestamp,
-      loc: { lat: data.lat, lon: data.lon },
-      cloud: data.cloudCover,
-      oracle: data.oracleHash,
-      stars: data.stars,
-      observer: wallet.publicKey?.toString(),
+      app: 'skyproof',
+      ...memoData,
+      observer: publicKey.toString(),
+      ts: Date.now(),
     });
-    return await sendMemoTx(wallet, memo);
-  } catch (e: unknown) {
-    console.warn('[Solana] On-chain failed, simulating:', e);
-    return simulate();
+
+    const transaction = new Transaction().add({
+      keys: [{ pubkey: publicKey, isSigner: true, isWritable: false }],
+      programId: MEMO_PROGRAM_ID,
+      data: Buffer.from(memo, 'utf-8'),
+    });
+
+    const signature = await sendTransaction(transaction, connection);
+    const latestBlockhash = await connection.getLatestBlockhash();
+    await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed');
+
+    console.log('[Solana] ✅ Confirmed:', signature);
+    console.log(`[Solana] 🔗 https://explorer.solana.com/tx/${signature}?cluster=devnet`);
+    return { success: true, txId: signature, method: 'onchain' };
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('[Solana] TX failed:', msg);
+    if (msg.includes('rejected') || msg.includes('User rejected')) {
+      return { success: false, txId: '', method: 'simulated', error: 'Transaction cancelled' };
+    }
+    return { ...simResult(), error: msg };
   }
 }
 
-export async function mintMembership(wallet: WalletAdapter): Promise<MintResult> {
-  try {
-    return await sendMemoTx(wallet, JSON.stringify({
-      protocol: 'proof-of-observation',
-      type: 'membership',
-      ts: new Date().toISOString(),
-      observer: wallet.publicKey?.toString(),
-    }));
-  } catch {
-    return simulate();
-  }
+export async function mintMembership(
+  sendTransaction: ((tx: Transaction, connection: Connection) => Promise<string>) | null,
+  publicKey: PublicKey | null
+): Promise<MintResult> {
+  if (!sendTransaction || !publicKey) return { ...simResult(), txId: 'email_' + Date.now().toString(36) };
+  return createOnChainProof(sendTransaction, publicKey, { type: 'membership', name: 'Skyproof Club Membership' });
 }
 
 export async function mintTelescopePassport(
-  wallet: WalletAdapter,
+  sendTransaction: ((tx: Transaction, connection: Connection) => Promise<string>) | null,
+  publicKey: PublicKey | null,
   telescope: { brand: string; model: string; aperture: string }
 ): Promise<MintResult> {
-  try {
-    return await sendMemoTx(wallet, JSON.stringify({
-      protocol: 'proof-of-observation',
-      type: 'telescope',
-      brand: telescope.brand,
-      model: telescope.model,
-      aperture: telescope.aperture,
-      ts: new Date().toISOString(),
-      observer: wallet.publicKey?.toString(),
-    }));
-  } catch {
-    return simulate();
-  }
+  if (!sendTransaction || !publicKey) return { ...simResult(), txId: 'email_' + Date.now().toString(36) };
+  return createOnChainProof(sendTransaction, publicKey, {
+    type: 'telescope',
+    name: `${telescope.brand} ${telescope.model}`,
+    aperture: telescope.aperture,
+  });
 }
 
-// Legacy shim — keep old callers working during transition
+export async function mintObservation(
+  sendTransaction: ((tx: Transaction, connection: Connection) => Promise<string>) | null,
+  publicKey: PublicKey | null,
+  observation: { target: string; timestamp: string; lat: number; lon: number; cloudCover: number; oracleHash: string; stars: number }
+): Promise<MintResult> {
+  if (!sendTransaction || !publicKey) return { ...simResult(), txId: 'email_' + Date.now().toString(36) };
+  return createOnChainProof(sendTransaction, publicKey, {
+    type: 'observation',
+    target: observation.target,
+    timestamp: observation.timestamp,
+    location: { lat: observation.lat, lon: observation.lon },
+    verification: { cloudCover: observation.cloudCover, oracle: observation.oracleHash, source: 'farmhawk' },
+    stars: observation.stars,
+  });
+}
+
+// Legacy shim for old callers
 export async function mintNFT(name: string, _symbol: string): Promise<{ success: boolean; txId: string; mint: string }> {
-  await new Promise(r => setTimeout(r, 2500));
-  const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-  const txId = [...Array(64)].map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
-  return { success: true, txId, mint: txId.slice(0, 4) + '...' + txId.slice(-4) };
+  await new Promise(r => setTimeout(r, 2000));
+  const r = simResult();
+  return { success: true, txId: r.txId, mint: r.txId.slice(0, 8) };
 }
