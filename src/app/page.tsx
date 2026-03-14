@@ -1,5 +1,7 @@
+'use client';
 import Link from 'next/link';
-import { ECOSYSTEM, SPONSORS } from '@/lib/constants';
+import { ECOSYSTEM } from '@/lib/constants';
+import AstroLogo from '@/components/shared/AstroLogo';
 
 const ecoCards = [
   { icon: '🛒', title: 'astroman.ge', subtitle: 'Main Store', desc: 'Browse telescopes', href: ECOSYSTEM.store, ext: true },
@@ -13,6 +15,7 @@ export default function HomePage() {
     <div className="max-w-3xl mx-auto px-4 py-16 flex flex-col items-center gap-12">
       {/* Hero */}
       <div className="text-center flex flex-col items-center gap-5">
+        <AstroLogo className="h-14 w-14" />
         <p className="text-[#c9a84c] text-sm tracking-widest uppercase font-mono">✦ Proof of Observation</p>
         <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-[#c9a84c]" style={{ fontFamily: 'Georgia, serif' }}>
           Strava for Astronomy
@@ -75,27 +78,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="text-center w-full pb-4">
-        <p className="text-slate-600 text-xs mb-3 tracking-widest uppercase">— Powered By —</p>
-        <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-xs">
-          <a href={ECOSYSTEM.store} target="_blank" rel="noopener noreferrer"
-            className="text-[#c9a84c] hover:text-[#d4b05c] font-medium transition-colors">
-            🔭 Astroman
-          </a>
-          {[
-            { label: 'Solana', href: SPONSORS.solana },
-            { label: 'FarmHawk', href: SPONSORS.farmhawk },
-            { label: 'Pollinet', href: SPONSORS.pollinet },
-            { label: 'Scriptonia', href: SPONSORS.scriptonia },
-          ].map(s => (
-            <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer"
-              className="text-slate-500 hover:text-slate-300 transition-colors">
-              {s.label}
-            </a>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

@@ -1,24 +1,59 @@
 'use client';
 
 import Link from 'next/link';
+import { CheckCircle2 } from 'lucide-react';
 import { useAppState } from '@/hooks/useAppState';
 import WalletStep from '@/components/club/WalletStep';
 import MembershipStep from '@/components/club/MembershipStep';
 import TelescopeStep from '@/components/club/TelescopeStep';
 import { ECOSYSTEM } from '@/lib/constants';
 
+function StepProgress({ steps }: { steps: { label: string; done: boolean; active: boolean }[] }) {
+  return (
+    <div className="flex items-center justify-center mb-8">
+      {steps.map((step, i) => (
+        <div key={step.label} className="flex items-center">
+          <div className="flex flex-col items-center gap-1">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
+              step.done
+                ? 'bg-[#c9a84c] border-2 border-[#c9a84c] text-black'
+                : step.active
+                  ? 'border-2 border-[#c9a84c] text-[#c9a84c] bg-transparent'
+                  : 'border-2 border-[var(--text-dim)] text-[var(--text-dim)] bg-transparent'
+            }`}>
+              {step.done ? <CheckCircle2 size={16} /> : i + 1}
+            </div>
+            <span className={`text-xs font-medium ${step.done ? 'text-[#c9a84c]' : step.active ? 'text-[var(--text-secondary)]' : 'text-[var(--text-dim)]'}`}>
+              {step.label}
+            </span>
+          </div>
+          {i < steps.length - 1 && (
+            <div className={`w-16 sm:w-24 h-0.5 mb-5 mx-1 transition-all duration-300 ${step.done ? 'bg-[#c9a84c]' : 'bg-[var(--text-dim)]'}`} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function ClubPage() {
   const { state } = useAppState();
   const allDone = state.walletConnected && state.membershipMinted && !!state.telescope;
 
+  const steps = [
+    { label: 'Connect', done: state.walletConnected, active: !state.walletConnected },
+    { label: 'Mint', done: state.membershipMinted, active: state.walletConnected && !state.membershipMinted },
+    { label: 'Register', done: !!state.telescope, active: state.membershipMinted && !state.telescope },
+  ];
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#c9a84c]" style={{ fontFamily: 'Georgia, serif' }}>
-          🏛️ AstroClub
-        </h1>
-        <p className="text-slate-400 mt-2">Three steps to start your observation journey</p>
+      <div className="mb-6 text-center">
+        <h1 className="text-3xl font-bold text-[#c9a84c]">AstroClub</h1>
+        <p className="text-[var(--text-secondary)] mt-2 text-sm">Three steps to start your observation journey</p>
       </div>
+
+      <StepProgress steps={steps} />
 
       <div className="flex flex-col gap-4">
         <WalletStep />
@@ -27,23 +62,19 @@ export default function ClubPage() {
       </div>
 
       {allDone && (
-        <div className="mt-8 bg-[#0f1a2e] border border-[#34d399] rounded-xl p-6 text-center animate-slide-up glow-emerald">
-          <p className="text-2xl mb-2">✅</p>
+        <div className="mt-8 glass-card border border-[#34d399]/50 p-6 text-center animate-slide-up glow-emerald">
+          <CheckCircle2 size={32} className="text-[#34d399] mx-auto mb-3" />
           <h2 className="text-xl font-bold text-[#34d399] mb-4">You&apos;re ready to observe!</h2>
           <div className="flex gap-4 justify-center flex-wrap">
-            <Link
-              href="/sky"
-              className="px-6 py-3 bg-gradient-to-r from-[#c9a84c] to-[#a07840] text-black font-bold rounded-lg hover:from-[#d4b05c] transition-all duration-200"
-            >
-              🌌 Go to Sky Dashboard →
+            <Link href="/sky" className="btn-primary px-6 py-3 rounded-xl font-bold inline-flex items-center gap-2">
+              Sky Dashboard →
             </Link>
             <a
               href={ECOSYSTEM.store}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3 border border-[#1a2d4d] hover:border-[#c9a84c] text-slate-300 hover:text-[#c9a84c] rounded-lg transition-all duration-200"
+              target="_blank" rel="noopener noreferrer"
+              className="btn-ghost px-6 py-3 rounded-xl inline-flex items-center gap-2"
             >
-              🛒 Browse Telescopes at astroman.ge →
+              Browse Telescopes ↗
             </a>
           </div>
         </div>

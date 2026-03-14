@@ -4,6 +4,7 @@ import { SolanaWalletProvider } from '@/components/providers/WalletProvider';
 import { AppStateProvider } from '@/hooks/useAppState';
 import Nav from '@/components/shared/Nav';
 import StarField from '@/components/shared/StarField';
+import Footer from '@/components/shared/Footer';
 
 export const metadata: Metadata = {
   title: 'Proof of Observation — Astroman',
@@ -13,12 +14,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-void text-slate-200 min-h-screen font-sans">
+      <body className="bg-void text-slate-200 min-h-screen font-sans flex flex-col">
         <SolanaWalletProvider>
           <AppStateProvider>
             <StarField />
             <Nav />
-            <main className="relative z-10 pt-16">{children}</main>
+            <main className="relative z-10 pt-16 flex-1">{children}</main>
+            <Footer />
           </AppStateProvider>
         </SolanaWalletProvider>
       </body>

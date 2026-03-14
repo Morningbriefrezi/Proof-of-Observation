@@ -4,6 +4,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { useEffect, useState } from 'react';
 import { Keypair } from '@solana/web3.js';
+import { Mail, CheckCircle2 } from 'lucide-react';
 import { useAppState } from '@/hooks/useAppState';
 import Card from '@/components/shared/Card';
 import Button from '@/components/shared/Button';
@@ -61,12 +62,27 @@ export default function WalletStep() {
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-white">Connect Wallet</h3>
           {done ? (
-            <p className="text-[#34d399] font-mono text-sm mt-1">
-              {state.walletAddress.slice(0, 8)}...{state.walletAddress.slice(-8)}
+            <div className="mt-2 flex flex-col gap-1">
+              <div className="flex items-center gap-2 text-[#34d399]">
+                <CheckCircle2 size={15} />
+                <span className="text-sm font-medium">Solana wallet connected</span>
+              </div>
+              <p className="font-hash text-xs text-[var(--text-secondary)] ml-5">
+                {state.walletAddress.slice(0, 8)}...{state.walletAddress.slice(-8)}
+              </p>
               {localStorage.getItem('poo_wallet_email') && (
-                <span className="text-slate-400 font-sans ml-2 text-xs">({localStorage.getItem('poo_wallet_email')})</span>
+                <p className="text-xs text-[var(--text-dim)] ml-5">
+                  Signed in as {localStorage.getItem('poo_wallet_email')}
+                </p>
               )}
-            </p>
+              <a
+                href={`https://explorer.solana.com/address/${state.walletAddress}?cluster=devnet`}
+                target="_blank" rel="noopener noreferrer"
+                className="text-xs text-[var(--text-dim)] hover:text-[#c9a84c] ml-5 transition-colors"
+              >
+                View on Solana Explorer ↗
+              </a>
+            </div>
           ) : (
             <div className="mt-3 flex flex-col gap-4">
               {/* Phantom */}
@@ -84,8 +100,8 @@ export default function WalletStep() {
               {/* Email */}
               <div className="bg-[#0f1a2e] border border-[#1a2d4d] rounded-xl p-4 flex flex-col gap-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">✉️</span>
-                  <p className="text-slate-300 text-sm font-medium">Continue with Email</p>
+                  <Mail size={16} className="text-[var(--text-secondary)]" />
+                  <p className="text-[var(--text-primary)] text-sm font-medium">Continue with Email</p>
                 </div>
                 <input
                   type="email"

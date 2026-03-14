@@ -7,17 +7,17 @@ interface CardProps {
 }
 
 const glowMap = {
-  brass: 'border-[#c9a84c] glow-brass',
-  emerald: 'border-[#34d399] glow-emerald',
-  cyan: 'border-[#22d3ee] glow-cyan',
-  solana: 'border-[#9945FF] glow-solana',
+  brass: 'border-[#c9a84c]/50 glow-brass',
+  emerald: 'border-[#34d399]/50 glow-emerald',
+  cyan: 'border-[#22d3ee]/50 glow-cyan',
+  solana: 'border-[#9945FF]/50 glow-solana',
 };
 
 export default function Card({ children, className = '', glow }: CardProps) {
   return (
     <div className={`
-      bg-[#111c30] border rounded-xl p-5 transition-all duration-300
-      ${glow ? glowMap[glow] : 'border-[#1a2d4d]'}
+      glass-card p-5 transition-all duration-300
+      ${glow ? glowMap[glow] : ''}
       ${className}
     `}>
       {children}

@@ -4,9 +4,11 @@ import { useState } from 'react';
 import { MISSIONS } from '@/lib/constants';
 import { useAppState } from '@/hooks/useAppState';
 import type { Mission } from '@/lib/types';
+import { CheckCircle2, Clock } from 'lucide-react';
 import Badge from '@/components/shared/Badge';
 import Card from '@/components/shared/Card';
 import Button from '@/components/shared/Button';
+import { MissionIcon } from '@/components/shared/PlanetIcons';
 import MissionActive from './MissionActive';
 
 export default function MissionList() {
@@ -25,8 +27,8 @@ export default function MissionList() {
           return (
             <Card key={mission.id} className={done ? 'opacity-60' : ''}>
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#0f1a2e] rounded-full flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
-                  {mission.emoji}
+                <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0">
+                  <MissionIcon id={mission.id} size={40} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-white text-sm sm:text-base">{mission.name}</p>
@@ -55,9 +57,9 @@ export default function MissionList() {
                     <p className="text-[#c9a84c] text-sm font-semibold">+{mission.points} pts</p>
                   </div>
                   {done ? (
-                    <span className="text-[#34d399] text-xs sm:text-sm">✅ Done</span>
+                    <span className="flex items-center gap-1 text-[#34d399] text-xs"><CheckCircle2 size={14} /> Done</span>
                   ) : pending ? (
-                    <span className="text-amber-400 text-xs">⏳ Pending</span>
+                    <span className="flex items-center gap-1 text-amber-400 text-xs"><Clock size={13} /> Pending</span>
                   ) : (
                     <Button variant="ghost" onClick={() => setActive(mission)} className="text-sm px-3 min-h-[44px]">
                       Start →

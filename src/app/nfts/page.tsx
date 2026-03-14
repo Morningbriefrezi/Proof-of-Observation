@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { ExternalLink, Trash2, Clock, CheckCircle2, Cloud, Wifi } from 'lucide-react';
 import { useAppState } from '@/hooks/useAppState';
 import type { CompletedMission } from '@/lib/types';
 
@@ -10,7 +11,7 @@ function NFTCard({ mission, onDelete }: { mission: CompletedMission; onDelete: (
 
   const isPending = mission.status === 'pending';
   return (
-    <div className={`bg-[#111c30] rounded-xl overflow-hidden flex flex-col border ${isPending ? 'border-amber-500/60' : 'border-[#1a2d4d]'}`}>
+    <div className={`glass-card rounded-xl overflow-hidden flex flex-col ${isPending ? '!border-amber-500/50' : ''}`} style={isPending ? { borderColor: 'rgba(245,158,11,0.5)' } : {}}>
       <img src={mission.photo} alt={mission.name} className="w-full aspect-[4/3] object-cover" />
       <div className="p-4 flex flex-col gap-2 flex-1">
         <div className="flex items-center gap-2">
@@ -22,14 +23,14 @@ function NFTCard({ mission, onDelete }: { mission: CompletedMission; onDelete: (
           <p className="text-[#c9a84c] font-bold">+{mission.points} pts</p>
           {isPending && <span className="text-amber-400 text-xs">⏳ Pending</span>}
         </div>
-        <div className="flex gap-3 text-xs text-slate-400">
-          {mission.farmhawk ? <span>☁️ {mission.farmhawk.cloudCover}% clouds</span> : <span>☁️ —</span>}
-          <span>{mission.pollinet.mode === 'direct' ? '🟢 Direct' : mission.pollinet.mode === 'queued' ? '📡 Queued' : '📡 Mesh'}</span>
+        <div className="flex gap-3 text-xs text-[var(--text-secondary)]">
+          <span className="flex items-center gap-1"><Cloud size={11} />{mission.farmhawk ? `${mission.farmhawk.cloudCover}%` : '—'}</span>
+          <span className="flex items-center gap-1"><Wifi size={11} />{mission.pollinet.mode}</span>
         </div>
         {isPending ? (
-          <p className="text-amber-400 text-xs italic">Awaiting connectivity to verify & mint</p>
+          <p className="text-amber-400 text-xs italic flex items-center gap-1"><Clock size={11} /> Awaiting connectivity</p>
         ) : (
-          <p className="font-mono text-xs text-slate-500 truncate">
+          <p className="font-hash text-xs text-[var(--text-dim)] truncate">
             {mission.txId.slice(0, 8)}...{mission.txId.slice(-8)}
           </p>
         )}
@@ -41,14 +42,14 @@ function NFTCard({ mission, onDelete }: { mission: CompletedMission; onDelete: (
             rel="noopener noreferrer"
             className="flex-1 text-center text-xs px-2 py-1.5 border border-[#1a2d4d] hover:border-[#22d3ee] text-slate-400 hover:text-[#22d3ee] rounded transition-all"
           >
-            🔗 Explorer
+            <ExternalLink size={12} /> Explorer
           </a>
           {!confirming ? (
             <button
               onClick={() => setConfirming(true)}
               className="flex-1 text-xs px-2 py-1.5 border border-[#1a2d4d] hover:border-red-500 text-slate-400 hover:text-red-400 rounded transition-all"
             >
-              🗑️ Delete
+              <Trash2 size={12} /> Delete
             </button>
           ) : (
             <div className="flex-1 flex gap-1">

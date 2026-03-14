@@ -2,13 +2,13 @@
 import { useMemo } from 'react';
 
 export default function StarField() {
-  const stars = useMemo(() => Array.from({ length: 120 }, (_, i) => ({
+  const stars = useMemo(() => Array.from({ length: 55 }, (_, i) => ({
     id: i,
     top: Math.random() * 100,
     left: Math.random() * 100,
-    size: Math.random() * 2 + 0.5,
-    duration: Math.random() * 4 + 2,
-    delay: Math.random() * 5,
+    size: Math.random() * 1 + 0.5,
+    duration: Math.random() * 4 + 4,
+    delay: Math.random() * 8,
   })), []);
 
   return (
