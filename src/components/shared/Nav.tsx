@@ -57,7 +57,7 @@ export default function Nav() {
   const walletLabel = email ? `✉️ ${email.split('@')[0]}` : `🟢 ${walletShort}`;
 
   return (
-    <nav className="glass-nav fixed top-0 left-0 right-0 z-40">
+    <nav className="glass-nav sticky top-0 z-40">
       <div className="max-w-5xl mx-auto px-3 sm:px-4">
 
         {/* Main row */}

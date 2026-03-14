@@ -7,9 +7,20 @@ import { useAppState } from '@/hooks/useAppState';
 import { getUnlockedRewards, getRank } from '@/lib/rewards';
 import type { CompletedMission } from '@/lib/types';
 
+function openExplorer(txId: string) {
+  if (!txId || txId.startsWith('sim_') || txId === 'pending' || txId.length < 20) {
+    alert('This observation was recorded locally. Connect Phantom wallet with devnet SOL for on-chain transactions.');
+    return;
+  }
+  window.open(`https://explorer.solana.com/tx/${txId}?cluster=devnet`, '_blank', 'noopener,noreferrer');
+}
+
 function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete: () => void }) {
   const [confirming, setConfirming] = useState(false);
   const isPending = mission.status === 'pending';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const displayStars = mission.stars ?? (mission as any).points ?? 0;
+  const isRealTx = !isPending && !!mission.txId && !mission.txId.startsWith('sim_') && mission.txId !== 'pending' && mission.txId.length >= 20;
 
   return (
     <div className={`glass-card rounded-xl overflow-hidden flex flex-col ${isPending ? '!border-amber-500/50' : ''}`} style={isPending ? { borderColor: 'rgba(245,158,11,0.5)' } : {}}>
@@ -21,7 +32,7 @@ function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete:
         </div>
         <p className="text-slate-400 text-xs">{new Date(mission.timestamp).toLocaleString()}</p>
         <div className="flex items-center gap-2">
-          <p className="text-[#c9a84c] font-bold">+{mission.stars} stars ✦</p>
+          <p className="text-[#c9a84c] font-bold">+{displayStars} stars ✦</p>
           {isPending && <span className="text-amber-400 text-xs">⏳ Pending</span>}
         </div>
         <div className="flex gap-3 text-xs text-[var(--text-secondary)]">
@@ -45,14 +56,16 @@ function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete:
         )}
 
         <div className="flex gap-2 mt-auto pt-2">
-          <a
-            href={isPending || mission.method === 'simulated' ? '#' : `https://explorer.solana.com/tx/${mission.txId}?cluster=devnet`}
-            target={isPending || mission.method === 'simulated' ? undefined : '_blank'}
-            rel="noopener noreferrer"
-            className="flex-1 text-center text-xs px-2 py-1.5 border border-[#1a2d4d] hover:border-[#22d3ee] text-slate-400 hover:text-[#22d3ee] rounded transition-all flex items-center justify-center gap-1"
+          <button
+            onClick={() => openExplorer(mission.txId)}
+            className={`flex-1 text-center text-xs px-2 py-1.5 border rounded transition-all flex items-center justify-center gap-1 ${
+              isRealTx
+                ? 'border-[#1a2d4d] hover:border-[#22d3ee] text-slate-400 hover:text-[#22d3ee]'
+                : 'border-[#1a2d4d] text-slate-600 cursor-default'
+            }`}
           >
-            <ExternalLink size={12} /> Explorer
-          </a>
+            <ExternalLink size={12} /> {isRealTx ? 'Explorer →' : 'Local only'}
+          </button>
           {!confirming ? (
             <button
               onClick={() => setConfirming(true)}

@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AppStateProvider>
             <StarField />
             <Nav />
-            <main className="relative z-10 pt-14 sm:pt-14 flex-1">{children}</main>
+            <main className="relative z-10 flex-1">{children}</main>
             <Footer />
           </AppStateProvider>
         </SolanaWalletProvider>

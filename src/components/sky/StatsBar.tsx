@@ -7,7 +7,8 @@ import { getRank } from '@/lib/rewards';
 export default function StatsBar() {
   const { state } = useAppState();
   const completed = state.completedMissions.filter(m => m.status === 'completed');
-  const total = completed.reduce((sum, m) => sum + m.stars, 0);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const total = completed.reduce((sum, m) => sum + (m.stars ?? (m as any).points ?? 0), 0);
   const count = completed.length;
   const rank = getRank(count);
 
