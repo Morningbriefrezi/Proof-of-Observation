@@ -40,11 +40,12 @@ export interface CompletedMission {
   timestamp: string;
   latitude: number;
   longitude: number;
-  farmhawk: FarmHawkResult;
+  farmhawk: FarmHawkResult | null;
   pollinet: {
     mode: 'direct' | 'mesh' | 'queued';
     peers: number;
   };
+  status: 'completed' | 'pending';
 }
 
 export interface AppState {

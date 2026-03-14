@@ -20,11 +20,15 @@ export default function ObservationLog() {
             <div className="flex items-center gap-4">
               <img src={m.photo} alt={m.name} className="w-16 h-12 object-cover rounded" />
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-white">{m.name}</p>
+                <p className="font-medium text-white text-sm">{m.name}</p>
                 <p className="text-slate-400 text-xs">{new Date(m.timestamp).toLocaleString()}</p>
-                <p className="font-mono text-xs text-slate-600 truncate mt-0.5">
-                  {m.txId.slice(0, 12)}...{m.txId.slice(-8)}
-                </p>
+                {m.status === 'pending' ? (
+                  <p className="text-amber-400 text-xs mt-0.5">⏳ Pending — awaiting connectivity</p>
+                ) : (
+                  <p className="font-mono text-xs text-slate-600 truncate mt-0.5">
+                    {m.txId.slice(0, 12)}...{m.txId.slice(-8)}
+                  </p>
+                )}
               </div>
               <p className="text-[#c9a84c] font-bold text-sm flex-shrink-0">+{m.points} pts</p>
             </div>

@@ -4,18 +4,19 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAppState } from '@/hooks/useAppState';
 import { getPollinetStatus } from '@/lib/pollinet';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 export default function Nav() {
   const pathname = usePathname();
-  const { state } = useAppState();
+  const { state, pendingCount } = useAppState();
   const [pollinetLabel, setPollinetLabel] = useState('🟢 Online');
   const clubDone = state.walletConnected && state.membershipMinted && !!state.telescope;
 
-  const updatePollinet = () => {
+  const updatePollinet = useCallback(() => {
     const s = getPollinetStatus();
-    setPollinetLabel(`${s.icon} ${s.label}`);
-  };
+    const pending = pendingCount > 0 ? ` · ${pendingCount} pending` : '';
+    setPollinetLabel(`${s.icon} ${s.label}${pending}`);
+  }, [pendingCount]);
 
   useEffect(() => {
     updatePollinet();
@@ -25,7 +26,7 @@ export default function Nav() {
       window.removeEventListener('online', updatePollinet);
       window.removeEventListener('offline', updatePollinet);
     };
-  }, []);
+  }, [updatePollinet]);
 
   const tabs = [
     { href: '/', label: 'Home' },
@@ -37,8 +38,8 @@ export default function Nav() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 bg-[#05080f]/90 backdrop-blur border-b border-[#1a2d4d]">
       <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="text-[#c9a84c] font-bold text-lg flex-shrink-0" style={{ fontFamily: 'Georgia, serif' }}>
-          🔭 ASTROMAN
+        <Link href="/" className="text-2xl flex-shrink-0" title="Astroman Home">
+          🔭
         </Link>
 
         <div className="flex items-center gap-1">

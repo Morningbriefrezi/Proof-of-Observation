@@ -81,3 +81,9 @@ h1, h2, h3 {
   font-family: inherit !important;
   border-radius: 8px !important;
 }
+
+/* Mobile rules */
+@media (max-width: 640px) {
+  body { font-size: 14px; overflow-x: hidden; }
+  button, a, select, input { min-height: 44px; }
+}

@@ -8,8 +8,9 @@ import type { CompletedMission } from '@/lib/types';
 function NFTCard({ mission, onDelete }: { mission: CompletedMission; onDelete: () => void }) {
   const [confirming, setConfirming] = useState(false);
 
+  const isPending = mission.status === 'pending';
   return (
-    <div className="bg-[#111c30] border border-[#1a2d4d] rounded-xl overflow-hidden flex flex-col">
+    <div className={`bg-[#111c30] rounded-xl overflow-hidden flex flex-col border ${isPending ? 'border-amber-500/60' : 'border-[#1a2d4d]'}`}>
       <img src={mission.photo} alt={mission.name} className="w-full aspect-[4/3] object-cover" />
       <div className="p-4 flex flex-col gap-2 flex-1">
         <div className="flex items-center gap-2">
@@ -17,18 +18,25 @@ function NFTCard({ mission, onDelete }: { mission: CompletedMission; onDelete: (
           <p className="font-semibold text-white">{mission.name}</p>
         </div>
         <p className="text-slate-400 text-xs">{new Date(mission.timestamp).toLocaleString()}</p>
-        <p className="text-[#c9a84c] font-bold">+{mission.points} pts</p>
-        <div className="flex gap-3 text-xs text-slate-400">
-          <span>☁️ {mission.farmhawk.cloudCover}% clouds</span>
-          <span>{mission.pollinet.mode === 'direct' ? '🟢 Direct' : '📡 Mesh'}</span>
+        <div className="flex items-center gap-2">
+          <p className="text-[#c9a84c] font-bold">+{mission.points} pts</p>
+          {isPending && <span className="text-amber-400 text-xs">⏳ Pending</span>}
         </div>
-        <p className="font-mono text-xs text-slate-500 truncate">
-          {mission.txId.slice(0, 8)}...{mission.txId.slice(-8)}
-        </p>
+        <div className="flex gap-3 text-xs text-slate-400">
+          {mission.farmhawk ? <span>☁️ {mission.farmhawk.cloudCover}% clouds</span> : <span>☁️ —</span>}
+          <span>{mission.pollinet.mode === 'direct' ? '🟢 Direct' : mission.pollinet.mode === 'queued' ? '📡 Queued' : '📡 Mesh'}</span>
+        </div>
+        {isPending ? (
+          <p className="text-amber-400 text-xs italic">Awaiting connectivity to verify & mint</p>
+        ) : (
+          <p className="font-mono text-xs text-slate-500 truncate">
+            {mission.txId.slice(0, 8)}...{mission.txId.slice(-8)}
+          </p>
+        )}
 
         <div className="flex gap-2 mt-auto pt-2">
           <a
-            href={`https://explorer.solana.com/tx/${mission.txId}?cluster=devnet`}
+            href={isPending ? '#' : `https://explorer.solana.com/tx/${mission.txId}?cluster=devnet`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 text-center text-xs px-2 py-1.5 border border-[#1a2d4d] hover:border-[#22d3ee] text-slate-400 hover:text-[#22d3ee] rounded transition-all"

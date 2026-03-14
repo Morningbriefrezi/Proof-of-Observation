@@ -28,10 +28,8 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
 
   const handleCapture = async (p: string) => {
     setPhoto(p);
-    setStep('verifying');
     const ts = new Date().toISOString();
     setTimestamp(ts);
-    console.log('[Verify] Starting FarmHawk verification');
 
     // Get GPS
     let lat = 41.7151, lon = 44.8271;
@@ -46,9 +44,34 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
     }
     setCoords({ lat, lon });
 
+    const ps = getPollinetStatus();
+    setPollinet(ps);
+
+    // Offline — queue it
+    if (!navigator.onLine) {
+      console.log('[Pollinet] Offline — queuing observation');
+      addMission({
+        id: mission.id,
+        name: mission.name,
+        emoji: mission.emoji,
+        points: mission.points,
+        txId: 'pending',
+        photo: p,
+        timestamp: ts,
+        latitude: lat,
+        longitude: lon,
+        farmhawk: null,
+        pollinet: { mode: 'queued', peers: ps.peers },
+        status: 'pending',
+      });
+      onClose();
+      return;
+    }
+
+    setStep('verifying');
+    console.log('[Verify] Starting FarmHawk verification');
     const fh = await verifyWithFarmHawk(lat, lon);
     setFarmhawk(fh);
-    setPollinet(getPollinetStatus());
     setStep('verified');
   };
 
@@ -70,6 +93,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
         longitude: coords.lon,
         farmhawk: farmhawk!,
         pollinet: { mode: pollinet!.mode, peers: pollinet!.peers },
+        status: 'completed',
       });
       setStep('done');
       onClose();

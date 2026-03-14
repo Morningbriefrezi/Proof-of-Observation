@@ -12,7 +12,8 @@ import MissionActive from './MissionActive';
 export default function MissionList() {
   const { state } = useAppState();
   const [active, setActive] = useState<Mission | null>(null);
-  const completedIds = new Set(state.completedMissions.map(m => m.id));
+  const completedIds = new Set(state.completedMissions.filter(m => m.status === 'completed').map(m => m.id));
+  const pendingIds = new Set(state.completedMissions.filter(m => m.status === 'pending').map(m => m.id));
 
   return (
     <>
@@ -20,29 +21,45 @@ export default function MissionList() {
       <div className="flex flex-col gap-3">
         {MISSIONS.map(mission => {
           const done = completedIds.has(mission.id);
+          const pending = pendingIds.has(mission.id);
           return (
             <Card key={mission.id} className={done ? 'opacity-60' : ''}>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-[#0f1a2e] rounded-full flex items-center justify-center text-2xl flex-shrink-0">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#0f1a2e] rounded-full flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
                   {mission.emoji}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-white">{mission.name}</p>
-                  <p className="text-slate-400 text-sm">{mission.desc}</p>
-                  <p className="text-slate-500 text-xs italic mt-0.5">{mission.hint}</p>
+                  <p className="font-semibold text-white text-sm sm:text-base">{mission.name}</p>
+                  <p className="text-slate-400 text-xs sm:text-sm">{mission.desc}</p>
+                  <p className="text-slate-500 text-xs italic mt-0.5 hidden sm:block">{mission.hint}</p>
+                  {/* Mobile badges inline */}
+                  <div className="flex gap-1.5 mt-1.5 sm:hidden flex-wrap">
+                    <Badge color={mission.difficulty === 'Beginner' ? 'emerald' : 'brass'}>
+                      {mission.difficulty}
+                    </Badge>
+                    <Badge color="dim">
+                      {mission.type === 'telescope' ? '🔭' : '👁️'}
+                    </Badge>
+                    <span className="text-[#c9a84c] text-xs font-semibold">+{mission.points} pts</span>
+                  </div>
                 </div>
-                <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                  <Badge color={mission.difficulty === 'Beginner' ? 'emerald' : 'brass'}>
-                    {mission.difficulty}
-                  </Badge>
-                  <Badge color="dim">
-                    {mission.type === 'telescope' ? '🔭' : '👁️'} {mission.type === 'telescope' ? 'Telescope' : 'Naked Eye'}
-                  </Badge>
-                  <p className="text-[#c9a84c] text-sm font-semibold">+{mission.points} pts</p>
+                <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                  {/* Desktop badges */}
+                  <div className="hidden sm:flex flex-col items-end gap-1.5">
+                    <Badge color={mission.difficulty === 'Beginner' ? 'emerald' : 'brass'}>
+                      {mission.difficulty}
+                    </Badge>
+                    <Badge color="dim">
+                      {mission.type === 'telescope' ? '🔭' : '👁️'} {mission.type === 'telescope' ? 'Telescope' : 'Naked Eye'}
+                    </Badge>
+                    <p className="text-[#c9a84c] text-sm font-semibold">+{mission.points} pts</p>
+                  </div>
                   {done ? (
-                    <span className="text-[#34d399] text-sm">✅ Completed</span>
+                    <span className="text-[#34d399] text-xs sm:text-sm">✅ Done</span>
+                  ) : pending ? (
+                    <span className="text-amber-400 text-xs">⏳ Pending</span>
                   ) : (
-                    <Button variant="ghost" onClick={() => setActive(mission)} className="text-sm px-3 py-1.5">
+                    <Button variant="ghost" onClick={() => setActive(mission)} className="text-sm px-3 min-h-[44px]">
                       Start →
                     </Button>
                   )}

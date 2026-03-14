@@ -14,7 +14,7 @@ export default function HomePage() {
       {/* Hero */}
       <div className="text-center flex flex-col items-center gap-5">
         <p className="text-[#c9a84c] text-sm tracking-widest uppercase font-mono">✦ Proof of Observation</p>
-        <h1 className="text-4xl md:text-5xl font-bold text-[#c9a84c]" style={{ fontFamily: 'Georgia, serif' }}>
+        <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-[#c9a84c]" style={{ fontFamily: 'Georgia, serif' }}>
           Strava for Astronomy
           <br />
           <span className="text-white">on Solana</span>
@@ -23,7 +23,7 @@ export default function HomePage() {
           Verify your stargazing. Earn on-chain rewards.<br />
           Built on Georgia&apos;s first astronomy store.
         </p>
-        <div className="flex gap-4 flex-wrap justify-center">
+        <div className="flex gap-4 flex-wrap justify-center w-full sm:w-auto">
           <Link
             href="/club"
             className="px-6 py-3 bg-gradient-to-r from-[#c9a84c] to-[#a07840] text-black font-bold rounded-lg hover:from-[#d4b05c] transition-all duration-200"
@@ -42,7 +42,7 @@ export default function HomePage() {
       {/* Ecosystem */}
       <div className="w-full">
         <p className="text-center text-slate-500 text-sm mb-6 tracking-widest uppercase">— The Astroman Ecosystem —</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {ecoCards.map(card => (
             card.ext ? (
               <a
@@ -75,10 +75,14 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Powered by */}
-      <div className="text-center">
+      {/* Footer */}
+      <div className="text-center w-full pb-4">
         <p className="text-slate-600 text-xs mb-3 tracking-widest uppercase">— Powered By —</p>
-        <div className="flex flex-wrap justify-center gap-4 text-sm">
+        <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-xs">
+          <a href={ECOSYSTEM.store} target="_blank" rel="noopener noreferrer"
+            className="text-[#c9a84c] hover:text-[#d4b05c] font-medium transition-colors">
+            🔭 Astroman
+          </a>
           {[
             { label: 'Solana', href: SPONSORS.solana },
             { label: 'FarmHawk', href: SPONSORS.farmhawk },
@@ -86,14 +90,11 @@ export default function HomePage() {
             { label: 'Scriptonia', href: SPONSORS.scriptonia },
           ].map(s => (
             <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer"
-              className="text-slate-500 hover:text-[#c9a84c] transition-colors">
+              className="text-slate-500 hover:text-slate-300 transition-colors">
               {s.label}
             </a>
           ))}
         </div>
-        <p className="text-slate-700 text-xs mt-4">
-          Vibecoding From 0 · Superteam Georgia × CyreneAI · March 14-15 2026
-        </p>
       </div>
     </div>
   );
