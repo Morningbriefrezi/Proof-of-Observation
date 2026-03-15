@@ -3,14 +3,13 @@ import Link from 'next/link';
 import { ECOSYSTEM, MISSIONS } from '@/lib/constants';
 import AstroLogo from '@/components/shared/AstroLogo';
 import { MissionIcon } from '@/components/shared/PlanetIcons';
-import { Telescope, Camera, Satellite, Link2 } from 'lucide-react';
 import RewardIcon from '@/components/shared/RewardIcon';
 
 const howItWorksSteps = [
-  { step: 1, icon: <Telescope size={24} />, color: 'text-[#FFD166]', bg: 'bg-[#FFD166]/10 border-[#FFD166]/20', title: 'Observe', desc: "Point your telescope at tonight's target" },
-  { step: 2, icon: <Camera size={24} />, color: 'text-[#38F0FF]', bg: 'bg-[#38F0FF]/10 border-[#38F0FF]/20', title: 'Capture', desc: 'Photograph through the eyepiece' },
-  { step: 3, icon: <Satellite size={24} />, color: 'text-[#38F0FF]', bg: 'bg-[#38F0FF]/10 border-[#38F0FF]/20', title: 'Verify', desc: 'Satellite confirms clear sky conditions' },
-  { step: 4, icon: <Link2 size={24} />, color: 'text-[#7A5FFF]', bg: 'bg-[#7A5FFF]/10 border-[#7A5FFF]/20', title: 'Mint', desc: 'Proof sealed on Solana as your NFT' },
+  { step: 1, title: 'Observe', desc: "Point your telescope at tonight's target" },
+  { step: 2, title: 'Capture', desc: 'Photograph through the eyepiece' },
+  { step: 3, title: 'Verify', desc: 'Satellite confirms clear sky conditions' },
+  { step: 4, title: 'Mint', desc: 'Proof sealed on Solana as your NFT' },
 ];
 
 const ecoCards = [
@@ -37,37 +36,38 @@ export default function HomePage() {
         <p className="text-slate-400 max-w-md text-lg">
           Stargazing verified by satellite. Sealed on Solana.
         </p>
-        <div className="flex gap-4 flex-wrap justify-center w-full sm:w-auto">
-          <Link
-            href="/club"
-            className="px-7 py-3 bg-gradient-to-r from-[#FFD166] to-[#CC9A33] text-black font-bold rounded-lg shadow-[0_0_20px_rgba(255,209,102,0.25)] hover:shadow-[0_0_30px_rgba(255,209,102,0.4)] transition-all duration-200"
-          >
-            Start Observing →
-          </Link>
-          <a
-            href="#how-it-works"
-            className="px-7 py-3 border border-slate-600 text-slate-400 hover:text-white hover:border-slate-400 rounded-lg transition-all duration-200"
-            onClick={(e) => { e.preventDefault(); document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }); }}
-          >
-            How It Works ↓
-          </a>
-        </div>
+        <Link
+          href="/club"
+          className="px-10 py-4 rounded-xl font-bold text-base tracking-wide transition-all duration-200 active:scale-[0.97]"
+          style={{
+            background: 'linear-gradient(135deg, #FFD166, #CC9A33)',
+            color: '#070B14',
+            boxShadow: '0 0 32px rgba(255,209,102,0.3), 0 4px 20px rgba(0,0,0,0.4)',
+          }}
+        >
+          Start Observing →
+        </Link>
       </div>
 
       {/* How It Works */}
       <div id="how-it-works" className="w-full">
-        <p className="text-center text-[var(--text-dim)] text-xs mb-6 tracking-widest uppercase">— How It Works —</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <p className="text-center text-[var(--text-dim)] text-xs mb-8 tracking-widest uppercase">— How It Works —</p>
+        <div className="flex flex-col sm:flex-row gap-0">
           {howItWorksSteps.map((item, i) => (
-            <div key={item.step} className="glass-card p-4 relative text-center animate-word" style={{ animationDelay: `${i * 100 + 400}ms` }}>
-              <span className="absolute top-2 left-3 text-[10px] font-bold text-[#FFD166] bg-[#FFD166]/10 px-1.5 py-0.5 rounded-full">
-                {item.step}
-              </span>
-              <div className={`w-12 h-12 rounded-full ${item.bg} border flex items-center justify-center mb-2 mt-2 mx-auto ${item.color}`}>
-                {item.icon}
+            <div key={item.step} className="flex-1 flex flex-col items-center text-center relative px-4 py-2">
+              {/* Connector line between steps */}
+              {i < howItWorksSteps.length - 1 && (
+                <div className="hidden sm:block absolute top-[22px] left-[calc(50%+22px)] right-0 h-px"
+                  style={{ background: 'linear-gradient(to right, rgba(255,209,102,0.25), rgba(255,255,255,0.04))' }} />
+              )}
+              <div
+                className="w-11 h-11 rounded-full flex items-center justify-center mb-4 relative z-10"
+                style={{ border: '1px solid rgba(255,209,102,0.25)', background: 'rgba(255,209,102,0.04)' }}
+              >
+                <span className="text-[#FFD166]/80 font-bold text-sm" style={{ fontFamily: 'Georgia, serif' }}>{item.step}</span>
               </div>
-              <p className="text-white font-semibold text-sm mb-1">{item.title}</p>
-              <p className="text-[var(--text-secondary)] text-xs leading-relaxed">{item.desc}</p>
+              <p className="text-white font-semibold text-sm mb-1.5">{item.title}</p>
+              <p className="text-slate-600 text-xs leading-relaxed max-w-[120px]">{item.desc}</p>
             </div>
           ))}
         </div>
