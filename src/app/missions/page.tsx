@@ -1,16 +1,20 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { Satellite } from 'lucide-react';
 import { useAppState } from '@/hooks/useAppState';
 import StatsBar from '@/components/sky/StatsBar';
 import MissionList from '@/components/sky/MissionList';
+import MissionActive from '@/components/sky/MissionActive';
 import ObservationLog from '@/components/sky/ObservationLog';
 import RewardsSection from '@/components/sky/RewardsSection';
+import type { Mission } from '@/lib/types';
 
 export default function MissionsPage() {
   const { state } = useAppState();
   const clubDone = state.walletConnected && state.membershipMinted && !!state.telescope;
+  const [activeMission, setActiveMission] = useState<Mission | null>(null);
 
   if (!clubDone) {
     return (
@@ -52,36 +56,41 @@ export default function MissionsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-3 sm:py-6 animate-page-enter flex flex-col gap-3">
+    <>
+      {/* Rendered outside animated wrapper so fixed overlay covers full viewport */}
+      {activeMission && <MissionActive mission={activeMission} onClose={() => setActiveMission(null)} />}
 
-      {/* ── Observer Dashboard ── */}
-      <section>
-        <div className="flex items-center gap-2 mb-3">
-          <Satellite size={16} strokeWidth={1.5} className="text-[#38F0FF]" />
-          <h1 className="text-xl sm:text-2xl font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>
-            Missions
-          </h1>
-          <span className="ml-auto text-[10px] text-slate-700 uppercase tracking-widest">Devnet</span>
-        </div>
+      <div className="max-w-2xl mx-auto px-4 py-3 sm:py-6 animate-page-enter flex flex-col gap-3">
 
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#34d399] animate-pulse" />
-          <span className="text-[11px] text-slate-600">
-            {new Date().getHours() >= 18 || new Date().getHours() < 5
-              ? 'Sky conditions: Observable'
-              : 'Daytime — missions available tonight'}
-          </span>
-        </div>
+        {/* ── Observer Dashboard ── */}
+        <section>
+          <div className="flex items-center gap-2 mb-3">
+            <Satellite size={16} strokeWidth={1.5} className="text-[#38F0FF]" />
+            <h1 className="text-xl sm:text-2xl font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>
+              Missions
+            </h1>
+            <span className="ml-auto text-[10px] text-slate-700 uppercase tracking-widest">Devnet</span>
+          </div>
 
-        <StatsBar />
-      </section>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#34d399] animate-pulse" />
+            <span className="text-[11px] text-slate-600">
+              {new Date().getHours() >= 18 || new Date().getHours() < 5
+                ? 'Sky conditions: Observable'
+                : 'Daytime — missions available tonight'}
+            </span>
+          </div>
 
-      {/* ── Mission Cards ── */}
-      <MissionList />
+          <StatsBar />
+        </section>
 
-      {/* ── Rewards & Log ── */}
-      <RewardsSection />
-      <ObservationLog />
-    </div>
+        {/* ── Mission Cards ── */}
+        <MissionList onStart={setActiveMission} />
+
+        {/* ── Rewards & Log ── */}
+        <RewardsSection />
+        <ObservationLog />
+      </div>
+    </>
   );
 }

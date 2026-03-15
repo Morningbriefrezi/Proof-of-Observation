@@ -1,22 +1,22 @@
 'use client';
 
-import { useState } from 'react';
 import { MISSIONS } from '@/lib/constants';
 import { useAppState } from '@/hooks/useAppState';
 import type { Mission } from '@/lib/types';
 import { CheckCircle2, Clock } from 'lucide-react';
 import { MissionIcon } from '@/components/shared/PlanetIcons';
-import MissionActive from './MissionActive';
 
-export default function MissionList() {
+interface MissionListProps {
+  onStart: (mission: Mission) => void;
+}
+
+export default function MissionList({ onStart }: MissionListProps) {
   const { state } = useAppState();
-  const [active, setActive] = useState<Mission | null>(null);
   const completedIds = new Set(state.completedMissions.filter(m => m.status === 'completed').map(m => m.id));
   const pendingIds   = new Set(state.completedMissions.filter(m => m.status === 'pending').map(m => m.id));
 
   return (
     <>
-      {active && <MissionActive mission={active} onClose={() => setActive(null)} />}
 
       <div className="grid grid-cols-2 gap-2.5">
         {MISSIONS.map(mission => {
@@ -84,7 +84,7 @@ export default function MissionList() {
                 </div>
               ) : (
                 <button
-                  onClick={() => setActive(mission)}
+                  onClick={() => onStart(mission)}
                   className="w-full py-2.5 rounded-lg text-[12px] font-bold transition-all active:scale-95 hover:opacity-90"
                   style={{ background: 'linear-gradient(135deg, #FFD166, #CC9A33)', color: '#070B14' }}
                 >
