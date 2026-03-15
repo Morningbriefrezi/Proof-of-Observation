@@ -22,8 +22,8 @@ export default function MissionList({ onStart }: MissionListProps) {
         {MISSIONS.map(mission => {
           const done    = completedIds.has(mission.id);
           const pending = pendingIds.has(mission.id);
-          const diff    = mission.difficulty === 'Beginner' ? 1 : mission.difficulty === 'Intermediate' ? 2 : 3;
-          const diffLabel = mission.difficulty === 'Beginner' ? 'Easy' : mission.difficulty === 'Intermediate' ? 'Medium' : 'Hard';
+          const diff    = mission.difficulty === 'Beginner' ? 1 : mission.difficulty === 'Intermediate' ? 2 : mission.difficulty === 'Advanced' ? 3 : mission.difficulty === 'Hard' ? 4 : 5;
+          const diffLabel = mission.difficulty === 'Beginner' ? 'Easy' : mission.difficulty === 'Intermediate' ? 'Medium' : mission.difficulty === 'Advanced' ? 'Hard' : mission.difficulty === 'Hard' ? 'Hard+' : 'Expert';
 
           return (
             <div
@@ -59,9 +59,11 @@ export default function MissionList({ onStart }: MissionListProps) {
               {/* Difficulty dots + label */}
               <div className="flex flex-col items-center gap-1 mb-3">
                 <div className="flex gap-1 justify-center">
-                  {[1,2,3].map(d => (
+                  {[1,2,3,4,5].map(d => (
                     <span key={d} className="w-1 h-1 rounded-full" style={{
-                      backgroundColor: d <= diff ? 'rgba(255,209,102,0.55)' : 'rgba(255,255,255,0.1)'
+                      backgroundColor: d <= diff
+                        ? diff >= 5 ? 'rgba(239,68,68,0.8)' : diff >= 4 ? 'rgba(251,113,133,0.7)' : 'rgba(255,209,102,0.55)'
+                        : 'rgba(255,255,255,0.1)'
                     }} />
                   ))}
                 </div>

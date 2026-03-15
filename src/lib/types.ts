@@ -1,4 +1,4 @@
-export type Difficulty = 'Beginner' | 'Intermediate' | 'Advanced';
+export type Difficulty = 'Beginner' | 'Intermediate' | 'Advanced' | 'Hard' | 'Expert';
 export type ObsType = 'naked_eye' | 'telescope';
 export type MissionState = 'idle' | 'observing' | 'camera' | 'review' | 'verifying' | 'verified' | 'minting' | 'done';
 

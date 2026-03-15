@@ -42,6 +42,16 @@ export const MISSIONS: Mission[] = [
     desc: 'Locate the Seven Sisters star cluster.',
     hint: 'Fuzzy patch to naked eye. Binoculars show dozens of stars.',
     context: 'open_cluster_m45_seven_sisters' },
+  { id: 'andromeda', name: 'Andromeda Galaxy', emoji: '🌌', difficulty: 'Hard',
+    stars: 175, type: 'telescope',
+    desc: 'Locate M31 — the nearest major galaxy at 2.5 million light-years.',
+    hint: 'Find the Great Square of Pegasus, then hop two stars north-east. Dark skies required.',
+    context: 'deep_sky_m31_andromeda_galaxy' },
+  { id: 'crab', name: 'Crab Nebula', emoji: '🔭', difficulty: 'Expert',
+    stars: 250, type: 'telescope',
+    desc: 'Capture M1 — the supernova remnant in Taurus. One of the hardest deep-sky targets.',
+    hint: 'Requires at least 8" aperture and dark skies. Located 1° NW of ζ Tauri.',
+    context: 'deep_sky_m1_supernova_remnant' },
 ];
 
 export const TELESCOPE_BRANDS = ['Celestron', 'National Geographic', 'Meade', 'Sky-Watcher', 'Orion', 'Other'];

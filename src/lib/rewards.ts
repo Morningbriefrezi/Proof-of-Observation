@@ -41,7 +41,7 @@ export const REWARDS: Reward[] = [
   {
     id: 'complete-all',
     name: 'Celestial',
-    description: 'Complete all 5 missions → Free Custom Star Map (framed, 180 GEL value)',
+    description: 'Complete all 5 beginner/intermediate missions → Free Custom Star Map (framed, 180 GEL value)',
     type: 'product',
     value: '180 GEL',
     requirement: 'set',
@@ -49,6 +49,30 @@ export const REWARDS: Reward[] = [
     icon: '🏆',
     claimed: false,
     code: 'CELESTIAL',
+  },
+  {
+    id: 'andromeda-reward',
+    name: 'Galaxy Hunter',
+    description: 'Observe the Andromeda Galaxy → 100 GEL Astroman store voucher',
+    type: 'voucher',
+    value: '100 GEL',
+    requirement: 'single',
+    requiredMissions: ['andromeda'],
+    icon: '🎟️',
+    claimed: false,
+    code: 'GALAXY100',
+  },
+  {
+    id: 'crab-reward',
+    name: 'Supernova Master',
+    description: 'Capture the Crab Nebula → Win a brand new telescope from Astroman',
+    type: 'product',
+    value: 'Telescope',
+    requirement: 'single',
+    requiredMissions: ['crab'],
+    icon: '🔭',
+    claimed: false,
+    code: 'TELESCOPE-PRIZE',
   },
 ];
 
@@ -102,4 +126,6 @@ export const MISSION_REWARD_HINTS: Record<string, string> = {
   orion: 'Part of: Celestial (Free Star Map)',
   saturn: 'Part of: Celestial (Free Star Map)',
   pleiades: 'Part of: Celestial (Free Star Map)',
+  andromeda: 'Unlocks: 100 GEL Voucher',
+  crab: 'Unlocks: Brand New Telescope',
 };
