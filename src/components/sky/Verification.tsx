@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { CheckCircle2, AlertTriangle, Wifi, WifiOff, Wind, Thermometer, Droplets, Eye, Cloud } from 'lucide-react';
 import type { FarmHawkResult, PollinetStatus } from '@/lib/types';
 
@@ -12,54 +13,26 @@ interface VerificationProps {
   latitude: number;
   longitude: number;
   onMint: () => void;
+  onQueueOffline: () => void;
 }
 
-export default function Verification({ photo, farmhawk, pollinet, stars, timestamp, latitude, longitude, onMint }: VerificationProps) {
+export default function Verification({ photo, farmhawk, pollinet, stars, timestamp, latitude, longitude, onMint, onQueueOffline }: VerificationProps) {
   const conditionOk = farmhawk.verified;
+  const [offlineMode, setOfflineMode] = useState(!pollinet.online);
 
   const metrics = [
-    {
-      icon: <Cloud size={14} />,
-      label: 'Cloud Cover',
-      value: `${farmhawk.cloudCover}%`,
-      bar: farmhawk.cloudCover,
-      good: farmhawk.cloudCover < 30,
-    },
-    {
-      icon: <Eye size={14} />,
-      label: 'Visibility',
-      value: farmhawk.visibility,
-      bar: null,
-      good: conditionOk,
-    },
-    {
-      icon: <Thermometer size={14} />,
-      label: 'Temperature',
-      value: `${farmhawk.temperature}°C`,
-      bar: null,
-      good: true,
-    },
-    {
-      icon: <Droplets size={14} />,
-      label: 'Humidity',
-      value: `${farmhawk.humidity}%`,
-      bar: farmhawk.humidity,
-      good: farmhawk.humidity < 70,
-    },
-    {
-      icon: <Wind size={14} />,
-      label: 'Wind Speed',
-      value: `${farmhawk.windSpeed} km/h`,
-      bar: null,
-      good: farmhawk.windSpeed < 30,
-    },
+    { icon: <Cloud size={14} />, label: 'Cloud Cover', value: `${farmhawk.cloudCover}%`, bar: farmhawk.cloudCover, good: farmhawk.cloudCover < 30 },
+    { icon: <Eye size={14} />, label: 'Visibility', value: farmhawk.visibility, bar: null, good: conditionOk },
+    { icon: <Thermometer size={14} />, label: 'Temperature', value: `${farmhawk.temperature}°C`, bar: null, good: true },
+    { icon: <Droplets size={14} />, label: 'Humidity', value: `${farmhawk.humidity}%`, bar: farmhawk.humidity, good: farmhawk.humidity < 70 },
+    { icon: <Wind size={14} />, label: 'Wind Speed', value: `${farmhawk.windSpeed} km/h`, bar: null, good: farmhawk.windSpeed < 30 },
   ];
 
   return (
     <div className="flex flex-col w-full gap-4 mt-2 animate-page-enter">
 
-      {/* Photo — compact, rounded */}
-      <div className="relative rounded-2xl overflow-hidden bg-black" style={{ height: 200 }}>
+      {/* Photo — compact */}
+      <div className="relative rounded-2xl overflow-hidden bg-black" style={{ height: 140 }}>
         <img src={photo} alt="Observation" className="w-full h-full object-cover" style={{ opacity: 0.9 }} />
         <div
           className="absolute bottom-2.5 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-lg"
@@ -90,26 +63,20 @@ export default function Verification({ photo, farmhawk, pollinet, stars, timesta
               color: conditionOk ? '#34d399' : '#fbbf24',
             }}
           >
-            {conditionOk
-              ? <><CheckCircle2 size={11} /> Clear sky</>
-              : <><AlertTriangle size={11} /> Cloudy</>
-            }
+            {conditionOk ? <><CheckCircle2 size={11} /> Clear sky</> : <><AlertTriangle size={11} /> Cloudy</>}
           </div>
         </div>
 
-        {/* Satellite data — metric grid */}
+        {/* Metric grid */}
         <div>
           <div className="flex items-center gap-2 mb-2">
             <div className="w-1.5 h-1.5 rounded-full bg-[#38F0FF]/60" />
             <span className="text-[10px] text-slate-600 uppercase tracking-widest font-medium">Satellite Data</span>
           </div>
           <div className="grid grid-cols-3 gap-1.5">
-            {metrics.map((m, i) => (
-              <div
-                key={m.label}
-                className="rounded-xl px-2.5 py-2 flex flex-col gap-1"
-                style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
-              >
+            {metrics.map((m) => (
+              <div key={m.label} className="rounded-xl px-2.5 py-2 flex flex-col gap-1"
+                style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
                 <div className="flex items-center gap-1" style={{ color: m.good ? 'rgba(255,255,255,0.3)' : 'rgba(251,191,36,0.5)' }}>
                   {m.icon}
                   <span className="text-[9px] text-slate-600 truncate">{m.label}</span>
@@ -126,21 +93,36 @@ export default function Verification({ photo, farmhawk, pollinet, stars, timesta
               </div>
             ))}
             {/* Oracle */}
-            <div className="rounded-xl px-2.5 py-2 flex flex-col gap-1" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div className="rounded-xl px-2.5 py-2 flex flex-col gap-1"
+              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
               <span className="text-[9px] text-slate-600">Oracle</span>
-              <p className="text-[#FFD166]/60 text-[10px] font-mono truncate">{farmhawk.oracleHash.slice(0, 6)}…{farmhawk.oracleHash.slice(-4)}</p>
+              <p className="text-[#FFD166]/60 text-[10px] font-mono truncate">
+                {farmhawk.oracleHash.slice(0, 6)}…{farmhawk.oracleHash.slice(-4)}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Network + receipt row */}
+        {/* Pollinet toggle — click to switch online/offline mode */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            {pollinet.online ? <Wifi size={11} className="text-slate-600" /> : <WifiOff size={11} className="text-slate-600" />}
-            <span className="text-slate-600 text-[11px]">
-              {pollinet.online ? 'Direct to Solana' : `Mesh (${pollinet.peers} peers)`}
+          <button
+            onClick={() => setOfflineMode(m => !m)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all"
+            style={{
+              background: offlineMode ? 'rgba(251,191,36,0.06)' : 'rgba(52,211,153,0.06)',
+              border: `1px solid ${offlineMode ? 'rgba(251,191,36,0.2)' : 'rgba(52,211,153,0.15)'}`,
+            }}
+            title={offlineMode ? 'Click to submit live to Solana' : 'Click to queue offline'}
+          >
+            {offlineMode
+              ? <WifiOff size={11} className="text-amber-400" />
+              : <Wifi size={11} className="text-[#34d399]" />
+            }
+            <span className="text-[10px] font-medium" style={{ color: offlineMode ? '#fbbf24' : '#34d399' }}>
+              {offlineMode ? 'Offline · Queue' : 'Pollinet · Live'}
             </span>
-          </div>
+          </button>
+
           {farmhawk.receipt && (
             <details className="text-right">
               <summary className="text-slate-700 text-[10px] cursor-pointer hover:text-slate-500 select-none list-none">
@@ -157,16 +139,26 @@ export default function Verification({ photo, farmhawk, pollinet, stars, timesta
 
         {/* CTA */}
         <button
-          onClick={onMint}
+          onClick={offlineMode ? onQueueOffline : onMint}
           className="w-full py-3.5 rounded-xl text-sm font-bold tracking-wide transition-all active:scale-[0.98]"
-          style={{
+          style={offlineMode ? {
+            background: 'rgba(251,191,36,0.12)',
+            border: '1px solid rgba(251,191,36,0.3)',
+            color: '#fbbf24',
+          } : {
             background: 'linear-gradient(135deg, #FFD166, #CC9A33)',
             color: '#070B14',
             boxShadow: '0 0 24px rgba(255,209,102,0.2)',
           }}
         >
-          Create Proof ✦ +{stars} stars
+          {offlineMode ? '⏳ Queue for Later' : `Create Proof ✦ +${stars} stars`}
         </button>
+
+        {offlineMode && (
+          <p className="text-center text-[10px] text-slate-600">
+            Saved locally. Auto-submits to Solana devnet when back online.
+          </p>
+        )}
       </div>
     </div>
   );

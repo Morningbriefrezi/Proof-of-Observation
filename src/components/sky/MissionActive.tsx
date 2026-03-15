@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Mission, FarmHawkResult, PollinetStatus, MissionState } from '@/lib/types';
 import { verifyWithFarmHawk } from '@/lib/farmhawk';
-import { getPollinetStatus, queueOfflineObservation } from '@/lib/pollinet';
+import { getPollinetStatus, queueOfflineObservation, initPollinetSync } from '@/lib/pollinet';
 import { mintObservation } from '@/lib/solana';
 import { getEmailKeypair, getEmailSendTransaction } from '@/lib/emailWallet';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
@@ -42,6 +42,48 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
   const [mintError, setMintError] = useState('');
   const [newRewards, setNewRewards] = useState<NewReward[]>([]);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  // Auto-submit queued offline observations when device comes back online
+  useEffect(() => {
+    const cleanup = initPollinetSync(async (queuedMission) => {
+      const emailKeypair = !publicKey ? getEmailKeypair() : null;
+      const effectiveKey = publicKey ?? emailKeypair?.publicKey ?? null;
+      const send = publicKey
+        ? (tx: Parameters<typeof sendTransaction>[0]) => sendTransaction(tx, connection)
+        : (getEmailSendTransaction() as Parameters<typeof mintObservation>[0]);
+      const result = await mintObservation(send, effectiveKey, {
+        target: queuedMission.name,
+        timestamp: queuedMission.timestamp,
+        lat: queuedMission.latitude,
+        lon: queuedMission.longitude,
+        cloudCover: queuedMission.farmhawk?.cloudCover ?? 0,
+        oracleHash: queuedMission.farmhawk?.oracleHash ?? 'offline',
+        stars: queuedMission.stars,
+      });
+      console.log('[Pollinet] Auto-submitted queued observation:', result.txId, '→ https://explorer.solana.com/tx/' + result.txId + '?cluster=devnet');
+    });
+    return cleanup;
+  }, [publicKey, sendTransaction, connection]);
+
+  const handleQueueOffline = async () => {
+    const queuedMission = {
+      id: mission.id,
+      name: mission.name,
+      emoji: mission.emoji,
+      stars: mission.stars,
+      txId: 'queued_' + Date.now().toString(36),
+      photo,
+      timestamp,
+      latitude: coords.lat,
+      longitude: coords.lon,
+      farmhawk: farmhawk!,
+      pollinet: { mode: 'queued' as const, peers: pollinet?.peers ?? 0 },
+      status: 'pending' as const,
+    };
+    await queueOfflineObservation(queuedMission);
+    addMission(queuedMission);
+    onClose();
+  };
 
   const handleCapture = async (p: string) => {
     setPhoto(p);
@@ -318,6 +360,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
             latitude={coords.lat}
             longitude={coords.lon}
             onMint={handleMint}
+            onQueueOffline={handleQueueOffline}
           />
         )}
 
