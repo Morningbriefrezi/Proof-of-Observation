@@ -1,14 +1,14 @@
 'use client';
 
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { CheckCircle2 } from 'lucide-react';
 import { useAppState } from '@/hooks/useAppState';
 import WalletStep from '@/components/club/WalletStep';
 import MembershipStep from '@/components/club/MembershipStep';
 import TelescopeStep from '@/components/club/TelescopeStep';
-import { ECOSYSTEM } from '@/lib/constants';
 
-function StepProgress({ steps }: { steps: { label: string; done: boolean; active: boolean }[] }) {
+function StepProgress({ current, steps }: { current: number; steps: { label: string; done: boolean }[] }) {
   return (
     <div className="flex items-center justify-center mb-8">
       {steps.map((step, i) => (
@@ -17,13 +17,13 @@ function StepProgress({ steps }: { steps: { label: string; done: boolean; active
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
               step.done
                 ? 'bg-[#FFD166] border-2 border-[#FFD166] text-black'
-                : step.active
+                : i + 1 === current
                   ? 'border-2 border-[#FFD166] text-[#FFD166] bg-transparent'
                   : 'border-2 border-[var(--text-dim)] text-[var(--text-dim)] bg-transparent'
             }`}>
               {step.done ? <CheckCircle2 size={16} /> : i + 1}
             </div>
-            <span className={`text-xs font-medium ${step.done ? 'text-[#FFD166]' : step.active ? 'text-[var(--text-secondary)]' : 'text-[var(--text-dim)]'}`}>
+            <span className={`text-xs font-medium ${step.done ? 'text-[#FFD166]' : i + 1 === current ? 'text-[var(--text-secondary)]' : 'text-[var(--text-dim)]'}`}>
               {step.label}
             </span>
           </div>
@@ -38,13 +38,59 @@ function StepProgress({ steps }: { steps: { label: string; done: boolean; active
 
 export default function ClubPage() {
   const { state } = useAppState();
-  const allDone = state.walletConnected && state.membershipMinted && !!state.telescope;
+  const router = useRouter();
+
+  // Initialize current step from saved state
+  const getInitialStep = () => {
+    if (!state.walletConnected) return 1;
+    if (!state.membershipMinted) return 2;
+    if (!state.telescope) return 3;
+    return 3;
+  };
+  const [currentStep, setCurrentStep] = useState(getInitialStep);
+  const [transitioning, setTransitioning] = useState(false);
+
+  // Auto-advance: wallet connected → step 2
+  useEffect(() => {
+    if (state.walletConnected && currentStep === 1) {
+      setTransitioning(true);
+      setTimeout(() => {
+        setCurrentStep(2);
+        setTransitioning(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 700);
+    }
+  }, [state.walletConnected]);
+
+  // Auto-advance: membership claimed → step 3
+  useEffect(() => {
+    if (state.membershipMinted && currentStep === 2) {
+      setTransitioning(true);
+      setTimeout(() => {
+        setCurrentStep(3);
+        setTransitioning(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 700);
+    }
+  }, [state.membershipMinted]);
+
+  // Auto-advance: telescope registered → missions
+  useEffect(() => {
+    if (state.telescope && currentStep === 3) {
+      setTransitioning(true);
+      setTimeout(() => {
+        router.push('/missions');
+      }, 900);
+    }
+  }, [state.telescope]);
 
   const steps = [
-    { label: 'Wallet', done: state.walletConnected, active: !state.walletConnected },
-    { label: 'Membership', done: state.membershipMinted, active: state.walletConnected && !state.membershipMinted },
-    { label: 'Telescope', done: !!state.telescope, active: state.membershipMinted && !state.telescope },
+    { label: 'Wallet', done: state.walletConnected },
+    { label: 'Membership', done: state.membershipMinted },
+    { label: 'Telescope', done: !!state.telescope },
   ];
+
+  const stepTitles = ['Connect Wallet', 'Claim Membership', 'Register Telescope'];
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 sm:py-12 animate-page-enter">
@@ -53,36 +99,33 @@ export default function ClubPage() {
         <p className="text-[var(--text-primary)] mt-2 text-sm sm:text-base">
           Observe the night sky, earn real rewards.
         </p>
-        <p className="text-[var(--text-dim)] mt-1 text-xs">
-          Connect → claim your free membership → Register your telescope → Get rewards
-        </p>
       </div>
 
-      <StepProgress steps={steps} />
+      <StepProgress current={currentStep} steps={steps} />
 
-      <div className="flex flex-col gap-4">
-        <WalletStep />
-        <MembershipStep />
-        <TelescopeStep />
+      {/* Step label */}
+      <p className="text-center text-[var(--text-dim)] text-xs mb-4 tracking-widest uppercase">
+        Step {currentStep} of 3 — {stepTitles[currentStep - 1]}
+      </p>
+
+      {/* Single step view with fade transition */}
+      <div
+        className="transition-all duration-300"
+        style={{ opacity: transitioning ? 0 : 1, transform: transitioning ? 'translateY(8px)' : 'translateY(0)' }}
+      >
+        {currentStep === 1 && <WalletStep />}
+        {currentStep === 2 && <MembershipStep />}
+        {currentStep === 3 && <TelescopeStep />}
       </div>
 
-      {allDone && (
-        <div className="mt-8 glass-card border border-[#34d399]/50 p-6 text-center animate-slide-up glow-emerald">
-          <CheckCircle2 size={32} className="text-[#34d399] mx-auto mb-3" />
-          <h2 className="text-xl font-bold text-[#34d399] mb-4">You&apos;re ready to observe!</h2>
-          <div className="flex gap-4 justify-center flex-wrap">
-            <Link href="/missions" className="btn-primary px-6 py-3 rounded-xl font-bold inline-flex items-center gap-2">
-              Start Missions →
-            </Link>
-            <a
-              href={ECOSYSTEM.store}
-              target="_blank" rel="noopener noreferrer"
-              className="btn-ghost px-6 py-3 rounded-xl inline-flex items-center gap-2"
-            >
-              Browse Telescopes ↗
-            </a>
-          </div>
-        </div>
+      {/* Back link if not on step 1 */}
+      {currentStep > 1 && !transitioning && (
+        <button
+          onClick={() => setCurrentStep(s => s - 1)}
+          className="mt-4 w-full text-center text-xs text-slate-600 hover:text-slate-400 transition-colors py-2"
+        >
+          ← Back
+        </button>
       )}
     </div>
   );
