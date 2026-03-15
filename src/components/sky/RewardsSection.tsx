@@ -24,7 +24,7 @@ export default function RewardsSection() {
   };
 
   return (
-    <div className="mb-6">
+    <div>
       {/* Section header */}
       <div className="flex items-center gap-3 mb-3">
         <div className="ornament-line flex-1" />

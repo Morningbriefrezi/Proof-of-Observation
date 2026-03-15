@@ -11,7 +11,7 @@ export default function ObservationLog() {
 
   if (missions.length === 0) {
     return (
-      <div className="mb-6">
+      <div>
         <div className="flex items-center gap-3 mb-3">
           <div className="ornament-line flex-1" />
           <span className="text-[10px] text-slate-700 uppercase tracking-widest font-medium">Observation Log</span>
@@ -28,7 +28,7 @@ export default function ObservationLog() {
   }
 
   return (
-    <div className="mb-4">
+    <div>
       {/* Section header */}
       <div className="flex items-center gap-3 mb-3">
         <div className="ornament-line flex-1" />

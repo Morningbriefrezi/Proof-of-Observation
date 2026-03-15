@@ -77,9 +77,7 @@ export default function MissionsPage() {
       </section>
 
       {/* ── Mission Cards ── */}
-      <section>
-        <MissionList />
-      </section>
+      <MissionList />
 
       {/* ── Rewards & Log ── */}
       <RewardsSection />
