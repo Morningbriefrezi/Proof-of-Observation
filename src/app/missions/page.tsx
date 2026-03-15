@@ -26,11 +26,11 @@ export default function MissionsPage() {
   // Persistent listener — auto-submits queued observations when device comes back online
   useEffect(() => {
     const cleanup = initPollinetSync(async (queuedMission) => {
-      const emailKeypair = !publicKey ? getEmailKeypair() : null;
-      const effectiveKey = publicKey ?? emailKeypair?.publicKey ?? null;
-      const send = publicKey
-        ? (tx: Parameters<typeof sendTransaction>[0]) => sendTransaction(tx, connection)
-        : (getEmailSendTransaction() as Parameters<typeof mintObservation>[0]);
+      // Prefer email wallet (signs silently, no popup). Fall back to Phantom.
+      const emailSend = getEmailSendTransaction();
+      const emailKeypair = getEmailKeypair();
+      const send = emailSend ?? (publicKey ? (tx: Parameters<typeof sendTransaction>[0]) => sendTransaction(tx, connection) : null);
+      const effectiveKey = emailKeypair?.publicKey ?? publicKey ?? null;
 
       const result = await mintObservation(send, effectiveKey, {
         target: queuedMission.name,
