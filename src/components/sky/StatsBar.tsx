@@ -18,7 +18,7 @@ export default function StatsBar() {
 
   return (
     <div
-      className="rounded-2xl overflow-hidden mb-6"
+      className="rounded-2xl overflow-hidden mb-6 animate-page-enter"
       style={{
         background: 'linear-gradient(135deg, rgba(255,209,102,0.06) 0%, rgba(15,20,40,0.8) 60%, rgba(56,240,255,0.04) 100%)',
         border: '1px solid rgba(255,209,102,0.15)',

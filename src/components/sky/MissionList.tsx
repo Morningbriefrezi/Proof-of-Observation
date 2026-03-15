@@ -32,7 +32,10 @@ export default function MissionList() {
                 background: 'rgba(255,255,255,0.03)',
                 border: `1px solid ${done ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.08)'}`,
                 opacity: done ? 0.45 : 1,
+                transition: 'border-color 0.2s, box-shadow 0.2s',
               }}
+              onMouseEnter={e => { if (!done) { e.currentTarget.style.borderColor = 'rgba(255,209,102,0.25)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(255,209,102,0.08)'; }}}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = done ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.08)'; e.currentTarget.style.boxShadow = 'none'; }}
             >
               {/* Status badge */}
               {(done || pending) && (

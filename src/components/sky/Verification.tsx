@@ -56,7 +56,7 @@ export default function Verification({ photo, farmhawk, pollinet, stars, timesta
   ];
 
   return (
-    <div className="flex flex-col w-full -mx-4 -mt-4 sm:-mx-0 sm:-mt-0">
+    <div className="flex flex-col w-full -mx-4 -mt-4 sm:-mx-0 sm:-mt-0 animate-page-enter">
 
       {/* Photo header */}
       <div className="relative bg-black" style={{ height: '38vh', minHeight: 180 }}>
@@ -112,11 +112,11 @@ export default function Verification({ photo, farmhawk, pollinet, stars, timesta
             <span className="text-[10px] text-slate-600 uppercase tracking-widest font-medium">Satellite Data</span>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            {metrics.map(m => (
+            {metrics.map((m, i) => (
               <div
                 key={m.label}
-                className="rounded-xl px-3 py-2.5 flex flex-col gap-1.5"
-                style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
+                className="rounded-xl px-3 py-2.5 flex flex-col gap-1.5 animate-slide-up"
+                style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'backwards', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5" style={{ color: m.good ? 'rgba(255,255,255,0.35)' : 'rgba(251,191,36,0.5)' }}>
@@ -182,10 +182,11 @@ export default function Verification({ photo, farmhawk, pollinet, stars, timesta
         {/* CTA */}
         <button
           onClick={onMint}
-          className="w-full py-4 rounded-xl text-sm font-bold tracking-wide transition-all active:scale-98 mt-1"
+          className="w-full py-4 rounded-xl text-sm font-bold tracking-wide transition-all active:scale-[0.98] mt-1"
           style={{
             background: 'linear-gradient(135deg, #FFD166, #CC9A33)',
             color: '#070B14',
+            boxShadow: '0 0 24px rgba(255,209,102,0.2), 0 0 48px rgba(255,209,102,0.08)',
           }}
         >
           Create Proof  ✦  +{stars} stars

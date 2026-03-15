@@ -108,9 +108,18 @@ export default function CameraCapture({ missionName, onCapture }: CameraCaptureP
           { bottom: '10%', right: '8%',borderBottom: '2px solid rgba(255,209,102,0.7)', borderRight: '2px solid rgba(255,209,102,0.7)' },
         ].map((s, i) => <div key={i} className="absolute w-5 h-5 pointer-events-none" style={s} />)}
 
-        {/* Center dot */}
+        {/* Center reticle */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-1 h-1 rounded-full bg-white/40" />
+          <div className="relative">
+            <div className="w-8 h-8 rounded-full border border-[#FFD166]/30" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-1 h-1 rounded-full bg-[#FFD166]/60" />
+            </div>
+            <div className="absolute top-1/2 -left-2 w-1.5 h-px bg-[#FFD166]/20" />
+            <div className="absolute top-1/2 -right-2 w-1.5 h-px bg-[#FFD166]/20" />
+            <div className="absolute -top-2 left-1/2 h-1.5 w-px bg-[#FFD166]/20" />
+            <div className="absolute -bottom-2 left-1/2 h-1.5 w-px bg-[#FFD166]/20" />
+          </div>
         </div>
 
         {/* Top HUD */}

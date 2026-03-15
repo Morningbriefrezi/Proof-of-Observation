@@ -65,6 +65,16 @@ export default function MissionsPage() {
           <span className="ml-auto text-[10px] text-slate-700 uppercase tracking-widest">Devnet</span>
         </div>
 
+        {/* Live sky status */}
+        <div className="flex items-center gap-2 mt-1 mb-4">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#34d399] animate-pulse" />
+          <span className="text-[11px] text-slate-600">
+            {new Date().getHours() >= 18 || new Date().getHours() < 5
+              ? 'Sky conditions: Observable'
+              : 'Daytime — missions available tonight'}
+          </span>
+        </div>
+
         {/* Stats card — visually isolated */}
         <StatsBar />
       </section>

@@ -9,7 +9,23 @@ export default function ObservationLog() {
   const all = [...state.completedMissions].reverse();
   const missions = all.slice(0, 3);
 
-  if (missions.length === 0) return null;
+  if (missions.length === 0) {
+    return (
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="ornament-line flex-1" />
+          <span className="text-[10px] text-slate-700 uppercase tracking-widest font-medium">Observation Log</span>
+          <div className="ornament-line flex-1" />
+        </div>
+        <div
+          className="rounded-xl py-6 text-center"
+          style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.06)' }}
+        >
+          <p className="text-slate-700 text-xs">No observations yet. Complete a mission above to see your log.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mb-4">

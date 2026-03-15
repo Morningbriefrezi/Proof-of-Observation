@@ -218,6 +218,25 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
   return (
     <div className={`fixed inset-0 z-50 bg-[#070B14] ${step === 'minting' ? 'overflow-hidden' : 'overflow-y-auto scrollbar-hide'} flex flex-col`}>
 
+      {/* Step progress bar */}
+      <div className="flex-shrink-0 flex h-0.5" style={{ background: 'rgba(255,255,255,0.03)' }}>
+        {(['observing','camera','verifying','verified','minting'] as const).map((s, i) => {
+          const steps = ['observing','camera','verifying','verified','minting'];
+          const current = steps.indexOf(step);
+          return (
+            <div
+              key={s}
+              className="flex-1 transition-all duration-500"
+              style={{
+                background: i <= current
+                  ? 'linear-gradient(90deg, #FFD166, #38F0FF)'
+                  : 'transparent',
+              }}
+            />
+          );
+        })}
+      </div>
+
       {/* Top bar */}
       <div
         className="flex-shrink-0 flex items-center justify-between px-4 py-3 z-10"
