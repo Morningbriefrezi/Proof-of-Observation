@@ -119,7 +119,7 @@ export default function Verification({ photo, farmhawk, pollinet, stars, timesta
               : <Wifi size={11} className="text-[#34d399]" />
             }
             <span className="text-[10px] font-medium" style={{ color: offlineMode ? '#fbbf24' : '#34d399' }}>
-              {offlineMode ? 'Offline · Queue' : 'Pollinet · Live'}
+              {offlineMode ? 'Offline · Queue' : 'Online · Direct'}
             </span>
           </button>
 

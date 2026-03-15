@@ -42,8 +42,8 @@ export default function OfflineBanner() {
     >
       {offline ? <WifiOff size={13} /> : <Wifi size={13} />}
       {offline
-        ? 'Pollinet: Offline — observations will queue and sync when you reconnect'
-        : '✓ Pollinet: Back online — syncing queued observations…'}
+        ? 'Offline — observations will queue and sync when you reconnect'
+        : '✓ Back online — syncing queued observations…'}
     </div>
   );
 }
