@@ -82,14 +82,15 @@ function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete:
           {!confirming ? (
             <button
               onClick={() => setConfirming(true)}
-              className="flex-1 text-xs px-2 py-1.5 border border-[rgba(56, 240, 255, 0.12)] hover:border-red-500 text-slate-400 hover:text-red-400 rounded transition-all flex items-center justify-center gap-1"
+              className="flex-1 text-xs px-2 py-1.5 hover:border-red-500 text-slate-400 hover:text-red-400 rounded transition-all flex items-center justify-center gap-1"
+              style={{ border: '1px solid rgba(56,240,255,0.12)' }}
             >
               <Trash2 size={12} /> Delete
             </button>
           ) : (
             <div className="flex-1 flex gap-1">
               <button onClick={onDelete} className="flex-1 text-xs px-2 py-1.5 bg-red-500/20 border border-red-500 text-red-400 rounded">Confirm</button>
-              <button onClick={() => setConfirming(false)} className="flex-1 text-xs px-2 py-1.5 border border-[rgba(56, 240, 255, 0.12)] text-slate-400 rounded">Cancel</button>
+              <button onClick={() => setConfirming(false)} className="flex-1 text-xs px-2 py-1.5 text-slate-400 rounded" style={{ border: '1px solid rgba(56,240,255,0.12)' }}>Cancel</button>
             </div>
           )}
         </div>
@@ -140,7 +141,7 @@ export default function ProofPage() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-[#FFD166]" style={{ fontFamily: 'Georgia, serif' }}>
-            My NFTs
+            Observation Gallery
           </h1>
           <p className="text-slate-400 mt-1">{proofs.length} observation{proofs.length !== 1 ? 's' : ''} sealed on Solana</p>
         </div>
@@ -183,7 +184,7 @@ export default function ProofPage() {
       </div>
 
       {proofs.length === 0 ? (
-        <div className="text-center py-20 border border-dashed border-[rgba(56, 240, 255, 0.12)] rounded-xl">
+        <div className="text-center py-20 rounded-xl" style={{ border: '1px dashed rgba(56,240,255,0.12)' }}>
           <p className="text-4xl mb-4">🌌</p>
           <p className="text-slate-400 mb-4">No observations minted yet</p>
           <Link href="/missions" className="px-6 py-3 bg-gradient-to-r from-[#FFD166] to-[#CC9A33] text-black font-bold rounded-lg">

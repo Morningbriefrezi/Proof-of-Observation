@@ -7,42 +7,10 @@ import { Telescope, Camera, Satellite, Layers } from 'lucide-react';
 import RewardIcon from '@/components/shared/RewardIcon';
 
 const howItWorksSteps = [
-  {
-    step: 1,
-    icon: Telescope,
-    title: 'Observe',
-    desc: "Point your telescope at tonight's target object",
-    color: 'rgba(255,209,102,0.12)',
-    border: 'rgba(255,209,102,0.2)',
-    iconColor: '#FFD166',
-  },
-  {
-    step: 2,
-    icon: Camera,
-    title: 'Capture',
-    desc: 'Photograph through the eyepiece with your phone',
-    color: 'rgba(56,240,255,0.06)',
-    border: 'rgba(56,240,255,0.15)',
-    iconColor: '#38F0FF',
-  },
-  {
-    step: 3,
-    icon: Satellite,
-    title: 'Verify',
-    desc: 'FarmHawk satellite confirms your sky conditions',
-    color: 'rgba(122,95,255,0.08)',
-    border: 'rgba(122,95,255,0.2)',
-    iconColor: '#7A5FFF',
-  },
-  {
-    step: 4,
-    icon: Layers,
-    title: 'Mint',
-    desc: 'Your proof is sealed permanently on Solana',
-    color: 'rgba(52,211,153,0.06)',
-    border: 'rgba(52,211,153,0.15)',
-    iconColor: '#34d399',
-  },
+  { step: 1, icon: Telescope, title: 'Observe', desc: "Point your telescope at tonight's target" },
+  { step: 2, icon: Camera, title: 'Capture', desc: 'Photograph through the eyepiece' },
+  { step: 3, icon: Satellite, title: 'Verify', desc: 'Satellite confirms clear sky conditions' },
+  { step: 4, icon: Layers, title: 'Mint', desc: 'Proof sealed on Solana as your NFT' },
 ];
 
 const ecoCards = [
@@ -67,7 +35,7 @@ export default function HomePage() {
           ))}
         </h1>
         <p className="text-slate-400 max-w-md text-lg">
-          Stargazing verified by satellite. Sealed on Solana.
+          Verified Sky Observations
         </p>
         <Link
           href="/club"
@@ -80,6 +48,33 @@ export default function HomePage() {
         >
           Start Observing →
         </Link>
+      </div>
+
+      {/* How It Works */}
+      <div id="how-it-works" className="w-full">
+        <p className="text-center text-[var(--text-dim)] text-xs mb-8 tracking-widest uppercase">— How It Works —</p>
+        <div className="flex flex-col sm:flex-row gap-0">
+          {howItWorksSteps.map((item, i) => {
+            const Icon = item.icon;
+            return (
+              <div key={item.step} className="flex-1 flex flex-col items-center text-center relative px-4 py-2">
+                {/* Connector line between steps */}
+                {i < howItWorksSteps.length - 1 && (
+                  <div className="hidden sm:block absolute top-[22px] left-[calc(50%+24px)] right-0 h-px"
+                    style={{ background: 'linear-gradient(to right, rgba(255,209,102,0.2), rgba(255,255,255,0.03))' }} />
+                )}
+                <div
+                  className="w-11 h-11 rounded-full flex items-center justify-center mb-4 relative z-10"
+                  style={{ border: '1px solid rgba(255,209,102,0.2)', background: 'rgba(255,209,102,0.05)' }}
+                >
+                  <Icon size={18} className="text-[#FFD166]/70" />
+                </div>
+                <p className="text-white font-semibold text-sm mb-1.5">{item.title}</p>
+                <p className="text-slate-600 text-xs leading-relaxed max-w-[120px]">{item.desc}</p>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Tonight's Targets */}
@@ -99,43 +94,6 @@ export default function HomePage() {
                   {vis.label}
                 </span>
               </Link>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* How It Works */}
-      <div id="how-it-works" className="w-full">
-        <p className="text-center text-[var(--text-dim)] text-xs mb-6 tracking-widest uppercase">— How It Works —</p>
-        <div className="grid grid-cols-2 gap-3">
-          {howItWorksSteps.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={item.step}
-                className="relative rounded-2xl p-5 flex flex-col gap-3 transition-all duration-200"
-                style={{ background: item.color, border: `1px solid ${item.border}` }}
-              >
-                {/* Step number badge */}
-                <span
-                  className="absolute top-3 right-3 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                  style={{ background: 'rgba(0,0,0,0.3)', color: item.iconColor }}
-                >
-                  {item.step}
-                </span>
-                {/* Icon */}
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(0,0,0,0.25)' }}
-                >
-                  <Icon size={20} style={{ color: item.iconColor }} />
-                </div>
-                {/* Text */}
-                <div>
-                  <p className="text-white font-semibold text-sm mb-1">{item.title}</p>
-                  <p className="text-slate-500 text-xs leading-relaxed">{item.desc}</p>
-                </div>
-              </div>
             );
           })}
         </div>
@@ -170,7 +128,7 @@ export default function HomePage() {
 
       {/* Ecosystem */}
       <div className="w-full">
-        <p className="text-center text-[var(--text-dim)] text-xs mb-6 tracking-widest uppercase">— The Astroman Ecosystem —</p>
+        <p className="text-center text-[var(--text-dim)] text-xs mb-6 tracking-widest uppercase">— Explore the Platform —</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {ecoCards.map(card => (
             card.ext ? (

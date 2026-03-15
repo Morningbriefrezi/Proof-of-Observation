@@ -10,7 +10,7 @@ interface CameraCaptureProps {
 }
 
 export default function CameraCapture({ missionName, onCapture }: CameraCaptureProps) {
-  const { videoRef, error, facingMode, startCamera, flipCamera, stopCamera, capture } = useCamera();
+  const { videoRef, error, startCamera, flipCamera, stopCamera, capture } = useCamera();
   const [preview, setPreview] = useState<string | null>(null);
   const [flash, setFlash] = useState(false);
   const autoSimDone = useRef(false);
