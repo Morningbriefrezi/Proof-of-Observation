@@ -1,9 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { Satellite } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Satellite, ExternalLink, X } from 'lucide-react';
 import { useAppState } from '@/hooks/useAppState';
+import { useWallet, useConnection } from '@solana/wallet-adapter-react';
+import { initPollinetSync } from '@/lib/pollinet';
+import { mintObservation } from '@/lib/solana';
+import { getEmailKeypair, getEmailSendTransaction } from '@/lib/emailWallet';
 import StatsBar from '@/components/sky/StatsBar';
 import MissionList from '@/components/sky/MissionList';
 import MissionActive from '@/components/sky/MissionActive';
@@ -13,8 +17,39 @@ import type { Mission } from '@/lib/types';
 
 export default function MissionsPage() {
   const { state } = useAppState();
+  const { publicKey, sendTransaction } = useWallet();
+  const { connection } = useConnection();
   const clubDone = state.walletConnected && state.membershipMinted && !!state.telescope;
   const [activeMission, setActiveMission] = useState<Mission | null>(null);
+  const [syncToast, setSyncToast] = useState<{ txId: string; name: string } | null>(null);
+
+  // Persistent listener — auto-submits queued observations when device comes back online
+  useEffect(() => {
+    const cleanup = initPollinetSync(async (queuedMission) => {
+      const emailKeypair = !publicKey ? getEmailKeypair() : null;
+      const effectiveKey = publicKey ?? emailKeypair?.publicKey ?? null;
+      const send = publicKey
+        ? (tx: Parameters<typeof sendTransaction>[0]) => sendTransaction(tx, connection)
+        : (getEmailSendTransaction() as Parameters<typeof mintObservation>[0]);
+
+      const result = await mintObservation(send, effectiveKey, {
+        target: queuedMission.name,
+        timestamp: queuedMission.timestamp,
+        lat: queuedMission.latitude,
+        lon: queuedMission.longitude,
+        cloudCover: queuedMission.farmhawk?.cloudCover ?? 0,
+        oracleHash: queuedMission.farmhawk?.oracleHash ?? 'offline',
+        stars: queuedMission.stars,
+      });
+
+      console.log('[Pollinet] ✅ Auto-submitted:', result.txId);
+      console.log(`[Pollinet] 🔗 https://explorer.solana.com/tx/${result.txId}?cluster=devnet`);
+
+      setSyncToast({ txId: result.txId, name: queuedMission.name });
+      setTimeout(() => setSyncToast(null), 8000);
+    });
+    return cleanup;
+  }, [publicKey, sendTransaction, connection]);
 
   if (!clubDone) {
     return (
@@ -42,10 +77,7 @@ export default function MissionsPage() {
             <Link
               href="/club"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90"
-              style={{
-                background: 'linear-gradient(135deg, #FFD166, #CC9A33)',
-                color: '#070B14',
-              }}
+              style={{ background: 'linear-gradient(135deg, #FFD166, #CC9A33)', color: '#070B14' }}
             >
               {!state.walletConnected ? 'Connect Wallet to Start →' : 'Complete Setup →'}
             </Link>
@@ -57,12 +89,42 @@ export default function MissionsPage() {
 
   return (
     <>
-      {/* Rendered outside animated wrapper so fixed overlay covers full viewport */}
       {activeMission && <MissionActive mission={activeMission} onClose={() => setActiveMission(null)} />}
+
+      {/* Pollinet sync toast — appears when queued observation auto-submits */}
+      {syncToast && (
+        <div
+          className="fixed bottom-24 sm:bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-80 z-[80] p-3.5 rounded-xl flex items-start gap-3"
+          style={{
+            background: 'rgba(7,11,20,0.95)',
+            border: '1px solid rgba(52,211,153,0.3)',
+            backdropFilter: 'blur(12px)',
+            boxShadow: '0 0 24px rgba(52,211,153,0.1)',
+          }}
+        >
+          <div className="w-6 h-6 rounded-full bg-[#34d399]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <div className="w-2 h-2 rounded-full bg-[#34d399]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white text-xs font-semibold">Queued observation submitted</p>
+            <p className="text-slate-500 text-[11px] mt-0.5">{syncToast.name} · sealed on Solana devnet</p>
+            <a
+              href={`https://explorer.solana.com/tx/${syncToast.txId}?cluster=devnet`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 mt-1.5 text-[11px] text-[#38F0FF] hover:underline"
+            >
+              View on Explorer <ExternalLink size={9} />
+            </a>
+          </div>
+          <button onClick={() => setSyncToast(null)} className="text-slate-600 hover:text-slate-400 flex-shrink-0">
+            <X size={13} />
+          </button>
+        </div>
+      )}
 
       <div className="max-w-2xl mx-auto px-4 py-3 sm:py-6 animate-page-enter flex flex-col gap-3">
 
-        {/* ── Observer Dashboard ── */}
         <section>
           <div className="flex items-center gap-2 mb-3">
             <Satellite size={16} strokeWidth={1.5} className="text-[#38F0FF]" />
@@ -84,10 +146,8 @@ export default function MissionsPage() {
           <StatsBar />
         </section>
 
-        {/* ── Mission Cards ── */}
         <MissionList onStart={setActiveMission} />
 
-        {/* ── Rewards & Log ── */}
         <RewardsSection />
         <ObservationLog />
       </div>

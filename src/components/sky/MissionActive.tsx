@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Mission, FarmHawkResult, PollinetStatus, MissionState } from '@/lib/types';
 import { verifyWithFarmHawk } from '@/lib/farmhawk';
-import { getPollinetStatus, queueOfflineObservation, initPollinetSync } from '@/lib/pollinet';
+import { getPollinetStatus, queueOfflineObservation } from '@/lib/pollinet';
 import { mintObservation } from '@/lib/solana';
 import { getEmailKeypair, getEmailSendTransaction } from '@/lib/emailWallet';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
@@ -42,28 +42,6 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
   const [mintError, setMintError] = useState('');
   const [newRewards, setNewRewards] = useState<NewReward[]>([]);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
-
-  // Auto-submit queued offline observations when device comes back online
-  useEffect(() => {
-    const cleanup = initPollinetSync(async (queuedMission) => {
-      const emailKeypair = !publicKey ? getEmailKeypair() : null;
-      const effectiveKey = publicKey ?? emailKeypair?.publicKey ?? null;
-      const send = publicKey
-        ? (tx: Parameters<typeof sendTransaction>[0]) => sendTransaction(tx, connection)
-        : (getEmailSendTransaction() as Parameters<typeof mintObservation>[0]);
-      const result = await mintObservation(send, effectiveKey, {
-        target: queuedMission.name,
-        timestamp: queuedMission.timestamp,
-        lat: queuedMission.latitude,
-        lon: queuedMission.longitude,
-        cloudCover: queuedMission.farmhawk?.cloudCover ?? 0,
-        oracleHash: queuedMission.farmhawk?.oracleHash ?? 'offline',
-        stars: queuedMission.stars,
-      });
-      console.log('[Pollinet] Auto-submitted queued observation:', result.txId, '→ https://explorer.solana.com/tx/' + result.txId + '?cluster=devnet');
-    });
-    return cleanup;
-  }, [publicKey, sendTransaction, connection]);
 
   const handleQueueOffline = async () => {
     const queuedMission = {
