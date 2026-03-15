@@ -52,7 +52,7 @@ export default function MissionsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-5 sm:py-8 animate-page-enter flex flex-col gap-4">
+    <div className="max-w-2xl mx-auto px-4 py-3 sm:py-6 animate-page-enter flex flex-col gap-3">
 
       {/* ── Observer Dashboard ── */}
       <section>
