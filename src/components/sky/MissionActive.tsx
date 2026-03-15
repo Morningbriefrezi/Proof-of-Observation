@@ -213,7 +213,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
     );
   }
 
-  const fullBleed = step === 'verified';
+  const fullBleed = false;
 
   return (
     <div className={`fixed inset-0 z-50 bg-[#070B14] ${step === 'minting' ? 'overflow-hidden' : 'overflow-y-auto scrollbar-hide'} flex flex-col`}>
