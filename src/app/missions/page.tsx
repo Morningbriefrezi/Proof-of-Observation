@@ -4,10 +4,10 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Satellite, ExternalLink, X } from 'lucide-react';
 import { useAppState } from '@/hooks/useAppState';
-import { useWallet, useConnection } from '@solana/wallet-adapter-react';
+import { usePrivy } from '@privy-io/react-auth';
+import { Connection, PublicKey } from '@solana/web3.js';
 import { initPollinetSync } from '@/lib/pollinet';
 import { mintObservation } from '@/lib/solana';
-import { getEmailKeypair, getEmailSendTransaction } from '@/lib/emailWallet';
 import StatsBar from '@/components/sky/StatsBar';
 import MissionList from '@/components/sky/MissionList';
 import MissionActive from '@/components/sky/MissionActive';
@@ -17,8 +17,12 @@ import type { Mission } from '@/lib/types';
 
 export default function MissionsPage() {
   const { state } = useAppState();
-  const { publicKey, sendTransaction } = useWallet();
-  const { connection } = useConnection();
+  const { user } = usePrivy();
+  const solanaWallet = user?.linkedAccounts.find(
+    (a): a is Extract<typeof a, { type: 'wallet' }> =>
+      a.type === 'wallet' && 'chainType' in a && (a as { chainType?: string }).chainType === 'solana'
+  );
+  const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
   const clubDone = state.walletConnected && state.membershipMinted && !!state.telescope;
   const [activeMission, setActiveMission] = useState<Mission | null>(null);
   const [syncToast, setSyncToast] = useState<{ txId: string; name: string } | null>(null);
@@ -26,11 +30,9 @@ export default function MissionsPage() {
   // Persistent listener — auto-submits queued observations when device comes back online
   useEffect(() => {
     const cleanup = initPollinetSync(async (queuedMission) => {
-      // Prefer email wallet (signs silently, no popup). Fall back to Phantom.
-      const emailSend = getEmailSendTransaction();
-      const emailKeypair = getEmailKeypair();
-      const send = emailSend ?? (publicKey ? (tx: Parameters<typeof sendTransaction>[0]) => sendTransaction(tx, connection) : null);
-      const effectiveKey = emailKeypair?.publicKey ?? publicKey ?? null;
+      const effectiveKey = solanaWallet?.address ? new PublicKey(solanaWallet.address) : null;
+      // TODO Phase 5: wire Privy signAndSendTransaction from @privy-io/react-auth/solana
+      const send = null;
 
       const result = await mintObservation(send, effectiveKey, {
         target: queuedMission.name,
@@ -49,7 +51,7 @@ export default function MissionsPage() {
       setTimeout(() => setSyncToast(null), 8000);
     });
     return cleanup;
-  }, [publicKey, sendTransaction, connection]);
+  }, [solanaWallet?.address]);
 
   if (!clubDone) {
     return (

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { usePrivy } from '@privy-io/react-auth';
 import { useAppState } from '@/hooks/useAppState';
 import { getPollinetStatus } from '@/lib/pollinet';
 import { useEffect, useState, useCallback } from 'react';
@@ -12,7 +12,7 @@ import AstroLogo from './AstroLogo';
 export default function Nav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { disconnect, connected } = useWallet();
+  const { logout, authenticated } = usePrivy();
   const { state, pendingCount, reset } = useAppState();
   const [pollinetIcon, setPollinetIcon] = useState('🟢');
   const [showLogout, setShowLogout] = useState(false);
@@ -39,7 +39,7 @@ export default function Nav() {
 
   const handleLogout = async () => {
     if (!confirm('Log out and clear all data?')) return;
-    if (connected) await disconnect();
+    if (authenticated) await logout();
     localStorage.removeItem('stellar_wallet_email');
     localStorage.removeItem('stellar_wallet_address');
     reset();

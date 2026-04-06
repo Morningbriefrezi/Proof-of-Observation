@@ -5,8 +5,8 @@ import type { Mission, FarmHawkResult, PollinetStatus, MissionState } from '@/li
 import { verifyWithFarmHawk } from '@/lib/farmhawk';
 import { getPollinetStatus, queueOfflineObservation } from '@/lib/pollinet';
 import { mintObservation } from '@/lib/solana';
-import { getEmailKeypair, getEmailSendTransaction } from '@/lib/emailWallet';
-import { useWallet, useConnection } from '@solana/wallet-adapter-react';
+import { usePrivy } from '@privy-io/react-auth';
+import { Connection, PublicKey } from '@solana/web3.js';
 import { useAppState } from '@/hooks/useAppState';
 import { getUnlockedRewards, getRank } from '@/lib/rewards';
 import CameraCapture from './CameraCapture';
@@ -30,8 +30,12 @@ interface NewReward {
 
 export default function MissionActive({ mission, onClose }: MissionActiveProps) {
   const { state, addMission } = useAppState();
-  const { publicKey, sendTransaction } = useWallet();
-  const { connection } = useConnection();
+  const { user } = usePrivy();
+  const solanaWallet = user?.linkedAccounts.find(
+    (a): a is Extract<typeof a, { type: 'wallet' }> =>
+      a.type === 'wallet' && 'chainType' in a && (a as { chainType?: string }).chainType === 'solana'
+  );
+  const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
   const [step, setStep] = useState<MissionState>('observing');
   const [photo, setPhoto] = useState('');
   const [farmhawk, setFarmhawk] = useState<FarmHawkResult | null>(null);
@@ -127,12 +131,9 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
       .map(r => r.id);
 
     setMintError('');
-    // Use Phantom wallet or fall back to email keypair
-    const emailKeypair = !publicKey ? getEmailKeypair() : null;
-    const effectiveKey = publicKey ?? emailKeypair?.publicKey ?? null;
-    const send = publicKey
-      ? (tx: Parameters<typeof sendTransaction>[0]) => sendTransaction(tx, connection)
-      : (getEmailSendTransaction() as Parameters<typeof mintObservation>[0]);
+    const effectiveKey = solanaWallet?.address ? new PublicKey(solanaWallet.address) : null;
+    // TODO Phase 5: wire Privy signAndSendTransaction from @privy-io/react-auth/solana
+    const send = null;
     const result = await mintObservation(send, effectiveKey, {
       target: mission.name,
       timestamp,

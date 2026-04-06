@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import type { Viewport } from 'next';
 import './globals.css';
-import { SolanaWalletProvider } from '@/components/providers/WalletProvider';
+import { SolanaWalletProvider } from '@/components/providers/PrivyProvider';
 import { AppStateProvider } from '@/hooks/useAppState';
 import Nav from '@/components/shared/Nav';
 import StarField from '@/components/shared/StarField';

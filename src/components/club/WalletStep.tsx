@@ -1,12 +1,10 @@
 'use client';
 
-import { useWallet } from '@solana/wallet-adapter-react';
-import { useWalletModal } from '@solana/wallet-adapter-react-ui';
+import { usePrivy } from '@privy-io/react-auth';
 import { useEffect, useState } from 'react';
-import { Keypair, Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
+import { Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import { Mail, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { useAppState } from '@/hooks/useAppState';
-import { saveEmailKeypair } from '@/lib/emailWallet';
 import Card from '@/components/shared/Card';
 import Button from '@/components/shared/Button';
 
@@ -25,116 +23,55 @@ async function ensureDevnetSol(publicKey: PublicKey) {
   }
 }
 
-function createWalletFromEmail(email: string) {
-  const keypair = Keypair.generate();
-  saveEmailKeypair(keypair, email);
-  console.log('[Wallet] Created from email:', email, keypair.publicKey.toString());
-  return keypair.publicKey.toString();
-}
-
 export default function WalletStep() {
-  const { connected, publicKey } = useWallet();
-  const { setVisible } = useWalletModal();
+  const { login, authenticated, ready, user } = usePrivy();
   const { state, setWallet } = useAppState();
-  const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState('');
+
+  // Find the Solana embedded wallet from the user's linked accounts
+  const solanaWallet = user?.linkedAccounts.find(
+    (a): a is Extract<typeof a, { type: 'wallet' }> =>
+      a.type === 'wallet' && 'chainType' in a && (a as { chainType?: string }).chainType === 'solana'
+  );
+  const walletAddress = solanaWallet?.address ?? null;
   const [airdropStatus, setAirdropStatus] = useState<'idle' | 'funding' | 'funded' | 'failed'>('idle');
-  const [emailBalance, setEmailBalance] = useState<number | null>(null);
-  const [isEmailWallet, setIsEmailWallet] = useState(false);
-  const [savedEmail, setSavedEmail] = useState('');
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const done = state.walletConnected;
 
-  const [isMobile, setIsMobile] = useState(false);
-
+  // When Privy auth completes and the embedded Solana wallet is available, sync into AppState
   useEffect(() => {
-    const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    setIsMobile(mobile);
-  }, []);
-
-  const hasPhantomExtension = typeof window !== 'undefined' && !!(window as { phantom?: { solana?: unknown } }).phantom?.solana;
-  // Detect if we're already running inside Phantom's built-in browser
-  const inPhantomBrowser = isMobile && hasPhantomExtension;
-
-  const handlePhantomClick = () => {
-    if (inPhantomBrowser || !isMobile) {
-      // In Phantom browser or on desktop — use adapter modal directly
-      setVisible(true);
-    } else {
-      // Try native Phantom deeplink first; fall back to download page if not installed
-      const timeout = setTimeout(() => {
-        window.open('https://phantom.app/download', '_blank');
-      }, 1500);
-      window.addEventListener('blur', () => clearTimeout(timeout), { once: true });
-      window.location.href = `phantom://browse/${window.location.href}`;
+    if (authenticated && walletAddress && !state.walletConnected) {
+      console.log('[Privy] Wallet ready:', walletAddress);
+      setWallet(walletAddress);
+      setAirdropStatus('funding');
+      ensureDevnetSol(new PublicKey(walletAddress))
+        .then(() => setAirdropStatus('funded'))
+        .catch(() => setAirdropStatus('failed'));
     }
-  };
+  }, [authenticated, walletAddress, state.walletConnected]);
 
-  // If arriving in Phantom's browser, auto-open connect modal
+  // Fetch balance once connected
   useEffect(() => {
-    if (inPhantomBrowser && !state.walletConnected && !done) {
-      const timer = setTimeout(() => setVisible(true), 600);
-      return () => clearTimeout(timer);
-    }
-  }, [inPhantomBrowser]);
-
-  useEffect(() => {
-    if (connected && publicKey && !state.walletConnected) {
-      console.log('[Wallet] Phantom connected:', publicKey.toBase58());
-      setWallet(publicKey.toBase58());
-      ensureDevnetSol(publicKey);
-    }
-  }, [connected, publicKey]);
-
-  // Detect email wallet + check balance (client-only)
-  useEffect(() => {
-    const emailVal = localStorage.getItem('stellar_wallet_email') ?? '';
-    setIsEmailWallet(!!emailVal);
-    setSavedEmail(emailVal);
-    if (done && emailVal && state.walletAddress) {
+    if (done && state.walletAddress) {
       const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
       connection.getBalance(new PublicKey(state.walletAddress))
-        .then(bal => setEmailBalance(bal))
-        .catch(() => setEmailBalance(0));
+        .then(bal => setWalletBalance(bal))
+        .catch(() => setWalletBalance(0));
     }
   }, [done, state.walletAddress]);
 
-  // Restore email wallet on mount
-  useEffect(() => {
-    if (!state.walletConnected) {
-      const saved = localStorage.getItem('stellar_wallet_address');
-      const savedEmail = localStorage.getItem('stellar_wallet_email');
-      if (saved && savedEmail) setWallet(saved);
-    }
-  }, []);
-
-  const handleEmailWallet = async () => {
-    if (!email || !email.includes('@')) {
-      setEmailError('Enter a valid email');
-      return;
-    }
-    setEmailError('');
-    const address = createWalletFromEmail(email);
-    setWallet(address);
-    setAirdropStatus('funding');
-    try {
-      const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
-      const pk = new PublicKey(address);
-      const balance = await connection.getBalance(pk);
-      if (balance >= 50_000_000) {
-        setAirdropStatus('funded');
-        return;
-      }
-      const sig = await connection.requestAirdrop(pk, LAMPORTS_PER_SOL);
-      await connection.confirmTransaction(sig, 'confirmed');
-      console.log('[Wallet] Airdropped 1 SOL to email wallet');
-      setAirdropStatus('funded');
-      setEmailBalance(LAMPORTS_PER_SOL);
-    } catch {
-      console.log('[Wallet] Airdrop rate limited');
-      setAirdropStatus('failed');
-      setEmailBalance(0);
-    }
-  };
+  // Show loading state while Privy SDK initialises
+  if (!ready) {
+    return (
+      <Card glow={null} className="">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <div className="w-8 h-8 rounded-full border-2 border-[#FFD166] flex items-center justify-center text-sm font-bold text-[#FFD166]">
+            1
+          </div>
+          <p className="text-slate-500 text-sm animate-pulse">Loading…</p>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card glow={done ? 'emerald' : null} className={done ? 'animate-pulse-success' : ''}>
@@ -155,19 +92,13 @@ export default function WalletStep() {
               <p className="font-hash text-xs text-[var(--text-secondary)]">
                 {state.walletAddress.slice(0, 8)}...{state.walletAddress.slice(-8)}
               </p>
-              {savedEmail && (
-                <p className="text-xs text-[var(--text-dim)]">
-                  Signed in as {savedEmail}
-                </p>
-              )}
               {airdropStatus === 'funding' && (
                 <p className="text-xs text-[#38F0FF] animate-pulse">Activating wallet on Solana devnet…</p>
               )}
               {airdropStatus === 'funded' && (
                 <p className="text-xs text-[#34d399]">✓ Wallet activated — 1 devnet SOL funded</p>
               )}
-              {/* Show activation notice if email wallet has no balance */}
-              {isEmailWallet && emailBalance === 0 && airdropStatus === 'idle' && (
+              {walletBalance === 0 && airdropStatus === 'idle' && (
                 <div className="mt-2 w-full rounded-xl p-3 text-left flex flex-col gap-2"
                   style={{ background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)' }}>
                   <div className="flex items-center gap-2">
@@ -189,7 +120,7 @@ export default function WalletStep() {
                   </a>
                 </div>
               )}
-              {(airdropStatus === 'failed') && (
+              {airdropStatus === 'failed' && (
                 <div className="mt-1 flex flex-col items-center gap-1">
                   <p className="text-xs text-amber-400">⚠ Airdrop rate limited — fund manually:</p>
                   <div className="flex items-center gap-2">
@@ -222,7 +153,7 @@ export default function WalletStep() {
             </div>
           ) : (
             <div className="mt-3 flex flex-col gap-4">
-              {/* Email — primary */}
+              {/* Email / social — primary */}
               <div className="bg-[#0F1F3D] rounded-xl p-4 flex flex-col gap-3" style={{ border: '1px solid rgba(255,209,102,0.2)' }}>
                 <div className="flex flex-col gap-0.5">
                   <div className="flex items-center gap-2">
@@ -231,45 +162,10 @@ export default function WalletStep() {
                   </div>
                   <p className="text-slate-500 text-xs ml-6">We create a Solana wallet for you automatically. No app needed.</p>
                 </div>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={e => { setEmail(e.target.value); setEmailError(''); }}
-                  placeholder="your@email.com"
-                  onKeyDown={e => e.key === 'Enter' && handleEmailWallet()}
-                  className="w-full bg-[#070B14] rounded-lg px-3 py-2.5 text-slate-200 text-sm placeholder-slate-600 focus:outline-none focus:border-[#FFD166] min-h-[44px]"
-                  style={{ border: '1px solid rgba(56,240,255,0.12)' }}
-                />
-                {emailError && <p className="text-red-400 text-xs">{emailError}</p>}
-                <Button variant="brass" onClick={handleEmailWallet} className="w-full min-h-[44px]">
+                <Button variant="brass" onClick={() => login()} className="w-full min-h-[44px]">
                   Continue with Email →
                 </Button>
-                <p className="text-slate-600 text-xs text-center">Your wallet stays in your browser. Free to use.</p>
-              </div>
-
-              {/* Divider */}
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-px" style={{ background: 'rgba(56,240,255,0.12)' }} />
-                <span className="text-slate-600 text-xs">or use wallet</span>
-                <div className="flex-1 h-px" style={{ background: 'rgba(56,240,255,0.12)' }} />
-              </div>
-
-              {/* Phantom — secondary */}
-              <div className="flex flex-col gap-1.5">
-                <Button variant="solana" onClick={handlePhantomClick} className="w-full min-h-[44px]">
-                  👻 {inPhantomBrowser ? 'Connect Phantom' : isMobile ? 'Open Phantom App' : 'Connect Phantom Wallet'}
-                </Button>
-                {isMobile && !inPhantomBrowser && (
-                  <>
-                    <p className="text-slate-600 text-xs text-center">Opens Phantom app. Install it first if you haven&apos;t.</p>
-                    <a
-                      href={`https://phantom.app/ul/browse/${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin + '/club' : '')}`}
-                      className="text-center text-xs text-[#7A5FFF] hover:underline py-1"
-                    >
-                      Or open this page in Phantom Browser →
-                    </a>
-                  </>
-                )}
+                <p className="text-slate-600 text-xs text-center">Also supports Google, SMS, and Phantom wallet.</p>
               </div>
             </div>
           )}
