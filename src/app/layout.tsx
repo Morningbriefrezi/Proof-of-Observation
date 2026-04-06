@@ -17,8 +17,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'STELLAR — Verified Sky Observations',
-  description: 'Observe. Verify. Collect. Stargazing verified by satellite and sealed on Solana.',
+  title: 'STELLAR — Your AI-Powered Window to the Cosmos',
+  description: 'The all-in-one astronomy app: 7-day sky forecast, AI companion, real marketplace — powered by invisible Solana infrastructure.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,

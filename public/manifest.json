@@ -1,7 +1,7 @@
 {
-  "name": "STELLAR — Verified Sky Observations",
+  "name": "STELLAR — Your AI-Powered Window to the Cosmos",
   "short_name": "STELLAR",
-  "description": "Observe. Verify. Collect. Stargazing verified by satellite and sealed on Solana.",
+  "description": "7-day sky forecast, AI companion, real marketplace — powered by invisible Solana.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#070B14",
