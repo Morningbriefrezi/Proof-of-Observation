@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 export function SolanaWalletProvider({ children }: { children: ReactNode }) {
   return (
     <PrivyProvider
-      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
+      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? 'cmnnk6n2c002d0cl47skaaz0d'}
       config={{
         loginMethods: ['email', 'sms', 'google', 'wallet'],
         appearance: {
