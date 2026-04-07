@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { getVisiblePlanets, PlanetInfo } from '@/lib/planets';
 import PlanetCard from './PlanetCard';
+import PlanetDetail from './PlanetDetail';
 
 const TBILISI = { lat: 41.6941, lng: 44.8337 };
 
@@ -11,6 +12,7 @@ export default function PlanetGrid() {
   const t = useTranslations('sky');
   const [planets, setPlanets] = useState<PlanetInfo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPlanet, setSelectedPlanet] = useState<PlanetInfo | null>(null);
 
   useEffect(() => {
     function calc(lat: number, lng: number) {
@@ -50,8 +52,17 @@ export default function PlanetGrid() {
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-      {planets.map(p => <PlanetCard key={p.key} planet={p} />)}
-    </div>
+    <>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {planets.map(p => (
+          <button key={p.key} className="text-left" onClick={() => setSelectedPlanet(p)}>
+            <PlanetCard planet={p} />
+          </button>
+        ))}
+      </div>
+      {selectedPlanet && (
+        <PlanetDetail planet={selectedPlanet} onClose={() => setSelectedPlanet(null)} />
+      )}
+    </>
   );
 }

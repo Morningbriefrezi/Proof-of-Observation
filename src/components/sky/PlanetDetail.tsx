@@ -1,0 +1,164 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { PlanetInfo } from '@/lib/planets';
+
+interface Props {
+  planet: PlanetInfo;
+  onClose: () => void;
+}
+
+const DOT_COLOR: Record<string, string> = {
+  moon:    'bg-slate-400',
+  mercury: 'bg-blue-400',
+  venus:   'bg-white',
+  mars:    'bg-red-500',
+  jupiter: 'bg-amber-400',
+  saturn:  'bg-yellow-300',
+};
+
+const CONSTELLATION: Record<string, string> = {
+  moon: 'varies', mercury: 'Aries', venus: 'Taurus',
+  mars: 'Gemini', jupiter: 'Taurus', saturn: 'Aquarius',
+};
+
+const VIEWING_TIP: Record<string, string> = {
+  moon:    'Look for craters along the terminator line',
+  mercury: 'Best seen near the horizon just after sunset or before sunrise',
+  venus:   'Brightest natural object after the Sun and Moon',
+  mars:    'Look for the reddish hue — disc visible in telescopes',
+  jupiter: 'Four Galilean moons visible in binoculars',
+  saturn:  'Rings clearly visible in any telescope',
+};
+
+function hhmm(d: Date | null): string {
+  if (!d) return '—';
+  return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+function magnitudeLabel(mag: number): string {
+  if (mag < -2) return 'very bright';
+  if (mag < 0)  return 'bright';
+  if (mag < 2)  return 'moderate';
+  return 'faint';
+}
+
+export default function PlanetDetail({ planet, onClose }: Props) {
+  const t = useTranslations('planets');
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    requestAnimationFrame(() => setVisible(true));
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  const handleClose = () => {
+    setVisible(false);
+    setTimeout(onClose, 300);
+  };
+
+  const rows: { label: string; value: string }[] = [
+    {
+      label: 'Status',
+      value: planet.visible ? 'Visible Now' : 'Below Horizon',
+    },
+    {
+      label: 'Altitude',
+      value: `${planet.altitude}° above horizon`,
+    },
+    {
+      label: 'Azimuth',
+      value: `${planet.azimuth}° ${planet.azimuthDir} — look ${dirFull(planet.azimuthDir)}`,
+    },
+    {
+      label: 'Magnitude',
+      value: `${planet.magnitude > 0 ? '+' : ''}${planet.magnitude.toFixed(1)} (${magnitudeLabel(planet.magnitude)})`,
+    },
+    {
+      label: 'Rises at',
+      value: hhmm(planet.rise),
+    },
+    {
+      label: 'Highest at',
+      value: hhmm(planet.transit),
+    },
+    {
+      label: 'Sets at',
+      value: hhmm(planet.set),
+    },
+    {
+      label: 'Constellation',
+      value: CONSTELLATION[planet.key] ?? '—',
+    },
+  ];
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center"
+      onClick={handleClose}
+    >
+      <div
+        className={`
+          w-full sm:max-w-sm sm:mx-auto sm:rounded-2xl
+          bg-[#0F1827]
+          border-t sm:border border-[#38F0FF]/10
+          transition-transform duration-300
+          ${visible ? 'translate-y-0' : 'translate-y-full sm:translate-y-4'}
+          rounded-t-2xl sm:rounded-2xl
+          max-h-[85dvh] overflow-y-auto
+        `}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 pt-5 pb-3">
+          <div className="flex items-center gap-2.5">
+            <span className={`w-3 h-3 rounded-full flex-shrink-0 ${DOT_COLOR[planet.key] ?? 'bg-slate-400'}`} />
+            <h2 className="text-white text-lg font-bold" style={{ fontFamily: 'Georgia, serif' }}>
+              {t(planet.key as Parameters<typeof t>[0])}
+            </h2>
+          </div>
+          <button
+            onClick={handleClose}
+            className="text-slate-500 hover:text-slate-300 transition-colors p-1"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Rows */}
+        <div className="px-5 pb-4 flex flex-col divide-y divide-white/5">
+          {rows.map(row => (
+            <div key={row.label} className="flex items-baseline justify-between py-2.5 gap-4">
+              <span className="text-slate-500 text-xs flex-shrink-0">{row.label}</span>
+              <span className={`text-sm text-right ${
+                row.label === 'Status'
+                  ? planet.visible ? 'text-[#34d399] font-medium' : 'text-slate-400'
+                  : 'text-slate-200'
+              }`}>
+                {row.value}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Tip */}
+        <div className="mx-5 mb-5 px-4 py-3 rounded-xl" style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.15)' }}>
+          <p className="text-slate-500 text-[10px] uppercase tracking-wider mb-1">Viewing tip</p>
+          <p className="text-slate-300 text-xs leading-relaxed">{VIEWING_TIP[planet.key]}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function dirFull(abbr: string): string {
+  const map: Record<string, string> = {
+    N: 'North', NE: 'Northeast', E: 'East', SE: 'Southeast',
+    S: 'South', SW: 'Southwest', W: 'West', NW: 'Northwest',
+  };
+  return map[abbr] ?? abbr;
+}
