@@ -26,7 +26,7 @@ export default function Nav() {
     { href: '/profile', label: t('profile'), icon: <User size={17} /> },
   ];
 
-  const solanaWallet = wallets.find(w => w.chainType === 'solana');
+  const solanaWallet = wallets.find(w => (w as { chainType?: string }).chainType === 'solana');
   const walletShort = solanaWallet
     ? `${solanaWallet.address.slice(0, 4)}...${solanaWallet.address.slice(-4)}`
     : '';
