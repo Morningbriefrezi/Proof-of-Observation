@@ -99,7 +99,20 @@
     "discoveries": "აღმოჩენები",
     "signOut": "გასვლა",
     "viewOnExplorer": "Solana Explorer-ზე ნახვა ↗",
-    "noDiscoveries": "ჯერ აღმოჩენები არ არის — დაიწყე დაკვირვება!"
+    "noDiscoveries": "ჯერ აღმოჩენები არ არის — დაიწყე დაკვირვება!",
+    "accountLabel": "ანგარიში",
+    "missionHistory": "მისიების ისტორია",
+    "purchaseHistory": "შეძენის ისტორია",
+    "addViaCard": "ბარათით შევსება",
+    "sendCrypto": "კრიპტოს გაგზავნა",
+    "noMissionsYet": "მისიები ჯერ არ დასრულებულა",
+    "startFirstMission": "პირველი მისიის დაწყება →",
+    "noPurchasesYet": "შეძენები ჯერ არ არის",
+    "browseCta": "ტელესკოპებისა და აქსესუარების დათვალიერება →",
+    "statMissions": "მისიები",
+    "statStars": "ვარსკვლავები",
+    "devnet": "Solana devnet",
+    "goToMissions": "მისიებზე გადასვლა"
   },
   "club": {
     "title": "კლუბში გაწევრება",

@@ -99,7 +99,20 @@
     "discoveries": "Discoveries",
     "signOut": "Sign Out",
     "viewOnExplorer": "View on Solana Explorer ↗",
-    "noDiscoveries": "No discoveries yet — start observing!"
+    "noDiscoveries": "No discoveries yet — start observing!",
+    "accountLabel": "Account",
+    "missionHistory": "Mission History",
+    "purchaseHistory": "Purchase History",
+    "addViaCard": "Add via Card",
+    "sendCrypto": "Send Crypto",
+    "noMissionsYet": "No missions completed yet",
+    "startFirstMission": "Start your first mission →",
+    "noPurchasesYet": "No purchases yet",
+    "browseCta": "Browse telescopes & accessories →",
+    "statMissions": "Missions",
+    "statStars": "Stars",
+    "devnet": "Solana devnet",
+    "goToMissions": "Go to Missions"
   },
   "club": {
     "title": "Join the Club",

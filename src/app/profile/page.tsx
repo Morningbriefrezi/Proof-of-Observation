@@ -13,6 +13,7 @@ import Button from '@/components/shared/Button';
 
 export default function ProfilePage() {
   const t = useTranslations('profile');
+  const tNav = useTranslations('nav');
   const { authenticated, ready, user, login, logout } = usePrivy();
   const { wallets } = useWallets();
   const { state, reset } = useAppState();
@@ -91,7 +92,7 @@ export default function ProfilePage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10 animate-page-enter flex flex-col gap-4">
       <h1 className="text-2xl sm:text-3xl font-bold text-[#FFD166]" style={{ fontFamily: 'Georgia, serif' }}>
-        My Account
+        {t('title')}
       </h1>
 
       {/* Balance card */}
@@ -110,7 +111,7 @@ export default function ProfilePage() {
             ) : (
               <p className="text-3xl font-bold text-white">{balance.toFixed(3)} <span className="text-[#38F0FF] text-xl">SOL</span></p>
             )}
-            <p className="text-slate-600 text-xs mt-0.5">Solana devnet</p>
+            <p className="text-slate-600 text-xs mt-0.5">{t('devnet')}</p>
           </div>
           {addrShort && (
             <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#38F0FF]/70 bg-[#38F0FF]/5 px-2.5 py-1.5 rounded-lg border border-[#38F0FF]/10">
@@ -146,7 +147,7 @@ export default function ProfilePage() {
             onClick={() => alert('Card payments coming soon — connect with Privy fiat onramp')}
           >
             <CreditCard size={14} />
-            Add via Card
+            {t('addViaCard')}
           </button>
           <button
             className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-300"
@@ -154,7 +155,7 @@ export default function ProfilePage() {
             onClick={() => address && navigator.clipboard.writeText(address).then(() => alert('Wallet address copied — send SOL to this address'))}
           >
             <Wallet size={14} />
-            Send Crypto
+            {t('sendCrypto')}
           </button>
         </div>
       </div>
@@ -162,7 +163,7 @@ export default function ProfilePage() {
       {/* Account info */}
       {email && (
         <Card>
-          <p className="text-[var(--text-dim)] text-xs uppercase tracking-wider mb-1">Account</p>
+          <p className="text-[var(--text-dim)] text-xs uppercase tracking-wider mb-1">{t('accountLabel')}</p>
           <p className="text-slate-200 text-sm">{email}</p>
         </Card>
       )}
@@ -170,9 +171,9 @@ export default function ProfilePage() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { icon: <Telescope size={15} className="text-[#38F0FF]" />, label: 'Missions', value: completed.length },
-          { icon: <Star size={15} className="text-[#FFD166]" />, label: 'Stars', value: `${totalStars} ✦` },
-          { icon: <Award size={15} className="text-[#7A5FFF]" />, label: 'Rank', value: rank.name },
+          { icon: <Telescope size={15} className="text-[#38F0FF]" />, label: t('statMissions'), value: completed.length },
+          { icon: <Star size={15} className="text-[#FFD166]" />, label: t('statStars'), value: `${totalStars} ✦` },
+          { icon: <Award size={15} className="text-[#7A5FFF]" />, label: t('rank'), value: rank.name },
         ].map(s => (
           <Card key={s.label} className="text-center !p-3">
             <div className="flex items-center justify-center mb-1">{s.icon}</div>
@@ -185,17 +186,17 @@ export default function ProfilePage() {
       {/* Mission history */}
       <Card>
         <div className="flex items-center justify-between mb-3">
-          <p className="text-white text-sm font-semibold">Mission History</p>
+          <p className="text-white text-sm font-semibold">{t('missionHistory')}</p>
           <Link href="/missions" className="text-xs text-[#38F0FF] hover:underline flex items-center gap-1">
-            Go to Missions <ChevronRight size={11} />
+            {t('goToMissions')} <ChevronRight size={11} />
           </Link>
         </div>
         {completed.length === 0 ? (
           <div className="text-center py-6">
             <Telescope size={24} className="text-slate-700 mx-auto mb-2" />
-            <p className="text-slate-600 text-sm">No missions completed yet</p>
+            <p className="text-slate-600 text-sm">{t('noMissionsYet')}</p>
             <Link href="/missions" className="text-xs text-[#38F0FF] hover:underline mt-1 inline-block">
-              Start your first mission →
+              {t('startFirstMission')}
             </Link>
           </div>
         ) : (
@@ -226,16 +227,16 @@ export default function ProfilePage() {
       {/* Purchase history */}
       <Card>
         <div className="flex items-center justify-between mb-3">
-          <p className="text-white text-sm font-semibold">Purchase History</p>
+          <p className="text-white text-sm font-semibold">{t('purchaseHistory')}</p>
           <Link href="/marketplace" className="text-xs text-[#38F0FF] hover:underline flex items-center gap-1">
-            Marketplace <ChevronRight size={11} />
+            {tNav('marketplace')} <ChevronRight size={11} />
           </Link>
         </div>
         <div className="text-center py-6">
           <ShoppingBag size={24} className="text-slate-700 mx-auto mb-2" />
-          <p className="text-slate-600 text-sm">No purchases yet</p>
+          <p className="text-slate-600 text-sm">{t('noPurchasesYet')}</p>
           <Link href="/marketplace" className="text-xs text-[#FFD166] hover:underline mt-1 inline-block">
-            Browse telescopes & accessories →
+            {t('browseCta')}
           </Link>
         </div>
       </Card>
