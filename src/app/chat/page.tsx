@@ -51,21 +51,40 @@ export default function ChatPage() {
 
     try {
       const history = messages.filter(m => !m.loading).slice(-8);
+      const locale = navigator.language.startsWith('ka') ? 'ka' : 'en';
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, history }),
+        body: JSON.stringify({ message: text, history, locale }),
       });
 
-      const data = await res.json() as { reply?: string; error?: string };
-      const reply = data.reply ?? "Sorry, I couldn't reach ASTRA. Try again.";
+      if (!res.ok || !res.body) throw new Error('No response body');
 
-      setMessages(prev => {
-        const next = [...prev];
-        const lastIdx = next.length - 1;
-        next[lastIdx] = { role: 'assistant', content: reply };
-        return next;
-      });
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const chunk = line.slice(6);
+          if (chunk === '[DONE]') {
+            setIsLoading(false);
+            break;
+          }
+          setMessages(prev => {
+            const next = [...prev];
+            const last = next[next.length - 1];
+            next[next.length - 1] = { role: 'assistant', content: (last.content ?? '') + chunk, loading: false };
+            return next;
+          });
+        }
+      }
     } catch {
       setMessages(prev => {
         const next = [...prev];
