@@ -7,6 +7,7 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   loading?: boolean;
+  isError?: boolean;
 }
 
 export default function ChatPage() {
@@ -58,13 +59,17 @@ export default function ChatPage() {
         body: JSON.stringify({ message: text, history, locale }),
       });
 
-      if (!res.ok || !res.body) throw new Error('No response body');
+      if (!res.ok || !res.body) {
+        // Non-streaming error from server (Claude unavailable etc.)
+        throw new Error('stream_unavailable');
+      }
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
+      let receivedContent = false;
 
-      while (true) {
+      outer: while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
@@ -75,8 +80,12 @@ export default function ChatPage() {
           const chunk = line.slice(6);
           if (chunk === '[DONE]') {
             setIsLoading(false);
-            break;
+            break outer;
           }
+          if (chunk === '[ERROR]') {
+            throw new Error('stream_error');
+          }
+          receivedContent = true;
           setMessages(prev => {
             const next = [...prev];
             const last = next[next.length - 1];
@@ -85,10 +94,14 @@ export default function ChatPage() {
           });
         }
       }
+
+      // Stream ended without [DONE] and no content — treat as error
+      if (!receivedContent) throw new Error('empty_response');
+
     } catch {
       setMessages(prev => {
         const next = [...prev];
-        next[next.length - 1] = { role: 'assistant', content: "Sorry, I couldn't reach ASTRA. Try again." };
+        next[next.length - 1] = { role: 'assistant', content: t('errorReply'), isError: true } as Message;
         return next;
       });
     } finally {
@@ -139,7 +152,9 @@ export default function ChatPage() {
               className={`max-w-[80%] px-4 py-2.5 text-sm leading-relaxed ${
                 msg.role === 'user'
                   ? 'bg-[#8B5CF6]/20 border border-[#8B5CF6]/30 rounded-2xl rounded-tr-sm text-white'
-                  : 'bg-[#1A1F2E] border border-white/5 rounded-2xl rounded-tl-sm text-slate-200'
+                  : msg.isError
+                    ? 'bg-red-950/40 border border-red-500/20 rounded-2xl rounded-tl-sm text-red-300'
+                    : 'bg-[#1A1F2E] border border-white/5 rounded-2xl rounded-tl-sm text-slate-200'
               }`}
             >
               {msg.loading ? (

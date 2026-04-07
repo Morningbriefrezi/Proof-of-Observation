@@ -71,7 +71,8 @@
     "placeholder": "Ask about tonight's sky…",
     "send": "Send",
     "thinking": "ASTRA is thinking…",
-    "clearChat": "Clear conversation"
+    "clearChat": "Clear conversation",
+    "errorReply": "Sorry, I couldn't reach ASTRA. Try again."
   },
   "marketplace": {
     "title": "Marketplace",
