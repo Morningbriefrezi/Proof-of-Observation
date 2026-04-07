@@ -4,8 +4,10 @@ import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
 import { Connection, PublicKey } from '@solana/web3.js';
-import { Copy, Check, ExternalLink, Telescope, Star, Award } from 'lucide-react';
+import { Copy, Check, ExternalLink, Telescope, Star, Award, CreditCard, Wallet, ShoppingBag, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 import { useAppState } from '@/hooks/useAppState';
+import { getRank } from '@/lib/rewards';
 import Card from '@/components/shared/Card';
 import Button from '@/components/shared/Button';
 
@@ -13,13 +15,13 @@ export default function ProfilePage() {
   const t = useTranslations('profile');
   const { authenticated, ready, user, login, logout } = usePrivy();
   const { wallets } = useWallets();
-  const { reset } = useAppState();
+  const { state, reset } = useAppState();
 
   const [balance, setBalance] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
 
   const solanaWallet = wallets.find(w => (w as { chainType?: string }).chainType === 'solana');
-  const address = solanaWallet?.address ?? null;
+  const address = solanaWallet?.address ?? state.walletAddress ?? null;
 
   useEffect(() => {
     if (!address) return;
@@ -65,16 +67,11 @@ export default function ProfilePage() {
           >
             <Telescope size={26} className="text-[#FFD166]" />
           </div>
-          <h2
-            className="text-xl sm:text-2xl font-bold text-white mb-2"
-            style={{ fontFamily: 'Georgia, serif' }}
-          >
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2" style={{ fontFamily: 'Georgia, serif' }}>
             {t('signUpPrompt')}
           </h2>
           <p className="text-slate-400 text-sm mb-6">{t('noDiscoveries')}</p>
-          <Button variant="brass" onClick={login} className="w-full">
-            {t('signUpCta')}
-          </Button>
+          <Button variant="brass" onClick={login} className="w-full">{t('signUpCta')}</Button>
         </Card>
       </div>
     );
@@ -85,20 +82,83 @@ export default function ProfilePage() {
     (user?.linkedAccounts.find(a => a.type === 'email') as { address?: string } | undefined)?.address ??
     null;
 
-  const addrShort = address
-    ? `${address.slice(0, 8)}...${address.slice(-8)}`
-    : null;
+  const addrShort = address ? `${address.slice(0, 6)}...${address.slice(-6)}` : null;
+  const completed = state.completedMissions.filter(m => m.status === 'completed');
+  const totalStars = completed.reduce((sum, m) => sum + (m.stars ?? 0), 0);
+  const rank = getRank(completed.length);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 sm:py-12 animate-page-enter flex flex-col gap-4">
-      <h1
-        className="text-2xl sm:text-3xl font-bold text-[#FFD166]"
-        style={{ fontFamily: 'Georgia, serif' }}
-      >
-        {t('title')}
+    <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10 animate-page-enter flex flex-col gap-4">
+      <h1 className="text-2xl sm:text-3xl font-bold text-[#FFD166]" style={{ fontFamily: 'Georgia, serif' }}>
+        My Account
       </h1>
 
-      {/* Account */}
+      {/* Balance card */}
+      <div
+        className="rounded-2xl p-5 flex flex-col gap-4"
+        style={{
+          background: 'linear-gradient(135deg, rgba(56,240,255,0.08) 0%, rgba(15,31,61,0.6) 100%)',
+          border: '1px solid rgba(56,240,255,0.2)',
+        }}
+      >
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-[var(--text-dim)] text-xs uppercase tracking-wider mb-1">{t('balance')}</p>
+            {balance === null ? (
+              <div className="w-5 h-5 rounded-full border-2 border-[#38F0FF] border-t-transparent animate-spin mt-1" />
+            ) : (
+              <p className="text-3xl font-bold text-white">{balance.toFixed(3)} <span className="text-[#38F0FF] text-xl">SOL</span></p>
+            )}
+            <p className="text-slate-600 text-xs mt-0.5">Solana devnet</p>
+          </div>
+          {addrShort && (
+            <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#38F0FF]/70 bg-[#38F0FF]/5 px-2.5 py-1.5 rounded-lg border border-[#38F0FF]/10">
+              <Wallet size={10} />
+              {addrShort}
+            </div>
+          )}
+        </div>
+
+        {/* Wallet address row */}
+        {address && (
+          <div className="flex items-center gap-2 bg-[rgba(0,0,0,0.2)] rounded-xl px-3 py-2.5">
+            <code className="font-mono text-xs text-slate-400 flex-1 truncate">{address}</code>
+            <button onClick={handleCopy} className="flex items-center gap-1 text-xs text-slate-500 hover:text-[#38F0FF] transition-colors flex-shrink-0">
+              {copied ? <Check size={11} className="text-[#34d399]" /> : <Copy size={11} />}
+              {copied ? t('copied') : t('copyAddress')}
+            </button>
+            <a
+              href={`https://explorer.solana.com/address/${address}?cluster=devnet`}
+              target="_blank" rel="noopener noreferrer"
+              className="text-slate-600 hover:text-[#FFD166] transition-colors flex-shrink-0"
+            >
+              <ExternalLink size={11} />
+            </a>
+          </div>
+        )}
+
+        {/* Fund buttons */}
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all"
+            style={{ background: 'linear-gradient(135deg, #FFD166, #CC9A33)', color: '#070B14' }}
+            onClick={() => alert('Card payments coming soon — connect with Privy fiat onramp')}
+          >
+            <CreditCard size={14} />
+            Add via Card
+          </button>
+          <button
+            className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-300"
+            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+            onClick={() => address && navigator.clipboard.writeText(address).then(() => alert('Wallet address copied — send SOL to this address'))}
+          >
+            <Wallet size={14} />
+            Send Crypto
+          </button>
+        </div>
+      </div>
+
+      {/* Account info */}
       {email && (
         <Card>
           <p className="text-[var(--text-dim)] text-xs uppercase tracking-wider mb-1">Account</p>
@@ -106,67 +166,83 @@ export default function ProfilePage() {
         </Card>
       )}
 
-      {/* Wallet */}
-      {address && (
-        <Card glow="cyan">
-          <p className="text-[var(--text-dim)] text-xs uppercase tracking-wider mb-2">
-            {t('walletAddress')}
-          </p>
-          <div className="flex items-center gap-2">
-            <code className="font-mono text-xs text-[#38F0FF] flex-1 truncate">{addrShort}</code>
-            <button
-              onClick={handleCopy}
-              className="flex items-center gap-1 text-xs text-[var(--text-dim)] hover:text-[#38F0FF] transition-colors flex-shrink-0"
-            >
-              {copied
-                ? <Check size={12} className="text-[#34d399]" />
-                : <Copy size={12} />}
-              {copied ? t('copied') : t('copyAddress')}
-            </button>
-          </div>
-
-          <div className="mt-3 flex items-end justify-between">
-            <div>
-              <p className="text-[var(--text-dim)] text-xs uppercase tracking-wider mb-1">
-                {t('balance')}
-              </p>
-              {balance === null ? (
-                <div className="w-4 h-4 rounded-full border-2 border-[#38F0FF] border-t-transparent animate-spin" />
-              ) : (
-                <p className="text-[#38F0FF] font-semibold">{balance.toFixed(3)} SOL</p>
-              )}
-            </div>
-            <a
-              href={`https://explorer.solana.com/address/${address}?cluster=devnet`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-xs text-[var(--text-dim)] hover:text-[#FFD166] transition-colors"
-            >
-              {t('viewOnExplorer')} <ExternalLink size={10} />
-            </a>
-          </div>
-        </Card>
-      )}
-
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { icon: <Telescope size={15} className="text-[#38F0FF]" />, label: t('observations'), value: '0' },
-          { icon: <Star size={15} className="text-[#FFD166]" />, label: t('rank'), value: 'Explorer' },
-          { icon: <Award size={15} className="text-[#7A5FFF]" />, label: t('discoveries'), value: '0' },
+          { icon: <Telescope size={15} className="text-[#38F0FF]" />, label: 'Missions', value: completed.length },
+          { icon: <Star size={15} className="text-[#FFD166]" />, label: 'Stars', value: `${totalStars} ✦` },
+          { icon: <Award size={15} className="text-[#7A5FFF]" />, label: 'Rank', value: rank.name },
         ].map(s => (
           <Card key={s.label} className="text-center !p-3">
             <div className="flex items-center justify-center mb-1">{s.icon}</div>
-            <p className="text-lg font-bold text-white">{s.value}</p>
+            <p className="text-base font-bold text-white">{s.value}</p>
             <p className="text-[var(--text-dim)] text-xs">{s.label}</p>
           </Card>
         ))}
       </div>
 
+      {/* Mission history */}
+      <Card>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-white text-sm font-semibold">Mission History</p>
+          <Link href="/missions" className="text-xs text-[#38F0FF] hover:underline flex items-center gap-1">
+            Go to Missions <ChevronRight size={11} />
+          </Link>
+        </div>
+        {completed.length === 0 ? (
+          <div className="text-center py-6">
+            <Telescope size={24} className="text-slate-700 mx-auto mb-2" />
+            <p className="text-slate-600 text-sm">No missions completed yet</p>
+            <Link href="/missions" className="text-xs text-[#38F0FF] hover:underline mt-1 inline-block">
+              Start your first mission →
+            </Link>
+          </div>
+        ) : (
+          <div className="flex flex-col divide-y divide-white/5">
+            {completed.slice(-5).reverse().map(m => (
+              <div key={m.id} className="flex items-center gap-3 py-2.5">
+                <span className="text-lg">{m.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-slate-200 text-sm font-medium truncate">{m.name}</p>
+                  <p className="text-slate-600 text-xs">{new Date(m.timestamp).toLocaleDateString()}</p>
+                </div>
+                <span className="text-[#FFD166] text-xs font-semibold flex-shrink-0">+{m.stars} ✦</span>
+                {m.txId && (
+                  <a
+                    href={`https://explorer.solana.com/tx/${m.txId}?cluster=devnet`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="text-slate-700 hover:text-[#38F0FF] transition-colors flex-shrink-0"
+                  >
+                    <ExternalLink size={11} />
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
+      {/* Purchase history */}
+      <Card>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-white text-sm font-semibold">Purchase History</p>
+          <Link href="/marketplace" className="text-xs text-[#38F0FF] hover:underline flex items-center gap-1">
+            Marketplace <ChevronRight size={11} />
+          </Link>
+        </div>
+        <div className="text-center py-6">
+          <ShoppingBag size={24} className="text-slate-700 mx-auto mb-2" />
+          <p className="text-slate-600 text-sm">No purchases yet</p>
+          <Link href="/marketplace" className="text-xs text-[#FFD166] hover:underline mt-1 inline-block">
+            Browse telescopes & accessories →
+          </Link>
+        </div>
+      </Card>
+
       {/* Sign out */}
       <button
         onClick={handleSignOut}
-        className="w-full mt-2 py-2.5 rounded-xl text-sm text-red-400 hover:text-red-300 hover:bg-red-500/5 border border-red-500/10 transition-all"
+        className="w-full py-2.5 rounded-xl text-sm text-red-400 hover:text-red-300 hover:bg-red-500/5 border border-red-500/10 transition-all"
       >
         {t('signOut')}
       </button>
