@@ -13,10 +13,11 @@ import { useTranslations } from 'next-intl';
 export default function Nav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout, authenticated, login } = usePrivy();
+  const { logout, authenticated, ready, login } = usePrivy();
   const { wallets } = useWallets();
   const { reset } = useAppState();
   const [showLogout, setShowLogout] = useState(false);
+  const [confirmStep, setConfirmStep] = useState(false);
   const t = useTranslations('nav');
 
   const tabs = [
@@ -33,11 +34,11 @@ export default function Nav() {
     : '';
 
   const handleLogout = async () => {
-    if (!confirm('Log out and clear all data?')) return;
     await logout();
     reset();
     router.push('/');
     setShowLogout(false);
+    setConfirmStep(false);
   };
 
   return (
@@ -73,10 +74,12 @@ export default function Nav() {
           <div className="flex items-center gap-2 flex-shrink-0">
             <LanguageToggle />
 
-            {authenticated ? (
+            {!ready ? (
+              <div className="w-20 h-7 rounded-lg bg-white/10 animate-pulse" />
+            ) : authenticated ? (
               <div className="relative">
                 <button
-                  onClick={() => setShowLogout(v => !v)}
+                  onClick={() => { setShowLogout(v => !v); setConfirmStep(false); }}
                   className="text-[#34d399] font-hash bg-[rgba(52,211,153,0.08)] border border-[rgba(52,211,153,0.2)] px-2 py-1 rounded-lg hover:bg-[rgba(52,211,153,0.15)] text-xs"
                 >
                   🟢 {walletShort}
@@ -88,9 +91,18 @@ export default function Nav() {
                         {solanaWallet.address.slice(0, 8)}...{solanaWallet.address.slice(-6)}
                       </p>
                     )}
-                    <button onClick={handleLogout} className="w-full text-left text-red-400 hover:text-red-300 text-xs py-1.5 px-2 rounded hover:bg-red-500/10 transition-all">
-                      {t('signOut')}
-                    </button>
+                    {confirmStep ? (
+                      <div>
+                        <p className="text-slate-400 text-xs mb-2">Are you sure?</p>
+                        <button onClick={handleLogout} className="w-full text-left text-red-400 hover:text-red-300 text-xs py-1.5 px-2 rounded bg-red-500/10 hover:bg-red-500/20 transition-all">
+                          Yes, sign out
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={() => setConfirmStep(true)} className="w-full text-left text-red-400 hover:text-red-300 text-xs py-1.5 px-2 rounded hover:bg-red-500/10 transition-all">
+                        {t('signOut')}
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

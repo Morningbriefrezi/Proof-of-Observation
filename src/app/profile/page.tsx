@@ -19,6 +19,7 @@ export default function ProfilePage() {
 
   const [balance, setBalance] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
 
   const solanaWallet = wallets.find(w => (w as { chainType?: string }).chainType === 'solana');
   const address = solanaWallet?.address ?? state.walletAddress ?? null;
@@ -241,10 +242,14 @@ export default function ProfilePage() {
 
       {/* Sign out */}
       <button
-        onClick={handleSignOut}
-        className="w-full py-2.5 rounded-xl text-sm text-red-400 hover:text-red-300 hover:bg-red-500/5 border border-red-500/10 transition-all"
+        onClick={confirmSignOut ? handleSignOut : () => setConfirmSignOut(true)}
+        className={`w-full py-2.5 rounded-xl text-sm border transition-all ${
+          confirmSignOut
+            ? 'text-red-300 bg-red-500/10 border-red-500/30 hover:bg-red-500/20'
+            : 'text-red-400 hover:text-red-300 hover:bg-red-500/5 border-red-500/10'
+        }`}
       >
-        {t('signOut')}
+        {confirmSignOut ? 'Confirm sign out?' : t('signOut')}
       </button>
     </div>
   );
