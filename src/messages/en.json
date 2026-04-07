@@ -112,7 +112,8 @@
     "statMissions": "Missions",
     "statStars": "Stars",
     "devnet": "Solana devnet",
-    "goToMissions": "Go to Missions"
+    "goToMissions": "Go to Missions",
+    "signInSubtitle": "Your cosmic identity awaits"
   },
   "club": {
     "title": "Join the Club",

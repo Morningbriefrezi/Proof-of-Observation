@@ -112,7 +112,8 @@
     "statMissions": "მისიები",
     "statStars": "ვარსკვლავები",
     "devnet": "Solana devnet",
-    "goToMissions": "მისიებზე გადასვლა"
+    "goToMissions": "მისიებზე გადასვლა",
+    "signInSubtitle": "შენი კოსმოსური იდენტობა გელოდება"
   },
   "club": {
     "title": "კლუბში გაწევრება",
