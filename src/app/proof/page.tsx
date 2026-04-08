@@ -8,10 +8,7 @@ import { getUnlockedRewards, getRank } from '@/lib/rewards';
 import type { CompletedMission } from '@/lib/types';
 
 function openExplorer(mission: CompletedMission) {
-  if (mission.method !== 'onchain' || !mission.txId || mission.txId.length < 40) {
-    alert('This observation was recorded locally.\nConnect Phantom wallet with devnet SOL for real on-chain proof.');
-    return;
-  }
+  if (mission.method !== 'onchain' || !mission.txId || mission.txId.length < 40) return;
   window.open(`https://explorer.solana.com/tx/${mission.txId}?cluster=devnet`, '_blank', 'noopener,noreferrer');
 }
 
@@ -129,7 +126,6 @@ export default function ProofPage() {
     );
   }
 
-  const isEmailWallet = typeof window !== 'undefined' && !!localStorage.getItem('stellar_wallet_email');
   const completedIds = state.completedMissions.filter(m => m.status === 'completed').map(m => m.id);
   const rank = getRank(completedIds.length).name;
   const rewards = getUnlockedRewards(completedIds, rank);
@@ -151,19 +147,6 @@ export default function ProofPage() {
           </Link>
         )}
       </div>
-
-      {/* Email wallet banner */}
-      {isEmailWallet && (
-        <div className="glass-card border border-amber-500/30 p-4 mb-4 flex items-center justify-between gap-3">
-          <div>
-            <p className="text-amber-400 text-sm font-medium">📧 Email Wallet — observations saved locally</p>
-            <p className="text-slate-500 text-xs">Connect Phantom for real on-chain transactions</p>
-          </div>
-          <Link href="/club" className="text-xs px-3 py-1.5 border border-amber-500/50 text-amber-400 rounded hover:bg-amber-500/10 transition-all whitespace-nowrap">
-            Connect →
-          </Link>
-        </div>
-      )}
 
       {/* Rewards summary */}
       <div className="glass-card border border-[#FFD166]/20 p-4 mb-6 flex flex-col gap-2">

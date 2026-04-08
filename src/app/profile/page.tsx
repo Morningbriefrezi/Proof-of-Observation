@@ -21,6 +21,7 @@ export default function ProfilePage() {
   const [balance, setBalance] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
   const [confirmSignOut, setConfirmSignOut] = useState(false);
+  const [cardMsgVisible, setCardMsgVisible] = useState(false);
 
   const solanaWallet = wallets.find(w => (w as { chainType?: string }).chainType === 'solana');
   const address = solanaWallet?.address ?? state.walletAddress ?? null;
@@ -150,15 +151,15 @@ export default function ProfilePage() {
           <button
             className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all"
             style={{ background: 'linear-gradient(135deg, #FFD166, #CC9A33)', color: '#070B14' }}
-            onClick={() => alert('Card payments coming soon — connect with Privy fiat onramp')}
+            onClick={() => { setCardMsgVisible(true); setTimeout(() => setCardMsgVisible(false), 2500); }}
           >
             <CreditCard size={14} />
-            {t('addViaCard')}
+            {cardMsgVisible ? 'Coming soon' : t('addViaCard')}
           </button>
           <button
             className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-300"
             style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
-            onClick={() => address && navigator.clipboard.writeText(address).then(() => alert('Wallet address copied — send SOL to this address'))}
+            onClick={handleCopy}
           >
             <Wallet size={14} />
             {t('sendCrypto')}

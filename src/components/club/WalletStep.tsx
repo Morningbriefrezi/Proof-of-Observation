@@ -165,7 +165,7 @@ export default function WalletStep() {
                 <Button variant="brass" onClick={() => login()} className="w-full min-h-[44px]">
                   Continue with Email →
                 </Button>
-                <p className="text-slate-600 text-xs text-center">Also supports Google, SMS, and Phantom wallet.</p>
+                <p className="text-slate-600 text-xs text-center">Also supports Google, SMS, and existing wallets.</p>
               </div>
             </div>
           )}
