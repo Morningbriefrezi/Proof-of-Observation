@@ -1,7 +1,6 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { Telescope, Moon, Star, Wrench, Sparkles } from 'lucide-react';
 import Badge from '@/components/shared/Badge';
 import Button from '@/components/shared/Button';
 import { Product } from '@/lib/products';
@@ -12,20 +11,12 @@ interface Props {
   onSelect: (p: Product) => void;
 }
 
-const CATEGORY_ICON: Record<string, React.ReactNode> = {
-  telescope: <Telescope size={32} className="text-[#38F0FF]/40" />,
-  moonlamp:  <Moon size={32} className="text-slate-400/40" />,
-  projector: <Star size={32} className="text-[#FFD166]/40" />,
-  accessory: <Wrench size={32} className="text-slate-500/40" />,
-  digital:   <Sparkles size={32} className="text-[#8B5CF6]/40" />,
-};
-
-const CATEGORY_GRADIENT: Record<string, string> = {
-  telescope: 'from-[#0a1628] to-[#0e2040]',
-  moonlamp:  'from-[#1a1a2e] to-[#16213e]',
-  projector: 'from-[#1a1409] to-[#2a1f05]',
-  accessory: 'from-[#0d1117] to-[#161b22]',
-  digital:   'from-[#150d2e] to-[#1e1040]',
+const CATEGORY_ART: Record<string, { emoji: string; label: string; bg: string; border: string }> = {
+  telescope: { emoji: '🔭', label: 'Telescope',  bg: 'radial-gradient(ellipse at 30% 40%, rgba(56,240,255,0.12) 0%, rgba(10,22,40,0.95) 70%)',   border: 'rgba(56,240,255,0.15)' },
+  moonlamp:  { emoji: '🌕', label: 'Moon Lamp',  bg: 'radial-gradient(ellipse at 60% 30%, rgba(255,209,102,0.12) 0%, rgba(26,26,46,0.95) 70%)',   border: 'rgba(255,209,102,0.15)' },
+  projector: { emoji: '✨', label: 'Projector',  bg: 'radial-gradient(ellipse at 40% 60%, rgba(139,92,246,0.12) 0%, rgba(26,20,9,0.95) 70%)',     border: 'rgba(139,92,246,0.15)' },
+  accessory: { emoji: '⚙️', label: 'Accessory',  bg: 'radial-gradient(ellipse at 50% 50%, rgba(100,116,139,0.1) 0%, rgba(13,17,23,0.95) 70%)',   border: 'rgba(100,116,139,0.15)' },
+  digital:   { emoji: '🗺️', label: 'Digital',    bg: 'radial-gradient(ellipse at 50% 30%, rgba(139,92,246,0.15) 0%, rgba(21,13,46,0.95) 70%)',    border: 'rgba(139,92,246,0.2)' },
 };
 
 export default function ProductCard({ product, solPerGEL, onSelect }: Props) {
@@ -33,23 +24,21 @@ export default function ProductCard({ product, solPerGEL, onSelect }: Props) {
   const locale = useLocale();
   const name = locale === 'ka' ? product.name.ka : product.name.en;
   const solPrice = (product.priceGEL * solPerGEL).toFixed(3);
+  const art = CATEGORY_ART[product.category] ?? CATEGORY_ART.accessory;
 
   return (
     <div
       className={`glass-card flex flex-col overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${!product.inStock ? 'opacity-60' : ''}`}
       onClick={() => product.inStock && onSelect(product)}
     >
-      {/* Image area */}
-      <div className={`relative w-full aspect-video bg-gradient-to-br ${CATEGORY_GRADIENT[product.category]} flex items-center justify-center`}>
-        <img
-          src={product.image}
-          alt={name}
-          className="w-full h-full object-cover"
-          onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-        />
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          {CATEGORY_ICON[product.category]}
-        </div>
+      {/* Image placeholder */}
+      <div
+        className="relative w-full aspect-video flex flex-col items-center justify-center gap-2"
+        style={{ background: art.bg, borderBottom: `1px solid ${art.border}` }}
+      >
+        <span className="text-5xl select-none" style={{ filter: 'drop-shadow(0 0 16px rgba(255,255,255,0.15))' }}>
+          {art.emoji}
+        </span>
         {product.featured && (
           <div className="absolute top-2 left-2">
             <Badge color="brass">{t('aiPick')}</Badge>

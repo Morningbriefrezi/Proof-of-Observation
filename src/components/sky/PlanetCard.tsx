@@ -16,9 +16,10 @@ const DOT_COLOR: Record<string, string> = {
   saturn:  'bg-yellow-300',
 };
 
-function hhmm(d: Date | null, locale: string): string {
+function hhmm(d: Date | string | null, locale: string): string {
   if (!d) return '—';
-  return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false });
+  const date = d instanceof Date ? d : new Date(d);
+  return date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
 export default function PlanetCard({ planet }: Props) {

@@ -63,6 +63,14 @@ export interface CompletedMission {
   method?: 'onchain' | 'simulated';
 }
 
+export interface QuizResult {
+  quizId: string;
+  score: number;
+  total: number;
+  stars: number;
+  timestamp: string;
+}
+
 export interface AppState {
   walletConnected: boolean;
   walletAddress: string;
@@ -72,4 +80,5 @@ export interface AppState {
   telescopeTx: string;
   completedMissions: CompletedMission[];
   claimedRewards: string[];
+  completedQuizzes: QuizResult[];
 }

@@ -13,9 +13,9 @@ export interface PlanetInfo {
   altitude: number;
   azimuth: number;
   azimuthDir: string;
-  rise: Date | null;
-  transit: Date | null;
-  set: Date | null;
+  rise: Date | string | null;
+  transit: Date | string | null;
+  set: Date | string | null;
   magnitude: number;
   visible: boolean;
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode, createElement } from 'react';
-import type { AppState, CompletedMission } from '@/lib/types';
+import type { AppState, CompletedMission, QuizResult } from '@/lib/types';
 
 const defaultState: AppState = {
   walletConnected: false,
@@ -12,6 +12,7 @@ const defaultState: AppState = {
   telescopeTx: '',
   completedMissions: [],
   claimedRewards: [],
+  completedQuizzes: [],
 };
 
 interface AppStateCtx {
@@ -22,6 +23,7 @@ interface AppStateCtx {
   addMission: (mission: CompletedMission) => void;
   removeMission: (id: string) => void;
   claimReward: (id: string) => void;
+  addQuizResult: (r: QuizResult) => void;
   pendingCount: number;
   reset: () => void;
 }
@@ -63,6 +65,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     claimReward: (id) => setState(s => ({
       ...s,
       claimedRewards: s.claimedRewards.includes(id) ? s.claimedRewards : [...s.claimedRewards, id],
+    })),
+    addQuizResult: (r) => setState(s => ({
+      ...s,
+      completedQuizzes: [...(s.completedQuizzes ?? []), r],
     })),
     pendingCount: state.completedMissions.filter(m => m.status === 'pending').length,
     reset: () => { localStorage.removeItem(STORAGE_KEY); setState(defaultState); },
