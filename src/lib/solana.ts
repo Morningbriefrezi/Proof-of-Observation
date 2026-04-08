@@ -120,10 +120,10 @@ export async function mintObservation(
     timestamp: observation.timestamp,
     location: { lat: observation.lat, lon: observation.lon },
     verification: {
-      oracle: 'farmhawk_v1',
+      oracle: 'open-meteo-v1',
       cloudCover: observation.cloudCover,
       hash: observation.oracleHash,
-      source: 'open-meteo + farmhawk oracle format',
+      source: 'open-meteo sky oracle',
     },
     stars: observation.stars,
   });

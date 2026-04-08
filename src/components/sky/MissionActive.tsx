@@ -1,12 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import type { Mission, FarmHawkResult, PollinetStatus, MissionState } from '@/lib/types';
-import { verifyWithFarmHawk } from '@/lib/farmhawk';
-import { getPollinetStatus, queueOfflineObservation } from '@/lib/pollinet';
-import { mintObservation } from '@/lib/solana';
+import type { Mission, SkyVerification, MissionState } from '@/lib/types';
 import { usePrivy } from '@privy-io/react-auth';
-import { Connection, PublicKey } from '@solana/web3.js';
 import { useAppState } from '@/hooks/useAppState';
 import { getUnlockedRewards, getRank } from '@/lib/rewards';
 import CameraCapture from './CameraCapture';
@@ -35,37 +31,15 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
     (a): a is Extract<typeof a, { type: 'wallet' }> =>
       a.type === 'wallet' && 'chainType' in a && (a as { chainType?: string }).chainType === 'solana'
   );
-  const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
   const [step, setStep] = useState<MissionState>('observing');
   const [photo, setPhoto] = useState('');
-  const [farmhawk, setFarmhawk] = useState<FarmHawkResult | null>(null);
-  const [pollinet, setPollinet] = useState<PollinetStatus | null>(null);
+  const [sky, setSky] = useState<SkyVerification | null>(null);
   const [coords, setCoords] = useState({ lat: 41.7151, lon: 44.8271 });
   const [timestamp, setTimestamp] = useState('');
   const [mintDone, setMintDone] = useState(false);
   const [mintError, setMintError] = useState('');
   const [newRewards, setNewRewards] = useState<NewReward[]>([]);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
-
-  const handleQueueOffline = async () => {
-    const queuedMission = {
-      id: mission.id,
-      name: mission.name,
-      emoji: mission.emoji,
-      stars: mission.stars,
-      txId: 'queued_' + Date.now().toString(36),
-      photo,
-      timestamp,
-      latitude: coords.lat,
-      longitude: coords.lon,
-      farmhawk: farmhawk!,
-      pollinet: { mode: 'queued' as const, peers: pollinet?.peers ?? 0 },
-      status: 'pending' as const,
-    };
-    await queueOfflineObservation(queuedMission);
-    addMission(queuedMission);
-    onClose();
-  };
 
   const handleCapture = async (p: string) => {
     setPhoto(p);
@@ -84,44 +58,23 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
     }
     setCoords({ lat, lon });
 
-    const ps = getPollinetStatus();
-    setPollinet(ps);
-
     if (!navigator.onLine) {
-      console.log('[Pollinet] Offline — queuing observation');
-      const offlineMission = {
-        id: mission.id,
-        name: mission.name,
-        emoji: mission.emoji,
-        stars: mission.stars,
-        txId: 'pending',
-        photo: p,
-        timestamp: ts,
-        latitude: lat,
-        longitude: lon,
-        farmhawk: null,
-        pollinet: { mode: 'queued' as const, peers: ps.peers },
-        status: 'pending' as const,
-      };
-      await queueOfflineObservation(offlineMission);
-      addMission(offlineMission);
-      onClose();
+      setMintError('No internet connection — try again when back online');
+      setStep('verified');
       return;
     }
 
     setStep('verifying');
-    console.log('[Verify] Starting FarmHawk verification');
-    const fh = await verifyWithFarmHawk(lat, lon);
-    setFarmhawk(fh);
+    const res = await fetch(`/api/sky/verify?lat=${lat}&lon=${lon}`);
+    const skyData: SkyVerification = await res.json();
+    setSky(skyData);
     setStep('verified');
   };
 
   const handleMint = async () => {
     window.scrollTo({ top: 0, behavior: 'instant' });
     setStep('minting');
-    console.log('[Mint] Creating observation proof for', mission.name);
 
-    // Snapshot unlocked rewards before minting
     const prevCompleted = state.completedMissions
       .filter(m => m.status === 'completed')
       .map(m => m.id);
@@ -131,21 +84,50 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
       .map(r => r.id);
 
     setMintError('');
-    const effectiveKey = solanaWallet?.address ? new PublicKey(solanaWallet.address) : null;
-    // TODO Phase 5: wire Privy signAndSendTransaction from @privy-io/react-auth/solana
-    const send = null;
-    const result = await mintObservation(send, effectiveKey, {
-      target: mission.name,
-      timestamp,
-      lat: coords.lat,
-      lon: coords.lon,
-      cloudCover: farmhawk?.cloudCover ?? 0,
-      oracleHash: farmhawk?.oracleHash ?? 'sim',
-      stars: mission.stars,
-    });
-    if (result.method === 'simulated' && result.error) {
-      setMintError(result.error);
+
+    let txId = 'sim_' + Date.now().toString(36);
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 60000);
+      const res = await fetch('/api/mint', {
+        method: 'POST',
+        signal: ctrl.signal,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userAddress: solanaWallet?.address ?? null,
+          target: mission.name,
+          timestampMs: new Date(timestamp).getTime(),
+          lat: coords.lat,
+          lon: coords.lon,
+          cloudCover: sky?.cloudCover ?? 0,
+          oracleHash: sky?.oracleHash ?? 'sim',
+          stars: mission.stars,
+        }),
+      });
+      clearTimeout(timer);
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Mint failed' }));
+        setMintError(err.error ?? 'Mint failed');
+        setStep('verified');
+        return;
+      }
+
+      const data = await res.json();
+      txId = data.txId;
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Mint failed';
+      setMintError(msg);
+      setStep('verified');
+      return;
     }
+
+    fetch('/api/award-stars', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recipientAddress: solanaWallet?.address, amount: mission.stars, reason: mission.name }),
+    }).catch(() => {});
+
     setMintDone(true);
     setTimeout(() => {
       const newCompleted = [...prevCompleted, mission.id];
@@ -158,15 +140,14 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
         name: mission.name,
         emoji: mission.emoji,
         stars: mission.stars,
-        txId: result.txId,
+        txId,
         photo,
         timestamp,
         latitude: coords.lat,
         longitude: coords.lon,
-        farmhawk: farmhawk!,
-        pollinet: { mode: pollinet!.mode, peers: pollinet!.peers },
+        sky: sky!,
         status: 'completed',
-        method: result.method === 'onchain' ? 'onchain' : 'simulated',
+        method: txId.startsWith('sim') ? 'simulated' : 'onchain',
       });
 
       if (justUnlocked.length > 0) {
@@ -174,7 +155,6 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
         window.scrollTo({ top: 0, behavior: 'instant' });
       } else {
         setStep('done');
-        onClose();
         window.scrollTo({ top: 0, behavior: 'instant' });
       }
     }, 1200);
@@ -324,36 +304,30 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
             </div>
             <div className="text-center">
               <p className="text-white text-sm font-medium">Scanning sky conditions</p>
-              <p className="text-slate-600 text-xs mt-1">Fetching satellite data for your location…</p>
+              <p className="text-slate-600 text-xs mt-1">Fetching sky data for your location…</p>
             </div>
           </div>
         )}
 
-        {step === 'verified' && farmhawk && pollinet && (
-          <Verification
-            photo={photo}
-            farmhawk={farmhawk}
-            pollinet={pollinet}
-            stars={mission.stars}
-            timestamp={timestamp}
-            latitude={coords.lat}
-            longitude={coords.lon}
-            onMint={handleMint}
-            onQueueOffline={handleQueueOffline}
-          />
+        {step === 'verified' && sky && (
+          <>
+            <Verification
+              photo={photo}
+              sky={sky}
+              stars={mission.stars}
+              timestamp={timestamp}
+              latitude={coords.lat}
+              longitude={coords.lon}
+              onMint={handleMint}
+            />
+            {mintError && (
+              <p className="mt-2 text-center text-xs text-amber-400">{mintError}</p>
+            )}
+          </>
         )}
 
         {step === 'minting' && (
-          <>
-            <MintAnimation done={mintDone} />
-            {mintError && (
-              <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 z-[70] p-3 rounded-lg backdrop-blur-sm"
-                style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)' }}>
-                <p className="text-amber-400 text-xs font-medium">Saved locally — on-chain failed</p>
-                <p className="text-slate-600 text-xs mt-0.5">{mintError}</p>
-              </div>
-            )}
-          </>
+          <MintAnimation done={mintDone} />
         )}
       </div>
     </div>

@@ -1,31 +1,27 @@
 'use client';
 
-import { useState } from 'react';
-import { CheckCircle2, AlertTriangle, Wifi, WifiOff, Wind, Thermometer, Droplets, Eye, Cloud } from 'lucide-react';
-import type { FarmHawkResult, PollinetStatus } from '@/lib/types';
+import { CheckCircle2, AlertTriangle, Wind, Thermometer, Droplets, Eye, Cloud } from 'lucide-react';
+import type { SkyVerification } from '@/lib/types';
 
 interface VerificationProps {
   photo: string;
-  farmhawk: FarmHawkResult;
-  pollinet: PollinetStatus;
+  sky: SkyVerification;
   stars: number;
   timestamp: string;
   latitude: number;
   longitude: number;
   onMint: () => void;
-  onQueueOffline: () => void;
 }
 
-export default function Verification({ photo, farmhawk, pollinet, stars, timestamp, latitude, longitude, onMint, onQueueOffline }: VerificationProps) {
-  const conditionOk = farmhawk.verified;
-  const [offlineMode, setOfflineMode] = useState(!pollinet.online);
+export default function Verification({ photo, sky, stars, timestamp, latitude, longitude, onMint }: VerificationProps) {
+  const conditionOk = sky.verified;
 
   const metrics = [
-    { icon: <Cloud size={14} />, label: 'Cloud Cover', value: `${farmhawk.cloudCover}%`, bar: farmhawk.cloudCover, good: farmhawk.cloudCover < 30 },
-    { icon: <Eye size={14} />, label: 'Visibility', value: farmhawk.visibility, bar: null, good: conditionOk },
-    { icon: <Thermometer size={14} />, label: 'Temperature', value: `${farmhawk.temperature}°C`, bar: null, good: true },
-    { icon: <Droplets size={14} />, label: 'Humidity', value: `${farmhawk.humidity}%`, bar: farmhawk.humidity, good: farmhawk.humidity < 70 },
-    { icon: <Wind size={14} />, label: 'Wind Speed', value: `${farmhawk.windSpeed} km/h`, bar: null, good: farmhawk.windSpeed < 30 },
+    { icon: <Cloud size={14} />, label: 'Cloud Cover', value: `${sky.cloudCover}%`, bar: sky.cloudCover, good: sky.cloudCover < 30 },
+    { icon: <Eye size={14} />, label: 'Visibility', value: sky.visibility, bar: null, good: conditionOk },
+    { icon: <Thermometer size={14} />, label: 'Temperature', value: `${sky.temperature}°C`, bar: null, good: true },
+    { icon: <Droplets size={14} />, label: 'Humidity', value: `${sky.humidity}%`, bar: sky.humidity, good: sky.humidity < 70 },
+    { icon: <Wind size={14} />, label: 'Wind Speed', value: `${sky.windSpeed} km/h`, bar: null, good: sky.windSpeed < 30 },
   ];
 
   return (
@@ -71,7 +67,7 @@ export default function Verification({ photo, farmhawk, pollinet, stars, timesta
         <div>
           <div className="flex items-center gap-2 mb-2">
             <div className="w-1.5 h-1.5 rounded-full bg-[#38F0FF]/60" />
-            <span className="text-[10px] text-slate-600 uppercase tracking-widest font-medium">Satellite Data</span>
+            <span className="text-[10px] text-slate-600 uppercase tracking-widest font-medium">Sky Data</span>
           </div>
           <div className="grid grid-cols-3 gap-1.5">
             {metrics.map((m) => (
@@ -92,73 +88,37 @@ export default function Verification({ photo, farmhawk, pollinet, stars, timesta
                 )}
               </div>
             ))}
-            {/* Oracle */}
+            {/* Hash */}
             <div className="rounded-xl px-2.5 py-2 flex flex-col gap-1"
               style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <span className="text-[9px] text-slate-600">Oracle</span>
+              <span className="text-[9px] text-slate-600">Hash</span>
               <p className="text-[#FFD166]/60 text-[10px] font-mono truncate">
-                {farmhawk.oracleHash.slice(0, 6)}…{farmhawk.oracleHash.slice(-4)}
+                {sky.oracleHash.slice(0, 6)}…{sky.oracleHash.slice(-4)}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Pollinet toggle — click to switch online/offline mode */}
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => setOfflineMode(m => !m)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all"
-            style={{
-              background: offlineMode ? 'rgba(251,191,36,0.06)' : 'rgba(52,211,153,0.06)',
-              border: `1px solid ${offlineMode ? 'rgba(251,191,36,0.2)' : 'rgba(52,211,153,0.15)'}`,
-            }}
-            title={offlineMode ? 'Click to submit live to Solana' : 'Click to queue offline'}
-          >
-            {offlineMode
-              ? <WifiOff size={11} className="text-amber-400" />
-              : <Wifi size={11} className="text-[#34d399]" />
-            }
-            <span className="text-[10px] font-medium" style={{ color: offlineMode ? '#fbbf24' : '#34d399' }}>
-              {offlineMode ? 'Offline · Queue' : 'Online · Direct'}
-            </span>
-          </button>
-
-          {farmhawk.receipt && (
-            <details className="text-right">
-              <summary className="text-slate-700 text-[10px] cursor-pointer hover:text-slate-500 select-none list-none">
-                Oracle receipt ›
-              </summary>
-              <div className="absolute right-4 mt-2 p-3 rounded-lg font-mono text-[9px] text-slate-600 z-10 text-left"
-                style={{ background: '#0a0f1e', border: '1px solid rgba(255,255,255,0.06)', maxWidth: 240 }}>
-                <p>hash: <span className="text-[#FFD166]/60">{farmhawk.receipt.hash.slice(0,16)}…</span></p>
-                <p>coords: {farmhawk.receipt.coordinates.lat.toFixed(3)}N</p>
-              </div>
-            </details>
-          )}
+        {/* Sky Oracle badge */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399' }} />
+          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>
+            Sky Oracle · Open-Meteo · {new Date(sky.verifiedAt).toLocaleTimeString()}
+          </span>
         </div>
 
         {/* CTA */}
         <button
-          onClick={offlineMode ? onQueueOffline : onMint}
+          onClick={onMint}
           className="w-full py-3.5 rounded-xl text-sm font-bold tracking-wide transition-all active:scale-[0.98]"
-          style={offlineMode ? {
-            background: 'rgba(251,191,36,0.12)',
-            border: '1px solid rgba(251,191,36,0.3)',
-            color: '#fbbf24',
-          } : {
+          style={{
             background: 'linear-gradient(135deg, #FFD166, #CC9A33)',
             color: '#070B14',
             boxShadow: '0 0 24px rgba(255,209,102,0.2)',
           }}
         >
-          {offlineMode ? '⏳ Queue for Later' : `Create Proof ✦ +${stars} stars`}
+          {`Seal on Solana  ✦ +${stars}`}
         </button>
-
-        {offlineMode && (
-          <p className="text-center text-[10px] text-slate-600">
-            Saved locally. Auto-submits to Solana devnet when back online.
-          </p>
-        )}
       </div>
     </div>
   );

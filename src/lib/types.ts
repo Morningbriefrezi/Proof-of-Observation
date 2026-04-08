@@ -14,7 +14,7 @@ export interface Mission {
   context?: string; // Scriptonia context tag
 }
 
-export interface FarmHawkResult {
+export interface SkyVerification {
   verified: boolean;
   cloudCover: number;
   visibility: 'Excellent' | 'Good' | 'Fair' | 'Poor';
@@ -23,25 +23,7 @@ export interface FarmHawkResult {
   temperature: number;
   windSpeed: number;
   oracleHash: string;
-  scanTimestamp: string;
-  source: string;
-  receipt?: {
-    oracle: string;
-    feed: string;
-    endpoint: string;
-    hash: string;
-    timestamp: string;
-    coordinates: { lat: number; lon: number };
-    dataPoints: Record<string, number>;
-  };
-}
-
-export interface PollinetStatus {
-  online: boolean;
-  mode: 'direct' | 'mesh' | 'queued';
-  peers: number;
-  label: string;
-  icon: string;
+  verifiedAt: string;
 }
 
 export interface CompletedMission {
@@ -54,11 +36,7 @@ export interface CompletedMission {
   timestamp: string;
   latitude: number;
   longitude: number;
-  farmhawk: FarmHawkResult | null;
-  pollinet: {
-    mode: 'direct' | 'mesh' | 'queued';
-    peers: number;
-  };
+  sky: SkyVerification | null;
   status: 'completed' | 'pending';
   method?: 'onchain' | 'simulated';
 }

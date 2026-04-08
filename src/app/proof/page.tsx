@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { ExternalLink, Trash2, Clock, CheckCircle2, Cloud, Wifi, ImageIcon } from 'lucide-react';
+import { ExternalLink, Trash2, Clock, CheckCircle2, Cloud, ImageIcon } from 'lucide-react';
 import { useAppState } from '@/hooks/useAppState';
 import { getUnlockedRewards, getRank } from '@/lib/rewards';
 import type { CompletedMission } from '@/lib/types';
@@ -33,8 +33,7 @@ function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete:
           {isPending && <span className="text-amber-400 text-xs">⏳ Pending</span>}
         </div>
         <div className="flex gap-3 text-xs text-[var(--text-secondary)]">
-          <span className="flex items-center gap-1"><Cloud size={11} />{mission.farmhawk ? `${mission.farmhawk.cloudCover}%` : '—'}</span>
-          <span className="flex items-center gap-1"><Wifi size={11} />{mission.pollinet.mode}</span>
+          <span className="flex items-center gap-1"><Cloud size={11} />{mission.sky ? `${mission.sky.cloudCover}%` : '—'}</span>
         </div>
         {isPending ? (
           <p className="text-amber-400 text-xs italic flex items-center gap-1"><Clock size={11} /> Awaiting connectivity</p>

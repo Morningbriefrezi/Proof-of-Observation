@@ -8,10 +8,7 @@ export const ECOSYSTEM = {
 };
 
 export const SPONSORS = {
-  farmhawk: 'https://farmhawk.ai',
-  pollinet: 'https://github.com/pollinet/pollinet',
   scriptonia: 'https://scriptonia.xyz',
-  cyreneai: 'https://cyreneai.com',
   superteam: 'https://superteam.fun',
   solana: 'https://solana.com',
 };
@@ -59,10 +56,9 @@ export const TELESCOPE_BRANDS = ['Celestron', 'National Geographic', 'Meade', 'S
 export const AGENT_META = {
   name: 'STELLAR Observer Agent',
   version: '1.0.0',
-  platform: 'cyreneai',
   description: 'Autonomous sky observation verification agent',
   capabilities: ['capture', 'verify', 'mint'],
-  oracle: 'farmhawk_v1',
+  oracle: 'open-meteo-v1',
   network: 'solana_devnet',
 };
 

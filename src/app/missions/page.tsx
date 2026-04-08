@@ -1,55 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Satellite, ExternalLink, X } from 'lucide-react';
+import { useState } from 'react';
+import { Satellite } from 'lucide-react';
 import { useAppState } from '@/hooks/useAppState';
 import { usePrivy } from '@privy-io/react-auth';
-import { Connection, PublicKey } from '@solana/web3.js';
-import { initPollinetSync } from '@/lib/pollinet';
-import { mintObservation } from '@/lib/solana';
+import { useLocale } from 'next-intl';
 import StatsBar from '@/components/sky/StatsBar';
 import MissionList from '@/components/sky/MissionList';
 import MissionActive from '@/components/sky/MissionActive';
 import ObservationLog from '@/components/sky/ObservationLog';
 import RewardsSection from '@/components/sky/RewardsSection';
+import QuizActive from '@/components/sky/QuizActive';
+import { QUIZZES } from '@/lib/quizzes';
 import type { Mission } from '@/lib/types';
+import type { QuizDef } from '@/lib/quizzes';
 
 export default function MissionsPage() {
   const { state } = useAppState();
-  const { authenticated, login, user } = usePrivy();
-  const solanaWallet = user?.linkedAccounts.find(
-    (a): a is Extract<typeof a, { type: 'wallet' }> =>
-      a.type === 'wallet' && 'chainType' in a && (a as { chainType?: string }).chainType === 'solana'
-  );
-  const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
+  const { authenticated, login } = usePrivy();
+  const locale = useLocale() === 'ka' ? 'ka' : 'en';
+  const [activeQuiz, setActiveQuiz] = useState<QuizDef | null>(null);
   const [activeMission, setActiveMission] = useState<Mission | null>(null);
-  const [syncToast, setSyncToast] = useState<{ txId: string; name: string } | null>(null);
-
-  // Persistent listener — auto-submits queued observations when device comes back online
-  useEffect(() => {
-    const cleanup = initPollinetSync(async (queuedMission) => {
-      const effectiveKey = solanaWallet?.address ? new PublicKey(solanaWallet.address) : null;
-      // TODO Phase 5: wire Privy signAndSendTransaction from @privy-io/react-auth/solana
-      const send = null;
-
-      const result = await mintObservation(send, effectiveKey, {
-        target: queuedMission.name,
-        timestamp: queuedMission.timestamp,
-        lat: queuedMission.latitude,
-        lon: queuedMission.longitude,
-        cloudCover: queuedMission.farmhawk?.cloudCover ?? 0,
-        oracleHash: queuedMission.farmhawk?.oracleHash ?? 'offline',
-        stars: queuedMission.stars,
-      });
-
-      console.log('[Pollinet] ✅ Auto-submitted:', result.txId);
-      console.log(`[Pollinet] 🔗 https://explorer.solana.com/tx/${result.txId}?cluster=devnet`);
-
-      setSyncToast({ txId: result.txId, name: queuedMission.name });
-      setTimeout(() => setSyncToast(null), 8000);
-    });
-    return cleanup;
-  }, [solanaWallet?.address]);
 
   if (!authenticated) {
     return (
@@ -90,38 +61,7 @@ export default function MissionsPage() {
   return (
     <>
       {activeMission && <MissionActive mission={activeMission} onClose={() => setActiveMission(null)} />}
-
-      {/* Pollinet sync toast — appears when queued observation auto-submits */}
-      {syncToast && (
-        <div
-          className="fixed bottom-24 sm:bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-80 z-[80] p-3.5 rounded-xl flex items-start gap-3"
-          style={{
-            background: 'rgba(7,11,20,0.95)',
-            border: '1px solid rgba(52,211,153,0.3)',
-            backdropFilter: 'blur(12px)',
-            boxShadow: '0 0 24px rgba(52,211,153,0.1)',
-          }}
-        >
-          <div className="w-6 h-6 rounded-full bg-[#34d399]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <div className="w-2 h-2 rounded-full bg-[#34d399]" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-white text-xs font-semibold">Queued observation submitted</p>
-            <p className="text-slate-500 text-[11px] mt-0.5">{syncToast.name} · sealed on Solana devnet</p>
-            <a
-              href={`https://explorer.solana.com/tx/${syncToast.txId}?cluster=devnet`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 mt-1.5 text-[11px] text-[#38F0FF] hover:underline"
-            >
-              View on Explorer <ExternalLink size={9} />
-            </a>
-          </div>
-          <button onClick={() => setSyncToast(null)} className="text-slate-600 hover:text-slate-400 flex-shrink-0">
-            <X size={13} />
-          </button>
-        </div>
-      )}
+      {activeQuiz && <QuizActive quiz={activeQuiz} onClose={() => setActiveQuiz(null)} />}
 
       <div className="max-w-2xl mx-auto px-4 py-3 sm:py-6 animate-page-enter flex flex-col gap-3">
 
@@ -147,6 +87,53 @@ export default function MissionsPage() {
         </section>
 
         <MissionList onStart={setActiveMission} />
+
+        {/* Quiz Missions */}
+        <section>
+          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-3">Knowledge Quizzes</h2>
+          <div className="flex flex-col gap-2.5">
+            {QUIZZES.map(quiz => {
+              const bestResult = [...(state.completedQuizzes ?? [])]
+                .filter(r => r.quizId === quiz.id)
+                .sort((a, b) => b.score - a.score)[0];
+              const pct = bestResult ? Math.round((bestResult.score / bestResult.total) * 100) : null;
+
+              return (
+                <div
+                  key={quiz.id}
+                  className="flex items-center gap-4 rounded-2xl px-4 py-3.5"
+                  style={{
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                  }}
+                >
+                  <span className="text-2xl flex-shrink-0">{quiz.emoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm font-semibold leading-snug">{quiz.title[locale]}</p>
+                    <p className="text-slate-500 text-xs mt-0.5 leading-snug line-clamp-1">{quiz.description[locale]}</p>
+                    {bestResult && (
+                      <p className="text-[#FFD166] text-[11px] font-bold mt-1">
+                        Best: {bestResult.score}/{bestResult.total} · +{bestResult.stars} ✦
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                    {pct !== null && (
+                      <span className="text-[10px] text-slate-500">{pct}%</span>
+                    )}
+                    <button
+                      onClick={() => setActiveQuiz(quiz)}
+                      className="px-3.5 py-2 rounded-xl text-[12px] font-bold transition-all active:scale-95 hover:opacity-90"
+                      style={{ background: 'linear-gradient(135deg, #FFD166, #CC9A33)', color: '#070B14' }}
+                    >
+                      {bestResult ? 'Retry' : 'Start'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
 
         <RewardsSection />
         <ObservationLog />
