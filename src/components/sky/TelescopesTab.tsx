@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 type Level = 'beginner' | 'intermediate' | 'advanced' | 'pro';
@@ -19,6 +20,27 @@ const LEVEL_CONFIG: { id: Level; label: string; badge: string; color: string; su
   { id: 'advanced',     label: 'Advanced',     badge: '⚡', color: '#38F0FF', subtitle: 'Serious Observer' },
   { id: 'pro',          label: 'Pro',          badge: '🚀', color: '#8B5CF6', subtitle: 'Observatory Level' },
 ];
+
+const SCOPE_INTROS: Partial<Record<Level, { img: string; title: string; subtitle: string; parts: string[] }>> = {
+  beginner: {
+    img: '/images/telescopes/refractor.jpg',
+    title: 'The 70–90mm Refractor',
+    subtitle: 'Most common beginner scope. Great for Moon, planets, and star clusters.',
+    parts: ['Lens cap (remove before use!)', 'Focuser — turn to sharpen the image', 'Eyepiece — swap for more magnification', 'Finderscope — points at your target first', 'Tripod — keep it stable on flat ground'],
+  },
+  intermediate: {
+    img: '/images/telescopes/dobsonian.jpg',
+    title: 'The Dobsonian Reflector',
+    subtitle: 'Maximum aperture for the price. The best visual telescope at any budget.',
+    parts: ['Primary mirror (bottom) — collects light', 'Secondary mirror (top) — redirects to eyepiece', 'Rocker box — smooth alt-az movement', 'No tripod needed — sits on the ground', 'Collimation cap — check alignment each session'],
+  },
+  advanced: {
+    img: '/images/telescopes/goto.jpg',
+    title: 'The GoTo Computerized Mount',
+    subtitle: 'Point at any of 40,000+ objects automatically. Essential for astrophotography.',
+    parts: ['Hand controller — enter any object name', 'RA/Dec axes — follow Earth\'s rotation', 'Polar axis — align with Polaris first', 'Motor drives — track objects as sky moves', 'USB port — connect to computer for imaging'],
+  },
+};
 
 const GUIDE_CARDS: GuideCard[] = [
   // ─── BEGINNER ───────────────────────────────────────────────────────────────
@@ -221,6 +243,33 @@ export default function TelescopesTab() {
 
       {/* Cards */}
       <div className="flex flex-col gap-3">
+        {SCOPE_INTROS[level] && (() => {
+          const intro = SCOPE_INTROS[level]!;
+          return (
+            <div className="glass-card overflow-hidden mb-1">
+              <div className="relative w-full" style={{ aspectRatio: '4/3', background: '#0B0E17' }}>
+                <Image src={intro.img} alt={intro.title} fill className="object-contain" sizes="(max-width: 672px) 100vw, 672px" />
+              </div>
+              <div className="p-4 pb-2">
+                <p className="text-white font-bold text-base">{intro.title}</p>
+                <p className="text-slate-400 text-xs mt-0.5">{intro.subtitle}</p>
+              </div>
+              <div className="px-4 pb-4 pt-2">
+                <p className="text-[10px] uppercase tracking-widest text-slate-600 mb-2">Key Parts</p>
+                <div className="flex flex-col gap-1.5">
+                  {intro.parts.map((part, i) => (
+                    <div key={i} className="flex items-start gap-2 text-xs">
+                      <span className="font-bold flex-shrink-0 mt-0.5" style={{ color: activeConfig.color }}>
+                        {i + 1}
+                      </span>
+                      <span className="text-slate-300">{part}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
         {cards.map(card => (
           <div key={card.step} className="glass-card p-4 flex flex-col gap-3">
             <div className="flex items-start gap-3">
