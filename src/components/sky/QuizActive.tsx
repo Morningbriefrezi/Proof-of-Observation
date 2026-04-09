@@ -19,6 +19,7 @@ export default function QuizActive({ quiz, onClose }: Props) {
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<'question' | 'feedback' | 'result'>('question');
   const [saved, setSaved] = useState(false);
+  const [answers, setAnswers] = useState<boolean[]>([]);
 
   const q = quiz.questions[idx];
   const total = quiz.questions.length;
@@ -30,6 +31,7 @@ export default function QuizActive({ quiz, onClose }: Props) {
     setPhase('feedback');
     const correct = i === q.correct;
     if (correct) setScore(s => s + 1);
+    setAnswers(prev => [...prev, correct]);
 
     setTimeout(() => {
       if (idx + 1 < total) {
@@ -39,7 +41,7 @@ export default function QuizActive({ quiz, onClose }: Props) {
       } else {
         setPhase('result');
       }
-    }, 900);
+    }, 2500);
   };
 
   const handleClose = () => {
@@ -55,7 +57,7 @@ export default function QuizActive({ quiz, onClose }: Props) {
       addQuizResult({ quizId: quiz.id, score, total, stars, timestamp: new Date().toISOString() });
       setSaved(true);
     }
-    setIdx(0); setSelected(null); setScore(0); setPhase('question'); setSaved(false);
+    setIdx(0); setSelected(null); setScore(0); setPhase('question'); setSaved(false); setAnswers([]);
   };
 
   const LABELS = ['A', 'B', 'C', 'D'];
@@ -107,6 +109,26 @@ export default function QuizActive({ quiz, onClose }: Props) {
                 {score >= 8 ? 'Outstanding!' : score >= 5 ? 'Well done!' : 'Keep learning!'}
               </p>
             </div>
+            <div className="w-full">
+              <div className="flex flex-wrap gap-1.5 justify-center">
+                {answers.map((correct, i) => (
+                  <div
+                    key={i}
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold"
+                    style={{
+                      background: correct ? 'rgba(52,211,153,0.15)' : 'rgba(239,68,68,0.15)',
+                      border: correct ? '1px solid rgba(52,211,153,0.3)' : '1px solid rgba(239,68,68,0.3)',
+                      color: correct ? '#34d399' : '#f87171',
+                    }}
+                  >
+                    {i + 1}
+                  </div>
+                ))}
+              </div>
+              <p className="text-slate-600 text-[10px] text-center mt-2">
+                {answers.filter(Boolean).length} correct · {answers.filter(b => !b).length} wrong
+              </p>
+            </div>
             <div className="flex gap-3 w-full">
               <button
                 onClick={restart}
@@ -137,6 +159,7 @@ export default function QuizActive({ quiz, onClose }: Props) {
             {/* Options */}
             <div className="flex flex-col gap-3">
               {q.options.map((opt, i) => {
+
                 let style: React.CSSProperties = {
                   background: 'rgba(255,255,255,0.03)',
                   border: '1px solid rgba(255,255,255,0.08)',
@@ -181,6 +204,22 @@ export default function QuizActive({ quiz, onClose }: Props) {
                 );
               })}
             </div>
+
+            {phase === 'feedback' && (
+              <div
+                className="mt-1 rounded-xl p-4 text-xs leading-relaxed"
+                style={{
+                  background: selected === q.correct ? 'rgba(52,211,153,0.08)' : 'rgba(239,68,68,0.08)',
+                  border: selected === q.correct ? '1px solid rgba(52,211,153,0.2)' : '1px solid rgba(239,68,68,0.2)',
+                  color: '#94a3b8',
+                }}
+              >
+                <span className="font-semibold" style={{ color: selected === q.correct ? '#34d399' : '#f87171' }}>
+                  {selected === q.correct ? '✓ Correct — ' : '✗ Incorrect — '}
+                </span>
+                {q.explanation[locale]}
+              </div>
+            )}
           </>
         )}
       </div>
