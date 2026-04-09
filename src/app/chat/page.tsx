@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import { useAppState } from '@/hooks/useAppState';
@@ -15,7 +16,7 @@ type Locale = 'en' | 'ka';
 
 const PLANETS = [
   {
-    emoji: '☿', key: 'mercury',
+    emoji: '☿', key: 'mercury', img: '/images/planets/mercury.jpg',
     name: { en: 'Mercury', ka: 'მერკური' },
     facts: {
       en: ['Closest planet to the Sun', 'No atmosphere — extreme temperature swings', 'A year is just 88 Earth days'],
@@ -27,7 +28,7 @@ const PLANETS = [
     color: '#b0b0b0',
   },
   {
-    emoji: '♀', key: 'venus',
+    emoji: '♀', key: 'venus', img: '/images/planets/venus.jpg',
     name: { en: 'Venus', ka: 'ვენერა' },
     facts: {
       en: ['Brightest planet — brighter than any star', 'Hottest planet (462°C) despite not being closest', 'Shows phases like the Moon in a telescope'],
@@ -39,7 +40,7 @@ const PLANETS = [
     color: '#e8c87a',
   },
   {
-    emoji: '🌍', key: 'earth',
+    emoji: '🌍', key: 'earth', img: '/images/planets/earth.jpg',
     name: { en: 'Earth', ka: 'დედამიწა' },
     facts: {
       en: ['Only known planet with life', 'One large moon stabilizes axial tilt', '71% surface covered by water'],
@@ -51,7 +52,7 @@ const PLANETS = [
     color: '#4a90d9',
   },
   {
-    emoji: '♂', key: 'mars',
+    emoji: '♂', key: 'mars', img: '/images/planets/mars.jpg',
     name: { en: 'Mars', ka: 'მარსი' },
     facts: {
       en: ['Red color from iron oxide (rust) in soil', 'Two tiny moons: Phobos and Deimos', 'Next opposition: May 2026 — best viewing in years'],
@@ -63,7 +64,7 @@ const PLANETS = [
     color: '#c1440e',
   },
   {
-    emoji: '♃', key: 'jupiter',
+    emoji: '♃', key: 'jupiter', img: '/images/planets/jupiter.jpg',
     name: { en: 'Jupiter', ka: 'იუპიტერი' },
     facts: {
       en: ['Largest planet — 1,300 Earths fit inside', 'Great Red Spot: a storm older than 400 years', '4 Galilean moons visible in binoculars'],
@@ -75,7 +76,7 @@ const PLANETS = [
     color: '#c88b3a',
   },
   {
-    emoji: '♄', key: 'saturn',
+    emoji: '♄', key: 'saturn', img: '/images/planets/saturn.jpg',
     name: { en: 'Saturn', ka: 'სატურნი' },
     facts: {
       en: ['Iconic ring system made of ice and rock', 'Least dense planet — would float on water', '83 known moons including giant Titan'],
@@ -87,7 +88,7 @@ const PLANETS = [
     color: '#e8d5a3',
   },
   {
-    emoji: '⛢', key: 'uranus',
+    emoji: '⛢', key: 'uranus', img: '/images/planets/uranus.jpg',
     name: { en: 'Uranus', ka: 'ურანი' },
     facts: {
       en: ['Rotates on its side (98° axial tilt)', 'Blue-green color from methane in atmosphere', 'Faint rings discovered in 1977'],
@@ -99,7 +100,7 @@ const PLANETS = [
     color: '#7de8e8',
   },
   {
-    emoji: '♆', key: 'neptune',
+    emoji: '♆', key: 'neptune', img: '/images/planets/neptune.jpg',
     name: { en: 'Neptune', ka: 'ნეპტუნი' },
     facts: {
       en: ['Windiest planet — winds up to 2,100 km/h', 'Takes 165 years to orbit the Sun', 'Largest moon Triton orbits backwards'],
@@ -252,9 +253,15 @@ function PlanetsTab({ locale, kidsMode }: { locale: Locale; kidsMode: boolean })
           className="glass-card text-left transition-all duration-200 hover:border-white/15 p-4"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl flex-shrink-0"
-              style={{ background: `${p.color}18`, border: `1px solid ${p.color}40` }}>
-              {p.emoji}
+            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 relative"
+              style={{ border: `1px solid ${p.color}40` }}>
+              <Image
+                src={p.img}
+                alt={p.name['en']}
+                fill
+                className="object-cover"
+                sizes="40px"
+              />
             </div>
             <div className="flex-1">
               <p className="text-white font-semibold text-sm">{p.name[locale]}</p>
@@ -264,6 +271,17 @@ function PlanetsTab({ locale, kidsMode }: { locale: Locale; kidsMode: boolean })
           </div>
           {expanded === p.key && (
             <div className="mt-4 flex flex-col gap-3" style={{ paddingLeft: '52px' }}>
+              <div className="relative w-full rounded-xl overflow-hidden mb-2" style={{ height: '160px' }}>
+                <Image
+                  src={p.img}
+                  alt={p.name[locale]}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 672px) 100vw, 672px"
+                />
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(7,11,20,0.8) 0%, transparent 60%)' }} />
+                <p className="absolute bottom-2 left-3 text-white text-xs font-semibold opacity-80">{p.name[locale]}</p>
+              </div>
               {kidsMode ? (
                 <div className="flex flex-col gap-2">
                   <p className="text-slate-300 text-xs leading-relaxed">⭐ {p.kidsLine[locale]}</p>
