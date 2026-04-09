@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 type Level = 'beginner' | 'intermediate' | 'advanced' | 'pro';
 
@@ -247,6 +248,15 @@ export default function TelescopesTab() {
               >
                 💡 {card.tip}
               </div>
+            )}
+            {level === 'intermediate' && card.step === 4 && (
+              <Link
+                href="/marketplace"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold transition-opacity hover:opacity-80"
+                style={{ color: '#FFD166' }}
+              >
+                Browse telescopes at Astroman →
+              </Link>
             )}
           </div>
         ))}
