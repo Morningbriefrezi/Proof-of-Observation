@@ -4,6 +4,16 @@ import { getVisiblePlanets } from '@/lib/planets';
 export async function GET(req: NextRequest) {
   const lat = parseFloat(req.nextUrl.searchParams.get('lat') ?? '41.6941');
   const lng = parseFloat(req.nextUrl.searchParams.get('lng') ?? '44.8337');
-  const planets = getVisiblePlanets(lat, lng, new Date());
-  return NextResponse.json(planets);
+
+  if (!isFinite(lat) || !isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    return NextResponse.json({ error: 'Invalid coordinates' }, { status: 400 });
+  }
+
+  try {
+    const planets = getVisiblePlanets(lat, lng, new Date());
+    return NextResponse.json(planets);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

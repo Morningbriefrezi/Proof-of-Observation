@@ -9,6 +9,10 @@ export async function GET(req: NextRequest) {
   const lat = parseFloat(searchParams.get('lat') ?? String(DEFAULT_LAT));
   const lng = parseFloat(searchParams.get('lng') ?? String(DEFAULT_LNG));
 
+  if (!isFinite(lat) || !isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    return NextResponse.json({ error: 'Invalid coordinates' }, { status: 400 });
+  }
+
   try {
     const data = await fetchSkyForecast(lat, lng);
     return NextResponse.json(data);

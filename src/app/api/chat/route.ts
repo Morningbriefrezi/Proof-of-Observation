@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
 import { fetchSkyForecast } from '@/lib/sky-data';
 import { getVisiblePlanets } from '@/lib/planets';
+import { CLAUDE_MODEL } from '@/lib/ai-config';
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -104,11 +105,21 @@ export async function POST(req: NextRequest) {
   if (!message?.trim()) {
     return new Response(JSON.stringify({ error: 'No message' }), { status: 400 });
   }
+  if (message.length > 2000) {
+    return new Response(JSON.stringify({ error: 'Message too long (max 2000 chars)' }), { status: 400 });
+  }
 
-  const systemPrompt = `${SYSTEM_PROMPT}\nUSER LANGUAGE: ${locale}`;
+  const VALID_LOCALES = ['en', 'ka'] as const;
+  const sanitizedLocale = VALID_LOCALES.includes(locale as typeof VALID_LOCALES[number]) ? locale : 'en';
+  const systemPrompt = `${SYSTEM_PROMPT}\nUSER LANGUAGE: ${sanitizedLocale}`;
+
+  const safeHistory = (body.history ?? [])
+    .filter(h => h.role === 'user' || h.role === 'assistant')
+    .filter(h => typeof h.content === 'string' && h.content.length > 0 && h.content.length <= 4000)
+    .slice(-8);
 
   const messages: Anthropic.MessageParam[] = [
-    ...history.slice(-8).map(h => ({ role: h.role, content: h.content })),
+    ...safeHistory.map(h => ({ role: h.role, content: h.content })),
     { role: 'user' as const, content: message },
   ];
 
@@ -116,7 +127,7 @@ export async function POST(req: NextRequest) {
   let firstResponse: Anthropic.Message;
   try {
     firstResponse = await client.messages.create({
-      model: 'claude-sonnet-4-6',
+      model: CLAUDE_MODEL,
       max_tokens: 1024,
       system: systemPrompt,
       tools: TOOLS,
@@ -162,7 +173,7 @@ export async function POST(req: NextRequest) {
   // Second call — stream the final response
   try {
     const stream = client.messages.stream({
-      model: 'claude-sonnet-4-6',
+      model: CLAUDE_MODEL,
       max_tokens: 600,
       system: systemPrompt,
       messages: finalMessages,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { createHash } from 'crypto';
+import { CLAUDE_MODEL } from '@/lib/ai-config';
 import type { PhotoVerificationResult, ObservationTarget, VerificationConfidence } from '@/lib/types';
 import { checkObjectVisibility } from '@/lib/astronomy-check';
 
@@ -65,8 +66,8 @@ export async function POST(req: NextRequest) {
   if (!file.type.startsWith('image/')) {
     return NextResponse.json({ error: 'file must be an image' }, { status: 400 });
   }
-  if (file.size > 50_000_000) {
-    return NextResponse.json({ error: 'file too large (max 50MB)' }, { status: 400 });
+  if (file.size > 10_000_000) {
+    return NextResponse.json({ error: 'file too large (max 10MB)' }, { status: 400 });
   }
   if (file.size < 10_000) {
     return NextResponse.json({ error: 'file too small (min 10KB)' }, { status: 400 });
@@ -80,6 +81,16 @@ export async function POST(req: NextRequest) {
 
   // Read file buffer + hash
   const buffer = Buffer.from(await file.arrayBuffer());
+
+  // Validate magic bytes — reject files that don't match a known image format
+  const isJpeg = buffer[0] === 0xff && buffer[1] === 0xd8;
+  const isPng = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47;
+  const isWebp = buffer.length >= 12 && buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50;
+  const isHeic = buffer.length >= 12 && buffer[4] === 0x66 && buffer[5] === 0x74 && buffer[6] === 0x79 && buffer[7] === 0x70;
+  if (!isJpeg && !isPng && !isWebp && !isHeic) {
+    return NextResponse.json({ error: 'file must be a valid image (JPEG, PNG, WebP, or HEIC)' }, { status: 400 });
+  }
+
   const fileHash = '0x' + createHash('sha256').update(buffer).digest('hex').slice(0, 40);
 
   // Base64 for Claude
@@ -165,7 +176,7 @@ Return ONLY valid JSON, no markdown, no preamble:
   let analysis: ClaudeAnalysis;
   try {
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
+      model: CLAUDE_MODEL,
       max_tokens: 500,
       system: 'You are an astronomy image verification system. You analyze photos of the night sky to determine what celestial object is shown and whether the image is authentic. Be generous but honest — phone photos of the moon are valid even if blurry. Screenshots and AI-generated images are not valid.',
       messages: [
