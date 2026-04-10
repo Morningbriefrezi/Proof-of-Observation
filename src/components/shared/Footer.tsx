@@ -20,6 +20,7 @@ export default function Footer() {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 16px', alignItems: 'center' }}>
           {[
             { href: '/sky',         label: 'Sky' },
+            { href: '/darksky',     label: 'Dark Sky Map' },
             { href: '/missions',    label: 'Missions' },
             { href: '/chat',        label: 'ASTRA AI' },
             { href: '/marketplace', label: 'Marketplace' },
