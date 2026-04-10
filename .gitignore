@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# playwright auth session (contains real tokens — never commit)
+stellar-toolkit/auth.json
+
+# playwright test results
+test-results/

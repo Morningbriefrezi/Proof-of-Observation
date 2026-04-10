@@ -1,14 +1,23 @@
 """
-Stellar — Console Error Detector
-Usage: python tests/detect_errors.py [--url http://localhost:3000]
+Stellar — Authenticated Error Detector
+Usage: python tests/detect_errors_auth.py [--url http://localhost:3000]
 
-Visits every page, collects JS errors, failed fetches, 404s, and React warnings.
-Run this after any code change to catch regressions instantly.
+Same as detect_errors.py but loads auth.json so pages run with a real
+Privy session. Run auth_setup.py first to create auth.json.
+
+Catches errors that only surface when a wallet is connected:
+  - NFT fetching failures
+  - Stars balance API errors
+  - Profile data loading issues
+  - Wallet-gated mission actions
 """
 
 import argparse
+import os
 import sys
 from playwright.sync_api import sync_playwright
+
+AUTH_FILE = os.path.join(os.path.dirname(__file__), "..", "auth.json")
 
 PAGES = [
     "/",
@@ -29,11 +38,17 @@ IGNORE_PATTERNS = [
     "__nextjs",
 ]
 
+
 def should_ignore(text: str) -> bool:
     return any(p in text for p in IGNORE_PATTERNS)
 
 
 def run(base_url: str) -> dict:
+    if not os.path.exists(AUTH_FILE):
+        print(f"ERROR: {AUTH_FILE} not found.")
+        print("Run auth_setup.py first:  python tests/auth_setup.py")
+        sys.exit(1)
+
     all_results = {}
 
     with sync_playwright() as p:
@@ -42,8 +57,10 @@ def run(base_url: str) -> dict:
             viewport={"width": 1440, "height": 900},
             geolocation={"latitude": 41.72, "longitude": 44.83},
             permissions=["geolocation"],
+            storage_state=AUTH_FILE,
         )
-        print(f"Stellar Error Detector  →  {base_url}\n")
+        print(f"Stellar Auth Error Detector  →  {base_url}")
+        print(f"Session: {AUTH_FILE}\n")
 
         for path in PAGES:
             errors = []
@@ -75,20 +92,30 @@ def run(base_url: str) -> dict:
 
             try:
                 page.goto(f"{base_url}{path}", wait_until="domcontentloaded", timeout=15000)
-                page.wait_for_timeout(800)
+                # Give React time to hydrate and fire authenticated useEffects
+                page.wait_for_timeout(2000)
             except Exception as e:
                 errors.append(f"[navigation] {e}")
+
+            # Check for auth-specific signals
+            auth_note = ""
+            try:
+                is_authed = page.evaluate(
+                    "() => Object.keys(localStorage).some(k => k.toLowerCase().includes('privy'))"
+                )
+                if not is_authed:
+                    auth_note = " (session expired — re-run auth_setup.py)"
+            except Exception:
+                pass
 
             total_issues = len(errors) + len(failed_requests)
             status = "OK " if total_issues == 0 else "ERR"
 
-            print(f"  {status}  {path}")
+            print(f"  {status}  {path}{auth_note}")
             for e in errors[:5]:
                 print(f"       [error]   {e[:120]}")
             for r in failed_requests[:3]:
                 print(f"       [request] {r[:120]}")
-            if warnings:
-                print(f"       [warn]    {len(warnings)} React warning(s) — run with --verbose to see")
 
             all_results[path] = {
                 "errors": errors,
@@ -104,7 +131,7 @@ def run(base_url: str) -> dict:
     total_errors = sum(len(v["errors"]) + len(v["failed_requests"]) for v in all_results.values())
     print(f"\n{'='*50}")
     if total_errors == 0:
-        print("All pages clean — no errors detected.")
+        print("All authenticated pages clean.")
     else:
         print(f"Total issues: {total_errors}")
         print("Fix errors above before submitting to Colosseum.")
@@ -112,9 +139,9 @@ def run(base_url: str) -> dict:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Detect JS errors on all Stellar pages")
+    parser = argparse.ArgumentParser()
     parser.add_argument("--url", default="http://localhost:3000")
-    parser.add_argument("--verbose", action="store_true", help="Show React warnings too")
+    parser.add_argument("--verbose", action="store_true")
     args = parser.parse_args()
 
     results = run(args.url)

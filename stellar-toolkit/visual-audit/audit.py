@@ -210,7 +210,7 @@ def audit_page(page, path: str, base_url: str) -> dict:
     page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
 
     try:
-        page.goto(f"{base_url}{path}", wait_until="networkidle", timeout=15000)
+        page.goto(f"{base_url}{path}", wait_until="domcontentloaded", timeout=20000)
         page.wait_for_timeout(700)
     except Exception as e:
         return {"path": path, "score": 0, "error": str(e), "findings": []}

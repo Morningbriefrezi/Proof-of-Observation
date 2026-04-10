@@ -97,15 +97,7 @@ export default function NftsPage() {
       .then(r => r.json()).then(d => setStarsBalance(d.balance)).catch(() => {});
   }, [authenticated, address, fetchNfts]);
 
-  if (!ready) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-6 h-6 rounded-full border-2 border-[#38F0FF] border-t-transparent animate-spin" />
-      </div>
-    );
-  }
-
-  if (!authenticated) {
+  if (!ready || !authenticated) {
     const demoNfts = [
       { name: 'Stellar Observation #001', target: 'Moon', date: 'Apr 9, 2026', cloudCover: '12', cloudColor: 'text-green-400', stars: '50' },
       { name: 'Stellar Observation #002', target: 'Jupiter', date: 'Apr 8, 2026', cloudCover: '24', cloudColor: 'text-green-400', stars: '75' },

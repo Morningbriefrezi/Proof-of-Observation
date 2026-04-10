@@ -13,7 +13,7 @@ import StarsRedemption from '@/components/shared/StarsRedemption';
 
 export default function ProfilePage() {
   const t = useTranslations('profile');
-  const { authenticated, ready, user, login, logout } = usePrivy();
+  const { authenticated, user, login, logout } = usePrivy();
   const { wallets } = useWallets();
   const { state, reset } = useAppState();
 
@@ -22,16 +22,10 @@ export default function ProfilePage() {
   const [confirmSignOut, setConfirmSignOut] = useState(false);
   const [obsCount, setObsCount] = useState<number>(0);
   const [obsStreak, setObsStreak] = useState<number>(0);
-  const [timedOut, setTimedOut] = useState(false);
   const [recentObs, setRecentObs] = useState<{ id: string; target: string; confidence: string; stars: number; created_at: string }[]>([]);
 
   const solanaWallet = wallets.find(w => (w as { chainType?: string }).chainType === 'solana');
   const address = solanaWallet?.address ?? state.walletAddress ?? null;
-
-  useEffect(() => {
-    const timer = setTimeout(() => setTimedOut(true), 5000);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     if (!address) return;
@@ -62,14 +56,6 @@ export default function ProfilePage() {
     await logout();
     reset();
   };
-
-  if (!ready && !timedOut) {
-    return (
-      <div className="max-w-2xl mx-auto px-4 py-20 flex items-center justify-center">
-        <div className="w-6 h-6 rounded-full border-2 border-[#FFD166] border-t-transparent animate-spin" />
-      </div>
-    );
-  }
 
   if (!authenticated) {
     return (
