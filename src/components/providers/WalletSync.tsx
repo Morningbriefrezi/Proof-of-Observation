@@ -7,7 +7,7 @@ import { useAppState } from '@/hooks/useAppState';
 export default function WalletSync() {
   const { wallets } = useWallets();
   const { setWallet } = useAppState();
-  const solWallet = wallets.find(w => w.chainType === 'solana');
+  const solWallet = wallets.find(w => (w as { chainType?: string }).chainType === 'solana');
 
   useEffect(() => {
     if (solWallet?.address) setWallet(solWallet.address);
