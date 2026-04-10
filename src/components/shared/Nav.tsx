@@ -124,8 +124,8 @@ export default function Nav() {
             ) : (
               <button
                 onClick={() => login()}
-                className="rounded-lg font-medium text-white transition-colors hover:bg-white/5"
-                style={{ border: '1px solid rgba(255,255,255,0.3)', fontSize: 13, padding: '6px 14px' }}
+                className="rounded-lg font-medium text-white transition-colors hover:bg-white/10"
+                style={{ border: '1px solid rgba(255,255,255,0.2)', fontSize: 13, padding: '6px 14px', background: 'rgba(255,255,255,0.08)' }}
               >
                 {t('signIn')}
               </button>

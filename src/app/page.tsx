@@ -9,7 +9,7 @@ import { useTranslations } from 'next-intl';
 import HomeSkyPreview from '@/components/home/HomeSkyPreview';
 import { usePrivy } from '@privy-io/react-auth';
 import { useAppState } from '@/hooks/useAppState';
-import { Telescope, Camera, Satellite, Layers, ChevronDown } from 'lucide-react';
+import { Telescope, Camera, Satellite, Layers } from 'lucide-react';
 
 export default function HomePage() {
   const t = useTranslations();
@@ -127,7 +127,7 @@ export default function HomePage() {
         ref={heroRef}
         style={{
           position: 'relative',
-          minHeight: '100vh',
+          minHeight: 'calc(100dvh - 64px)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
@@ -158,7 +158,7 @@ export default function HomePage() {
           justifyContent: 'center',
           textAlign: 'center',
           gap: 24,
-          padding: '16px 16px 80px',
+          padding: '16px 16px 32px',
         }}>
           {/* Badge */}
           <p style={{ color: '#FFD166', fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'monospace', margin: 0 }}>
@@ -228,7 +228,7 @@ export default function HomePage() {
                 Start Observing →
               </Link>
               <Link
-                href="/sky"
+                href="/missions"
                 style={{
                   background: 'rgba(255,255,255,0.06)',
                   border: '1px solid rgba(255,255,255,0.12)',
@@ -251,57 +251,41 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Live stats strip */}
+          {/* App nav shortcuts */}
           <div style={{
             display: 'flex',
-            gap: 12,
+            gap: 10,
             maxWidth: 480,
             width: '100%',
             justifyContent: 'center',
             flexWrap: 'wrap',
           }}>
             {[
-              { icon: '✦', title: 'Stars Token', sub: 'Live on Solana', color: '#34d399' },
-              { icon: '🔭', title: 'NFT Missions', sub: 'Seal your obs.', color: '#FFD166' },
-              { icon: '🛒', title: 'Real Rewards', sub: 'From Astroman', color: 'white' },
-            ].map(stat => (
-              <div
-                key={stat.title}
+              { href: '/sky',         icon: '☁', label: 'Sky',      sub: "Tonight's forecast", color: '#38F0FF' },
+              { href: '/missions',    icon: '🔭', label: 'Missions', sub: 'Earn Stars + NFTs',  color: '#34d399' },
+              { href: '/chat',        icon: '✦',  label: 'ASTRA',   sub: 'AI companion',       color: '#8B5CF6' },
+              { href: '/marketplace', icon: '🛒', label: 'Shop',     sub: 'Astroman store',     color: '#FFD166' },
+            ].map(item => (
+              <Link
+                key={item.href}
+                href={item.href}
                 style={{
-                  flex: '1 1 120px',
+                  flex: '1 1 80px',
                   background: 'rgba(255,255,255,0.04)',
                   border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: 12,
-                  padding: '12px 16px',
+                  borderRadius: 16,
+                  padding: '14px 12px',
                   textAlign: 'center',
-                  minWidth: 100,
+                  textDecoration: 'none',
+                  minWidth: 72,
                 }}
               >
-                <p style={{ color: stat.color, fontSize: 12, fontWeight: 600, margin: 0 }}>
-                  {stat.icon} {stat.title}
-                </p>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 2, marginBottom: 0 }}>
-                  {stat.sub}
-                </p>
-              </div>
+                <p style={{ fontSize: 20, margin: '0 0 4px' }}>{item.icon}</p>
+                <p style={{ color: item.color, fontSize: 12, fontWeight: 600, margin: 0 }}>{item.label}</p>
+                <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10, marginTop: 2, marginBottom: 0 }}>{item.sub}</p>
+              </Link>
             ))}
           </div>
-        </div>
-
-        {/* Scroll indicator */}
-        <div
-          className="hero-scroll"
-          style={{
-            position: 'absolute',
-            bottom: 28,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            color: 'rgba(255,255,255,0.25)',
-            zIndex: 1,
-            lineHeight: 1,
-          }}
-        >
-          <ChevronDown size={20} />
         </div>
       </section>
 
