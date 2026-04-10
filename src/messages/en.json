@@ -29,12 +29,6 @@
     "explorePlatform": "Explore the Platform",
     "observeEarn": "Observe & Earn",
     "observeEarnDesc": "Complete missions to unlock real rewards from the Astroman store.",
-    "featuredTarget": "Tonight's Best Target",
-    "noTargets": "Open the sky map to find tonight's best targets",
-    "joinStrip": "Observe · Earn · Collect",
-    "joinCta": "Join Free — Start Observing",
-    "bestViewing": "Best viewing",
-    "noWindow": "No clear window tonight",
     "steps": {
       "observe": "Observe",
       "observeDesc": "Point your telescope at tonight's target",
