@@ -11,12 +11,29 @@ export default function MembershipStep() {
   const unlocked = state.walletConnected;
   const done = state.membershipMinted;
   const [joining, setJoining] = useState(false);
+  const [error, setError] = useState('');
 
   const handleJoin = async () => {
+    if (!state.walletAddress) return;
     setJoining(true);
-    await new Promise(r => setTimeout(r, 800));
-    setMembership('local_' + Date.now().toString(36));
-    setJoining(false);
+    setError('');
+    try {
+      const res = await fetch('/api/club/activate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ walletAddress: state.walletAddress }),
+      });
+      const data = await res.json();
+      if (data.txId) {
+        setMembership(data.txId);
+      } else {
+        setError('Activation failed — try again');
+      }
+    } catch {
+      setError('Activation failed — try again');
+    } finally {
+      setJoining(false);
+    }
   };
 
   return (
@@ -41,9 +58,12 @@ export default function MembershipStep() {
               </div>
             </div>
           ) : (
-            <Button variant="brass" onClick={handleJoin} disabled={!unlocked || joining} className="w-full">
-              {joining ? 'Activating...' : 'Activate Now — It\'s Free ✦'}
-            </Button>
+            <>
+              <Button variant="brass" onClick={handleJoin} disabled={!unlocked || joining} className="w-full">
+                {joining ? 'Activating...' : 'Activate Now — It\'s Free ✦'}
+              </Button>
+              {error && <p className="text-amber-400 text-xs mt-2">{error}</p>}
+            </>
           )}
         </div>
       </div>

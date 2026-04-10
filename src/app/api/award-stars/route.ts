@@ -6,6 +6,12 @@ import bs58 from 'bs58';
 const DEVNET_URL = process.env.SOLANA_RPC_URL ?? 'https://api.devnet.solana.com';
 
 export async function POST(req: NextRequest) {
+  // Restrict to server-to-server calls only
+  const secret = process.env.INTERNAL_API_SECRET;
+  if (secret && req.headers.get('x-internal-secret') !== secret) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   let body: { recipientAddress?: unknown; amount?: unknown; reason?: unknown };
   try {
     body = await req.json();

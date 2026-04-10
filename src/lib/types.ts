@@ -88,6 +88,7 @@ export interface PhotoVerificationResult {
     capturedAt: string
     lat: number
     lon: number
+    cloudCover: number
     doubleCaptureVerified?: boolean
   }
 }

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { mintCompressedNFT } from '@/lib/mint-nft';
+import { db } from '@/lib/db';
+import { observationLog } from '@/lib/schema';
+import { eq, and, gte, isNotNull } from 'drizzle-orm';
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -25,6 +28,30 @@ export async function POST(req: NextRequest) {
   }
   if (typeof stars !== 'number' || !Number.isInteger(stars) || stars <= 0) {
     return NextResponse.json({ error: 'stars must be a positive integer' }, { status: 400 });
+  }
+
+  // Rate limit: one NFT per wallet+target per hour
+  if (userAddress && process.env.DATABASE_URL) {
+    try {
+      const oneHourAgo = new Date(Date.now() - 3600_000);
+      const recent = await db
+        .select({ id: observationLog.id })
+        .from(observationLog)
+        .where(
+          and(
+            eq(observationLog.wallet, userAddress),
+            eq(observationLog.target, target),
+            gte(observationLog.createdAt, oneHourAgo),
+            isNotNull(observationLog.mintTx)
+          )
+        )
+        .limit(1);
+      if (recent.length > 0) {
+        return NextResponse.json({ error: 'Already minted this target recently' }, { status: 429 });
+      }
+    } catch {
+      // DB check failure is non-fatal — allow the mint to proceed
+    }
   }
 
   try {

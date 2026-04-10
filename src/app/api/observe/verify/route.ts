@@ -183,6 +183,19 @@ Return ONLY valid JSON, no markdown, no preamble:
     return NextResponse.json({ error: 'Verification service unavailable' }, { status: 500 });
   }
 
+  // Fetch real-time cloud cover from Open-Meteo oracle
+  let cloudCover = 15; // safe default
+  try {
+    const skyUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=cloud_cover&timezone=auto`;
+    const skyRes = await fetch(skyUrl, { signal: AbortSignal.timeout(5000) });
+    if (skyRes.ok) {
+      const skyData = await skyRes.json();
+      cloudCover = skyData?.current?.cloud_cover ?? 15;
+    }
+  } catch {
+    // non-fatal — use default
+  }
+
   // Astronomy cross-check
   const astroCheck = await checkObjectVisibility({
     target: analysis.target,
@@ -249,6 +262,7 @@ Return ONLY valid JSON, no markdown, no preamble:
       capturedAt: capturedAt || new Date().toISOString(),
       lat,
       lon,
+      cloudCover,
       ...(isDoubleCapture && analysis.liveCaptureConfirmed ? { doubleCaptureVerified: true } : {}),
     },
   };

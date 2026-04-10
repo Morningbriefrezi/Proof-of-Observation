@@ -6,13 +6,11 @@ import {
 } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 
-const DEVNET_URL = 'https://api.devnet.solana.com';
+const RPC_URL = process.env.SOLANA_RPC_URL ?? 'https://api.devnet.solana.com';
 const MEMO_PROGRAM_ID = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
 
-let _connection: Connection | null = null;
 function getConnection(): Connection {
-  if (!_connection) _connection = new Connection(DEVNET_URL, 'confirmed');
-  return _connection;
+  return new Connection(RPC_URL, 'confirmed');
 }
 
 export type MintResult = {
@@ -36,9 +34,10 @@ export async function ensureBalance(publicKey: PublicKey): Promise<void> {
     const balance = await connection.getBalance(publicKey);
     console.log(`[Solana] Balance: ${(balance / LAMPORTS_PER_SOL).toFixed(3)} SOL`);
     if (balance < 0.01 * LAMPORTS_PER_SOL) {
-      console.log('[Solana] Low balance, airdropping...');
+      console.log('[Solana] Low balance, airdropping (devnet only)...');
       const sig = await connection.requestAirdrop(publicKey, LAMPORTS_PER_SOL);
-      await connection.confirmTransaction(sig, 'confirmed');
+      const latestBlockhash = await connection.getLatestBlockhash();
+      await connection.confirmTransaction({ signature: sig, ...latestBlockhash }, 'confirmed');
       console.log('[Solana] Airdrop done');
     }
   } catch (e) {
@@ -145,9 +144,3 @@ export async function getStarsBalance(walletAddress: string): Promise<number> {
   }
 }
 
-// Legacy shim for old callers
-export async function mintNFT(name: string, _symbol: string): Promise<{ success: boolean; txId: string; mint: string }> {
-  await new Promise(r => setTimeout(r, 2000));
-  const r = simResult();
-  return { success: true, txId: r.txId, mint: r.txId.slice(0, 8) };
-}

@@ -42,6 +42,7 @@ export default function ObserveFlow({ onClose, walletAddress }: ObserveFlowProps
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const firstFrameFileRef = useRef<File | null>(null);
+  const mintingRef = useRef(false);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -155,15 +156,6 @@ export default function ObserveFlow({ onClose, walletAddress }: ObserveFlowProps
     }
   };
 
-  const awardStars = (v: PhotoVerificationResult) => {
-    if (!walletAddress || v.starsAwarded <= 0) return;
-    fetch('/api/award-stars', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ recipientAddress: walletAddress, amount: v.starsAwarded, reason: `Photo: ${v.identifiedObject}` }),
-    }).catch(() => {});
-  };
-
   const logObservation = (v: PhotoVerificationResult, mintTx: string | null = null) => {
     if (!walletAddress) return;
     fetch('/api/observe/log', {
@@ -180,7 +172,8 @@ export default function ObserveFlow({ onClose, walletAddress }: ObserveFlowProps
   };
 
   const handleMintObservation = async () => {
-    if (!verification) return;
+    if (!verification || mintingRef.current) return;
+    mintingRef.current = true;
     setStep('minting');
     let txId = '';
     try {
@@ -193,8 +186,8 @@ export default function ObserveFlow({ onClose, walletAddress }: ObserveFlowProps
           timestampMs: new Date(verification.metadata.capturedAt).getTime(),
           lat: verification.metadata.lat,
           lon: verification.metadata.lon,
-          cloudCover: 0,
-          oracleHash: verification.metadata.fileHash.slice(0, 42),
+          cloudCover: verification.metadata.cloudCover,
+          oracleHash: verification.metadata.fileHash,
           stars: verification.starsAwarded,
         }),
       });
@@ -204,14 +197,14 @@ export default function ObserveFlow({ onClose, walletAddress }: ObserveFlowProps
         setMintTxId(txId);
       }
     } catch { /* fall through to done */ }
-    awardStars(verification);
     logObservation(verification, txId || null);
+    mintingRef.current = false;
     setStep('done');
   };
 
   const handleCollectOnly = () => {
-    if (!verification) return;
-    awardStars(verification);
+    if (!verification || mintingRef.current) return;
+    mintingRef.current = true;
     logObservation(verification);
     setStep('done');
   };
