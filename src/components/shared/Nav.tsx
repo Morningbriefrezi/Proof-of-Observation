@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useAppState } from '@/hooks/useAppState';
 import { useState } from 'react';
-import { CloudSun, BookOpen, ShoppingBag, Satellite, User, Home } from 'lucide-react';
+import { CloudSun, BookOpen, ShoppingBag, Satellite, User } from 'lucide-react';
 import AstroLogo from './AstroLogo';
 import LanguageToggle from '@/components/nav/LanguageToggle';
 import { useTranslations } from 'next-intl';
@@ -22,7 +22,6 @@ export default function Nav() {
   const t = useTranslations('nav');
 
   const tabs = [
-    { href: '/',            label: 'Home',           icon: <Home size={17} /> },
     { href: '/sky',         label: t('sky'),         icon: <CloudSun size={17} /> },
     { href: '/chat',        label: t('learn'),       icon: <BookOpen size={17} /> },
     { href: '/marketplace', label: t('marketplace'), icon: <ShoppingBag size={17} /> },
@@ -125,7 +124,8 @@ export default function Nav() {
             ) : (
               <button
                 onClick={() => login()}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#8B5CF6] hover:bg-[#7C3AED] text-white transition-colors"
+                className="rounded-lg font-medium text-white transition-colors hover:bg-white/5"
+                style={{ border: '1px solid rgba(255,255,255,0.3)', fontSize: 13, padding: '6px 14px' }}
               >
                 {t('signIn')}
               </button>
