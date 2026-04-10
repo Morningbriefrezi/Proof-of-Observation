@@ -146,31 +146,6 @@ export default function HomePage() {
           pointerEvents: 'none',
         }} />
 
-        {/* Announcement bar */}
-        <div style={{
-          position: 'relative',
-          zIndex: 1,
-          width: '100%',
-          height: 32,
-          background: 'rgba(52,211,153,0.08)',
-          borderBottom: '1px solid rgba(52,211,153,0.12)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 16px',
-          flexShrink: 0,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', display: 'inline-block', flexShrink: 0 }} />
-            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11 }}>
-              Live: Sky conditions updating · Tbilisi clear 12%
-            </span>
-          </div>
-          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, display: 'none' }} className="sm:inline-block">
-            2nd place · Superteam Georgia Hackathon ✦
-          </span>
-        </div>
-
         {/* Hero content */}
         <div style={{
           position: 'relative',
@@ -182,7 +157,7 @@ export default function HomePage() {
           justifyContent: 'center',
           textAlign: 'center',
           gap: 24,
-          padding: '48px 16px 80px',
+          padding: '16px 16px 80px',
         }}>
           {/* Badge */}
           <p style={{ color: '#FFD166', fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'monospace', margin: 0 }}>
