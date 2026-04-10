@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CloudSun, BookOpen, ShoppingBag, Satellite, User } from 'lucide-react';
+import { CloudSun, BookOpen, ShoppingBag, Satellite, User, Camera } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export default function BottomNav() {
@@ -12,7 +12,7 @@ export default function BottomNav() {
   const tabs = [
     { href: '/sky',         label: t('sky'),         icon: <CloudSun size={18} /> },
     { href: '/chat',        label: t('learn'),       icon: <BookOpen size={18} /> },
-    { href: '/marketplace', label: t('marketplace'), icon: <ShoppingBag size={18} /> },
+    { href: '/observe',     label: t('observe'),     icon: <Camera size={18} /> },
     { href: '/missions',    label: t('missions'),    icon: <Satellite size={18} /> },
     { href: '/profile',     label: t('profile'),     icon: <User size={18} /> },
   ];

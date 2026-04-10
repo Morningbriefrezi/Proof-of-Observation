@@ -71,15 +71,14 @@ export default function MissionsPage() {
             <h1 className="text-xl sm:text-2xl font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>
               Missions
             </h1>
-            <span className="ml-auto text-[10px] text-slate-700 uppercase tracking-widest">Devnet</span>
           </div>
 
           <div className="flex items-center gap-2 mb-3">
             <div className="w-1.5 h-1.5 rounded-full bg-[#34d399] animate-pulse" />
             <span className="text-[11px] text-slate-600">
               {new Date().getHours() >= 18 || new Date().getHours() < 5
-                ? 'Sky conditions: Observable'
-                : 'Daytime — missions available tonight'}
+                ? '🟢 Sky conditions: Good for observing tonight'
+                : '☀️ Daytime — come back after sunset'}
             </span>
           </div>
 

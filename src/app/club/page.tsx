@@ -85,19 +85,19 @@ export default function ClubPage() {
   }, [state.telescope]);
 
   const steps = [
-    { label: 'Wallet', done: state.walletConnected },
-    { label: 'Membership', done: state.membershipMinted },
+    { label: 'Join', done: state.walletConnected },
+    { label: 'Start', done: state.membershipMinted },
     { label: 'Telescope', done: !!state.telescope },
   ];
 
-  const stepTitles = ['Connect Wallet', 'Claim Membership', 'Register Telescope'];
+  const stepTitles = ['Create Your Account', 'Activate Observer Status', 'Register Your Telescope'];
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 sm:py-12 animate-page-enter">
       <div className="mb-6 text-center">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#FFD166]">Join Stellar Club</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#FFD166]">Start Your Observation Journey</h1>
         <p className="text-[var(--text-primary)] mt-2 text-sm sm:text-base">
-          Observe the night sky, earn real rewards.
+          Join thousands of astronomers. Free forever.
         </p>
       </div>
 

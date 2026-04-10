@@ -643,10 +643,10 @@ export default function LearnPage() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>
-                {locale === 'ka' ? 'სტელარის აკადემია' : 'Stellar Academy'}
+                {locale === 'ka' ? 'ჰკითხე ASTRA-ს' : 'Ask ASTRA'}
               </h1>
               <p className="text-slate-500 text-sm mt-0.5">
-                {locale === 'ka' ? 'ასტრონომია — დამწყებიდან პროფესიონალამდე' : 'Astronomy from first light to deep space'}
+                {locale === 'ka' ? 'შენი პირადი ასტრონომიული გიდი.' : 'Your personal astronomy guide. Ask about tonight\'s sky, your telescope, or the cosmos.'}
               </p>
             </div>
           </div>
@@ -681,6 +681,15 @@ export default function LearnPage() {
               : (locale === 'ka' ? 'ჩართე ბავშვების რეჟიმი' : 'Kids Mode')}
           </button>
         </div>
+
+        {/* Open ASTRA */}
+        <button
+          onClick={() => (document.querySelector('[aria-label="Open ASTRA astronomy assistant"]') as HTMLButtonElement | null)?.click()}
+          className="w-full py-4 rounded-2xl text-sm font-bold mb-2 transition-all"
+          style={{ background: 'linear-gradient(135deg, rgba(56,240,255,0.15), rgba(26,143,160,0.1))', border: '1px solid rgba(56,240,255,0.25)', color: '#38F0FF' }}
+        >
+          {locale === 'ka' ? '💬 გახსენი ASTRA ჩათი →' : '💬 Open ASTRA Chat →'}
+        </button>
 
         {/* Tab bar */}
         <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-1">

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Product, ProductCategory } from '@/lib/products';
+import { Product, ProductCategory, PRODUCTS } from '@/lib/products';
 import ProductCard from './ProductCard';
 import ProductDetail from './ProductDetail';
 
@@ -79,20 +79,29 @@ export default function ProductGrid() {
 
   if (error) {
     return (
-      <div className="glass-card p-8 text-center">
-        <p className="text-slate-400 text-sm mb-4">{t('errorLoad')}</p>
-        <button
-          onClick={load}
-          className="text-xs text-[#38F0FF] hover:underline"
-        >
-          Retry
-        </button>
+      <div className="flex flex-col gap-4">
+        <a href="https://astroman.ge?utm_source=stellar&utm_medium=app"
+          target="_blank" rel="noopener noreferrer"
+          className="block w-full py-4 text-center rounded-xl font-semibold text-sm mb-2"
+          style={{ background: 'rgba(255,209,102,0.1)', border: '1px solid rgba(255,209,102,0.3)', color: '#FFD166' }}>
+          Browse all 200+ telescopes at astroman.ge →
+        </a>
+        <p className="text-sm text-slate-400 mb-2">Earn Stars on missions to unlock exclusive member discounts</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {PRODUCTS.slice(0, 6).map(p => (
+            <ProductCard key={p.id} product={p} solPerGEL={solPerGEL} onSelect={setSelected} />
+          ))}
+        </div>
+        {selected && (
+          <ProductDetail product={selected} solPerGEL={solPerGEL} onClose={() => setSelected(null)} />
+        )}
       </div>
     );
   }
 
   return (
     <>
+      <p className="text-sm text-slate-400 mb-4">Earn Stars on missions to unlock exclusive member discounts</p>
       {/* Filter tabs */}
       <div className="flex gap-2 flex-wrap mb-6">
         {FILTERS.map(f => (

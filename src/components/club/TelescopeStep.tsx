@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Telescope } from 'lucide-react';
 import { useAppState } from '@/hooks/useAppState';
 import { TELESCOPE_BRANDS } from '@/lib/constants';
@@ -9,6 +10,7 @@ import Button from '@/components/shared/Button';
 
 export default function TelescopeStep() {
   const { state, setTelescope } = useAppState();
+  const router = useRouter();
   const unlocked = state.membershipMinted;
   const done = !!state.telescope;
   const [form, setForm] = useState({ brand: 'Celestron', model: '', aperture: '' });
@@ -61,6 +63,12 @@ export default function TelescopeStep() {
               <Button variant="cyan" onClick={handleSave} disabled={!form.model || !form.aperture || saving} className="w-full">
                 {saving ? 'Saving...' : 'Register Telescope 🔭'}
               </Button>
+              <button
+                onClick={() => router.push('/missions')}
+                className="text-xs text-slate-600 hover:text-slate-400 underline mt-2"
+              >
+                Skip for now →
+              </button>
             </div>
           )}
         </div>

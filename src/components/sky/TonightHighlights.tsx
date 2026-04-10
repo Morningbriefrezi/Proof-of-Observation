@@ -70,6 +70,7 @@ export default function TonightHighlights() {
   const { lat, lng, ready } = useLocation();
   const [card, setCard] = useState<CardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const compute = useCallback(async (lat: number, lng: number) => {
     try {
@@ -79,7 +80,7 @@ export default function TonightHighlights() {
       ]);
       const days = await forecastRes.json() as SkyDay[];
       const planets = await planetsRes.json() as PlanetInfo[];
-      if (!days.length) { setLoading(false); return; }
+      if (!days.length) { setError(true); setLoading(false); return; }
 
       const today = days[0];
       const { best, window, state } = eveningStats(today.hours);
@@ -95,6 +96,7 @@ export default function TonightHighlights() {
       });
       setLoading(false);
     } catch {
+      setError(true);
       setLoading(false);
     }
   }, [locale]);
@@ -106,7 +108,20 @@ export default function TonightHighlights() {
   if (loading) {
     return <div className="glass-card h-[120px] animate-pulse" />;
   }
-  if (!card) return null;
+  if (error || !card) {
+    return (
+      <div className="glass-card p-5 flex flex-col items-center gap-3 text-center"
+        style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+        <p className="text-slate-400 text-sm">{t('forecastError')}</p>
+        <button
+          onClick={() => { setError(false); setLoading(true); compute(lat, lng); }}
+          className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-sm hover:bg-white/10 transition-colors"
+        >
+          {t('retry')}
+        </button>
+      </div>
+    );
+  }
 
   const { state, cloudCover, temp, wind, window, nextClear, planets } = card;
 

@@ -284,10 +284,10 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
 
           <div className="flex flex-col gap-3 w-full">
             <button
-              onClick={() => router.push('/nfts')}
+              onClick={() => { onClose(); router.push('/profile'); }}
               className="w-full py-3 rounded-xl text-white text-sm font-semibold transition-colors"
               style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)' }}>
-              View My Collection
+              View My Discoveries
             </button>
             <button
               onClick={onClose}
@@ -302,27 +302,27 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
             <div className="flex gap-2">
               <button
                 onClick={() => {
-                  const text = encodeURIComponent(`I just observed ${mission.name} and sealed it on Solana ✦\n\nstellarrclub.vercel.app`);
+                  const text = encodeURIComponent(`I just observed ${mission.name} through my telescope ✦ Verified with Stellar by Astroman\n\nstellarrclub.vercel.app`);
                   window.open(`https://warpcast.com/~/compose?text=${text}`, '_blank');
                 }}
                 className="flex-1 py-2.5 rounded-xl text-xs font-medium bg-[rgba(132,101,203,0.08)] border border-[rgba(132,101,203,0.2)] text-[#8465CB] hover:bg-[rgba(132,101,203,0.15)] transition-colors"
               >
-                Warpcast
+                Share on Warpcast
               </button>
               <button
                 onClick={() => {
-                  const text = encodeURIComponent(`Just observed ${mission.name} and sealed it as a compressed NFT on @solana ✦\n\nstellarrclub.vercel.app`);
+                  const text = encodeURIComponent(`Just observed ${mission.name} through my telescope and logged my discovery ✦\n\n@AstromanGe stellarrclub.vercel.app`);
                   window.open(`https://x.com/intent/tweet?text=${text}`, '_blank');
                 }}
                 className="flex-1 py-2.5 rounded-xl text-xs font-medium bg-[rgba(255,255,255,0.04)] border border-white/[0.08] text-white/60 hover:bg-white/[0.08] transition-colors"
               >
-                Post on X
+                Share on X
               </button>
             </div>
           </div>
 
           <p className="mt-8 text-[10px]" style={{ color: 'rgba(255,255,255,0.15)' }}>
-            Compressed NFT · Solana Devnet · {new Date().toLocaleDateString()}
+            Observation verified · {new Date().toLocaleDateString()}
           </p>
         </div>
       </div>

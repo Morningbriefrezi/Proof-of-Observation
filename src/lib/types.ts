@@ -60,3 +60,42 @@ export interface AppState {
   claimedRewards: string[];
   completedQuizzes: QuizResult[];
 }
+
+export type ObservationTarget = 'moon' | 'planet' | 'stars' | 'constellation' | 'deep_sky' | 'unknown'
+
+export type VerificationConfidence = 'high' | 'medium' | 'low' | 'rejected'
+
+export interface PhotoVerificationResult {
+  accepted: boolean
+  confidence: VerificationConfidence
+  target: ObservationTarget
+  identifiedObject: string
+  reason: string
+  astronomyCheck: {
+    objectVisible: boolean
+    expectedPhase?: string
+    expectedAltitude?: number
+  }
+  imageAnalysis: {
+    isScreenshot: boolean
+    isAiGenerated: boolean
+    hasNightSkyCharacteristics: boolean
+    sharpness: 'high' | 'medium' | 'low'
+  }
+  starsAwarded: number
+  metadata: {
+    fileHash: string
+    capturedAt: string
+    lat: number
+    lon: number
+    doubleCaptureVerified?: boolean
+  }
+}
+
+export interface UserObservation {
+  id: string
+  photo: string
+  verification: PhotoVerificationResult
+  mintTxId?: string
+  createdAt: string
+}
