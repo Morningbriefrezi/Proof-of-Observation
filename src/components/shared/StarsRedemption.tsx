@@ -9,6 +9,7 @@ const REWARDS_TIERS = [
 ];
 
 export default function StarsRedemption({ starsBalance }: { starsBalance: number }) {
+  const [open, setOpen] = useState(false);
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
 
   const handleClaim = (code: string) => {
@@ -17,10 +18,21 @@ export default function StarsRedemption({ starsBalance }: { starsBalance: number
   };
 
   return (
-    <div className="flex flex-col gap-3 mb-6">
-      <p className="text-xs text-slate-400">
-        You have <span className="text-[#FFD166] font-semibold">{starsBalance} ✦</span> Stars — redeem for rewards at astroman.ge
-      </p>
+    <div className="mb-6">
+      {/* Collapsed summary bar */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all"
+        style={{ background: 'rgba(255,209,102,0.07)', border: '1px solid rgba(255,209,102,0.15)' }}
+      >
+        <span className="text-sm text-slate-300">
+          <span className="text-[#FFD166] font-semibold">{starsBalance} ✦</span> Stars — redeem rewards
+        </span>
+        <span className="text-[#FFD166] text-xs">{open ? '▲' : '▼'}</span>
+      </button>
+
+      {open && (
+        <div className="flex flex-col gap-3 mt-3">
       {REWARDS_TIERS.map(tier => {
         const progress = Math.min((starsBalance / tier.stars) * 100, 100);
         const unlocked = starsBalance >= tier.stars;
@@ -65,6 +77,8 @@ export default function StarsRedemption({ starsBalance }: { starsBalance: number
           </div>
         );
       })}
+        </div>
+      )}
     </div>
   );
 }

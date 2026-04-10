@@ -620,7 +620,7 @@ function EventsTab({ locale }: { locale: Locale }) {
 interface ChatMessage { role: 'user' | 'assistant'; content: string; }
 
 function ChatTab({ locale }: { locale: Locale }) {
-  const { state } = useAppState();
+  const [chatOpen, setChatOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([{
     role: 'assistant',
     content: "Hello, Observer. I'm ASTRA — your astronomy assistant. Ask me anything about telescopes, tonight's sky, or the cosmos. ✦",
@@ -634,10 +634,11 @@ function ChatTab({ locale }: { locale: Locale }) {
   const hour = new Date().getHours();
   const isNight = hour >= 20 || hour < 5;
   const suggestions = isNight
-    ? ['What can I observe right now?', 'How do I find Saturn tonight?', "What's the best beginner target?", 'How do I photograph the Moon?']
-    : ['What will be visible tonight?', 'How do I collimate a reflector?', 'What is the Orion Nebula?', 'How do I read a star map?'];
+    ? ['What can I observe right now?', 'How do I find Saturn tonight?', "What's the best beginner target?"]
+    : ['What will be visible tonight?', 'How do I collimate a reflector?', 'What is the Orion Nebula?'];
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, loading]);
+  useEffect(() => { if (chatOpen) setTimeout(() => inputRef.current?.focus(), 100); }, [chatOpen]);
 
   const send = async (text?: string) => {
     const msg = (text ?? input).trim();
@@ -687,26 +688,77 @@ function ChatTab({ locale }: { locale: Locale }) {
     }
   };
 
+  if (!chatOpen) {
+    return (
+      <div className="flex flex-col gap-4">
+        {/* Open chat button */}
+        <button
+          onClick={() => setChatOpen(true)}
+          className="w-full flex items-center gap-4 px-5 py-5 rounded-2xl text-left transition-all active:scale-[0.98] hover:border-[#38F0FF]/30"
+          style={{ background: 'linear-gradient(135deg, rgba(56,240,255,0.08), rgba(26,143,160,0.04))', border: '1px solid rgba(56,240,255,0.18)' }}
+        >
+          <div className="relative flex-shrink-0">
+            <div className="w-11 h-11 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(56,240,255,0.12)', border: '1px solid rgba(56,240,255,0.25)' }}>
+              <Radio size={18} className="text-[#38F0FF]" />
+            </div>
+            <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#34d399] border-2 border-[#080e1e]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white font-semibold text-sm">ASTRA</p>
+            <p className="text-slate-400 text-xs mt-0.5">
+              {locale === 'ka' ? 'შენი AI ასტრონომიული ასისტენტი' : 'Your AI astronomy assistant'}
+            </p>
+          </div>
+          <span className="text-[#38F0FF] text-xs font-medium flex-shrink-0">
+            {locale === 'ka' ? 'ჩათი →' : 'Chat →'}
+          </span>
+        </button>
+
+        {/* Suggestion chips */}
+        <div className="flex flex-col gap-2">
+          <p className="text-slate-600 text-[10px] uppercase tracking-widest">
+            {locale === 'ka' ? 'ხშირი კითხვები' : 'Try asking'}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {suggestions.map(s => (
+              <button key={s}
+                onClick={() => { setChatOpen(true); setTimeout(() => send(s), 50); }}
+                className="text-xs px-3 py-2 rounded-xl transition-all hover:border-[#38F0FF]/40 text-left"
+                style={{ background: 'rgba(56,240,255,0.04)', border: '1px solid rgba(56,240,255,0.1)', color: 'rgba(56,240,255,0.75)' }}>
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-3">
-      {/* ASTRA header */}
-      <div className="flex items-center gap-3 px-4 py-3 rounded-2xl"
-        style={{ background: 'rgba(56,240,255,0.04)', border: '1px solid rgba(56,240,255,0.12)' }}>
+      {/* Header with close */}
+      <div className="flex items-center gap-3">
         <div className="relative flex-shrink-0">
-          <div className="w-9 h-9 rounded-full flex items-center justify-center"
+          <div className="w-8 h-8 rounded-full flex items-center justify-center"
             style={{ background: 'rgba(56,240,255,0.1)', border: '1px solid rgba(56,240,255,0.2)' }}>
-            <Radio size={16} className="text-[#38F0FF]" />
+            <Radio size={14} className="text-[#38F0FF]" />
           </div>
-          <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#34d399] border-2 border-[#080e1e]" />
+          <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#34d399] border border-[#080e1e]" />
         </div>
-        <div>
-          <p className="text-white text-sm font-semibold">ASTRA</p>
-          <p className="text-[#38F0FF]/50 text-[10px] font-mono">MISSION CONTROL · ONLINE</p>
+        <div className="flex-1">
+          <p className="text-white text-sm font-semibold leading-none">ASTRA</p>
+          <p className="text-[#38F0FF]/50 text-[10px] font-mono mt-0.5">ONLINE</p>
         </div>
+        <button onClick={() => setChatOpen(false)}
+          className="text-xs text-slate-500 hover:text-white px-2 py-1 rounded-lg transition-colors"
+          style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+          {locale === 'ka' ? 'დახურვა' : 'Close'}
+        </button>
       </div>
 
       {/* Messages */}
-      <div className="flex flex-col gap-3 min-h-[320px] max-h-[480px] overflow-y-auto px-1 scrollbar-hide">
+      <div className="flex flex-col gap-3 max-h-[420px] overflow-y-auto px-1 scrollbar-hide">
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             {m.role === 'assistant' && (
@@ -752,32 +804,18 @@ function ChatTab({ locale }: { locale: Locale }) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Suggestion chips */}
-      {messages.length <= 1 && (
-        <div className="flex flex-wrap gap-1.5">
-          {suggestions.map(s => (
-            <button key={s} onClick={() => send(s)}
-              className="text-[11px] px-3 py-1.5 rounded-full transition-all hover:border-[#38F0FF]/40"
-              style={{ background: 'rgba(56,240,255,0.04)', border: '1px solid rgba(56,240,255,0.12)', color: 'rgba(56,240,255,0.7)' }}>
-              {s}
-            </button>
-          ))}
-        </div>
-      )}
-
       {/* Input */}
-      <div className="flex gap-2 pt-1" style={{ borderTop: '1px solid rgba(56,240,255,0.07)' }}>
+      <div className="flex gap-2" style={{ borderTop: '1px solid rgba(56,240,255,0.07)', paddingTop: '0.75rem' }}>
         <input
           ref={inputRef}
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
-          placeholder={locale === 'ka' ? 'ჰკითხე ტელესკოპების, სამიზნეების, ტექნიკის შესახებ…' : 'Ask about telescopes, targets, technique…'}
+          placeholder={locale === 'ka' ? 'ჰკითხე ტელესკოპების, ცის შესახებ…' : 'Ask about telescopes, tonight\'s sky…'}
           className="flex-1 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none transition-colors"
           style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(56,240,255,0.1)' }}
           onFocus={e => (e.target.style.borderColor = 'rgba(56,240,255,0.3)')}
           onBlur={e => (e.target.style.borderColor = 'rgba(56,240,255,0.1)')}
-          autoFocus
         />
         <button onClick={() => send()} disabled={!input.trim() || loading}
           className="w-11 h-11 rounded-xl flex items-center justify-center transition-all active:scale-95 flex-shrink-0"
@@ -795,12 +833,12 @@ function ChatTab({ locale }: { locale: Locale }) {
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 const TAB_CONFIG: { id: Tab; icon: string; en: string; ka: string }[] = [
-  { id: 'chat',        icon: '💬', en: 'Ask ASTRA',  ka: 'ASTRA ჩათი' },
-  { id: 'planets',     icon: '🪐', en: 'Planets',    ka: 'პლანეტები' },
-  { id: 'deepsky',     icon: '🌌', en: 'Deep Sky',   ka: 'ღრმა ცა' },
-  { id: 'telescopes',  icon: '🔭', en: 'Telescopes', ka: 'ტელესკოპები' },
-  { id: 'quizzes',     icon: '🧠', en: 'Quizzes',    ka: 'ქვიზები' },
-  { id: 'events',      icon: '📅', en: 'Sky Events', ka: 'ცის მოვლენები' },
+  { id: 'chat',        icon: '💬', en: 'ASTRA',    ka: 'ASTRA' },
+  { id: 'planets',     icon: '🪐', en: 'Planets',  ka: 'პლანეტები' },
+  { id: 'deepsky',     icon: '🌌', en: 'Deep Sky', ka: 'ღრმა ცა' },
+  { id: 'telescopes',  icon: '🔭', en: 'Scopes',   ka: 'ტელესკოპები' },
+  { id: 'quizzes',     icon: '🧠', en: 'Quizzes',  ka: 'ქვიზები' },
+  { id: 'events',      icon: '📅', en: 'Events',   ka: 'მოვლენები' },
 ];
 
 export default function LearnPage() {
@@ -880,7 +918,7 @@ export default function LearnPage() {
               }}
             >
               <span>{t.icon}</span>
-              <span className="hidden sm:inline">{t[locale]}</span>
+              <span>{t[locale]}</span>
             </button>
           ))}
         </div>
