@@ -71,10 +71,3 @@ export const AGENT_META = {
   oracle: 'open-meteo-v1',
   network: 'solana_devnet',
 };
-
-export const CONTEXT_ENGINE = {
-  provider: 'scriptonia',
-  version: '1.0',
-  model: 'mission-context-v1',
-  url: 'https://scriptonia.xyz',
-};

@@ -38,7 +38,7 @@ export async function GET() {
             marginTop: 12,
           }}
         >
-          Observe · Verify · Seal on Solana
+          Observe the Sky · Earn on Solana
         </div>
 
         {/* Stat boxes */}

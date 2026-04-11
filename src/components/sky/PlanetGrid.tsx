@@ -65,7 +65,6 @@ export default function PlanetGrid() {
   }
 
   if (error || planets.length === 0) {
-    console.log('[PlanetGrid] static fallback count:', STATIC_PLANETS.length);
     return (
       <div className="flex flex-col gap-3">
         {error && (

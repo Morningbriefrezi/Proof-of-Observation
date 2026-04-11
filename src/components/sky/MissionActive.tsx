@@ -64,7 +64,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
       lat = pos.coords.latitude;
       lon = pos.coords.longitude;
     } catch {
-      console.log('[GPS] Unavailable, using Tbilisi coords');
+      // GPS unavailable, using default Tbilisi coords
     }
     setCoords({ lat, lon });
 

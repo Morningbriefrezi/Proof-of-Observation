@@ -22,7 +22,6 @@ export default function WalletStep() {
   // When Privy auth completes and the embedded Solana wallet is available, sync into AppState
   useEffect(() => {
     if (authenticated && walletAddress && !state.walletConnected) {
-      console.log('[Privy] Wallet ready:', walletAddress);
       setWallet(walletAddress);
     }
   }, [authenticated, walletAddress, state.walletConnected, setWallet]);

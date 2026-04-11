@@ -11,7 +11,7 @@ export interface Mission {
   type: ObsType;
   desc: string;
   hint: string;
-  context?: string; // Scriptonia context tag
+  context?: string;
   target?: string | null; // null = free observation (any sky photo)
   repeatable?: boolean;   // true = always visible, never hidden after completion
 }

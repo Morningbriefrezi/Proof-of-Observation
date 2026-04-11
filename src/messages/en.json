@@ -35,9 +35,9 @@
       "capture": "Capture",
       "captureDesc": "Photograph through the eyepiece",
       "verify": "Verify",
-      "verifyDesc": "Satellite confirms clear sky conditions",
+      "verifyDesc": "Sky oracle verifies clear conditions",
       "mint": "Collect",
-      "mintDesc": "Proof sealed on Solana. Stars land in your account."
+      "mintDesc": "Discovery sealed on Solana as compressed NFT"
     },
     "trust": {
       "astronomers": "Trusted by amateur astronomers",

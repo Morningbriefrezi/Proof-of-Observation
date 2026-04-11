@@ -118,15 +118,9 @@ export default function ProofPage() {
           <p className="text-[var(--text-secondary)] text-sm mb-6">
             Your sky observations minted as on-chain proofs on Solana. Collect them all.
           </p>
-          {!state.walletConnected ? (
-            <Link href="/club" className="inline-block px-6 py-3 bg-gradient-to-r from-[#FFD166] to-[#CC9A33] text-black font-bold rounded-lg transition-all duration-200">
-              Connect Wallet to Start →
-            </Link>
-          ) : (
-            <Link href="/club" className="inline-block px-6 py-3 bg-gradient-to-r from-[#FFD166] to-[#CC9A33] text-black font-bold rounded-lg transition-all duration-200">
-              Complete Setup →
-            </Link>
-          )}
+          <Link href="/missions" className="inline-block px-6 py-3 bg-gradient-to-r from-[#FFD166] to-[#CC9A33] text-black font-bold rounded-lg transition-all duration-200">
+            Start Observing →
+          </Link>
         </div>
       </div>
     );
