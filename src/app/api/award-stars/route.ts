@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+export const maxDuration = 60; // Solana devnet token mint can take 15-30s
 import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import { getOrCreateAssociatedTokenAccount, mintTo } from '@solana/spl-token';
 import bs58 from 'bs58';

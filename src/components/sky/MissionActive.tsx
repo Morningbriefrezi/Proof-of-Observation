@@ -297,14 +297,12 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
           {mintTxId && !mintTxId.startsWith('sim') ? (
             <a href={`https://explorer.solana.com/tx/${mintTxId}?cluster=devnet`}
               target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-full text-xs transition-colors"
+              className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-full text-xs solana-explorer-link"
               style={{
                 background: 'rgba(56,240,255,0.06)',
                 border: '1px solid rgba(56,240,255,0.15)',
                 color: '#38F0FF',
-              }}
-              onMouseOver={e => (e.currentTarget.style.background = 'rgba(56,240,255,0.12)')}
-              onMouseOut={e => (e.currentTarget.style.background = 'rgba(56,240,255,0.06)')}>
+              }}>
               Verified on Solana <ExternalLink size={12} />
             </a>
           ) : (
@@ -333,24 +331,22 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
           <div className="w-full mt-4 pt-4 border-t border-white/[0.06]">
             <p className="text-center text-[10px] text-white/20 mb-3">Share your discovery</p>
             <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  const text = encodeURIComponent(`I just observed ${mission.id === 'free-observation' ? "Tonight's Sky" : mission.name} ✦ Verified with Stellar\n\nstellarrclub.vercel.app`);
-                  window.open(`https://warpcast.com/~/compose?text=${text}`, '_blank');
-                }}
-                className="flex-1 py-2.5 rounded-xl text-xs font-medium bg-[rgba(132,101,203,0.08)] border border-[rgba(132,101,203,0.2)] text-[#8465CB] hover:bg-[rgba(132,101,203,0.15)] transition-colors"
+              <a
+                href={`https://warpcast.com/~/compose?text=${encodeURIComponent(`I just observed ${mission.id === 'free-observation' ? "Tonight's Sky" : mission.name} ✦ Verified with Stellar\n\nstellarrclub.vercel.app`)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="flex-1 py-2.5 rounded-xl text-xs font-medium bg-[rgba(132,101,203,0.08)] border border-[rgba(132,101,203,0.2)] text-[#8465CB] transition-colors text-center"
+                style={{ textDecoration: 'none' }}
               >
                 Share on Warpcast
-              </button>
-              <button
-                onClick={() => {
-                  const text = encodeURIComponent(`Just observed ${mission.id === 'free-observation' ? "Tonight's Sky" : mission.name} and logged my discovery ✦\n\n@AstromanGe stellarrclub.vercel.app`);
-                  window.open(`https://x.com/intent/tweet?text=${text}`, '_blank');
-                }}
-                className="flex-1 py-2.5 rounded-xl text-xs font-medium bg-[rgba(255,255,255,0.04)] border border-white/[0.08] text-white/60 hover:bg-white/[0.08] transition-colors"
+              </a>
+              <a
+                href={`https://x.com/intent/tweet?text=${encodeURIComponent(`Just observed ${mission.id === 'free-observation' ? "Tonight's Sky" : mission.name} and logged my discovery ✦\n\n@AstromanGe stellarrclub.vercel.app`)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="flex-1 py-2.5 rounded-xl text-xs font-medium bg-[rgba(255,255,255,0.04)] border border-white/[0.08] text-white/60 transition-colors text-center"
+                style={{ textDecoration: 'none' }}
               >
                 Share on X
-              </button>
+              </a>
             </div>
           </div>
 

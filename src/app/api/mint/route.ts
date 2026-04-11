@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { mintCompressedNFT } from '@/lib/mint-nft';
+
+export const maxDuration = 60; // Solana devnet confirmations can take 15-30s
 import { getDb } from '@/lib/db';
 import { observationLog } from '@/lib/schema';
 import { eq, and, gte, isNotNull } from 'drizzle-orm';

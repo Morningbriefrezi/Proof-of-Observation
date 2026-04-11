@@ -205,6 +205,11 @@ h1, h2, h3 { font-family: Georgia, Palatino, serif; }
 
 .btn-glow-cyan:hover:not(:disabled) { box-shadow: 0 0 16px rgba(56, 240, 255, 0.3); }
 .btn-glow-gold:hover:not(:disabled) { box-shadow: 0 0 16px rgba(255, 209, 102, 0.3); }
+/* Hover-only styles via pointer:fine so iOS touch never triggers hover state */
+@media (hover: hover) and (pointer: fine) {
+  .solana-explorer-link:hover { background: rgba(56,240,255,0.12) !important; }
+}
+
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 
