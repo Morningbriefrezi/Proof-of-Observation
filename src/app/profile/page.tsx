@@ -54,7 +54,6 @@ export default function ProfilePage() {
 
   const handleSignOut = async () => {
     await logout();
-    reset();
   };
 
   if (!authenticated) {

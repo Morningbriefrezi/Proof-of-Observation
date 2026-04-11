@@ -176,7 +176,7 @@ export default function HomeSkyPreview() {
         gap: 10,
         overflowX: 'auto',
         scrollbarWidth: 'none',
-        touchAction: 'pan-x',
+        WebkitOverflowScrolling: 'touch',
         marginBottom: 12,
         paddingBottom: 4,
       }}>
@@ -239,7 +239,7 @@ export default function HomeSkyPreview() {
       </div>
 
       {/* 7-day forecast ribbon */}
-      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', touchAction: 'pan-x' }}>
+      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
         {forecast.slice(0, 7).map((day, i) => {
           const badge = dayBadge(day);
           const bs =

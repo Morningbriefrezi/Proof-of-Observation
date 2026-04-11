@@ -289,7 +289,7 @@ export default function HomePage() {
       </section>
 
       {/* Remaining sections */}
-      <div className="max-w-3xl w-full mx-auto px-4 py-4 sm:py-8 flex flex-col items-center gap-5 sm:gap-8 animate-page-enter">
+      <div className="max-w-3xl w-full mx-auto px-4 py-4 sm:py-8 flex flex-col items-center gap-5 sm:gap-8 animate-page-enter overflow-x-hidden">
 
         {/* How It Works — interactive stepper */}
         <div id="how-it-works" className="w-full"
@@ -399,7 +399,7 @@ export default function HomePage() {
         </div>
 
         {/* Tonight's Sky Preview Strip */}
-        <div style={{ width: '100%' }}>
+        <div style={{ width: '100%', overflow: 'hidden' }}>
           {/* Section header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -439,7 +439,7 @@ export default function HomePage() {
         </div>
 
         {/* Missions + Leaderboard — side-by-side */}
-        <div style={{ width: '100%', display: 'grid', gridTemplateColumns: '1fr', gap: 24 }} className="md-two-col">
+        <div style={{ width: '100%', display: 'grid', gridTemplateColumns: '1fr', gap: 24, overflow: 'hidden' }} className="md-two-col">
           <style>{`
             @media (min-width: 768px) { .md-two-col { grid-template-columns: 1fr 1fr !important; } }
           `}</style>
@@ -559,16 +559,18 @@ export default function HomePage() {
                     color: 'rgba(255,255,255,0.45)',
                     fontSize: 11,
                     margin: 0,
+                    lineHeight: 1.5,
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
                     overflow: 'hidden',
-                    whiteSpace: 'nowrap',
-                    textOverflow: 'ellipsis',
                   }}>
                     {m.desc}
                   </p>
                   {/* Bottom row */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <span style={{ color: '#FFD166', fontWeight: 700, fontSize: 13 }}>✦ +{m.stars}</span>
-                    <div style={{ width: 120, height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 999, overflow: 'hidden' }}>
+                    <div style={{ flex: 1, maxWidth: 120, height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 999, overflow: 'hidden' }}>
                       <div style={{
                         width: `${m.progress}%`,
                         height: '100%',

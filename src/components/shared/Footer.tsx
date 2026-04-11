@@ -26,7 +26,7 @@ export default function Footer() {
             { href: '/profile',      label: 'Profile' },
             { href: '/learn',        label: 'Learn' },
             { href: ECOSYSTEM.store, label: 'Astroman ↗', external: true },
-            { href: 'https://github.com/Morningbriefrezi/Stellar', label: 'GitHub ↗', external: true },
+            { href: 'https://github.com/Rezimod/Stellar', label: 'GitHub ↗', external: true },
           ].map(link =>
             link.external ? (
               <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer"
