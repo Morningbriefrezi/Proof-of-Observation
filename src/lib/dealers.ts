@@ -433,11 +433,11 @@ const PRODUCTS: Product[] = [
   },
 ]
 
-// Global fallback: 3 from Astroman + 3 from Celestron (no Bresser for global)
+// Global fallback: 3 telescopes from Astroman + 3 from Celestron (no Bresser, no digital)
 function buildGlobalFallback(): Product[] {
   const globalDealerIds = ['astroman', 'celestron-us']
   return globalDealerIds.flatMap((id) =>
-    PRODUCTS.filter((p) => p.dealerId === id)
+    PRODUCTS.filter((p) => p.dealerId === id && p.category === 'telescope')
       .sort((a, b) => a.price - b.price)
       .slice(0, 3)
   )
