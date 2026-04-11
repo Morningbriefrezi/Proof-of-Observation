@@ -317,7 +317,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
 
           <div className="flex flex-col gap-3 w-full">
             <button
-              onClick={() => { onClose(); router.push('/profile'); }}
+              onClick={() => { onClose(); router.push('/nfts'); }}
               className="w-full py-3 rounded-xl text-white text-sm font-semibold transition-colors"
               style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)' }}>
               View My Discoveries

@@ -10,6 +10,7 @@ import HomeSkyPreview from '@/components/home/HomeSkyPreview';
 import { usePrivy } from '@privy-io/react-auth';
 import { useAppState } from '@/hooks/useAppState';
 import { Telescope, Camera, Star, ShoppingBag, CloudSun, Satellite, Sparkles, Moon, Lock, Orbit } from 'lucide-react';
+import { MISSIONS } from '@/lib/constants';
 import LocationPicker from '@/components/LocationPicker';
 import { useLocation } from '@/lib/location';
 
@@ -506,19 +507,17 @@ export default function HomePage() {
             </Link>
 
             {/* Mission cards */}
-            {[
-              { icon: Moon, iconBg: 'rgba(245,158,11,0.12)', iconColor: '#F59E0B', name: 'Lunar Observation', difficulty: 'Beginner' as const, stars: 50, desc: 'Observe and photograph the Moon\'s craters through your telescope.', progress: 0 },
-              { icon: Orbit, iconBg: 'rgba(56,240,255,0.12)', iconColor: '#38F0FF', name: 'Jupiter\'s Moons', difficulty: 'Advanced' as const, stars: 120, desc: 'Track the four Galilean moons over a single evening.', progress: 35 },
-              { icon: Sparkles, iconBg: 'rgba(255,100,100,0.12)', iconColor: '#ff6464', name: 'Deep Sky Survey', difficulty: 'Expert' as const, stars: 200, desc: 'Locate and capture 5 Messier objects in one night.', progress: 0 },
-            ].map(m => {
+            {MISSIONS.slice(0, 4).map(m => {
               const diff = m.difficulty === 'Beginner'
                 ? { bg: 'rgba(52,211,153,0.15)', color: '#34d399' }
-                : m.difficulty === 'Advanced'
+                : m.difficulty === 'Intermediate'
                 ? { bg: 'rgba(56,240,255,0.12)', color: '#38F0FF' }
+                : m.difficulty === 'Hard'
+                ? { bg: 'rgba(245,158,11,0.15)', color: '#F59E0B' }
                 : { bg: 'rgba(255,100,100,0.12)', color: '#ff6464' };
               return (
                 <Link
-                  key={m.name}
+                  key={m.id}
                   href="/missions"
                   style={{
                     background: 'rgba(255,255,255,0.04)',
@@ -544,8 +543,8 @@ export default function HomePage() {
                 >
                   {/* Top row */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: m.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <m.icon size={18} color={m.iconColor} strokeWidth={1.5} />
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: diff.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 18 }}>
+                      {m.emoji}
                     </div>
                     <span style={{ color: 'white', fontWeight: 600, fontSize: 13, flex: 1 }}>{m.name}</span>
                     <span style={{
@@ -576,14 +575,6 @@ export default function HomePage() {
                   {/* Bottom row */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <span style={{ color: '#FFD166', fontWeight: 700, fontSize: 13 }}>✦ +{m.stars}</span>
-                    <div style={{ flex: 1, maxWidth: 120, height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 999, overflow: 'hidden' }}>
-                      <div style={{
-                        width: `${m.progress}%`,
-                        height: '100%',
-                        background: 'rgba(52,211,153,0.6)',
-                        borderRadius: 999,
-                      }} />
-                    </div>
                   </div>
                 </Link>
               );
