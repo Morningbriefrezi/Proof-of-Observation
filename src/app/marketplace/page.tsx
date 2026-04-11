@@ -71,19 +71,19 @@ function ProductCard({ product, showDealer, dealerName }: {
       </div>
 
       {/* Info */}
-      <div className="flex flex-col flex-1 pt-3 pb-1">
-        <p className="text-white text-sm font-semibold px-3 leading-snug">{product.name}</p>
-        <p className="text-xs mt-1 px-3 line-clamp-2" style={{ color: 'rgba(255,255,255,0.4)' }}>
+      <div className="flex flex-col flex-1 pt-2 pb-1">
+        <p className="text-white text-[13px] font-semibold px-2 leading-snug line-clamp-2">{product.name}</p>
+        <p className="text-[11px] mt-1 px-2 line-clamp-2" style={{ color: 'rgba(255,255,255,0.4)' }}>
           {product.description}
         </p>
 
         {specEntries.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-1.5 px-3">
-            {specEntries.map(([k, v]) => (
+          <div className="flex flex-wrap gap-1 mt-1 px-2">
+            {specEntries.slice(0, 1).map(([k, v]) => (
               <span
                 key={k}
                 className="text-[10px] px-1.5 py-0.5 rounded"
-                style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.4)' }}
+                style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.35)' }}
               >
                 {v}
               </span>
@@ -92,32 +92,33 @@ function ProductCard({ product, showDealer, dealerName }: {
         )}
 
         {/* Price row */}
-        <div className="flex items-end justify-between px-3 mt-2 pb-2">
+        <div className="flex items-end justify-between px-2 mt-2 pb-2">
           <div>
-            <p className="text-white font-bold text-lg leading-none">
-              {product.currencySymbol}{product.price.toLocaleString()}
+            <p className="text-white font-bold text-base leading-none">
+              {product.currencySymbol}{product.price % 1 !== 0 ? product.price.toFixed(2) : product.price.toLocaleString()}
             </p>
-            <p className="text-[11px] mt-0.5" style={{ color: '#14B8A6' }}>
-              or {product.starsPrice.toLocaleString()} ✦
+            <p className="text-[10px] mt-0.5" style={{ color: '#14B8A6' }}>
+              {product.starsPrice.toLocaleString()} ✦
             </p>
           </div>
-          <button
-            onClick={() => window.open(product.externalUrl, '_blank')}
-            className="text-xs px-3 py-1.5 rounded-lg transition-colors"
+          <a
+            href={product.externalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[11px] px-2.5 py-1.5 rounded-lg transition-colors"
             style={{
               background: 'rgba(255,255,255,0.06)',
               border: '1px solid rgba(255,255,255,0.1)',
               color: 'white',
+              textDecoration: 'none',
             }}
-            onMouseOver={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.1)')}
-            onMouseOut={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)')}
           >
             Buy →
-          </button>
+          </a>
         </div>
 
         {showDealer && (
-          <p className="px-3 pb-2 text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
+          <p className="px-2 pb-2 text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
             via {dealerName}
           </p>
         )}
@@ -225,7 +226,7 @@ export default function MarketplacePage() {
           <LocationPicker compact={false} />
         </div>
       ) : (
-        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
+        <div className="grid gap-3 grid-cols-2">
           {products.map(p => (
             <ProductCard
               key={p.id}
