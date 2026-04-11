@@ -9,7 +9,7 @@ import { useTranslations } from 'next-intl';
 import HomeSkyPreview from '@/components/home/HomeSkyPreview';
 import { usePrivy } from '@privy-io/react-auth';
 import { useAppState } from '@/hooks/useAppState';
-import { Telescope, Camera, Star, ShoppingBag } from 'lucide-react';
+import { Telescope, Camera, Star, ShoppingBag, CloudSun, Satellite, Sparkles } from 'lucide-react';
 import LocationPicker from '@/components/LocationPicker';
 import { useLocation } from '@/lib/location';
 
@@ -50,49 +50,26 @@ export default function HomePage() {
       o: 0.2 + Math.random() * 0.5,
     }));
 
-    let raf: number;
-    let visible = true;
-
     const draw = () => {
-      if (!visible) return;
       ctx.clearRect(0, 0, w, h);
       for (const s of stars) {
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(255,255,255,${s.o})`;
         ctx.fill();
-        s.y += 0.15;
-        if (s.y > h) {
-          s.y = 0;
-          s.x = Math.random() * w;
-        }
       }
-      raf = requestAnimationFrame(draw);
     };
     draw();
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        visible = entry.isIntersecting;
-        if (visible) {
-          cancelAnimationFrame(raf);
-          draw();
-        }
-      },
-      { threshold: 0 }
-    );
-    observer.observe(hero);
 
     const handleResize = () => {
       w = hero.offsetWidth;
       h = hero.offsetHeight;
       canvas.width = w;
       canvas.height = h;
+      draw();
     };
     window.addEventListener('resize', handleResize);
     return () => {
-      cancelAnimationFrame(raf);
-      observer.disconnect();
       window.removeEventListener('resize', handleResize);
     };
   }, []);
@@ -180,11 +157,6 @@ export default function HomePage() {
           gap: 24,
           padding: '16px 16px 32px',
         }}>
-          {/* Badge */}
-          <p style={{ color: '#FFD166', fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'monospace', margin: 0 }}>
-            ✦ STELLAR ✦
-          </p>
-
           {/* Headline */}
           <h1 style={{
             fontFamily: 'Georgia, serif',
@@ -261,9 +233,6 @@ export default function HomePage() {
                 Tonight&apos;s Targets
               </Link>
             </div>
-            <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, margin: 0 }}>
-              Free to join · No wallet needed · Powered by Solana
-            </p>
           </div>
 
           {/* App nav shortcuts */}
@@ -276,10 +245,10 @@ export default function HomePage() {
             flexWrap: 'wrap',
           }}>
             {[
-              { href: '/sky',         icon: '☁',  label: 'Sky',      sub: "Tonight's forecast",  color: '#38F0FF' },
-              { href: '/missions',    icon: '🛰️', label: 'Missions', sub: 'Earn Stars tokens',   color: '#34d399' },
-              { href: '/chat',        icon: '✦',  label: 'ASTRA',   sub: 'AI astronomer',        color: '#8B5CF6' },
-              { href: '/marketplace', icon: '🛒', label: 'Shop',     sub: 'Partner stores',      color: '#FFD166' },
+              { href: '/sky',         Icon: CloudSun,    label: 'Sky',      sub: "Tonight's forecast",  color: '#38F0FF' },
+              { href: '/missions',    Icon: Satellite,   label: 'Missions', sub: 'Earn Stars tokens',   color: '#34d399' },
+              { href: '/chat',        Icon: Sparkles,    label: 'ASTRA',    sub: 'AI astronomer',       color: '#8B5CF6' },
+              { href: '/marketplace', Icon: ShoppingBag, label: 'Shop',     sub: 'Partner stores',      color: '#FFD166' },
             ].map(item => (
               <Link
                 key={item.href}
@@ -293,11 +262,15 @@ export default function HomePage() {
                   textAlign: 'center',
                   textDecoration: 'none',
                   minWidth: 72,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 4,
                 }}
               >
-                <p style={{ fontSize: 20, margin: '0 0 4px' }}>{item.icon}</p>
+                <item.Icon size={20} color={item.color} strokeWidth={1.5} />
                 <p style={{ color: item.color, fontSize: 12, fontWeight: 600, margin: 0 }}>{item.label}</p>
-                <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10, marginTop: 2, marginBottom: 0 }}>{item.sub}</p>
+                <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10, margin: 0 }}>{item.sub}</p>
               </Link>
             ))}
           </div>

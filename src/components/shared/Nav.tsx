@@ -35,12 +35,20 @@ export default function Nav() {
 
   const solanaWallet = wallets.find(w => (w as { chainType?: string }).chainType === 'solana');
 
-  // Derive initial for avatar
+  // Derive display name for avatar
   const userEmail =
     user?.email?.address ??
     (user?.linkedAccounts?.find(a => a.type === 'email') as { address?: string } | undefined)?.address ??
     '';
-  const initial = userEmail ? userEmail[0].toUpperCase() : solanaWallet ? 'A' : '?';
+  const username = userEmail ? userEmail.split('@')[0] : '';
+  const displayName = username.length > 0 && username.length <= 10
+    ? username
+    : userEmail
+      ? userEmail[0].toUpperCase()
+      : solanaWallet
+        ? 'A'
+        : '?';
+  const isName = username.length > 0 && username.length <= 10;
 
   const handleLogout = async () => {
     await logout();
@@ -92,33 +100,29 @@ export default function Nav() {
               <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse" />
             ) : authenticated ? (
               <div className="relative">
-                {/* Avatar button — gradient ring effect */}
+                {/* Avatar button */}
                 <button
                   onClick={() => { setShowMenu(v => !v); setConfirmStep(false); }}
-                  className="transition-all hover:ring-2 hover:ring-[#14B8A6]/40 rounded-full"
-                  style={{
-                    width: 34,
-                    height: 34,
-                    borderRadius: '50%',
-                    background: 'conic-gradient(from 0deg, #8B5CF6, #14B8A6, #8B5CF6)',
-                    padding: 1.5,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
                   title="Account"
-                >
-                  <div style={{
-                    width: 31,
-                    height: 31,
-                    borderRadius: '50%',
-                    background: '#0D1321',
+                  style={{
+                    height: 32,
+                    borderRadius: 9999,
+                    background: 'rgba(52,211,153,0.12)',
+                    border: '1px solid rgba(52,211,153,0.35)',
+                    color: '#34d399',
+                    padding: isName ? '0 12px' : '0',
+                    width: isName ? 'auto' : 32,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                  }}>
-                    <span style={{ fontSize: '0.6875rem', fontWeight: 700, color: 'white' }}>{initial}</span>
-                  </div>
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'background 0.2s',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {displayName}
                 </button>
 
                 {/* Dropdown */}
