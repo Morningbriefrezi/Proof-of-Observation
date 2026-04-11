@@ -42,7 +42,7 @@
 | ~~Mobile spacing — side gutters, section gaps~~ | ✅ DONE (Phase 0) |
 | ~~Location icon is weak~~ | ✅ DONE (Phase 0) |
 | ~~`constants.ts` still has `club` and `scriptonia` keys~~ | ✅ DONE (Phase 0) |
-| Auth: email OTP clears data on re-login, no password, Google/SMS broken | P0 |
+| ~~Auth: email OTP clears data on re-login, no password, Google/SMS broken~~ | ✅ DONE (Phase AUTH) |
 | Marketplace missing Celestron (US) and Bresser (Europe) dealers | P1 |
 | Marketplace product images are broken (local paths that don't exist) | P1 |
 | Dark Sky page is static, hardcoded Georgia data, fake map, no real tools | P1 |
@@ -398,12 +398,12 @@ Do NOT change any animations, star field, colors, or layout. Text changes only.
 
 ---
 
-## PHASE AUTH — Account & Authentication
+## PHASE AUTH — Account & Authentication ✅ DONE
 *Run after Phase 0. Makes login sticky, data persistent, and all auth methods work.*
 
 ---
 
-### Prompt AUTH-1 — Email+Password Login, Data Persistence, Fix Google + SMS
+### Prompt AUTH-1 — Email+Password Login, Data Persistence, Fix Google + SMS ✅ DONE
 
 ```
 I'm building Stellar, a Next.js 15 app using Privy (@privy-io/react-auth ^3.19.0) for auth.
