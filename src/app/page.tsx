@@ -2,7 +2,7 @@
 // Sections: Hero → Sky Preview → Missions + Leaderboard → How It Works → ASTRA → Rewards → Footer
 // Colors: #070B14 bg · #34d399 teal · #FFD166 gold · #38F0FF blue
 'use client';
-import { useRef, useEffect, Suspense } from 'react';
+import { useRef, useEffect, Suspense, useState } from 'react';
 import Link from 'next/link';
 
 import { useTranslations } from 'next-intl';
@@ -19,6 +19,8 @@ export default function HomePage() {
   const { state } = useAppState();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const heroRef = useRef<HTMLElement>(null);
+  const [activeStep, setActiveStep] = useState(0);
+  const stepPausedRef = useRef(false);
 
   const { location } = useLocation();
 
@@ -72,6 +74,15 @@ export default function HomePage() {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!stepPausedRef.current) {
+        setActiveStep(s => (s + 1) % 4);
+      }
+    }, 3500);
+    return () => clearInterval(timer);
   }, []);
 
   const stepIcons = [Telescope, Camera, Star, ShoppingBag];
@@ -278,52 +289,111 @@ export default function HomePage() {
       </section>
 
       {/* Remaining sections */}
-      <div className="max-w-3xl w-full mx-auto px-4 py-8 sm:py-16 flex flex-col items-center gap-6 sm:gap-12 animate-page-enter">
+      <div className="max-w-3xl w-full mx-auto px-4 py-4 sm:py-8 flex flex-col items-center gap-5 sm:gap-8 animate-page-enter">
 
-        {/* How It Works */}
-        <div id="how-it-works" className="w-full">
-          <p className="text-center text-xs mb-8 tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.3)' }}>
+        {/* How It Works — interactive stepper */}
+        <div id="how-it-works" className="w-full"
+          onMouseEnter={() => { stepPausedRef.current = true; }}
+          onMouseLeave={() => { stepPausedRef.current = false; }}
+          onTouchStart={() => { stepPausedRef.current = true; }}
+        >
+          <p className="text-center text-xs mb-4 tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.3)' }}>
             — {t('home.howItWorks')} —
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }} className="hiw-grid">
-            <style>{`@media (min-width: 768px) { .hiw-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 28px !important; } }`}</style>
-            {howItWorksSteps.map((item, i) => (
-              <div key={item.step} style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.07)',
-                borderRadius: 16,
-                padding: 20,
-                position: 'relative',
-              }}>
-                {/* Arrow connector — desktop only */}
-                {i < 3 && (
-                  <div className="hiw-arrow" style={{
-                    position: 'absolute',
-                    right: -20,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
+
+          {/* Step selector tabs */}
+          <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+            {howItWorksSteps.map((item, i) => {
+              const active = activeStep === i;
+              return (
+                <button
+                  key={i}
+                  onClick={() => { setActiveStep(i); stepPausedRef.current = true; }}
+                  style={{
+                    flex: 1,
+                    padding: '10px 0',
+                    borderRadius: 12,
+                    border: 'none',
+                    borderBottom: `2px solid ${active ? '#34d399' : 'transparent'}`,
+                    background: active ? 'rgba(52,211,153,0.08)' : 'rgba(255,255,255,0.03)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
-                    zIndex: 2,
+                    gap: 6,
+                    transition: 'all 0.25s',
+                  }}
+                >
+                  <span style={{
+                    fontSize: 9,
+                    fontFamily: 'monospace',
+                    fontWeight: 700,
+                    color: active ? '#34d399' : 'rgba(255,255,255,0.25)',
                   }}>
-                    <div style={{ width: 14, height: 1, background: 'rgba(52,211,153,0.2)' }} />
-                    <span style={{ color: 'rgba(52,211,153,0.4)', fontSize: 10, lineHeight: 1, marginLeft: 1 }}>▶</span>
-                  </div>
-                )}
-                {/* Step icon */}
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <item.icon
+                    size={18}
+                    color={active ? '#34d399' : 'rgba(255,255,255,0.25)'}
+                    strokeWidth={active ? 2 : 1.5}
+                  />
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Active step detail card */}
+          {(() => {
+            const step = howItWorksSteps[activeStep];
+            const StepIcon = step.icon;
+            return (
+              <div style={{
+                background: 'rgba(52,211,153,0.04)',
+                border: '1px solid rgba(52,211,153,0.15)',
+                borderRadius: 16,
+                padding: '18px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 16,
+              }}>
                 <div style={{
-                  width: 48, height: 48,
-                  borderRadius: 12,
-                  background: 'rgba(52,211,153,0.08)',
-                  border: '1px solid rgba(52,211,153,0.15)',
+                  width: 52, height: 52, flexShrink: 0,
+                  borderRadius: 14,
+                  background: 'rgba(52,211,153,0.1)',
+                  border: '1px solid rgba(52,211,153,0.2)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                  <item.icon size={22} color="#34d399" />
+                  <StepIcon size={24} color="#34d399" strokeWidth={1.5} />
                 </div>
-                <p style={{ color: 'white', fontWeight: 600, fontSize: 13, marginTop: 12, marginBottom: 4 }}>{item.title}</p>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, lineHeight: 1.6, margin: 0 }}>{item.desc}</p>
+                <div style={{ flex: 1 }}>
+                  <p style={{ color: 'white', fontWeight: 700, fontSize: 14, margin: '0 0 4px' }}>
+                    {step.title}
+                  </p>
+                  <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, lineHeight: 1.6, margin: 0 }}>
+                    {step.desc}
+                  </p>
+                </div>
               </div>
+            );
+          })()}
+
+          {/* Progress dots */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 10 }}>
+            {howItWorksSteps.map((_, i) => (
+              <div
+                key={i}
+                onClick={() => { setActiveStep(i); stepPausedRef.current = true; }}
+                style={{
+                  width: activeStep === i ? 20 : 5,
+                  height: 4,
+                  borderRadius: 2,
+                  background: activeStep === i ? '#34d399' : 'rgba(255,255,255,0.15)',
+                  transition: 'all 0.3s',
+                  cursor: 'pointer',
+                }}
+              />
             ))}
           </div>
         </div>

@@ -235,6 +235,12 @@ body {
   overflow-x: clip;
   width: 100%;
   max-width: 100vw;
+  /* Lock mobile touch to vertical-only panning — prevents left/right page slide */
+  touch-action: pan-y;
+}
+/* Re-enable horizontal touch scroll inside designated scroll containers */
+.scroll-x {
+  touch-action: pan-x pan-y;
 }
 html, body {
   scrollbar-width: none;
