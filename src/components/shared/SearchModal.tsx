@@ -18,6 +18,7 @@ const STATIC_ITEMS: SearchItem[] = [
   { type: 'page', label: 'Sky Forecast', sub: '7-day cloud cover and seeing', href: '/sky', icon: '🌤' },
   { type: 'page', label: 'Planet Tracker', sub: 'Mercury to Saturn + Moon', href: '/sky', icon: '🪐' },
   { type: 'page', label: 'ASTRA AI', sub: 'Chat with your AI astronomer', href: '/chat', icon: '✦' },
+  { type: 'page', label: 'Astronomy Guide', sub: 'Planets, deep sky, quizzes, events', href: '/learn', icon: '📚' },
   { type: 'page', label: 'NFT Gallery', sub: 'Your discovery attestations', href: '/nfts', icon: '🖼' },
   // Celestial objects
   { type: 'object', label: 'Moon', sub: "Earth's natural satellite, brightest object at night", href: '/sky', icon: '🌕' },
