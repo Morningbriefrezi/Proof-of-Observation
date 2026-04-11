@@ -131,31 +131,20 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
       });
       clearTimeout(timer);
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'Mint failed' }));
-        const raw = err.error ?? 'Mint failed';
-        const friendly = raw.includes('not set') || raw.includes('PRIVATE_KEY') || raw.includes('MERKLE') || raw.includes('COLLECTION')
-          ? 'Mint service unavailable — check back soon'
-          : raw;
-        setMintError(friendly);
-        setStep('verified');
-        return;
+      if (res.ok) {
+        const data = await res.json();
+        txId = data.txId;
       }
-
-      const data = await res.json();
-      txId = data.txId;
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Mint failed';
-      setMintError(msg);
-      setStep('verified');
-      return;
+      // On any API error: txId stays as sim_… and observation is saved as pending
+    } catch {
+      // Network / timeout: txId stays as sim_… — observation saved as pending
     }
 
     setMintTxId(txId);
     setMintDone(true);
 
-    // Award stars with idempotency key to prevent double-award on retry
-    if (solanaWallet?.address && effectiveStars > 0) {
+    // Award stars only for confirmed on-chain mints
+    if (!txId.startsWith('sim') && solanaWallet?.address && effectiveStars > 0) {
       fetch('/api/award-stars', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -191,7 +180,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
         latitude: coords.lat,
         longitude: coords.lon,
         sky: sky!,
-        status: 'completed',
+        status: txId.startsWith('sim') ? 'pending' : 'completed',
         method: txId.startsWith('sim') ? 'simulated' : 'onchain',
       });
 
@@ -291,7 +280,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
           </div>
 
           <h2 className="text-2xl text-white mt-6 tracking-wide" style={{ fontFamily: 'Georgia, serif' }}>
-            {mission.id === 'free-observation' ? 'Observation Sealed' : 'Discovery Sealed'}
+            {mintTxId.startsWith('sim') ? 'Observation Logged' : mission.id === 'free-observation' ? 'Observation Sealed' : 'Discovery Sealed'}
           </h2>
           <p className="text-slate-400 text-sm mt-2">
             {mission.emoji} {mission.id === 'free-observation' ? "Tonight's Sky" : mission.name}
@@ -305,7 +294,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
             <p className="text-slate-500 text-sm mt-3">Cloudy — observation logged</p>
           )}
 
-          {mintTxId && !mintTxId.startsWith('sim') && (
+          {mintTxId && !mintTxId.startsWith('sim') ? (
             <a href={`https://explorer.solana.com/tx/${mintTxId}?cluster=devnet`}
               target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-full text-xs transition-colors"
@@ -318,6 +307,10 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
               onMouseOut={e => (e.currentTarget.style.background = 'rgba(56,240,255,0.06)')}>
               Verified on Solana <ExternalLink size={12} />
             </a>
+          ) : (
+            <p className="mt-4 text-[11px] text-slate-600 text-center">
+              Saved locally · pending on-chain confirmation
+            </p>
           )}
 
           <div className="w-12 h-px my-6" style={{ background: 'rgba(255,255,255,0.1)' }} />
