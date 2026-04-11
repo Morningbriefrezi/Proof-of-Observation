@@ -24,6 +24,7 @@ export default function Footer() {
             { href: '/chat',         label: 'ASTRA AI' },
             { href: '/marketplace',  label: 'Marketplace' },
             { href: '/profile',      label: 'Profile' },
+            { href: '/learn',        label: 'Learn' },
             { href: ECOSYSTEM.store, label: 'Astroman ↗', external: true },
             { href: 'https://github.com/Morningbriefrezi/Stellar', label: 'GitHub ↗', external: true },
           ].map(link =>
