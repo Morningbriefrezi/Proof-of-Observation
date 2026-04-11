@@ -84,9 +84,8 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
       }
       const skyData: SkyVerification = await res.json();
       setSky(skyData);
-      // Free observation: never block on cloudy sky
-      if (mission.id === 'free-observation' && !skyData.verified) {
-        setMintError('Cloudy tonight — your observation still counts! ☁️');
+      if (!skyData.verified) {
+        setMintError('Cloudy sky — observation logged with 0 stars. You can still mint.');
       }
       setStep('verified');
     } catch {
@@ -98,6 +97,8 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
   const handleMint = async () => {
     window.scrollTo({ top: 0, behavior: 'instant' });
     setStep('minting');
+
+    const effectiveStars = sky?.verified ? mission.stars : 0;
 
     const prevCompleted = state.completedMissions
       .filter(m => m.status === 'completed')
@@ -125,7 +126,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
           lon: coords.lon,
           cloudCover: sky?.cloudCover ?? 0,
           oracleHash: sky?.oracleHash ?? 'sim',
-          stars: mission.stars,
+          stars: effectiveStars,
         }),
       });
       clearTimeout(timer);
@@ -150,13 +151,13 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
     setMintDone(true);
 
     // Award stars with idempotency key to prevent double-award on retry
-    if (solanaWallet?.address) {
+    if (solanaWallet?.address && effectiveStars > 0) {
       fetch('/api/award-stars', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           recipientAddress: solanaWallet.address,
-          amount: mission.stars,
+          amount: effectiveStars,
           reason: `mission:${mission.id}`,
           idempotencyKey: `${solanaWallet.address}_${mission.id}_v1`,
         }),
@@ -179,7 +180,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
         id: mission.id,
         name: mission.name,
         emoji: mission.emoji,
-        stars: mission.stars,
+        stars: effectiveStars,
         txId,
         photo: isSafePhoto(photo) ? photo : '',
         timestamp,
@@ -291,10 +292,14 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
           <p className="text-slate-400 text-sm mt-2">
             {mission.emoji} {mission.id === 'free-observation' ? "Tonight's Sky" : mission.name}
           </p>
-          <p className="text-[#FFD166] text-lg font-bold mt-3"
-            style={{ animation: 'starShimmer 2s ease-in-out infinite' }}>
-            +{mission.stars} ✦
-          </p>
+          {(sky?.verified ? mission.stars : 0) > 0 ? (
+            <p className="text-[#FFD166] text-lg font-bold mt-3"
+              style={{ animation: 'starShimmer 2s ease-in-out infinite' }}>
+              +{sky?.verified ? mission.stars : 0} ✦
+            </p>
+          ) : (
+            <p className="text-slate-500 text-sm mt-3">Cloudy — observation logged</p>
+          )}
 
           {mintTxId && !mintTxId.startsWith('sim') && (
             <a href={`https://explorer.solana.com/tx/${mintTxId}?cluster=devnet`}
@@ -468,7 +473,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
             <Verification
               photo={photo}
               sky={sky}
-              stars={mission.stars}
+              stars={sky.verified ? mission.stars : 0}
               timestamp={timestamp}
               latitude={coords.lat}
               longitude={coords.lon}

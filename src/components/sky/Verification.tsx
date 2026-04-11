@@ -112,12 +112,14 @@ export default function Verification({ photo, sky, stars, timestamp, latitude, l
           onClick={onMint}
           className="w-full py-3.5 rounded-xl text-sm font-bold tracking-wide transition-all active:scale-[0.98]"
           style={{
-            background: 'linear-gradient(135deg, #FFD166, #CC9A33)',
+            background: stars > 0
+              ? 'linear-gradient(135deg, #FFD166, #CC9A33)'
+              : 'linear-gradient(135deg, #4B5563, #374151)',
             color: '#070B14',
-            boxShadow: '0 0 24px rgba(255,209,102,0.2)',
+            boxShadow: stars > 0 ? '0 0 24px rgba(255,209,102,0.2)' : 'none',
           }}
         >
-          {`Seal on Solana  ✦ +${stars}`}
+          {stars > 0 ? `Seal on Solana  ✦ +${stars}` : 'Log Observation  ✦ +0 (cloudy)'}
         </button>
       </div>
     </div>

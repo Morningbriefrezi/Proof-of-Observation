@@ -23,16 +23,13 @@ export async function POST(req: NextRequest) {
   if (typeof cloudCover !== 'number' || cloudCover < 0 || cloudCover > 100) {
     return NextResponse.json({ error: 'cloudCover must be 0–100' }, { status: 400 });
   }
-  if (cloudCover > 70) {
-    return NextResponse.json({ error: 'Sky too cloudy', cloudCover }, { status: 400 });
-  }
   if (typeof lat !== 'number' || !isFinite(lat) || lat < -90 || lat > 90) {
     return NextResponse.json({ error: 'lat must be -90 to 90' }, { status: 400 });
   }
   if (typeof lon !== 'number' || !isFinite(lon) || lon < -180 || lon > 180) {
     return NextResponse.json({ error: 'lon must be -180 to 180' }, { status: 400 });
   }
-  if (typeof stars !== 'number' || !Number.isInteger(stars) || stars <= 0) {
+  if (typeof stars !== 'number' || !Number.isInteger(stars) || stars < 0) {
     return NextResponse.json({ error: 'stars must be a positive integer' }, { status: 400 });
   }
 

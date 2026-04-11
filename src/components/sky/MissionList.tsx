@@ -24,7 +24,7 @@ export default function MissionList({ onStart }: MissionListProps) {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-2 gap-2.5" style={{ gridAutoRows: '1fr' }}>
         {MISSIONS.map(mission => {
           const isRepeatable = mission.repeatable === true;
           const done    = completedIds.has(mission.id) && !isRepeatable;
@@ -36,7 +36,7 @@ export default function MissionList({ onStart }: MissionListProps) {
           return (
             <div
               key={mission.id}
-              className="relative flex flex-col items-center text-center rounded-2xl px-3 pt-5 pb-4 transition-all duration-200"
+              className="relative flex flex-col items-center text-center rounded-2xl px-3 pt-5 pb-4 transition-all duration-200 h-full justify-between"
               style={{
                 background: 'rgba(255,255,255,0.03)',
                 border: `1px solid ${done ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.08)'}`,
