@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'www.celestron.com' },
+      { protocol: 'https', hostname: 'www.bresser.com' },
       { protocol: 'https', hostname: 'images.bresser.de' },
       { protocol: 'https', hostname: 'astroman.ge' },
     ],

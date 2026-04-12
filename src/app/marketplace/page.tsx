@@ -13,11 +13,13 @@ import { ExternalLink } from 'lucide-react';
 import { useEffect } from 'react';
 import Image from 'next/image';
 
-type CategoryFilter = 'all' | 'telescope' | 'accessory';
+type CategoryFilter = 'all' | 'telescope' | 'eyepiece' | 'binocular' | 'accessory';
 
 const CATEGORY_FILTERS: { key: CategoryFilter; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'telescope', label: 'Telescopes' },
+  { key: 'eyepiece', label: 'Eyepieces' },
+  { key: 'binocular', label: 'Binoculars' },
   { key: 'accessory', label: 'Accessories' },
 ];
 
