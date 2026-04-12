@@ -2,6 +2,8 @@
 
 import { CheckCircle2, AlertTriangle, Wind, Thermometer, Droplets, Eye, Cloud } from 'lucide-react';
 import type { SkyVerification } from '@/lib/types';
+import { calculateSkyScore, visibilityToMeters } from '@/lib/sky-score';
+import ScoreRing from '@/components/ui/ScoreRing';
 
 interface VerificationProps {
   photo: string;
@@ -15,6 +17,13 @@ interface VerificationProps {
 
 export default function Verification({ photo, sky, stars, timestamp, latitude, longitude, onMint }: VerificationProps) {
   const conditionOk = sky.verified;
+
+  const skyScore = calculateSkyScore({
+    cloudCover: sky.cloudCover,
+    visibility: visibilityToMeters(sky.visibility),
+    humidity: sky.humidity ?? 50,
+    windSpeed: sky.windSpeed ?? 5,
+  });
 
   const metrics = [
     { icon: <Cloud size={14} />, label: 'Cloud Cover', value: `${sky.cloudCover}%`, bar: sky.cloudCover, good: sky.cloudCover < 30 },
@@ -61,6 +70,11 @@ export default function Verification({ photo, sky, stars, timestamp, latitude, l
           >
             {conditionOk ? <><CheckCircle2 size={11} /> Clear sky</> : <><AlertTriangle size={11} /> Cloudy</>}
           </div>
+        </div>
+
+        {/* Sky Score ring */}
+        <div className="flex justify-center mb-4">
+          <ScoreRing size={120} value={skyScore.score} color="gradient" label="Sky Score" sublabel={skyScore.grade} />
         </div>
 
         {/* Metric grid */}

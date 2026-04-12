@@ -648,6 +648,11 @@ input, select, textarea { font-size: 16px !important; }
 .animate-scale-in { animation: scaleIn 300ms var(--ease-out-expo) forwards; }
 .animate-glow-pulse { animation: glowPulse 2.5s ease-in-out infinite; }
 
+@keyframes confettiBurst {
+  0%   { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) scale(0) rotate(var(--rot)); opacity: 0; }
+}
+
 /* Extended stagger delays */
 .stagger-6 { animation-delay: 360ms; }
 
