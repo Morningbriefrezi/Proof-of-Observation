@@ -122,9 +122,11 @@ export default function MissionsPage() {
           ) : (
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isNight ? 'bg-[#34d399] animate-pulse' : 'bg-slate-700'}`} />
-              <span className="text-slate-500 text-sm">
-                {isNight ? 'Loading sky conditions...' : 'Come back after sunset to observe'}
-              </span>
+              {isNight ? (
+                <span className="loading-dots"><span></span><span></span><span></span></span>
+              ) : (
+                <span className="text-slate-500 text-sm">Come back after sunset to observe</span>
+              )}
             </div>
           )}
         </div>

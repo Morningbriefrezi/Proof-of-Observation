@@ -321,7 +321,7 @@ export default function HomePage() {
                 Start Observing →
               </Link>
               <Link
-                href="/missions"
+                href="/sky"
                 style={{
                   background: 'rgba(255,255,255,0.06)',
                   border: '1px solid rgba(255,255,255,0.12)',
@@ -336,7 +336,7 @@ export default function HomePage() {
                 onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.1)'; }}
                 onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; }}
               >
-                Tonight&apos;s Targets
+                Tonight&apos;s Sky →
               </Link>
             </div>
             <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, marginTop: 4 }}>
@@ -712,9 +712,9 @@ export default function HomePage() {
               flex: 1,
             }}>
               {[
-                { medal: '🥇', name: 'StargazerRezi', obs: 7, stars: 875 },
-                { medal: '🥈', name: 'AstroNika', obs: 4, stars: 460 },
-                { medal: '🥉', name: 'NightObserver', obs: 2, stars: 225 },
+                { medal: '🥇', name: 'AstroNova', obs: 12, stars: 1240 },
+                { medal: '🥈', name: 'CosmicRezi', obs: 8, stars: 890 },
+                { medal: '🥉', name: 'StarGazer_GE', obs: 5, stars: 620 },
               ].map(entry => (
                 <div key={entry.name} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <span style={{ fontSize: 16 }}>{entry.medal}</span>
@@ -1023,103 +1023,30 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Partner Stores */}
+        {/* Partner Stores — compact banner */}
         <div style={{ width: '100%' }}>
-          <p style={{ color: 'white', fontFamily: 'Georgia, serif', fontSize: '1.25rem', fontWeight: 700, textAlign: 'center', margin: '0 0 6px' }}>
-            Partner Telescope Stores
-          </p>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, textAlign: 'center', margin: '0 0 24px' }}>
-            Earn Stars anywhere. Spend them at your local dealer.
-          </p>
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
             gap: 16,
-            maxWidth: 600,
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: 16,
+            padding: '14px 20px',
+            maxWidth: 560,
             margin: '0 auto',
-          }} className="partner-grid">
-            <style>{`@media (max-width: 560px) { .partner-grid { grid-template-columns: 1fr !important; } }`}</style>
-
-            {/* Astroman */}
-            <div style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.07)',
-              borderRadius: 20,
-              padding: 20,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <Telescope size={16} color="#34d399" strokeWidth={1.5} />
-                <p style={{ color: 'white', fontWeight: 600, fontSize: 14, margin: 0 }}>Astroman</p>
-              </div>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, margin: '0 0 8px', lineHeight: 1.5 }}>
-                Georgia&apos;s first astronomy store
-              </p>
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, margin: '0 0 8px' }}>
-                Ships to: 🇬🇪 🇦🇲 🇦🇿 🇹🇷
-              </p>
-              <a
-                href="https://astroman.ge"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: '#34d399', fontSize: 12, textDecoration: 'none' }}
-              >
-                Visit store →
-              </a>
-            </div>
-
-            {/* Celestron */}
-            <div style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.07)',
-              borderRadius: 20,
-              padding: 20,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <Telescope size={16} color="#34d399" strokeWidth={1.5} />
-                <p style={{ color: 'white', fontWeight: 600, fontSize: 14, margin: 0 }}>Celestron</p>
-              </div>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, margin: '0 0 8px', lineHeight: 1.5 }}>
-                World&apos;s #1 telescope brand
-              </p>
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, margin: '0 0 8px' }}>
-                Ships to: 🇺🇸 🇨🇦
-              </p>
-              <a
-                href="https://celestron.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: '#34d399', fontSize: 12, textDecoration: 'none' }}
-              >
-                Visit store →
-              </a>
-            </div>
-
-            {/* Bresser */}
-            <div style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.07)',
-              borderRadius: 20,
-              padding: 20,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <Telescope size={16} color="#34d399" strokeWidth={1.5} />
-                <p style={{ color: 'white', fontWeight: 600, fontSize: 14, margin: 0 }}>Bresser</p>
-              </div>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, margin: '0 0 8px', lineHeight: 1.5 }}>
-                Germany&apos;s leading optics manufacturer
-              </p>
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, margin: '0 0 8px' }}>
-                Ships to: 🇩🇪 🇦🇹 🇨🇭 + EU
-              </p>
-              <a
-                href="https://bresser.de"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: '#34d399', fontSize: 12, textDecoration: 'none' }}
-              >
-                Visit store →
-              </a>
-            </div>
+          }}>
+            <span style={{ fontSize: 24 }}>🔭</span>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, margin: 0, flex: 1 }}>
+              Shop telescopes from partner stores worldwide
+            </p>
+            <Link
+              href="/marketplace"
+              style={{ color: '#34d399', fontSize: 13, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}
+            >
+              Browse Store →
+            </Link>
           </div>
 
           <EmailSubscribe />
