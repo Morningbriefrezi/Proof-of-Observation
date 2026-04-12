@@ -25,6 +25,12 @@ export default function MissionsPage() {
   const [activeMission, setActiveMission] = useState<Mission | null>(null);
   const [skyConditions, setSkyConditions] = useState<{ cloudCover: number; visibility: string; verified: boolean } | null>(null);
   const [streak, setStreak] = useState<number>(0);
+  const [isNight, setIsNight] = useState(false);
+
+  useEffect(() => {
+    const h = new Date().getHours();
+    setIsNight(h >= 18 || h < 5);
+  }, []);
 
   useEffect(() => {
     if (!authenticated || !state.walletAddress) return;
@@ -43,8 +49,6 @@ export default function MissionsPage() {
   }, [authenticated]);
 
   if (!authenticated) {
-    const isNight = new Date().getHours() >= 18 || new Date().getHours() < 5;
-
     return (
       <div className="max-w-2xl mx-auto px-4 py-3 sm:py-6 animate-page-enter flex flex-col gap-4">
         {/* Sign-in card */}
@@ -152,7 +156,7 @@ export default function MissionsPage() {
           <div className="flex items-center gap-2 mb-3">
             <div className="w-1.5 h-1.5 rounded-full bg-[#34d399] animate-pulse" />
             <span className="text-[11px] text-slate-600">
-              {new Date().getHours() >= 18 || new Date().getHours() < 5
+              {isNight
                 ? '🟢 Sky conditions: Good for observing tonight'
                 : '☀️ Daytime — come back after sunset'}
             </span>

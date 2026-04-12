@@ -2,14 +2,18 @@
 import { useMemo, useEffect, useState } from 'react';
 
 export default function StarField() {
+  const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     setIsMobile(window.innerWidth < 640);
     const handler = () => setIsMobile(window.innerWidth < 640);
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
+
+  if (!mounted) return null;
 
   const starCount = isMobile ? 40 : 140;
 
