@@ -14,6 +14,7 @@ import { MISSIONS } from '@/lib/constants';
 import LocationPicker from '@/components/LocationPicker';
 import { useLocation } from '@/lib/location';
 import OnboardingOverlay from '@/components/shared/OnboardingOverlay';
+import PageTransition from '@/components/ui/PageTransition';
 
 function EmailSubscribe() {
   const [email, setEmail] = useState('');
@@ -188,6 +189,7 @@ export default function HomePage() {
   return (
     <>
       <OnboardingOverlay />
+      <PageTransition>
       <style>{`
         @media (prefers-reduced-motion: no-preference) {
           @keyframes fadeInUp {
@@ -1069,6 +1071,7 @@ export default function HomePage() {
         </div>
 
       </div>
+      </PageTransition>
     </>
   );
 }

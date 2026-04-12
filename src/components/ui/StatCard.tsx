@@ -33,13 +33,13 @@ export default function StatCard({
   suffix,
   trend,
   trendValue,
-  accentColor = 'var(--accent-teal)',
+  accentColor = 'var(--accent)',
   onClick,
   className = '',
 }: StatCardProps) {
   const trendColor =
-    trend === 'up' ? 'var(--accent-teal)' :
-    trend === 'down' ? 'var(--accent-red)' :
+    trend === 'up' ? 'var(--success)' :
+    trend === 'down' ? 'var(--error)' :
     'var(--text-muted)';
 
   return (

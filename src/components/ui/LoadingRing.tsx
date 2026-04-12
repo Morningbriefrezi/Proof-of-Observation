@@ -81,7 +81,7 @@ export default function LoadingRing({
             cy={cy}
             r={radius}
             fill="none"
-            stroke="var(--accent-teal)"
+            stroke="var(--accent)"
             strokeWidth={strokeWidth}
             strokeLinecap="round"
             strokeDasharray={`${circumference * 0.7} ${circumference * 0.3}`}

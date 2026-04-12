@@ -16,6 +16,7 @@ import { QUIZZES } from '@/lib/quizzes';
 import { MISSIONS } from '@/lib/constants';
 import type { Mission } from '@/lib/types';
 import type { QuizDef } from '@/lib/quizzes';
+import PageTransition from '@/components/ui/PageTransition';
 
 export default function MissionsPage() {
   const { state } = useAppState();
@@ -139,11 +140,12 @@ export default function MissionsPage() {
   }
 
   return (
-    <>
+    <PageTransition>
+      <>
       {activeMission && <MissionActive mission={activeMission} onClose={() => setActiveMission(null)} />}
       {activeQuiz && <QuizActive quiz={activeQuiz} onClose={() => setActiveQuiz(null)} />}
 
-      <div className="max-w-2xl mx-auto px-4 py-3 sm:py-6 animate-page-enter flex flex-col gap-3">
+      <div className="max-w-2xl mx-auto px-4 py-3 sm:py-6 flex flex-col gap-3">
         <BackButton />
         <section>
           <div className="flex items-center gap-2 mb-3">
@@ -230,6 +232,7 @@ export default function MissionsPage() {
         <RewardsSection />
         <ObservationLog />
       </div>
-    </>
+      </>
+    </PageTransition>
   );
 }

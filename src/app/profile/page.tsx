@@ -12,6 +12,7 @@ import Card from '@/components/shared/Card';
 import Button from '@/components/shared/Button';
 import StarsRedemption from '@/components/shared/StarsRedemption';
 import { MissionIcon } from '@/components/shared/PlanetIcons';
+import PageTransition from '@/components/ui/PageTransition';
 
 export default function ProfilePage() {
   const t = useTranslations('profile');
@@ -149,7 +150,8 @@ export default function ProfilePage() {
     .slice(0, 6);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10 animate-page-enter flex flex-col gap-5">
+    <PageTransition>
+    <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10 flex flex-col gap-5">
       <style>{`@keyframes nft-pulse { 0%,100% { opacity: 0.5 } 50% { opacity: 1 } }`}</style>
 
       {/* Photo lightbox modal */}
@@ -396,5 +398,6 @@ export default function ProfilePage() {
         </button>
       </div>
     </div>
+    </PageTransition>
   );
 }

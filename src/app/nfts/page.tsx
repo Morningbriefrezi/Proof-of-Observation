@@ -5,6 +5,7 @@ import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { Telescope, Satellite, ExternalLink, Lock } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 import Link from 'next/link';
+import PageTransition from '@/components/ui/PageTransition';
 
 interface NftAttribute {
   trait_type: string;
@@ -175,7 +176,8 @@ export default function NftsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10 animate-page-enter flex flex-col gap-6">
+    <PageTransition>
+    <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10 flex flex-col gap-6">
       <BackButton />
       {/* Header */}
       <div className="flex items-center gap-3">
@@ -345,5 +347,6 @@ export default function NftsPage() {
         </div>
       )}
     </div>
+    </PageTransition>
   );
 }
