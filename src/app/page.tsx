@@ -288,6 +288,18 @@ export default function HomePage() {
             </span>
           </h1>
 
+          {/* Tagline */}
+          <p style={{
+            fontSize: 13,
+            fontWeight: 600,
+            letterSpacing: '0.12em',
+            color: 'rgba(52,211,153,0.7)',
+            margin: '-8px 0 0',
+            textTransform: 'uppercase',
+          }}>
+            Observe · Verify · Earn Stars
+          </p>
+
           {/* Sub-copy */}
           <p style={{
             maxWidth: 480,

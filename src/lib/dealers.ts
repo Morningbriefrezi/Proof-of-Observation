@@ -29,6 +29,7 @@ export interface Product {
   externalUrl: string
   badge?: string
   specs?: Record<string, string>
+  beginner?: boolean
 }
 
 const DEALERS: Dealer[] = [
@@ -87,6 +88,7 @@ const PRODUCTS: Product[] = [
     description: '76mm reflector, 300mm focal length. Compact and lightweight — ideal for beginners and young astronomers.',
     image: 'https://astroman.ge/wp-content/uploads/2024/11/222.jpg',
     externalUrl: 'https://astroman.ge/teleskopi/',
+    beginner: true,
   },
   {
     id: 'scope-bresser-50-360',
@@ -100,6 +102,7 @@ const PRODUCTS: Product[] = [
     description: '50mm refractor with pop-up observation tent. Perfect gift set for young astronomers.',
     image: 'https://astroman.ge/wp-content/uploads/2022/09/22122.jpg',
     externalUrl: 'https://astroman.ge/teleskopi/',
+    beginner: true,
   },
   {
     id: 'scope-natgeo-60-700',
@@ -264,6 +267,7 @@ const PRODUCTS: Product[] = [
     image: 'https://www.celestron.com/cdn/shop/products/22452_StarSense_Explorer_LT_114_01.jpg?v=1727800415',
     externalUrl: 'https://www.celestron.com/collections/telescopes',
     specs: { aperture: '114mm', focal: '1000mm', mount: 'Manual Alt-Az' },
+    beginner: true,
   },
   {
     id: 'cel-travelscope80',
@@ -278,6 +282,7 @@ const PRODUCTS: Product[] = [
     image: 'https://www.celestron.com/cdn/shop/products/22030_Travel_Scope_80_01_CallOut.jpg?v=1584998404',
     externalUrl: 'https://www.celestron.com/collections/telescopes',
     specs: { aperture: '80mm', focal: '400mm', mount: 'Manual Alt-Az' },
+    beginner: true,
   },
   // Bresser (Europe) products — real data from bresser.com
   {
@@ -293,6 +298,7 @@ const PRODUCTS: Product[] = [
     image: 'https://www.bresser.com/media/91/fd/b7/1772098134/4512001_M_V2019.webp?ts=1772098134',
     externalUrl: 'https://www.bresser.com/astronomy/telescopes/telescopes-for-beginners/',
     specs: { aperture: '70mm', focal: '900mm', mount: 'Manual Alt-Az' },
+    beginner: true,
   },
   {
     id: 'bre-natgeo114',
@@ -308,6 +314,7 @@ const PRODUCTS: Product[] = [
     externalUrl: 'https://www.bresser.com/astronomy/telescopes/telescopes-for-beginners/',
     badge: 'Popular',
     specs: { aperture: '114mm', focal: '900mm', mount: 'Manual Alt-Az' },
+    beginner: true,
   },
   {
     id: 'bre-solarix114',
@@ -322,6 +329,7 @@ const PRODUCTS: Product[] = [
     image: 'https://www.bresser.com/media/ec/07/b6/1772097914/4614505_M_1_v0617.webp?ts=1772097914',
     externalUrl: 'https://www.bresser.com/astronomy/telescopes/telescopes-for-beginners/',
     specs: { aperture: '114mm', focal: '500mm', mount: 'EQ3' },
+    beginner: true,
   },
   {
     id: 'bre-pluto114',

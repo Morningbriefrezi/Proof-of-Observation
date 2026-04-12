@@ -16,7 +16,7 @@ The Privy auth modal references `/logo.png` which causes a 404 on every page.
 Copy the Stellarr logo PNG (the Saturn/planet image with STELLARR text) into the project public folder.
 
 **Task:**
-Save the logo image to `/public/logo.png`. The image has already been shown in the conversation — it is a dark space-themed planet with a glowing ring and "STELLARR" text below on a deep navy background.
+Save the logo image to `/public/logo.png`. The imag1e has already been shown in the conversation — it is a dark space-themed planet with a glowing ring and "STELLARR" text below on a deep navy background.
 
 If the binary cannot be written directly, generate an SVG equivalent and save it as `/public/logo.svg`, then update `src/components/providers/PrivyProvider.tsx` line where `logo: '/logo.png'` appears to point to `/logo.svg` instead.
 

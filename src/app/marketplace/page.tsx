@@ -36,16 +36,26 @@ const CATEGORY_FALLBACK: Record<string, { icon: string; label: string; bg: strin
   accessory: { icon: '🔧', label: 'Accessory', bg: 'rgba(245,158,11,0.07)' },
 };
 
-function ProductCard({ product, showDealer, dealerName }: {
+function ProductCard({ product, showDealer, dealerName, solRate }: {
   product: Product;
   showDealer: boolean;
   dealerName: string;
+  solRate: { solPerGEL: number; solPrice: number } | null;
 }) {
   const [imgError, setImgError] = useState(false);
   const badgeStyle = product.badge ? BADGE_STYLES[product.badge] : null;
   const fallback = CATEGORY_FALLBACK[product.category] ?? CATEGORY_FALLBACK.telescope;
   const firstSpec = product.specs ? Object.values(product.specs)[0] : null;
   const showImg = !!product.image && !imgError;
+
+  function solPrice(): string {
+    if (!solRate) return '—';
+    let sol: number;
+    if (product.currency === 'GEL') sol = product.price * solRate.solPerGEL;
+    else if (product.currency === 'USD') sol = product.price / solRate.solPrice;
+    else sol = product.price / (solRate.solPrice * 0.92);
+    return sol < 0.01 ? `${(sol * 1000).toFixed(1)}m◎` : `${sol.toFixed(2)}◎`;
+  }
 
   return (
     <div
@@ -80,6 +90,14 @@ function ProductCard({ product, showDealer, dealerName }: {
             {product.badge}
           </span>
         )}
+        {product.beginner && (
+          <span
+            className="absolute top-2 left-2 text-[10px] px-2 py-0.5 rounded-full font-semibold"
+            style={{ background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.3)', color: '#34d399' }}
+          >
+            Beginner
+          </span>
+        )}
       </div>
 
       {/* Info — fixed layout, no flex-1 stretching */}
@@ -104,8 +122,8 @@ function ProductCard({ product, showDealer, dealerName }: {
             <p className="text-white font-bold text-sm leading-none">
               {product.currencySymbol}{product.price % 1 !== 0 ? product.price.toFixed(2) : product.price.toLocaleString()}
             </p>
-            <p className="text-[10px] mt-0.5" style={{ color: '#14B8A6' }}>
-              {product.starsPrice.toLocaleString()} ✦
+            <p className="text-[10px] mt-0.5" style={{ color: 'rgba(153,69,255,0.8)' }}>
+              {solPrice()}
             </p>
           </div>
           <a
@@ -141,6 +159,7 @@ export default function MarketplacePage() {
   const { location } = useLocation();
   const [filter, setFilter] = useState<CategoryFilter>('all');
   const [starsBalance, setStarsBalance] = useState(0);
+  const [solRate, setSolRate] = useState<{ solPerGEL: number; solPrice: number } | null>(null);
 
   const solanaWallet = wallets.find(w => (w as { chainType?: string }).chainType === 'solana');
   const address = solanaWallet?.address ?? state.walletAddress ?? null;
@@ -150,6 +169,11 @@ export default function MarketplacePage() {
     fetch(`/api/stars-balance?address=${encodeURIComponent(address)}`)
       .then(r => r.json()).then(d => setStarsBalance(d.balance)).catch(() => {});
   }, [address]);
+
+  useEffect(() => {
+    fetch('/api/price/sol')
+      .then(r => r.json()).then(d => setSolRate(d)).catch(() => {});
+  }, []);
 
   const completed = state.completedMissions.filter(m => m.status === 'completed');
   const totalStars = completed.reduce((sum, m) => sum + (m.stars ?? 0), 0);
@@ -238,6 +262,7 @@ export default function MarketplacePage() {
                 product={p}
                 showDealer={false}
                 dealerName="Astroman"
+                solRate={solRate}
               />
             ))}
           </div>
@@ -250,6 +275,7 @@ export default function MarketplacePage() {
               product={p}
               showDealer={showDealer}
               dealerName={getDealerName(p.dealerId)}
+              solRate={solRate}
             />
           ))}
         </div>

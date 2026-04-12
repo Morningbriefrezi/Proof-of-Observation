@@ -130,44 +130,70 @@ export default function HomeSkyPreview() {
 
   const selectedLabel = selectedDay === 0 ? 'Tonight' : selectedDay === 1 ? 'Tomorrow' : formatDay(forecast[selectedDay]?.date ?? '', selectedDay);
 
+  const bestTarget = visiblePlanets[0] ?? null;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
 
-      {/* Sky summary card — updates with selected day */}
+      {/* Sky verdict — dominant visual element */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        flexWrap: 'wrap', gap: 8,
+        flexWrap: 'wrap', gap: 12,
         background: statusStyle.bg,
         border: `1px solid ${statusStyle.border}`,
-        borderRadius: 12,
-        padding: '10px 14px',
+        borderRadius: 16,
+        padding: '14px 16px',
         transition: 'background 0.3s, border-color 0.3s',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', flex: 1 }}>
           <span style={{
             background: statusStyle.bg,
             border: `1px solid ${statusStyle.border}`,
             color: statusStyle.color,
-            fontSize: 11, fontWeight: 700,
-            padding: '2px 9px', borderRadius: 999,
+            fontSize: 20, fontWeight: 800,
+            padding: '4px 16px', borderRadius: 999,
+            textShadow: `0 0 12px ${statusStyle.color}88`,
+            boxShadow: `0 0 16px ${statusStyle.color}22`,
           }}>
             {status === 'Go' ? '✦ Go' : status === 'Maybe' ? '◑ Maybe' : '✕ Skip'}
           </span>
-          <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11 }}>{selectedLabel}</span>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            {avgCloud !== null && (
-              <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12 }}>☁ {avgCloud}%</span>
-            )}
-            {visibility && (
-              <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12 }}>👁 {visibility}</span>
-            )}
-            {bestWindow && (
-              <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12 }}>⏱ {bestWindow}</span>
-            )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: 600 }}>{selectedLabel}</span>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              {avgCloud !== null && (
+                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>☁ {avgCloud}%</span>
+              )}
+              {visibility && (
+                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>👁 {visibility}</span>
+              )}
+              {bestWindow && (
+                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>⏱ {bestWindow}</span>
+              )}
+            </div>
           </div>
         </div>
-        <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>📍 {locationLabel}</span>
+        <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11 }}>📍 {locationLabel}</span>
       </div>
+
+      {/* Tonight's best target */}
+      {selectedDay === 0 && bestTarget && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          background: 'rgba(255,255,255,0.02)',
+          border: '1px solid rgba(255,255,255,0.06)',
+          borderRadius: 12, padding: '8px 12px',
+        }}>
+          <span style={{ fontSize: 18 }}>{PLANET_EMOJI[bestTarget.key] ?? '✦'}</span>
+          <div>
+            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: 600, margin: 0 }}>
+              Tonight&apos;s Best Target: {bestTarget.key.charAt(0).toUpperCase() + bestTarget.key.slice(1)}
+            </p>
+            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, margin: 0 }}>
+              {Math.round(bestTarget.altitude)}° altitude · Prime viewing window
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Visible planets — update with selected day */}
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', minHeight: 32 }}>

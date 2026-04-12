@@ -202,7 +202,20 @@ export default function ProfilePage() {
 
           {/* Name + meta */}
           <div className="flex-1 min-w-0 pt-1">
-            <p className="text-white font-bold text-lg leading-tight truncate" style={{ fontFamily: 'Georgia, serif' }}>{displayName}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-white font-bold text-lg leading-tight truncate" style={{ fontFamily: 'Georgia, serif' }}>{displayName}</p>
+              {(() => {
+                const n = starsDisplay;
+                const label = n >= 1000 ? 'Astronomer' : n >= 500 ? 'Navigator' : n >= 100 ? 'Observer' : 'Cadet';
+                const color = n >= 1000 ? '#9945FF' : n >= 500 ? '#14B8A6' : n >= 100 ? '#FFD166' : 'rgba(255,255,255,0.3)';
+                return (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0"
+                    style={{ background: `${color}22`, border: `1px solid ${color}44`, color }}>
+                    {label}
+                  </span>
+                );
+              })()}
+            </div>
             <p className="text-slate-400 text-sm mt-0.5">
               {rank.icon} {rank.name}{joinDate ? ` · Joined ${joinDate}` : ''}
             </p>
@@ -212,10 +225,10 @@ export default function ProfilePage() {
         {/* Stats row — social style */}
         <div className="grid grid-cols-4 gap-2 text-center">
           {[
-            { value: completed.length, label: 'Missions', loading: false },
-            { value: obsCount, label: 'Obs', loading: !profileLoaded },
-            { value: `${starsDisplay} ✦`, label: 'Stars', loading: !profileLoaded },
-            { value: obsStreak > 0 ? `${obsStreak}d` : '—', label: 'Streak', loading: !profileLoaded },
+            { value: completed.length, label: 'Missions', loading: false, color: undefined },
+            { value: obsCount, label: 'Obs', loading: !profileLoaded, color: undefined },
+            { value: `✦ ${starsDisplay}`, label: 'Stars', loading: !profileLoaded, color: '#F59E0B' },
+            { value: obsStreak > 0 ? `${obsStreak}d` : '—', label: 'Streak', loading: !profileLoaded, color: undefined },
           ].map(s => (
             <div key={s.label} className="flex flex-col items-center gap-0.5">
               {s.loading ? (
@@ -224,7 +237,7 @@ export default function ProfilePage() {
                   style={{ background: 'rgba(255,255,255,0.06)', animation: 'nft-pulse 1.5s ease-in-out infinite' }}
                 />
               ) : (
-                <p className="text-white font-bold text-base leading-tight">{s.value}</p>
+                <p className="font-bold text-base leading-tight" style={{ color: s.color ?? 'white' }}>{s.value}</p>
               )}
               <p className="text-slate-500 text-xs">{s.label}</p>
             </div>

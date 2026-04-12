@@ -222,7 +222,7 @@ export default function NftsPage() {
           <p className="text-slate-400 text-sm">Couldn&apos;t load NFTs</p>
           <button
             onClick={fetchNfts}
-            className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-80"
+            className="px-4 py-2 min-h-[44px] rounded-xl text-sm font-semibold text-white transition-all hover:opacity-80"
             style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
           >
             Retry
@@ -232,24 +232,38 @@ export default function NftsPage() {
 
       {/* Empty */}
       {!loading && !error && nfts.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
-          <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center"
-            style={{ background: 'rgba(56,240,255,0.06)', border: '1px solid rgba(56,240,255,0.1)' }}
-          >
-            <Telescope size={28} className="text-[#38F0FF]/50" />
+        <div className="flex flex-col items-center gap-5">
+          {/* Demo card with overlay */}
+          <div className="relative w-full rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+            {/* Overlay */}
+            <div className="absolute inset-0 z-10 backdrop-blur-[2px] bg-[#070B14]/60 flex flex-col items-center justify-center gap-2 text-center px-6">
+              <Telescope size={28} className="text-[#38F0FF]/70" />
+              <p className="text-white text-sm font-semibold">Complete your first observation</p>
+              <p className="text-slate-400 text-xs">to earn a Discovery Attestation NFT</p>
+              <Link
+                href="/missions"
+                className="mt-1 inline-flex items-center gap-2 px-5 py-2.5 min-h-[44px] rounded-xl font-bold text-sm transition-all hover:opacity-90"
+                style={{ background: 'linear-gradient(135deg, #FFD166, #CC9A33)', color: '#070B14' }}
+              >
+                Go to Missions →
+              </Link>
+            </div>
+            {/* Dimmed demo card */}
+            <div className="p-4 select-none pointer-events-none" aria-hidden="true">
+              <div style={{ width: '100%', aspectRatio: '1', background: 'linear-gradient(135deg, rgba(56,240,255,0.06), rgba(122,95,255,0.08))', borderRadius: 8 }} />
+              <p className="text-slate-400 text-base font-semibold mt-3">Stellar Observation #001</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <span className="bg-white/[0.04] px-2.5 py-1 rounded-full text-[11px] text-[#38F0FF]/60">Moon</span>
+                <span className="bg-white/[0.04] px-2.5 py-1 rounded-full text-[11px] text-white/30">Apr 12, 2026</span>
+                <span className="bg-white/[0.04] px-2.5 py-1 rounded-full text-[11px] text-green-400/50">12% cloud</span>
+                <span className="bg-white/[0.04] px-2.5 py-1 rounded-full text-[11px] text-[#FFD166]/50">✦ 50</span>
+              </div>
+              <div className="flex justify-between items-center mt-3 pt-3 border-t border-white/[0.06]">
+                <span className="text-[10px] text-white/10">Compressed NFT</span>
+                <span className="inline-flex items-center gap-1 text-[10px] text-[#38F0FF]/20">View on Explorer <ExternalLink size={10} /></span>
+              </div>
+            </div>
           </div>
-          <div>
-            <p className="text-white font-semibold mb-1">No discoveries yet</p>
-            <p className="text-slate-500 text-sm">Complete missions to mint your first observation NFT.</p>
-          </div>
-          <Link
-            href="/missions"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90"
-            style={{ background: 'linear-gradient(135deg, #FFD166, #CC9A33)', color: '#070B14' }}
-          >
-            Start Your First Mission →
-          </Link>
         </div>
       )}
 

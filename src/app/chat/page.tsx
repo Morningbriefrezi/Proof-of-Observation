@@ -17,6 +17,8 @@ export default function ChatPage() {
   const rawLocale = useLocale();
   const locale = rawLocale === 'ka' ? 'ka' : 'en';
 
+  const [skySummary, setSkySummary] = useState<{ verified: boolean; cloudCover: number; visibility: string } | null>(null);
+
   const [messages, setMessages] = useState<Msg[]>([{
     role: 'assistant',
     content: locale === 'ka'
@@ -34,6 +36,12 @@ export default function ChatPage() {
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, loading]);
   useEffect(() => { setTimeout(() => inputRef.current?.focus(), 200); }, []);
+  useEffect(() => {
+    fetch('/api/sky/verify?lat=41.6938&lon=44.8015')
+      .then(r => r.json())
+      .then(d => setSkySummary({ verified: d.verified, cloudCover: d.cloudCover, visibility: d.visibility }))
+      .catch(() => {});
+  }, []);
 
   const send = async (text?: string) => {
     const msg = (text ?? input).trim();
@@ -108,57 +116,82 @@ export default function ChatPage() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3 scrollbar-hide">
 
-        {/* Suggestion pills — show when only the greeting is present */}
+        {/* Empty state: sky card + suggestions — show when only the greeting is present */}
         {messages.length === 1 && (
-          <div className="flex flex-wrap gap-2 mb-2">
-            {suggestions.map(s => (
-              <button
-                key={s}
-                onClick={() => send(s)}
-                className="text-xs px-3 py-2 rounded-xl transition-all hover:border-[#38F0FF]/40 text-left"
-                style={{ background: 'rgba(56,240,255,0.04)', border: '1px solid rgba(56,240,255,0.1)', color: 'rgba(56,240,255,0.75)' }}
-              >
-                {s}
-              </button>
-            ))}
+          <div className="flex flex-col gap-2 mb-2">
+            {skySummary && (
+              <div className="rounded-xl p-3" style={{
+                background: skySummary.verified ? 'rgba(52,211,153,0.06)' : 'rgba(255,209,102,0.06)',
+                border: `1px solid ${skySummary.verified ? 'rgba(52,211,153,0.15)' : 'rgba(255,209,102,0.15)'}`,
+              }}>
+                <p className="text-xs font-semibold mb-0.5" style={{ color: skySummary.verified ? '#34d399' : '#FFD166' }}>
+                  {skySummary.verified ? '✦ Good conditions tonight' : '◑ Cloudy tonight'}
+                </p>
+                <p className="text-slate-500 text-xs">
+                  {skySummary.cloudCover}% cloud · {skySummary.visibility} · Ask me what to observe
+                </p>
+              </div>
+            )}
+            <div className="flex flex-wrap gap-2">
+              {suggestions.map(s => (
+                <button
+                  key={s}
+                  onClick={() => send(s)}
+                  className="text-xs px-3 py-2 rounded-xl transition-all hover:border-[#38F0FF]/40 text-left"
+                  style={{ background: 'rgba(56,240,255,0.04)', border: '1px solid rgba(56,240,255,0.1)', color: 'rgba(56,240,255,0.75)' }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
-        {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            {m.role === 'assistant' && (
-              <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-2 mt-0.5"
-                style={{ background: 'rgba(56,240,255,0.1)', border: '1px solid rgba(56,240,255,0.2)' }}>
-                <span className="text-[8px] font-bold text-[#38F0FF]">AI</span>
-              </div>
-            )}
-            <div
-              className="max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap"
-              style={m.role === 'user' ? {
-                background: 'linear-gradient(135deg, rgba(255,209,102,0.15), rgba(204,154,51,0.1))',
-                border: '1px solid rgba(255,209,102,0.2)',
-                color: '#f5e8b8',
-                borderBottomRightRadius: 6,
-              } : {
-                background: 'rgba(56,240,255,0.05)',
-                border: '1px solid rgba(56,240,255,0.1)',
-                color: '#cbd5e1',
-                borderBottomLeftRadius: 6,
-              }}
-            >
-              {m.content}
-            </div>
-          </div>
-        ))}
+        <style>{`
+          @keyframes cursorBlink { 0%,100% { opacity:1 } 50% { opacity:0 } }
+          .streaming-cursor { animation: cursorBlink 0.7s ease-in-out infinite; color: #38F0FF; }
+        `}</style>
 
-        {loading && (
+        {messages.map((m, i) => {
+          const isStreamingThis = loading && m.role === 'assistant' && i === messages.length - 1;
+          return (
+            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              {m.role === 'assistant' && (
+                <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-2 mt-0.5"
+                  style={{ background: 'rgba(56,240,255,0.1)', border: '1px solid rgba(56,240,255,0.2)' }}>
+                  <span className="text-[8px] font-bold text-[#38F0FF]">AI</span>
+                </div>
+              )}
+              <div
+                className="max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap"
+                style={m.role === 'user' ? {
+                  background: 'linear-gradient(135deg, rgba(255,209,102,0.15), rgba(204,154,51,0.1))',
+                  border: '1px solid rgba(255,209,102,0.2)',
+                  color: '#f5e8b8',
+                  borderBottomRightRadius: 6,
+                } : {
+                  background: 'rgba(56,240,255,0.05)',
+                  border: '1px solid rgba(56,240,255,0.1)',
+                  borderLeft: '3px solid rgba(56,240,255,0.35)',
+                  color: '#cbd5e1',
+                  borderBottomLeftRadius: 6,
+                }}
+              >
+                {m.content}
+                {isStreamingThis && m.content && <span className="streaming-cursor">▋</span>}
+              </div>
+            </div>
+          );
+        })}
+
+        {loading && messages[messages.length - 1]?.content === '' && (
           <div className="flex justify-start">
             <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-2 mt-0.5"
               style={{ background: 'rgba(56,240,255,0.1)', border: '1px solid rgba(56,240,255,0.2)' }}>
               <span className="text-[8px] font-bold text-[#38F0FF]">AI</span>
             </div>
             <div className="rounded-2xl rounded-bl-md px-4 py-3"
-              style={{ background: 'rgba(56,240,255,0.05)', border: '1px solid rgba(56,240,255,0.1)' }}>
+              style={{ background: 'rgba(56,240,255,0.05)', border: '1px solid rgba(56,240,255,0.1)', borderLeft: '3px solid rgba(56,240,255,0.35)' }}>
               <div className="flex items-center gap-1">
                 {[0, 1, 2].map(i => (
                   <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#38F0FF]/60 animate-bounce"

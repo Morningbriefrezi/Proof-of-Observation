@@ -108,7 +108,7 @@ export default function MissionList({ onStart }: MissionListProps) {
               ) : (
                 <button
                   onClick={() => onStart(mission)}
-                  className="w-full py-2.5 rounded-lg text-[12px] font-bold transition-all active:scale-95 hover:opacity-90"
+                  className="w-full py-2.5 min-h-[44px] rounded-lg text-[12px] font-bold transition-all active:scale-95 hover:opacity-90"
                   style={{ background: 'linear-gradient(135deg, #FFD166, #CC9A33)', color: '#070B14' }}
                 >
                   Begin →

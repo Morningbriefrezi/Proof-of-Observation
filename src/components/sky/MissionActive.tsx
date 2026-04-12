@@ -11,7 +11,7 @@ import CameraCapture from './CameraCapture';
 import Verification from './Verification';
 import MintAnimation from '@/components/shared/MintAnimation';
 import Button from '@/components/shared/Button';
-import { Copy, Check, Telescope, Award } from 'lucide-react';
+import { Copy, Check, Telescope, Award, ExternalLink } from 'lucide-react';
 import RewardIcon from '@/components/shared/RewardIcon';
 
 interface MissionActiveProps {
@@ -292,8 +292,11 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
           <span className="text-7xl block" style={{ animation: 'emojiPulse 3s ease-in-out infinite' }}>
             {mission.emoji}
           </span>
-          <span className="text-xs tracking-[0.3em] uppercase font-mono" style={{ color: '#14B8A6' }}>
-            ✦ VERIFIED ON SOLANA
+          <span
+            className="text-[11px] font-bold px-3 py-1.5 rounded-full"
+            style={{ background: 'rgba(153,69,255,0.15)', border: '1px solid rgba(153,69,255,0.3)', color: '#9945FF' }}
+          >
+            ✦ Verified on Solana Devnet
           </span>
         </div>
 
@@ -326,10 +329,10 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
               href={`https://explorer.solana.com/tx/${mintTxId}?cluster=devnet`}
               target="_blank"
               rel="noopener noreferrer"
-              className="block mt-3 text-xs"
-              style={{ color: '#14B8A6', textDecoration: 'none' }}
+              className="mt-3 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-opacity hover:opacity-80"
+              style={{ background: 'rgba(20,184,166,0.1)', border: '1px solid rgba(20,184,166,0.25)', color: '#14B8A6', textDecoration: 'none' }}
             >
-              View on Solana Explorer →
+              View on Solana Explorer <ExternalLink size={11} />
             </a>
           )}
         </div>
