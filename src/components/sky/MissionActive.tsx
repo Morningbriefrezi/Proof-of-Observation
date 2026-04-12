@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Mission, SkyVerification, MissionState } from '@/lib/types';
 import { usePrivy } from '@privy-io/react-auth';
@@ -10,7 +10,7 @@ import CameraCapture from './CameraCapture';
 import Verification from './Verification';
 import MintAnimation from '@/components/shared/MintAnimation';
 import Button from '@/components/shared/Button';
-import { Copy, Check, Telescope, Award, ExternalLink } from 'lucide-react';
+import { Copy, Check, Telescope, Award } from 'lucide-react';
 import RewardIcon from '@/components/shared/RewardIcon';
 
 interface MissionActiveProps {
@@ -249,110 +249,132 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
   }
 
   if (step === 'done') {
+    const tweet = `Just confirmed my ${mission.name} observation with @StellarApp ✦ Verified on Solana.\n\nDiscover the night sky → stellarrclub.vercel.app`;
+    const walletAddr = solanaWallet?.address ?? '';
+    const shortAddr = walletAddr.length > 10
+      ? `${walletAddr.slice(0, 6)}...${walletAddr.slice(-4)}`
+      : walletAddr || 'Not connected';
+    const isOnChain = mintTxId && !mintTxId.startsWith('sim');
+
     return (
-      <div className="fixed inset-0 z-[60] bg-[#070B14] overflow-hidden flex flex-col items-center"
-        style={{ animation: 'doneFadeIn 0.4s ease-out forwards' }}>
+      <div
+        className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 px-6 text-center overflow-y-auto py-10"
+        style={{
+          background: 'rgba(5,8,16,0.97)',
+          backdropFilter: 'blur(4px)',
+          animation: 'doneOverlayIn 0.4s ease-out forwards',
+        }}
+      >
         <style>{`
-          @keyframes doneFadeIn {
+          @keyframes doneOverlayIn {
             from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
           }
-          @keyframes starShimmer {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-          }
-          @keyframes checkDraw {
-            from { stroke-dashoffset: 40; }
-            to { stroke-dashoffset: 0; }
+          @keyframes emojiPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
           }
         `}</style>
-        <div className="max-w-sm w-full mx-auto flex flex-col items-center pt-20 px-6">
-          <div className="w-20 h-20 rounded-full flex items-center justify-center"
-            style={{
-              background: 'radial-gradient(circle, rgba(52,211,153,0.15), transparent)',
-              border: '2px solid rgba(52,211,153,0.3)',
-            }}>
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <path d="M8 16l6 6 10-12" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                strokeDasharray="40" strokeDashoffset="40"
-                style={{ animation: 'checkDraw 0.6s ease-out 0.3s forwards' }} />
-            </svg>
-          </div>
 
-          <h2 className="text-2xl text-white mt-6 tracking-wide" style={{ fontFamily: 'Georgia, serif' }}>
-            {mintTxId.startsWith('sim') ? 'Observation Logged' : mission.id === 'free-observation' ? 'Observation Sealed' : 'Discovery Sealed'}
-          </h2>
-          <p className="text-slate-400 text-sm mt-2">
-            {mission.emoji} {mission.id === 'free-observation' ? "Tonight's Sky" : mission.name}
-          </p>
-          {(sky?.verified ? mission.stars : 0) > 0 ? (
-            <p className="text-[#FFD166] text-lg font-bold mt-3"
-              style={{ animation: 'starShimmer 2s ease-in-out infinite' }}>
-              +{sky?.verified ? mission.stars : 0} ✦
-            </p>
-          ) : (
-            <p className="text-slate-500 text-sm mt-3">Cloudy — observation logged</p>
-          )}
+        {/* Top section */}
+        <div className="flex flex-col items-center gap-2">
+          <span className="text-7xl block" style={{ animation: 'emojiPulse 3s ease-in-out infinite' }}>
+            {mission.emoji}
+          </span>
+          <span className="text-xs tracking-[0.3em] uppercase font-mono" style={{ color: '#14B8A6' }}>
+            ✦ VERIFIED ON SOLANA
+          </span>
+        </div>
 
-          {mintTxId && !mintTxId.startsWith('sim') ? (
-            <a href={`https://explorer.solana.com/tx/${mintTxId}?cluster=devnet`}
-              target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-full text-xs solana-explorer-link"
-              style={{
-                background: 'rgba(56,240,255,0.06)',
-                border: '1px solid rgba(56,240,255,0.15)',
-                color: '#38F0FF',
-              }}>
-              Verified on Solana <ExternalLink size={12} />
-            </a>
-          ) : (
-            <p className="mt-4 text-[11px] text-slate-600 text-center">
-              Saved locally · pending on-chain confirmation
-            </p>
-          )}
-
-          <div className="w-12 h-px my-6" style={{ background: 'rgba(255,255,255,0.1)' }} />
-
-          <div className="flex flex-col gap-3 w-full">
-            <button
-              onClick={() => { onClose(); router.push('/nfts'); }}
-              className="w-full py-3 rounded-xl text-white text-sm font-semibold transition-colors"
-              style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)' }}>
-              View My Discoveries
-            </button>
-            <button
-              onClick={onClose}
-              className="w-full py-3 rounded-xl text-black text-sm font-semibold"
-              style={{ background: 'linear-gradient(to right, #FFD166, #E8B84A)' }}>
-              Continue Observing
-            </button>
-          </div>
-
-          <div className="w-full mt-4 pt-4 border-t border-white/[0.06]">
-            <p className="text-center text-[10px] text-white/20 mb-3">Share your discovery</p>
-            <div className="flex gap-2">
-              <a
-                href={`https://warpcast.com/~/compose?text=${encodeURIComponent(`I just observed ${mission.id === 'free-observation' ? "Tonight's Sky" : mission.name} ✦ Verified with Stellar\n\nstellarrclub.vercel.app`)}`}
-                target="_blank" rel="noopener noreferrer"
-                className="flex-1 py-2.5 rounded-xl text-xs font-medium bg-[rgba(132,101,203,0.08)] border border-[rgba(132,101,203,0.2)] text-[#8465CB] transition-colors text-center"
-                style={{ textDecoration: 'none' }}
-              >
-                Share on Warpcast
-              </a>
-              <a
-                href={`https://x.com/intent/tweet?text=${encodeURIComponent(`Just observed ${mission.id === 'free-observation' ? "Tonight's Sky" : mission.name} and logged my discovery ✦\n\n@AstromanGe stellarrclub.vercel.app`)}`}
-                target="_blank" rel="noopener noreferrer"
-                className="flex-1 py-2.5 rounded-xl text-xs font-medium bg-[rgba(255,255,255,0.04)] border border-white/[0.08] text-white/60 transition-colors text-center"
-                style={{ textDecoration: 'none' }}
-              >
-                Share on X
-              </a>
+        {/* Proof box */}
+        <div
+          className="rounded-2xl px-6 py-5 w-full max-w-sm text-left"
+          style={{
+            background: 'rgba(52,211,153,0.05)',
+            border: '1px solid rgba(52,211,153,0.2)',
+          }}
+        >
+          <p className="text-sm font-semibold text-white mb-3">Discovery Attestation</p>
+          {[
+            { label: 'Target', value: mission.name, style: { color: 'white' } as React.CSSProperties },
+            { label: 'Observer', value: shortAddr, style: { color: 'white', fontFamily: 'monospace' } as React.CSSProperties },
+            { label: 'Stars', value: `+${sky?.verified ? mission.stars : 0} ✦`, style: { color: 'var(--accent-gold)' } as React.CSSProperties },
+            { label: 'Network', value: 'Solana Devnet', style: { color: 'white' } as React.CSSProperties },
+            { label: 'Status', value: '🟢 Confirmed', style: { color: '#34d399' } as React.CSSProperties },
+            ...(isOnChain
+              ? [{ label: 'Signature', value: `${mintTxId.slice(0, 8)}...`, style: { color: '#14B8A6', fontFamily: 'monospace' } as React.CSSProperties }]
+              : []),
+          ].map(row => (
+            <div key={row.label} className="flex justify-between text-xs mb-1.5 last:mb-0">
+              <span className="text-slate-400">{row.label}</span>
+              <span style={row.style}>{row.value}</span>
             </div>
-          </div>
+          ))}
+          {isOnChain && (
+            <a
+              href={`https://explorer.solana.com/tx/${mintTxId}?cluster=devnet`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block mt-3 text-xs"
+              style={{ color: '#14B8A6', textDecoration: 'none' }}
+            >
+              View on Solana Explorer →
+            </a>
+          )}
+        </div>
 
-          <p className="mt-8 text-[10px]" style={{ color: 'rgba(255,255,255,0.15)' }}>
-            Observation verified · {new Date().toLocaleDateString()}
+        {/* Headline */}
+        <div className="flex flex-col items-center gap-1">
+          <h2 className="text-2xl font-bold text-white">Observation Confirmed</h2>
+          <p className="text-sm text-slate-400 max-w-xs">
+            Your discovery has been permanently sealed on Solana.
           </p>
+        </div>
+
+        {/* Share buttons */}
+        <div className="flex gap-3 justify-center">
+          <button
+            onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweet)}`, '_blank')}
+            className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm text-white"
+            style={{
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}
+          >
+            <span style={{ fontStyle: 'normal' }}>𝕏</span>
+            Share on X
+          </button>
+          <button
+            onClick={() => window.open(`https://warpcast.com/~/compose?text=${encodeURIComponent(tweet)}`, '_blank')}
+            className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm text-white"
+            style={{
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}
+          >
+            Cast on Farcaster
+          </button>
+        </div>
+
+        {/* Bottom buttons */}
+        <div className="flex flex-col gap-3 w-full max-w-sm mt-2">
+          <button
+            onClick={() => { onClose(); router.push('/nfts'); }}
+            className="w-full py-3 rounded-xl font-semibold text-sm text-black"
+            style={{ background: 'linear-gradient(135deg, #34D399, #14B8A6)' }}
+          >
+            View My Discoveries →
+          </button>
+          <button
+            onClick={onClose}
+            className="w-full py-3 rounded-xl text-sm text-slate-400"
+            style={{
+              background: 'transparent',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}
+          >
+            Back to Missions
+          </button>
         </div>
       </div>
     );
