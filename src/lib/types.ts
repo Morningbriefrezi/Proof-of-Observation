@@ -102,3 +102,12 @@ export interface UserObservation {
   mintTxId?: string
   createdAt: string
 }
+
+export type SkyGrade = 'Exceptional' | 'Excellent' | 'Good' | 'Fair' | 'Poor'
+
+export interface SkyScore {
+  score: number
+  grade: SkyGrade
+  emoji: string
+  color: string
+}
