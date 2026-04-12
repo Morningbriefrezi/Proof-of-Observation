@@ -23,26 +23,28 @@ export default function ProfilePage() {
   const [obsCount, setObsCount] = useState<number>(0);
   const [obsStreak, setObsStreak] = useState<number>(0);
   const [recentObs, setRecentObs] = useState<{ id: string; target: string; confidence: string; stars: number; created_at: string }[]>([]);
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   const solanaWallet = wallets.find(w => (w as { chainType?: string }).chainType === 'solana');
   const address = solanaWallet?.address ?? state.walletAddress ?? null;
 
   useEffect(() => {
     if (!address) return;
-    fetch(`/api/stars-balance?address=${encodeURIComponent(address)}`)
-      .then(r => r.json()).then(d => setStarsBalance(d.balance)).catch(() => {});
-    fetch(`/api/observe/history?walletAddress=${encodeURIComponent(address)}`)
-      .then(r => r.json())
-      .then(d => {
-        const obs = d.observations ?? [];
-        setObsCount(obs.length);
-        setRecentObs(obs.slice(0, 5));
-      })
-      .catch(() => {});
-    fetch(`/api/streak?walletAddress=${encodeURIComponent(address)}`)
-      .then(r => r.json())
-      .then(d => setObsStreak(d.streak ?? 0))
-      .catch(() => {});
+    setProfileLoaded(false);
+    Promise.allSettled([
+      fetch(`/api/stars-balance?address=${encodeURIComponent(address)}`)
+        .then(r => r.json()).then(d => setStarsBalance(d.balance)),
+      fetch(`/api/observe/history?walletAddress=${encodeURIComponent(address)}`)
+        .then(r => r.json())
+        .then(d => {
+          const obs = d.observations ?? [];
+          setObsCount(obs.length);
+          setRecentObs(obs.slice(0, 5));
+        }),
+      fetch(`/api/streak?walletAddress=${encodeURIComponent(address)}`)
+        .then(r => r.json())
+        .then(d => setObsStreak(d.streak ?? 0)),
+    ]).finally(() => setProfileLoaded(true));
   }, [address]);
 
   const handleCopy = () => {
@@ -143,6 +145,7 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10 animate-page-enter flex flex-col gap-5">
+      <style>{`@keyframes nft-pulse { 0%,100% { opacity: 0.5 } 50% { opacity: 1 } }`}</style>
 
       {/* 1 — IDENTITY HEADER (social-style) */}
       <div className="flex flex-col gap-4">
@@ -167,13 +170,20 @@ export default function ProfilePage() {
         {/* Stats row — social style */}
         <div className="grid grid-cols-4 gap-2 text-center">
           {[
-            { value: completed.length, label: 'Missions' },
-            { value: obsCount, label: 'Obs' },
-            { value: `${starsDisplay} ✦`, label: 'Stars' },
-            { value: obsStreak > 0 ? `${obsStreak}d` : '—', label: 'Streak' },
+            { value: completed.length, label: 'Missions', loading: false },
+            { value: obsCount, label: 'Obs', loading: !profileLoaded },
+            { value: `${starsDisplay} ✦`, label: 'Stars', loading: !profileLoaded },
+            { value: obsStreak > 0 ? `${obsStreak}d` : '—', label: 'Streak', loading: !profileLoaded },
           ].map(s => (
             <div key={s.label} className="flex flex-col items-center gap-0.5">
-              <p className="text-white font-bold text-base leading-tight">{s.value}</p>
+              {s.loading ? (
+                <div
+                  className="w-16 h-5 rounded-md"
+                  style={{ background: 'rgba(255,255,255,0.06)', animation: 'nft-pulse 1.5s ease-in-out infinite' }}
+                />
+              ) : (
+                <p className="text-white font-bold text-base leading-tight">{s.value}</p>
+              )}
               <p className="text-slate-500 text-xs">{s.label}</p>
             </div>
           ))}
@@ -191,6 +201,13 @@ export default function ProfilePage() {
               style={{ width: `${Math.max(rank.progressPct, 4)}%`, background: 'linear-gradient(90deg, #7A5FFF, #14B8A6)' }}
             />
           </div>
+          {rank.nextRank && (() => {
+            const thresholds: Record<string, number> = { Observer: 1, Pathfinder: 3, Celestial: 5 };
+            const needed = (thresholds[rank.nextRank] ?? 0) - completed.length;
+            return needed > 0 ? (
+              <p className="text-xs text-slate-500 mt-1">{needed} mission{needed !== 1 ? 's' : ''} to {rank.nextRank}</p>
+            ) : null;
+          })()}
         </div>
 
         {/* Wallet row — subtle, secondary */}

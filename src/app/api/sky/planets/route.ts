@@ -11,7 +11,9 @@ export async function GET(req: NextRequest) {
 
   try {
     const planets = getVisiblePlanets(lat, lng, new Date());
-    return NextResponse.json(planets);
+    return NextResponse.json(planets, {
+      headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600' },
+    });
   } catch (err) {
     console.error('[api/sky/planets] getVisiblePlanets threw:', err);
     return NextResponse.json([], { headers: { 'X-Warning': 'planet-calc-failed' } });

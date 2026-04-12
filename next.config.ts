@@ -5,6 +5,13 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'www.celestron.com' },
+      { protocol: 'https', hostname: 'images.bresser.de' },
+      { protocol: 'https', hostname: 'astroman.ge' },
+    ],
+  },
   turbopack: {
     root: __dirname,
   },

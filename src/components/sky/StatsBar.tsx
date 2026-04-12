@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useAppState } from '@/hooks/useAppState';
 import { getRank } from '@/lib/rewards';
 import { Star, Target, Award } from 'lucide-react';
@@ -11,7 +12,18 @@ export default function StatsBar() {
   const completed = state.completedMissions.filter(m => m.status === 'completed');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const totalStars = completed.reduce((sum, m) => sum + (m.stars ?? (m as any).points ?? 0), 0);
-  const count = completed.length;
+  const localCount = completed.length;
+  const [apiCount, setApiCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!state.walletAddress) return;
+    fetch(`/api/observe/history?walletAddress=${encodeURIComponent(state.walletAddress)}`)
+      .then(r => r.json())
+      .then(d => setApiCount((d.observations ?? []).length))
+      .catch(() => {});
+  }, [state.walletAddress]);
+
+  const count = apiCount ?? localCount;
   const rank = getRank(count);
   const pct = (count / TOTAL) * 100;
   const allDone = count >= TOTAL;

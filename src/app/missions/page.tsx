@@ -24,6 +24,15 @@ export default function MissionsPage() {
   const [activeQuiz, setActiveQuiz] = useState<QuizDef | null>(null);
   const [activeMission, setActiveMission] = useState<Mission | null>(null);
   const [skyConditions, setSkyConditions] = useState<{ cloudCover: number; visibility: string; verified: boolean } | null>(null);
+  const [streak, setStreak] = useState<number>(0);
+
+  useEffect(() => {
+    if (!authenticated || !state.walletAddress) return;
+    fetch(`/api/streak?walletAddress=${encodeURIComponent(state.walletAddress)}`)
+      .then(r => r.json())
+      .then(d => setStreak(d.streak ?? 0))
+      .catch(() => {});
+  }, [authenticated, state.walletAddress]);
 
   useEffect(() => {
     if (authenticated) return;
@@ -147,6 +156,19 @@ export default function MissionsPage() {
             </span>
           </div>
 
+          {streak > 0 && (
+            <div
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 mb-3"
+              style={{
+                background: 'rgba(245,158,11,0.12)',
+                border: '1px solid rgba(245,158,11,0.25)',
+                color: '#F59E0B',
+              }}
+            >
+              <span className="text-xs">🔥</span>
+              <span className="text-xs font-medium">{streak} day streak</span>
+            </div>
+          )}
           <StatsBar />
         </section>
 

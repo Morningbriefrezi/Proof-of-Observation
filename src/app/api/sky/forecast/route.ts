@@ -15,7 +15,9 @@ export async function GET(req: NextRequest) {
 
   try {
     const data = await fetchSkyForecast(lat, lng);
-    return NextResponse.json(data);
+    return NextResponse.json(data, {
+      headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600' },
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });

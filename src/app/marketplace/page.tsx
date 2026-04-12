@@ -5,12 +5,13 @@ import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useAppState } from '@/hooks/useAppState';
 import { useLocation } from '@/lib/location';
 import LocationPicker from '@/components/LocationPicker';
-import { getProductsByRegion, getDealersByRegion } from '@/lib/dealers';
+import { getProductsByRegion, getDealersByRegion, GLOBAL_FALLBACK } from '@/lib/dealers';
 import type { Product } from '@/lib/dealers';
 import StarsRedemption from '@/components/shared/StarsRedemption';
 import BackButton from '@/components/shared/BackButton';
 import { ExternalLink } from 'lucide-react';
 import { useEffect } from 'react';
+import Image from 'next/image';
 
 type CategoryFilter = 'all' | 'telescope' | 'accessory';
 
@@ -43,11 +44,13 @@ function ProductCard({ product, showDealer, dealerName }: {
       {/* Image */}
       <div className="relative" style={{ aspectRatio: '4/3', background: 'rgba(255,255,255,0.03)' }}>
         {product.image && !imgError ? (
-          <img
+          <Image
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover"
-            loading="lazy"
+            width={300}
+            height={200}
+            style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+            unoptimized={!product.image.startsWith('https://')}
             onError={() => setImgError(true)}
           />
         ) : (
@@ -215,13 +218,23 @@ export default function MarketplacePage() {
 
       {/* Product grid */}
       {products.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 py-16 text-center">
-          <span className="text-5xl">🔭</span>
-          <p className="text-white font-semibold">No partner stores in your area yet</p>
-          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            Switch to a different region or check back soon
-          </p>
-          <LocationPicker compact={false} />
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col items-center gap-2 py-8 text-center">
+            <p className="text-white font-semibold">No stores in your region yet</p>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              Products from Astroman ship worldwide.
+            </p>
+          </div>
+          <div className="grid gap-3 grid-cols-2">
+            {GLOBAL_FALLBACK.map(p => (
+              <ProductCard
+                key={p.id}
+                product={p}
+                showDealer={false}
+                dealerName="Astroman"
+              />
+            ))}
+          </div>
         </div>
       ) : (
         <div className="grid gap-3 grid-cols-2">

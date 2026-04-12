@@ -24,5 +24,7 @@ export async function GET(req: NextRequest) {
     sunSet:  sunSet  ? sunSet.date.toISOString()  : null,
     illuminationPct,
     moonPhaseDeg: Math.round(moonPhaseDeg),
+  }, {
+    headers: { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600' },
   });
 }

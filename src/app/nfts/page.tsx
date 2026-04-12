@@ -194,18 +194,32 @@ export default function NftsPage() {
         )}
       </div>
 
-      {/* Loading */}
+      {/* Loading — skeleton grid */}
       {loading && (
-        <div className="flex flex-col items-center justify-center py-16 gap-3">
-          <div className="w-6 h-6 rounded-full border-2 border-[#38F0FF] border-t-transparent animate-spin" />
-          <p className="text-slate-500 text-sm">Loading your observations...</p>
-        </div>
+        <>
+          <style>{`
+            @keyframes nft-pulse { 0%,100% { opacity: 0.5 } 50% { opacity: 1 } }
+          `}</style>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[0, 1, 2].map(i => (
+              <div
+                key={i}
+                className="rounded-2xl h-48"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  animation: 'nft-pulse 1.5s ease-in-out infinite',
+                  animationDelay: `${i * 0.15}s`,
+                }}
+              />
+            ))}
+          </div>
+        </>
       )}
 
       {/* Error */}
       {error && !loading && (
         <div className="flex flex-col items-center justify-center py-16 gap-4">
-          <p className="text-slate-400 text-sm">Could not load NFTs — check your connection</p>
+          <p className="text-slate-400 text-sm">Couldn&apos;t load NFTs</p>
           <button
             onClick={fetchNfts}
             className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-80"
@@ -226,7 +240,7 @@ export default function NftsPage() {
             <Telescope size={28} className="text-[#38F0FF]/50" />
           </div>
           <div>
-            <p className="text-white font-semibold mb-1">No observations yet</p>
+            <p className="text-white font-semibold mb-1">No discoveries yet</p>
             <p className="text-slate-500 text-sm">Complete missions to mint your first observation NFT.</p>
           </div>
           <Link
@@ -234,7 +248,7 @@ export default function NftsPage() {
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90"
             style={{ background: 'linear-gradient(135deg, #FFD166, #CC9A33)', color: '#070B14' }}
           >
-            Start a Mission →
+            Start Your First Mission →
           </Link>
         </div>
       )}

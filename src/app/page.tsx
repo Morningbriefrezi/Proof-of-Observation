@@ -13,6 +13,7 @@ import { Telescope, Camera, Star, ShoppingBag, CloudSun, Satellite, Sparkles, Mo
 import { MISSIONS } from '@/lib/constants';
 import LocationPicker from '@/components/LocationPicker';
 import { useLocation } from '@/lib/location';
+import OnboardingOverlay from '@/components/shared/OnboardingOverlay';
 
 export default function HomePage() {
   const t = useTranslations();
@@ -35,46 +36,71 @@ export default function HomePage() {
     const canvas = canvasRef.current;
     const hero = heroRef.current;
     if (!canvas || !hero) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
 
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
     if (mq.matches) return;
 
-    let w = hero.offsetWidth;
-    let h = hero.offsetHeight;
-    canvas.width = w;
-    canvas.height = h;
+    let initialized = false;
+    let w = 0, h = 0;
+    let handleResize: () => void;
 
-    const stars = Array.from({ length: 120 }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      r: 0.5 + Math.random() * 0.7,
-      o: 0.2 + Math.random() * 0.5,
-    }));
+    const init = () => {
+      if (initialized) return;
+      initialized = true;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
 
-    const draw = () => {
-      ctx.clearRect(0, 0, w, h);
-      for (const s of stars) {
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255,255,255,${s.o})`;
-        ctx.fill();
-      }
-    };
-    draw();
-
-    const handleResize = () => {
       w = hero.offsetWidth;
       h = hero.offsetHeight;
       canvas.width = w;
       canvas.height = h;
+
+      const stars = Array.from({ length: 120 }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: 0.5 + Math.random() * 0.7,
+        o: 0.2 + Math.random() * 0.5,
+      }));
+
+      const draw = () => {
+        ctx.clearRect(0, 0, w, h);
+        for (const s of stars) {
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255,255,255,${s.o})`;
+          ctx.fill();
+        }
+      };
       draw();
+
+      handleResize = () => {
+        w = hero.offsetWidth;
+        h = hero.offsetHeight;
+        canvas.width = w;
+        canvas.height = h;
+        draw();
+      };
+      window.addEventListener('resize', handleResize);
     };
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
+
+    if (typeof IntersectionObserver !== 'undefined') {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          init();
+          observer.disconnect();
+        }
+      }, { threshold: 0 });
+      observer.observe(canvas);
+      return () => {
+        observer.disconnect();
+        if (handleResize) window.removeEventListener('resize', handleResize);
+      };
+    } else {
+      init();
+      return () => {
+        if (handleResize) window.removeEventListener('resize', handleResize);
+      };
+    }
   }, []);
 
   useEffect(() => {
@@ -96,6 +122,7 @@ export default function HomePage() {
 
   return (
     <>
+      <OnboardingOverlay />
       <style>{`
         @media (prefers-reduced-motion: no-preference) {
           @keyframes fadeInUp {

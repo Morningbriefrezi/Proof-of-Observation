@@ -378,7 +378,7 @@ function buildGlobalFallback(): Product[] {
   )
 }
 
-const GLOBAL_FALLBACK = buildGlobalFallback()
+export const GLOBAL_FALLBACK = buildGlobalFallback()
 
 export function getDealersByRegion(region: Region): Dealer[] {
   if (region === 'global') return DEALERS
