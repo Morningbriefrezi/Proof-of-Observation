@@ -3,13 +3,15 @@
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
-import { Copy, Check, ExternalLink, Telescope, Star, Award, Camera, Lock, ChevronRight, Wallet } from 'lucide-react';
+import { Copy, Check, ExternalLink, Telescope, Camera, Lock, ChevronRight, Wallet, X } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAppState } from '@/hooks/useAppState';
 import { getRank } from '@/lib/rewards';
 import Card from '@/components/shared/Card';
 import Button from '@/components/shared/Button';
 import StarsRedemption from '@/components/shared/StarsRedemption';
+import { MissionIcon } from '@/components/shared/PlanetIcons';
 
 export default function ProfilePage() {
   const t = useTranslations('profile');
@@ -24,6 +26,7 @@ export default function ProfilePage() {
   const [obsStreak, setObsStreak] = useState<number>(0);
   const [recentObs, setRecentObs] = useState<{ id: string; target: string; confidence: string; stars: number; created_at: string }[]>([]);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<{ photo: string; name: string } | null>(null);
 
   const solanaWallet = wallets.find(w => (w as { chainType?: string }).chainType === 'solana');
   const address = solanaWallet?.address ?? state.walletAddress ?? null;
@@ -124,8 +127,9 @@ export default function ProfilePage() {
   const missionItems = completed.map(m => ({
     key: `m-${m.id}`,
     type: 'mission' as const,
+    id: m.id,
     label: m.name,
-    emoji: m.emoji,
+    photo: m.photo,
     stars: m.stars,
     date: m.timestamp,
     txId: m.txId,
@@ -133,8 +137,9 @@ export default function ProfilePage() {
   const obsItems = recentObs.map(o => ({
     key: `o-${o.id}`,
     type: 'observation' as const,
+    id: o.id,
     label: o.target,
-    emoji: null,
+    photo: null,
     stars: o.stars,
     date: o.created_at,
     txId: null,
@@ -146,6 +151,43 @@ export default function ProfilePage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10 animate-page-enter flex flex-col gap-5">
       <style>{`@keyframes nft-pulse { 0%,100% { opacity: 0.5 } 50% { opacity: 1 } }`}</style>
+
+      {/* Photo lightbox modal */}
+      {selectedPhoto && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(7,11,20,0.92)' }}
+          onClick={() => setSelectedPhoto(null)}
+        >
+          <div
+            className="relative max-w-sm w-full rounded-2xl overflow-hidden"
+            style={{ border: '1px solid rgba(122,95,255,0.25)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <Image
+              src={selectedPhoto.photo}
+              alt={selectedPhoto.name}
+              width={480}
+              height={480}
+              className="w-full object-cover"
+              unoptimized
+            />
+            <div
+              className="absolute bottom-0 left-0 right-0 px-4 py-3 flex items-center justify-between"
+              style={{ background: 'linear-gradient(0deg, rgba(7,11,20,0.9) 0%, transparent 100%)' }}
+            >
+              <p className="text-white text-sm font-semibold">{selectedPhoto.name}</p>
+            </div>
+            <button
+              onClick={() => setSelectedPhoto(null)}
+              className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center transition-colors"
+              style={{ background: 'rgba(7,11,20,0.7)', border: '1px solid rgba(255,255,255,0.1)' }}
+            >
+              <X size={13} className="text-slate-300" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 1 — IDENTITY HEADER (social-style) */}
       <div className="flex flex-col gap-4">
@@ -249,15 +291,22 @@ export default function ProfilePage() {
         ) : (
           <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
             {completed.map(m => (
-              <div
+              <button
                 key={m.id}
-                className="flex-shrink-0 flex flex-col items-center gap-1.5 rounded-xl px-3 py-2.5 min-w-[80px]"
-                style={{ background: 'rgba(122,95,255,0.08)', border: '1px solid rgba(122,95,255,0.15)' }}
+                onClick={() => m.photo ? setSelectedPhoto({ photo: m.photo, name: m.name }) : undefined}
+                className="flex-shrink-0 flex flex-col items-center gap-1.5 rounded-xl px-3 py-2.5 min-w-[80px] transition-all active:scale-95"
+                style={{
+                  background: 'rgba(122,95,255,0.08)',
+                  border: '1px solid rgba(122,95,255,0.15)',
+                  cursor: m.photo ? 'pointer' : 'default',
+                }}
               >
-                <span className="text-2xl leading-none">{m.emoji}</span>
+                <div className="flex items-center justify-center" style={{ height: 40 }}>
+                  <MissionIcon id={m.id} size={36} />
+                </div>
                 <p className="text-white text-xs font-medium text-center leading-tight line-clamp-2 max-w-[72px]">{m.name}</p>
                 <span className="text-[#FFD166] text-[10px] font-semibold">+{m.stars} ✦</span>
-              </div>
+              </button>
             ))}
           </div>
         )}
@@ -274,7 +323,12 @@ export default function ProfilePage() {
           </div>
           <div className="flex flex-col divide-y divide-white/5">
             {activityFeed.map(item => (
-              <div key={item.key} className="flex items-center gap-3 py-2.5">
+              <div
+                key={item.key}
+                className="flex items-center gap-3 py-2.5"
+                onClick={() => item.type === 'mission' && item.photo ? setSelectedPhoto({ photo: item.photo, name: item.label }) : undefined}
+                style={{ cursor: item.type === 'mission' && item.photo ? 'pointer' : 'default' }}
+              >
                 <div
                   className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{
@@ -283,7 +337,7 @@ export default function ProfilePage() {
                   }}
                 >
                   {item.type === 'mission'
-                    ? <span className="text-sm leading-none">{item.emoji}</span>
+                    ? <MissionIcon id={item.id} size={16} />
                     : <Camera size={12} className="text-[#14B8A6]" />}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -296,6 +350,7 @@ export default function ProfilePage() {
                     href={`https://explorer.solana.com/tx/${item.txId}?cluster=devnet`}
                     target="_blank" rel="noopener noreferrer"
                     className="text-slate-700 hover:text-[#38F0FF] transition-colors flex-shrink-0"
+                    onClick={e => e.stopPropagation()}
                   >
                     <ExternalLink size={11} />
                   </a>
