@@ -22,17 +22,30 @@ function hhmm(d: Date | string | null, locale: string): string {
   return date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
+const PLANET_ACCENT: Record<string, string> = {
+  moon:    '#94A3B8',
+  mercury: '#A78BFA',
+  venus:   '#FCD34D',
+  mars:    '#F87171',
+  jupiter: '#FB923C',
+  saturn:  '#FDE68A',
+};
+
 export default function PlanetCard({ planet }: Props) {
   const t = useTranslations('planets');
   const locale = useLocale();
+  const accentColor = PLANET_ACCENT[planet.key] ?? 'var(--accent-teal)';
 
   return (
-    <div className="glass-card p-4 flex flex-col gap-3">
+    <div
+      className="glass-card p-4 flex flex-col gap-3"
+      style={{ borderLeft: `1px solid ${accentColor}`, paddingLeft: '15px' }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-lg flex-shrink-0 leading-none">{PLANET_EMOJI[planet.key] ?? '✦'}</span>
-          <span className="text-white text-sm font-semibold truncate">{t(planet.key as Parameters<typeof t>[0])}</span>
+          <span className="font-display font-bold text-white text-sm truncate">{t(planet.key as Parameters<typeof t>[0])}</span>
         </div>
         {planet.visible ? (
           <span className="inline-flex items-center flex-shrink-0 px-2 py-0.5 rounded text-xs font-medium border bg-[#34d399]/20 text-[#34d399] border-[#34d399]/40">
@@ -70,7 +83,7 @@ export default function PlanetCard({ planet }: Props) {
         {(['rise', 'transit', 'set'] as const).map(label => (
           <div key={label}>
             <p className="text-[var(--text-dim)] text-[9px] uppercase tracking-wide">{t(label as Parameters<typeof t>[0])}</p>
-            <p className="text-white text-xs font-medium">{hhmm(planet[label], locale)}</p>
+            <p className="font-mono text-xs text-white">{hhmm(planet[label], locale)}</p>
           </div>
         ))}
       </div>

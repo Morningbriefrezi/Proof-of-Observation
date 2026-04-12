@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { SkyDay, SkyHour } from '@/lib/sky-data';
 import type { PlanetInfo } from "@/lib/planets";
 import { useLocation } from '@/hooks/useLocation';
+import ScoreRing from '@/components/ui/ScoreRing';
 
 const PLANET_EMOJIS: Record<string, string> = {
   moon: '🌕', mercury: '☿', venus: '♀', mars: '♂', jupiter: '♃', saturn: '♄',
@@ -133,49 +134,78 @@ export default function TonightHighlights() {
 
   const { state, cloudCover, temp, wind, window, nextClear, planets } = card;
 
+  const skyScore = Math.round(100 - cloudCover);
+  const ringColor = state === 'go' ? 'gradient' : state === 'maybe' ? 'var(--accent-gold)' : 'var(--accent-red)';
+  const ringGlow = state === 'go' ? 'var(--accent-teal-glow)' : state === 'maybe' ? 'var(--accent-gold-dim)' : 'rgba(239,68,68,0.15)';
+
   return (
     <div className="glass-card p-5" style={borderStyle[state]}>
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <span className={`text-[10px] uppercase tracking-widest font-medium ${labelColor[state]}`}>
-          {t('tonightHighlight')}
-        </span>
-        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border ${badgeStyles[state]}`}>
-          {badgeLabel[state]}
-        </span>
-      </div>
-
-      {/* Stats */}
-      <div className="flex items-center gap-4 mt-3 text-sm text-white/80">
-        <span className="flex items-center gap-1.5 flex-shrink-0">☁ {cloudCover}%</span>
-        <span className="flex items-center gap-1.5 flex-shrink-0">🌡 {Math.round(temp)}°C</span>
-        <span className="flex items-center gap-1.5 flex-shrink-0">💨 {Math.round(wind)} km/h</span>
-      </div>
-
-      {/* Window / next clear */}
-      <div className="mt-2">
-        {state !== 'skip' && window ? (
-          <p className="text-[#38F0FF] text-xs font-medium">
-            {state === 'go' ? 'Best window' : 'Clearest window'}: {window}
-          </p>
-        ) : state === 'skip' ? (
-          nextClear
-            ? <p className="text-slate-400 text-xs">Next clear night: {nextClear}</p>
-            : <p className="text-slate-500 text-xs">Cloudy all week — check back tomorrow</p>
-        ) : null}
-      </div>
-
-      {/* Visible planets */}
-      {state !== 'skip' && planets.length > 0 && (
-        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-white/[0.05]">
-          {planets.map(p => (
-            <span key={p.key} className="flex items-center gap-1.5 text-xs text-white">
-              <span>{PLANET_EMOJIS[p.key] ?? '✦'}</span>
-              <span>{pt(p.key as Parameters<typeof pt>[0])} ({p.altitude}°)</span>
-            </span>
-          ))}
+      <div className="flex items-start gap-4">
+        {/* Score ring — responsive sizing via inline style */}
+        <div className="flex-shrink-0 hidden sm:block">
+          <ScoreRing
+            value={skyScore}
+            size={140}
+            strokeWidth={9}
+            color={ringColor}
+            glowColor={ringGlow}
+            label="Sky Score"
+          />
         </div>
-      )}
+        <div className="sm:hidden flex-shrink-0">
+          <ScoreRing
+            value={skyScore}
+            size={120}
+            strokeWidth={8}
+            color={ringColor}
+            glowColor={ringGlow}
+            label="Sky Score"
+          />
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0 flex flex-col gap-2 pt-1">
+          {/* Header */}
+          <div className="flex items-center justify-between gap-2">
+            <span className={`text-[10px] uppercase tracking-widest font-medium ${labelColor[state]}`}>
+              {t('tonightHighlight')}
+            </span>
+            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border ${badgeStyles[state]}`}>
+              {badgeLabel[state]}
+            </span>
+          </div>
+
+          {/* Stats */}
+          <div className="flex items-center gap-3 text-sm text-white/80">
+            <span className="flex items-center gap-1 flex-shrink-0">☁ {cloudCover}%</span>
+            <span className="flex items-center gap-1 flex-shrink-0">🌡 {Math.round(temp)}°C</span>
+            <span className="flex items-center gap-1 flex-shrink-0">💨 {Math.round(wind)} km/h</span>
+          </div>
+
+          {/* Window / next clear */}
+          {state !== 'skip' && window ? (
+            <p className="text-[#38F0FF] text-xs font-medium">
+              {state === 'go' ? 'Best window' : 'Clearest window'}: {window}
+            </p>
+          ) : state === 'skip' ? (
+            nextClear
+              ? <p className="text-slate-400 text-xs">Next clear night: {nextClear}</p>
+              : <p className="text-slate-500 text-xs">Cloudy all week — check back tomorrow</p>
+          ) : null}
+
+          {/* Visible planets */}
+          {state !== 'skip' && planets.length > 0 && (
+            <div className="flex items-center gap-3 pt-2 border-t border-white/[0.05]">
+              {planets.map(p => (
+                <span key={p.key} className="flex items-center gap-1 text-xs text-white">
+                  <span>{PLANET_EMOJIS[p.key] ?? '✦'}</span>
+                  <span>{pt(p.key as Parameters<typeof pt>[0])} ({p.altitude}°)</span>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

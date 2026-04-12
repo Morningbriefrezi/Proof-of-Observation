@@ -29,9 +29,15 @@ function observationWindow(hours: SkyDay['hours']): string {
 }
 
 const badgeStyles = {
-  go:    'bg-[#34d399]/20 text-[#34d399] border-[#34d399]/40',
-  maybe: 'bg-[#FFD166]/20 text-[#FFD166] border-[#FFD166]/40',
-  skip:  'bg-red-500/20 text-red-400 border-red-500/40',
+  go:    '',
+  maybe: '',
+  skip:  '',
+};
+
+const badgeInlineStyles = {
+  go:    { background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.3)', color: '#34D399' },
+  maybe: { background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', color: '#F59E0B' },
+  skip:  { background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444' },
 };
 
 function Stat({ label, value, color }: { label: string; value: string; color?: string }) {
@@ -54,13 +60,19 @@ export default function ForecastCard({ day, isToday }: Props) {
 
   if (isToday) {
     return (
-      <div className="glass-card p-5 sm:p-6 border-[#38F0FF]/20">
+      <div className="card-base p-5 sm:p-6" style={{ borderColor: 'rgba(56,240,255,0.2)', transition: 'transform 0.2s ease' }}
+        onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'scale(1.02)'; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'scale(1)'; }}
+      >
         <div className="flex items-start justify-between gap-3 mb-4">
           <div>
             <p className="text-[#38F0FF] text-xs font-medium tracking-widest uppercase mb-1">{t('today')}</p>
             <p className="text-white text-lg font-semibold">{formatDate(day.date, locale)}</p>
           </div>
-          <span className={`inline-flex items-center px-2.5 py-1 rounded text-sm font-semibold border ${badgeStyles[kind]}`}>
+          <span
+            className="inline-flex items-center px-2.5 py-1 rounded text-sm font-semibold"
+            style={badgeInlineStyles[kind]}
+          >
             {t(kind)}
           </span>
         </div>
@@ -95,10 +107,18 @@ export default function ForecastCard({ day, isToday }: Props) {
   const maxTemp = temps.length ? Math.round(Math.max(...temps)) : null;
 
   return (
-    <div className="glass-card p-4 flex flex-col gap-2">
+    <div
+      className="card-base p-4 flex flex-col gap-2"
+      style={{ transition: 'transform 0.2s ease' }}
+      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'scale(1.02)'; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'scale(1)'; }}
+    >
       <div className="flex items-center justify-between gap-2">
         <p className="text-white text-sm font-medium min-w-0 truncate">{formatDate(day.date, locale)}</p>
-        <span className={`inline-flex items-center flex-shrink-0 px-2 py-0.5 rounded text-xs font-medium border ${badgeStyles[kind]}`}>
+        <span
+          className="inline-flex items-center flex-shrink-0 px-2 py-0.5 rounded text-xs font-medium"
+          style={badgeInlineStyles[kind]}
+        >
           {t(kind)}
         </span>
       </div>
