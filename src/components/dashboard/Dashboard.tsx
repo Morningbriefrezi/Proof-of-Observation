@@ -104,6 +104,9 @@ export default function Dashboard() {
   const [planets, setPlanets] = useState<PlanetInfo[]>([])
   const [streakDays, setStreakDays] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [greeting, setGreeting] = useState('')
+
+  useEffect(() => { setGreeting(getGreeting()) }, [])
 
   const lat = profile?.location?.lat ?? (location.lat !== 0 ? location.lat : 41.6941)
   const lon = profile?.location?.lon ?? (location.lon !== 0 ? location.lon : 44.8337)
@@ -200,7 +203,7 @@ export default function Dashboard() {
                 fontFamily: 'var(--font-body)',
               }}
             >
-              {getGreeting()}, {rankName}
+              {greeting}{greeting ? ', ' : ''}{rankName}
             </span>
             <StreakBadge days={streakDays} />
           </div>

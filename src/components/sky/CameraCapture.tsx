@@ -125,7 +125,7 @@ export default function CameraCapture({ missionName, onCapture }: CameraCaptureP
         {/* Top HUD */}
         <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-3 py-2.5" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.65), transparent)' }}>
           <span className="text-[#FFD166] text-[10px] font-mono tracking-widest uppercase">STELLAR · {missionName}</span>
-          <span className="text-white/40 text-[10px] font-mono">{new Date().toLocaleTimeString()}</span>
+          <span className="text-white/40 text-[10px] font-mono" suppressHydrationWarning>{new Date().toLocaleTimeString()}</span>
         </div>
 
         {/* Flip button */}

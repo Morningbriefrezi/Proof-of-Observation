@@ -54,10 +54,7 @@ function TypingDots() {
 
 export default function AstroChat() {
   const { state } = useAppState();
-  const suggestions = getSuggestions(
-    state.telescope?.brand ?? undefined,
-    state.completedMissions?.filter(m => m.status === 'completed').length ?? 0,
-  );
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -75,6 +72,13 @@ export default function AstroChat() {
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
+
+  useEffect(() => {
+    setSuggestions(getSuggestions(
+      state.telescope?.brand ?? undefined,
+      state.completedMissions?.filter(m => m.status === 'completed').length ?? 0,
+    ));
+  }, [state.telescope?.brand, state.completedMissions]);
 
   useEffect(() => {
     const visits = parseInt(localStorage.getItem('astra_visits') ?? '0', 10);
