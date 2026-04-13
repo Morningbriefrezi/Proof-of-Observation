@@ -29,6 +29,7 @@ const notoGeorgian = Noto_Sans_Georgian({
   variable: '--font-georgian',
   weight: ['400', '500', '600'],
   display: 'swap',
+  preload: false,
 });
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';

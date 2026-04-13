@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
-    "@metaplex-foundation/js": "^0.20.1",
     "@metaplex-foundation/mpl-bubblegum": "^4.4.0",
     "@metaplex-foundation/mpl-token-metadata": "^3.4.0",
     "@metaplex-foundation/umi": "^1.5.1",
@@ -28,7 +27,7 @@
     "drizzle-orm": "^0.45.2",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.577.0",
-    "next": "16.1.6",
+    "next": "^15.5.15",
     "next-intl": "^4.9.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",

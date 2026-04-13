@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStarsBalance } from '@/lib/solana';
 
-const TIER_CODES: Record<string, { minStars: number; code: string }> = {
-  'Free Moon Lamp': { minStars: 250, code: 'MOONLAMP25' },
-  '10% Telescope Discount': { minStars: 500, code: 'STELLAR10' },
-  '20% Telescope Discount': { minStars: 1000, code: 'STELLAR20' },
+const TIER_CODES: Record<string, { minStars: number; code: string | undefined }> = {
+  'Free Moon Lamp': { minStars: 250, code: process.env.REWARD_CODE_MOONLAMP },
+  '10% Telescope Discount': { minStars: 500, code: process.env.REWARD_CODE_10PCT },
+  '20% Telescope Discount': { minStars: 1000, code: process.env.REWARD_CODE_20PCT },
 };
 
 export async function POST(req: NextRequest) {
@@ -24,6 +24,9 @@ export async function POST(req: NextRequest) {
   const tierConfig = TIER_CODES[tier];
   if (!tierConfig) {
     return NextResponse.json({ error: 'Invalid tier' }, { status: 400 });
+  }
+  if (!tierConfig.code) {
+    return NextResponse.json({ error: 'Reward not configured' }, { status: 503 });
   }
 
   const balance = await getStarsBalance(walletAddress).catch(() => 0);

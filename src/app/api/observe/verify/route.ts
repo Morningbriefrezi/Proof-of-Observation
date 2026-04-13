@@ -21,28 +21,28 @@ interface ClaudeAnalysis {
 const FALLBACK_ANALYSIS: ClaudeAnalysis = {
   target: 'unknown',
   identifiedObject: 'Unidentified sky object',
-  isScreenshot: false,
+  isScreenshot: true,
   isAiGenerated: false,
-  hasNightSkyCharacteristics: true,
+  hasNightSkyCharacteristics: false,
   sharpness: 'low',
-  reason: 'Could not analyze — accepting with low confidence',
+  reason: 'Verification service unavailable — observation rejected for safety',
 };
 
-function parseClaudeResponse(text: string): ClaudeAnalysis {
+function parseClaudeResponse(text: string): { analysis: ClaudeAnalysis; isFallback: boolean } {
   // Try direct JSON parse
   try {
-    return JSON.parse(text) as ClaudeAnalysis;
+    return { analysis: JSON.parse(text) as ClaudeAnalysis, isFallback: false };
   } catch {
     // Try extracting from markdown code fences
     const match = text.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (match) {
       try {
-        return JSON.parse(match[1]) as ClaudeAnalysis;
+        return { analysis: JSON.parse(match[1]) as ClaudeAnalysis, isFallback: false };
       } catch {
         // fall through
       }
     }
-    return FALLBACK_ANALYSIS;
+    return { analysis: FALLBACK_ANALYSIS, isFallback: true };
   }
 }
 
@@ -178,6 +178,7 @@ Return ONLY valid JSON, no markdown, no preamble:
 
   // Claude Vision call
   let analysis: ClaudeAnalysis;
+  let verificationFailed = false;
   try {
     const message = await anthropic.messages.create({
       model: CLAUDE_MODEL,
@@ -192,7 +193,9 @@ Return ONLY valid JSON, no markdown, no preamble:
     });
 
     const text = message.content[0].type === 'text' ? message.content[0].text : '';
-    analysis = parseClaudeResponse(text);
+    const parsed = parseClaudeResponse(text);
+    analysis = parsed.analysis;
+    verificationFailed = parsed.isFallback;
   } catch (err) {
     console.error('[observe/verify] Claude error:', err);
     return NextResponse.json({ error: 'Verification service unavailable' }, { status: 500 });
@@ -265,6 +268,7 @@ Return ONLY valid JSON, no markdown, no preamble:
   const result: PhotoVerificationResult = {
     accepted: confidence !== 'rejected',
     confidence,
+    ...(verificationFailed ? { verificationFailed: true } : {}),
     target: analysis.target,
     identifiedObject: analysis.identifiedObject,
     reason: analysis.reason,

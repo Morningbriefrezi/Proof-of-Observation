@@ -85,6 +85,7 @@ export interface PhotoVerificationResult {
     sharpness: 'high' | 'medium' | 'low'
   }
   starsAwarded: number
+  verificationFailed?: boolean
   metadata: {
     fileHash: string
     capturedAt: string

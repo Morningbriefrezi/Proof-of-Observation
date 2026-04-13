@@ -361,6 +361,19 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
             <MissionIcon id={mission.id} size={20}/> {mission.name}
           </p>
 
+          {/* On-chain status */}
+          {mintTxId && (
+            mintTxId.startsWith('sim') ? (
+              <p className="text-xs animate-fade-in stagger-2" style={{ color: 'var(--text-muted)' }}>
+                Saved locally — will sync when back online
+              </p>
+            ) : (
+              <p className="text-xs animate-fade-in stagger-2" style={{ color: 'var(--success)' }}>
+                ✦ Sealed on Solana
+              </p>
+            )
+          )}
+
           {/* Stars counter */}
           <p
             className="text-4xl font-bold animate-scale-in animate-glow-pulse stagger-3"

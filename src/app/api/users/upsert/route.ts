@@ -14,6 +14,12 @@ import { getDb } from '@/lib/db'
 import { users } from '@/lib/schema'
 
 export async function POST(req: NextRequest) {
+  const secret = process.env.INTERNAL_API_SECRET;
+  const authHeader = req.headers.get('authorization');
+  if (secret && authHeader !== `Bearer ${secret}`) {
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { privyId, email, walletAddress } = await req.json()
 
   if (!privyId) {
