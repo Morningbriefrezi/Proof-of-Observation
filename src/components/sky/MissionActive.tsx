@@ -15,6 +15,7 @@ import LoadingRing from '@/components/ui/LoadingRing';
 import ScoreRing from '@/components/ui/ScoreRing';
 import { calculateSkyScore, visibilityToMeters, type SkyScoreResult } from '@/lib/sky-score';
 import { Copy, Check, Telescope, Award, ExternalLink } from 'lucide-react';
+import { MissionIcon } from '@/components/shared/PlanetIcons';
 import { buildTwitterShareUrl, buildFarcasterShareUrl, buildShareImageUrl } from '@/lib/share';
 import RewardIcon from '@/components/shared/RewardIcon';
 
@@ -354,10 +355,10 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
 
           {/* Mission info */}
           <p
-            className="text-base animate-fade-in stagger-2"
+            className="text-base animate-fade-in stagger-2 flex items-center gap-2 justify-center"
             style={{ fontFamily: 'var(--font-body)', color: 'var(--text-secondary)' }}
           >
-            {mission.emoji} {mission.name}
+            <MissionIcon id={mission.id} size={20}/> {mission.name}
           </p>
 
           {/* Stars counter */}
@@ -493,7 +494,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
         }}
       >
         <div className="flex items-center gap-2">
-          <span className="text-lg">{mission.emoji}</span>
+          <MissionIcon id={mission.id} size={22} animate/>
           <div>
             <p className="text-white text-sm font-semibold leading-tight">{mission.name}</p>
             {!fullBleed && <p className="text-slate-600 text-[11px]">{mission.desc}</p>}

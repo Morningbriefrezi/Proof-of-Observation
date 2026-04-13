@@ -17,6 +17,8 @@ import { MISSIONS } from '@/lib/constants';
 import type { Mission } from '@/lib/types';
 import type { QuizDef } from '@/lib/quizzes';
 import PageTransition from '@/components/ui/PageTransition';
+import { MissionIcon } from '@/components/shared/PlanetIcons';
+import { TelescopeIcon, StarTokenIcon, DifficultyDots } from '@/components/icons/CelestialIcons';
 
 export default function MissionsPage() {
   const { state } = useAppState();
@@ -62,10 +64,14 @@ export default function MissionsPage() {
         >
           <div className="flex items-center gap-4">
             <div
-              className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+              className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 relative"
               style={{ background: 'rgba(56,240,255,0.08)', border: '1px solid rgba(56,240,255,0.15)' }}
             >
-              <Satellite size={22} className="text-[#38F0FF]" />
+              <TelescopeIcon size={28} animate />
+              <span
+                className="absolute -top-1 -right-1 text-[10px] leading-none"
+                style={{ color: '#FFD166', textShadow: '0 0 6px rgba(255,209,102,0.6)' }}
+              >✦</span>
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-base font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>Sky Missions</h2>
@@ -94,12 +100,26 @@ export default function MissionsPage() {
                 <div className="absolute inset-0 bg-[#070B14]/40 backdrop-blur-[1px] z-10 flex items-center justify-end pr-4">
                   <Lock size={13} className="text-slate-600" />
                 </div>
-                <span className="text-2xl flex-shrink-0">{mission.emoji}</span>
+                <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <MissionIcon id={mission.id} size={28}/>
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-slate-400 text-sm font-semibold">{mission.name}</p>
                   <p className="text-slate-600 text-xs mt-0.5 line-clamp-1">{mission.desc}</p>
+                  <div className="mt-1.5">
+                    <DifficultyDots level={
+                      mission.difficulty === 'Beginner' ? 1
+                      : mission.difficulty === 'Intermediate' ? 2
+                      : mission.difficulty === 'Expert' ? 4
+                      : 3
+                    }/>
+                  </div>
                 </div>
-                <span className="text-[#FFD166]/40 text-xs font-bold flex-shrink-0">+{mission.stars} ✦</span>
+                <span className="text-[#FFD166]/40 text-xs font-bold flex-shrink-0 flex items-center gap-0.5"
+                  style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  +{mission.stars}<StarTokenIcon size={11}/>
+                </span>
               </div>
             ))}
           </div>
