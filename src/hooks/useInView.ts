@@ -4,7 +4,7 @@ import { useRef, useState, useEffect, type RefObject } from 'react';
 
 export function useInView<T extends Element = HTMLDivElement>(
   threshold = 0.1
-): [RefObject<T>, boolean] {
+): [RefObject<T | null>, boolean] {
   const ref = useRef<T>(null);
   const prefersReduced =
     typeof window !== 'undefined' &&
