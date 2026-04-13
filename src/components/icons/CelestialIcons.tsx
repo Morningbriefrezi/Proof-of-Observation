@@ -262,36 +262,91 @@ export function CrabNebulaIcon({ size = 48, className, animate }: CelestialIconP
   );
 }
 
-// ── Night Sky ─────────────────────────────────────────────────────────────────
-export function NightSkyIcon({ size = 48, className, animate: _animate }: CelestialIconProps) {
+// ── Night Sky — Premium ───────────────────────────────────────────────────────
+export function NightSkyIcon({ size = 48, className }: CelestialIconProps) {
   const id = uid(useId());
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}
-      style={{ overflow: 'visible' }}>
+      style={{ filter: 'drop-shadow(0 0 6px rgba(153,69,255,0.2))', overflow: 'visible' }}>
       <style>{`@media(prefers-reduced-motion:no-preference){
-        .nt${id}{animation:ntp${id} 2s ease-in-out infinite}
-        @keyframes ntp${id}{0%,100%{opacity:.5}50%{opacity:1}}
+        .nt${id}{animation:ntp${id} 2.2s ease-in-out infinite}
+        .nt2${id}{animation:ntp${id} 3.1s ease-in-out infinite;animation-delay:.8s}
+        @keyframes ntp${id}{0%,100%{opacity:.45}50%{opacity:1}}
       `}</style>
-      <circle cx="24" cy="24" r="22" fill="#0F1D32" opacity="0.9"/>
       <defs>
+        {/* Deep space radial background */}
+        <radialGradient id={`nbg${id}`} cx="45%" cy="40%" r="60%">
+          <stop offset="0%"   stopColor="#13103A"/>
+          <stop offset="60%"  stopColor="#0C0E22"/>
+          <stop offset="100%" stopColor="#06080F"/>
+        </radialGradient>
+        {/* Milky Way band */}
+        <radialGradient id={`nmw${id}`} cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stopColor="rgba(200,185,255,0.12)"/>
+          <stop offset="100%" stopColor="rgba(200,185,255,0)"/>
+        </radialGradient>
+        {/* Solana aurora */}
+        <radialGradient id={`naur${id}`} cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stopColor="rgba(20,241,149,0.18)"/>
+          <stop offset="100%" stopColor="rgba(20,241,149,0)"/>
+        </radialGradient>
+        {/* Moon */}
+        <radialGradient id={`nmo${id}`} cx="65%" cy="35%" r="60%">
+          <stop offset="0%"  stopColor="#EEE8D8"/>
+          <stop offset="100%" stopColor="#B0A898"/>
+        </radialGradient>
         <mask id={`nm${id}`}>
           <rect width="48" height="48" fill="white"/>
-          <circle cx="36" cy="11" r="6.5" fill="black"/>
+          <circle cx="37" cy="10" r="6.2" fill="black"/>
         </mask>
+        <clipPath id={`ncp${id}`}><circle cx="24" cy="24" r="22"/></clipPath>
       </defs>
-      {/* Crescent */}
-      <circle cx="33" cy="9" r="7.5" fill="#E8E0D0" mask={`url(#nm${id})`}/>
-      {/* Stars */}
-      <circle cx="12" cy="14" r="1.3" fill="white" opacity="0.85" className={`nt${id}`}/>
-      <circle cx="20" cy="33" r="1.0" fill="white" opacity="0.70"/>
-      <circle cx="10" cy="29" r="0.8" fill="white" opacity="0.60"/>
-      <circle cx="35" cy="31" r="1.0" fill="white" opacity="0.65"/>
-      <circle cx="16" cy="22" r="0.7" fill="white" opacity="0.55"/>
+
+      {/* Background */}
+      <circle cx="24" cy="24" r="22" fill={`url(#nbg${id})`}/>
+
+      {/* Milky Way band — diagonal blurred strip */}
+      <g clipPath={`url(#ncp${id})`}>
+        <ellipse cx="22" cy="26" rx="20" ry="7" fill={`url(#nmw${id})`}
+          transform="rotate(-40,22,26)" opacity="0.8"/>
+      </g>
+
+      {/* Solana aurora — lower left */}
+      <g clipPath={`url(#ncp${id})`}>
+        <ellipse cx="10" cy="36" rx="14" ry="8" fill={`url(#naur${id})`} opacity="0.7"/>
+      </g>
+
+      {/* Crescent moon — upper right */}
+      <circle cx="33" cy="9" r="7.2" fill={`url(#nmo${id})`} mask={`url(#nm${id})`}/>
+
+      {/* 4-pointed star shapes */}
+      {/* Large twinkling star */}
+      {(() => {
+        const cx=12,cy=15,r=1.8,si=r*0.36;
+        return <path className={`nt${id}`}
+          d={`M${cx},${cy-r} L${cx+si},${cy-si} L${cx+r},${cy} L${cx+si},${cy+si} L${cx},${cy+r} L${cx-si},${cy+si} L${cx-r},${cy} L${cx-si},${cy-si}Z`}
+          fill="white"/>;
+      })()}
+      {/* Medium star */}
+      {(() => {
+        const cx=35,cy=33,r=1.4,si=r*0.36;
+        return <path className={`nt2${id}`}
+          d={`M${cx},${cy-r} L${cx+si},${cy-si} L${cx+r},${cy} L${cx+si},${cy+si} L${cx},${cy+r} L${cx-si},${cy+si} L${cx-r},${cy} L${cx-si},${cy-si}Z`}
+          fill="#E0E8FF"/>;
+      })()}
+      {/* Small dot stars */}
+      <circle cx="20" cy="34" r="0.9" fill="white" opacity="0.65"/>
+      <circle cx="10" cy="27" r="0.7" fill="white" opacity="0.55"/>
+      <circle cx="40" cy="22" r="0.8" fill="white" opacity="0.60"/>
+      <circle cx="28" cy="38" r="0.6" fill="rgba(20,241,149,0.9)" opacity="0.75"/>
+
+      {/* Border ring */}
+      <circle cx="24" cy="24" r="22" stroke="rgba(153,69,255,0.12)" strokeWidth="1" fill="none"/>
     </svg>
   );
 }
 
-// ── Telescope (fallback) ──────────────────────────────────────────────────────
+// ── Telescope — Premium ───────────────────────────────────────────────────────
 export function TelescopeIcon({ size = 48, className, animate }: CelestialIconProps) {
   const id = uid(useId());
   return (
@@ -299,36 +354,101 @@ export function TelescopeIcon({ size = 48, className, animate }: CelestialIconPr
       style={{ overflow: 'visible' }}>
       {animate && (
         <style>{`@media(prefers-reduced-motion:no-preference){
-          .tf${id}{animation:tfp${id} 2s ease-in-out infinite}
-          @keyframes tfp${id}{0%,100%{opacity:.6}50%{opacity:1}}
+          .tfl${id}{animation:tflp${id} 2.5s ease-in-out infinite}
+          @keyframes tflp${id}{0%,100%{opacity:.75}50%{opacity:1}}
         `}</style>
       )}
-      {/* Tube */}
-      <line x1="9" y1="37" x2="38" y2="14" stroke="#38F0FF" strokeWidth="2" strokeLinecap="round"/>
-      {/* Eyepiece */}
-      <line x1="9" y1="34" x2="9" y2="40" stroke="#38F0FF" strokeWidth="2.5" strokeLinecap="round"/>
-      {/* Objective */}
-      <line x1="37" y1="12" x2="40" y2="16" stroke="#38F0FF" strokeWidth="1.5" strokeLinecap="round"/>
-      {/* Tripod */}
-      <line x1="21" y1="37" x2="16" y2="44" stroke="#38F0FF" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
-      <line x1="21" y1="37" x2="25" y2="44" stroke="#38F0FF" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
-      <line x1="21" y1="37" x2="21" y2="44" stroke="#38F0FF" strokeWidth="1.5" strokeLinecap="round" opacity="0.45"/>
-      {/* Mount */}
-      <circle cx="21" cy="37" r="2" stroke="#38F0FF" strokeWidth="1.5" fill="none"/>
-      {/* Lens flare */}
-      <path
-        d="M38,13 L39.2,10.5 L40.5,13 L38,14.2Z M38,13 L35.5,11.8 L38,10.5 L40.5,11.8Z"
-        fill="#38F0FF" opacity="0.7" className={animate ? `tf${id}` : ''}/>
+      <defs>
+        {/* Solana gradient — purple → teal → green */}
+        <linearGradient id={`tg${id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stopColor="#9945FF"/>
+          <stop offset="55%"  stopColor="#38F0FF"/>
+          <stop offset="100%" stopColor="#14F195"/>
+        </linearGradient>
+        <linearGradient id={`tb${id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%"   stopColor="#18103A"/>
+          <stop offset="100%" stopColor="#0C0820"/>
+        </linearGradient>
+        <linearGradient id={`tl${id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stopColor="#14F195" stopOpacity="0.9"/>
+          <stop offset="100%" stopColor="#9945FF" stopOpacity="0.7"/>
+        </linearGradient>
+        <filter id={`tglow${id}`}>
+          <feGaussianBlur stdDeviation="1.2" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      {/* ── Tripod ── */}
+      <line x1="22" y1="35" x2="14" y2="46" stroke="rgba(147,197,253,0.35)" strokeWidth="1.3" strokeLinecap="round"/>
+      <line x1="22" y1="35" x2="30" y2="46" stroke="rgba(147,197,253,0.35)" strokeWidth="1.3" strokeLinecap="round"/>
+      <line x1="22" y1="35" x2="22" y2="46" stroke="rgba(147,197,253,0.25)" strokeWidth="1"   strokeLinecap="round"/>
+      {/* Crossbar */}
+      <line x1="17" y1="41" x2="27" y2="41" stroke="rgba(147,197,253,0.2)" strokeWidth="0.8" strokeLinecap="round"/>
+
+      {/* ── Mount head ── */}
+      <circle cx="22" cy="35" r="2.2" fill={`url(#tb${id})`} stroke={`url(#tg${id})`} strokeWidth="1.2"/>
+
+      {/* ── Main tube body (rotated rect) ── */}
+      {/* shadow / depth */}
+      <rect x="9" y="21.5" width="29" height="8" rx="4"
+        fill="rgba(0,0,0,0.5)" transform="rotate(-36,24,24) translate(0.5,0.8)"/>
+      {/* tube fill */}
+      <rect x="9" y="21.5" width="29" height="8" rx="4"
+        fill={`url(#tb${id})`} stroke={`url(#tg${id})`} strokeWidth="1.4"
+        transform="rotate(-36,24,24)"/>
+      {/* highlight sheen */}
+      <rect x="10" y="22" width="27" height="2.5" rx="1.25"
+        fill="rgba(255,255,255,0.11)" transform="rotate(-36,24,24)"/>
+
+      {/* ── Dew shield / objective end ── */}
+      {/* wide outer ring */}
+      <circle cx="36" cy="15" r="5.5" fill={`url(#tb${id})`} stroke={`url(#tg${id})`} strokeWidth="1.4"/>
+      {/* lens glass inner */}
+      <circle cx="36" cy="15" r="3.8" fill="rgba(153,69,255,0.18)" stroke="rgba(56,240,255,0.5)" strokeWidth="0.8"/>
+      {/* glass reflex */}
+      <circle cx="36" cy="15" r="2.2" fill="rgba(20,241,149,0.12)" stroke="rgba(255,255,255,0.2)" strokeWidth="0.5"/>
+      <circle cx="34.8" cy="13.8" r="0.8" fill="rgba(255,255,255,0.35)"/>
+
+      {/* ── Eyepiece / focuser ── */}
+      <rect x="7" y="27" width="5.5" height="5" rx="1.8"
+        fill={`url(#tb${id})`} stroke="rgba(147,197,253,0.45)" strokeWidth="1"
+        transform="rotate(-36,10,30)"/>
+
+      {/* ── Finderscope (small parallel tube) ── */}
+      <rect x="16" y="19" width="12" height="3.5" rx="1.75"
+        fill="rgba(12,8,32,0.9)" stroke="rgba(153,69,255,0.35)" strokeWidth="0.8"
+        transform="rotate(-36,24,22)"/>
+
+      {/* ── Lens flare starburst ── */}
+      <g filter={`url(#tglow${id})`} className={animate ? `tfl${id}` : ''}>
+        {/* primary cross */}
+        <path d="M36,15 L36.5,12 L37,15 L36.5,18Z" fill="white" opacity="0.95"/>
+        <path d="M36,15 L33,14.5 L36,14 L39,14.5Z" fill="white" opacity="0.95"/>
+        {/* secondary diagonals — Solana colors */}
+        <path d="M36,15 L37.4,12.2 L37.8,15.2 L35.2,16.4Z" fill={`url(#tl${id})`} opacity="0.6"/>
+        <path d="M36,15 L33.2,13.6 L35.2,12.2 L37.8,14.8Z" fill={`url(#tl${id})`} opacity="0.5"/>
+        {/* halo */}
+        <circle cx="36" cy="15" r="2" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="0.6"/>
+      </g>
     </svg>
   );
 }
 
 // ── Star Token (inline ✦ replacement) ─────────────────────────────────────────
 export function StarTokenIcon({ size = 12, className }: { size?: number; className?: string }) {
+  const id = uid(useId());
   return (
     <svg width={size} height={size} viewBox="0 0 12 12" fill="none" className={className}
-      style={{ display: 'inline-block', verticalAlign: 'middle', filter: 'drop-shadow(0 0 2px rgba(255,209,102,0.5))' }}>
-      <path d="M6 1L7.1 4.9L11 6L7.1 7.1L6 11L4.9 7.1L1 6L4.9 4.9Z" fill="#FFD166"/>
+      style={{ display: 'inline-block', verticalAlign: 'middle', filter: 'drop-shadow(0 0 3px rgba(255,209,102,0.6)) drop-shadow(0 0 6px rgba(153,69,255,0.25))' }}>
+      <defs>
+        <linearGradient id={`stg${id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stopColor="#FFE08A"/>
+          <stop offset="60%"  stopColor="#FFD166"/>
+          <stop offset="100%" stopColor="#CC9A33"/>
+        </linearGradient>
+      </defs>
+      <path d="M6 0.8L7.15 4.85L11.2 6L7.15 7.15L6 11.2L4.85 7.15L0.8 6L4.85 4.85Z" fill={`url(#stg${id})`}/>
     </svg>
   );
 }

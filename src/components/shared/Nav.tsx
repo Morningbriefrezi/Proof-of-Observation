@@ -131,35 +131,49 @@ export default function Nav() {
       )}
 
     <nav className="glass-nav sticky top-0 z-40">
-      <div className="max-w-5xl mx-auto px-3 sm:px-4">
+      <div className="max-w-5xl mx-auto px-4">
 
-        {/* Main row */}
-        <div className="h-16 flex items-center justify-between gap-2">
-          {/* Hamburger */}
-          <button
-            onClick={() => setDrawerOpen(true)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors flex-shrink-0"
-            aria-label="Open navigation"
-          >
-            <AlignLeft size={18} />
-          </button>
+        {/* ── Main row ── */}
+        <div className="h-14 flex items-center relative">
 
-          <Link href="/" className="flex-shrink-0" title="Stellar">
-            <AstroLogo heightClass="h-7" />
-          </Link>
+          {/* LEFT — hamburger + search (always visible here on mobile) */}
+          <div className="flex items-center gap-1 z-10 flex-shrink-0">
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+              aria-label="Open navigation"
+            >
+              <AlignLeft size={18} />
+            </button>
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+              aria-label="Search"
+            >
+              <Search size={16} />
+            </button>
+          </div>
 
-          {/* Desktop Tabs */}
-          <div className="hidden sm:flex items-center overflow-x-auto scrollbar-hide gap-0.5">
+          {/* CENTER — logo, absolutely centered so it ignores left/right widths */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <Link href="/" className="pointer-events-auto flex-shrink-0" title="Stellar">
+              <AstroLogo heightClass="h-7" />
+            </Link>
+          </div>
+
+          {/* Desktop tabs — only show on sm+, pushed to center-right */}
+          <div className="hidden sm:flex items-center gap-0.5 absolute left-1/2 -translate-x-1/2 pointer-events-none" style={{ paddingLeft: 100 }}>
             {tabs.map(tab => (
               <Link
                 key={tab.href}
                 href={tab.href}
                 title={tab.label}
-                className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-all duration-200 ${
+                className={`pointer-events-auto px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all duration-200 ${
                   pathname === tab.href
-                    ? 'text-white border-b-2 border-[#38F0FF]'
-                    : 'text-[rgba(255,255,255,0.5)] hover:text-white hover:bg-white/5'
+                    ? 'text-white'
+                    : 'text-[rgba(255,255,255,0.45)] hover:text-white hover:bg-white/5'
                 }`}
+                style={pathname === tab.href ? { color: '#38F0FF' } : {}}
               >
                 {tab.icon}
                 <span>{tab.label}</span>
@@ -167,8 +181,8 @@ export default function Nav() {
             ))}
           </div>
 
-          {/* Right side: stars + search + auth */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
+          {/* RIGHT — stars balance + auth */}
+          <div className="ml-auto flex items-center gap-2 z-10 flex-shrink-0">
             {authenticated && (
               <Link
                 href="/profile"
@@ -177,26 +191,22 @@ export default function Nav() {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: 4,
-                  padding: '3px 9px',
+                  padding: '4px 10px',
                   borderRadius: 9999,
                   background: 'rgba(255,209,102,0.08)',
                   border: '1px solid rgba(255,209,102,0.18)',
                   color: '#FFD166',
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: 600,
                   textDecoration: 'none',
                 }}
               >
-                <span style={{ fontSize: 10 }}>✦</span>
-                <span>{(state.completedMissions.length * 50).toLocaleString()}</span>
+                <span style={{ fontSize: 9 }}>✦</span>
+                <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {(state.completedMissions.length * 50).toLocaleString()}
+                </span>
               </Link>
             )}
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
-            >
-              <Search size={16} />
-            </button>
 
             {!ready ? (
               <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse" />
@@ -206,15 +216,14 @@ export default function Nav() {
                   onClick={() => setShowMenu(v => !v)}
                   title="Account"
                   style={{
-                    height: 32,
+                    height: 34,
                     borderRadius: 9999,
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    color: 'rgba(255,255,255,0.7)',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    color: 'rgba(255,255,255,0.65)',
                     padding: '0 12px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
                     fontSize: 12,
                     fontWeight: 500,
                     cursor: 'pointer',
@@ -222,7 +231,7 @@ export default function Nav() {
                   }}
                 >
                   <User size={13} />
-                  Profile
+                  <span className="hidden sm:inline">Profile</span>
                 </button>
 
                 {showMenu && (
@@ -252,22 +261,42 @@ export default function Nav() {
                 )}
               </div>
             ) : (
-              <>
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => login()}
-                  className="rounded-lg font-medium text-white transition-colors hover:bg-white/10"
-                  style={{ border: '1px solid rgba(255,255,255,0.2)', fontSize: 12, padding: '5px 10px', background: 'rgba(255,255,255,0.06)' }}
+                  style={{
+                    height: 34,
+                    borderRadius: 9999,
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.14)',
+                    color: 'rgba(255,255,255,0.75)',
+                    padding: '0 14px',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
                 >
                   Log In
                 </button>
                 <button
                   onClick={() => login()}
-                  className="rounded-lg font-semibold transition-colors hover:bg-[rgba(52,211,153,0.25)]"
-                  style={{ background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.35)', color: '#34d399', fontSize: 12, padding: '5px 10px' }}
+                  style={{
+                    height: 34,
+                    borderRadius: 9999,
+                    background: 'linear-gradient(135deg, #14F195 0%, #9945FF 100%)',
+                    border: 'none',
+                    color: '#070B14',
+                    padding: '0 14px',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
                 >
                   Register
                 </button>
-              </>
+              </div>
             )}
           </div>
         </div>
