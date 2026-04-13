@@ -29,6 +29,24 @@ const BADGE_STYLES: Record<string, { bg: string; color: string }> = {
   'Popular': { bg: 'rgba(56,240,255,0.15)', color: '#38F0FF' },
 };
 
+const SKILL_BADGE_STYLES: Record<string, { background: string; color: string; border: string }> = {
+  beginner: {
+    background: 'rgba(52,211,153,0.15)',
+    color: '#34d399',
+    border: '1px solid rgba(52,211,153,0.3)',
+  },
+  intermediate: {
+    background: 'rgba(245,158,11,0.15)',
+    color: '#F59E0B',
+    border: '1px solid rgba(245,158,11,0.3)',
+  },
+  advanced: {
+    background: 'rgba(139,92,246,0.15)',
+    color: '#8B5CF6',
+    border: '1px solid rgba(139,92,246,0.3)',
+  },
+};
+
 const CATEGORY_FALLBACK: Record<string, { icon: string; label: string; bg: string }> = {
   telescope: { icon: '🔭', label: 'Telescope', bg: 'rgba(122,95,255,0.07)' },
   eyepiece:  { icon: '🔬', label: 'Eyepiece',  bg: 'rgba(56,240,255,0.06)' },
@@ -36,117 +54,111 @@ const CATEGORY_FALLBACK: Record<string, { icon: string; label: string; bg: strin
   accessory: { icon: '🔧', label: 'Accessory', bg: 'rgba(245,158,11,0.07)' },
 };
 
-function ProductCard({ product, showDealer, dealerName, solRate }: {
+function ProductCard({ product, showDealer, dealerName }: {
   product: Product;
   showDealer: boolean;
   dealerName: string;
-  solRate: { solPerGEL: number; solPrice: number } | null;
 }) {
   const [imgError, setImgError] = useState(false);
   const badgeStyle = product.badge ? BADGE_STYLES[product.badge] : null;
   const fallback = CATEGORY_FALLBACK[product.category] ?? CATEGORY_FALLBACK.telescope;
-  const firstSpec = product.specs ? Object.values(product.specs)[0] : null;
   const showImg = !!product.image && !imgError;
-
-  function solPrice(): string {
-    if (!solRate) return '—';
-    let sol: number;
-    if (product.currency === 'GEL') sol = product.price * solRate.solPerGEL;
-    else if (product.currency === 'USD') sol = product.price / solRate.solPrice;
-    else sol = product.price / (solRate.solPrice * 0.92);
-    return sol < 0.01 ? `${(sol * 1000).toFixed(1)}m◎` : `${sol.toFixed(2)}◎`;
-  }
 
   return (
     <div
       className="flex flex-col rounded-2xl overflow-hidden"
       style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
     >
-      {/* Image — fixed height so all cards align */}
-      <div className="relative flex-shrink-0" style={{ height: 140, background: showImg ? 'rgba(0,0,0,0.2)' : fallback.bg }}>
+      {/* Square image container — always shows full telescope */}
+      <div className="relative flex-shrink-0" style={{
+        aspectRatio: '1 / 1',
+        background: showImg ? 'rgba(0,0,0,0.3)' : fallback.bg,
+        overflow: 'hidden',
+      }}>
         {showImg ? (
           <Image
             src={product.image}
             alt={product.name}
             fill
             sizes="(max-width: 768px) 50vw, 300px"
-            style={{ objectFit: 'cover' }}
+            style={{ objectFit: 'contain', padding: '12px' }}
             unoptimized
             onError={() => setImgError(true)}
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-1.5">
-            <span className="text-4xl leading-none">{fallback.icon}</span>
-            <p className="text-[10px] font-medium tracking-wide uppercase" style={{ color: 'rgba(255,255,255,0.2)' }}>
+          <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+            <span className="text-5xl leading-none">{fallback.icon}</span>
+            <p className="text-[10px] font-medium tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.15)' }}>
               {fallback.label}
             </p>
           </div>
         )}
-        {badgeStyle && (
+        {/* Skill badge — top left */}
+        {product.skillLevel && (
           <span
-            className="absolute top-2 right-2 text-[10px] px-2 py-0.5 rounded-full"
-            style={{ background: badgeStyle.bg, color: badgeStyle.color }}
+            className="absolute top-2 left-2 text-[9px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wide"
+            style={SKILL_BADGE_STYLES[product.skillLevel]}
           >
-            {product.badge}
+            {product.skillLevel === 'intermediate' ? 'Mid' : product.skillLevel}
           </span>
         )}
-        {product.beginner && (
-          <span
-            className="absolute top-2 left-2 text-[10px] px-2 py-0.5 rounded-full font-semibold"
-            style={{ background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.3)', color: '#34d399' }}
-          >
-            Beginner
+        {/* Product badge — top right */}
+        {badgeStyle && !product.skillLevel && (
+          <span className="absolute top-2 right-2 text-[10px] px-2 py-0.5 rounded-full"
+            style={{ background: badgeStyle.bg, color: badgeStyle.color }}>
+            {product.badge}
           </span>
         )}
       </div>
 
-      {/* Info — fixed layout, no flex-1 stretching */}
-      <div className="flex flex-col p-2 gap-1">
+      {/* Info section */}
+      <div className="flex flex-col p-3 gap-1.5">
         <p className="text-white text-[12px] font-semibold leading-snug line-clamp-2">{product.name}</p>
-        <p className="text-[10px] line-clamp-2 leading-snug" style={{ color: 'rgba(255,255,255,0.35)' }}>
+
+        {/* Specs row — up to 2 specs */}
+        {product.specs && (
+          <div className="flex flex-wrap gap-1 mt-0.5">
+            {Object.entries(product.specs).slice(0, 2).map(([k, v]) => (
+              <span key={k} className="text-[9px] px-1.5 py-0.5 rounded"
+                style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.35)' }}>
+                {v}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <p className="text-[10px] line-clamp-2 leading-snug mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>
           {product.description}
         </p>
 
-        {firstSpec && (
-          <span
-            className="self-start text-[10px] px-1.5 py-0.5 rounded mt-0.5"
-            style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.3)' }}
-          >
-            {firstSpec}
-          </span>
-        )}
-
         {/* Price row */}
-        <div className="flex items-center justify-between mt-1">
+        <div className="flex items-center justify-between mt-1.5">
           <div>
             <p className="text-white font-bold text-sm leading-none">
               {product.currencySymbol}{product.price % 1 !== 0 ? product.price.toFixed(2) : product.price.toLocaleString()}
             </p>
-            <p className="text-[10px] mt-0.5" style={{ color: 'rgba(153,69,255,0.8)' }}>
-              {solPrice()}
-            </p>
+            {showDealer && (
+              <p className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                via {dealerName}
+              </p>
+            )}
           </div>
           <a
             href={product.externalUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[11px] px-2.5 py-1.5 rounded-lg transition-colors flex-shrink-0 min-h-[44px] flex items-center"
+            className="text-[11px] px-3 py-1.5 rounded-lg flex-shrink-0"
             style={{
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: 'white',
+              background: 'rgba(52,211,153,0.1)',
+              border: '1px solid rgba(52,211,153,0.25)',
+              color: '#34d399',
               textDecoration: 'none',
+              fontWeight: 600,
             }}
           >
             Buy →
           </a>
         </div>
-
-        {showDealer && (
-          <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
-            via {dealerName}
-          </p>
-        )}
       </div>
     </div>
   );
@@ -159,7 +171,6 @@ export default function MarketplacePage() {
   const { location } = useLocation();
   const [filter, setFilter] = useState<CategoryFilter>('all');
   const [starsBalance, setStarsBalance] = useState(0);
-  const [solRate, setSolRate] = useState<{ solPerGEL: number; solPrice: number } | null>(null);
 
   const solanaWallet = wallets.find(w => (w as { chainType?: string }).chainType === 'solana');
   const address = solanaWallet?.address ?? state.walletAddress ?? null;
@@ -169,11 +180,6 @@ export default function MarketplacePage() {
     fetch(`/api/stars-balance?address=${encodeURIComponent(address)}`)
       .then(r => r.json()).then(d => setStarsBalance(d.balance)).catch(() => {});
   }, [address]);
-
-  useEffect(() => {
-    fetch('/api/price/sol')
-      .then(r => r.json()).then(d => setSolRate(d)).catch(() => {});
-  }, []);
 
   const completed = state.completedMissions.filter(m => m.status === 'completed');
   const totalStars = completed.reduce((sum, m) => sum + (m.stars ?? 0), 0);
@@ -189,6 +195,14 @@ export default function MarketplacePage() {
   function getDealerName(dealerId: string): string {
     return dealers.find(d => d.id === dealerId)?.name ?? dealerId;
   }
+
+  const telescopesByTier = {
+    beginner: products.filter(p => p.category === 'telescope' && p.skillLevel === 'beginner'),
+    intermediate: products.filter(p => p.category === 'telescope' && (p.skillLevel === 'intermediate' || (!p.skillLevel && p.price >= 100 && p.price <= 500))),
+    advanced: products.filter(p => p.category === 'telescope' && (p.skillLevel === 'advanced' || (!p.skillLevel && p.price > 500))),
+  };
+  const nonTelescopes = products.filter(p => p.category !== 'telescope');
+  const isTelescopeView = filter === 'all' || filter === 'telescope';
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 animate-page-enter">
@@ -229,7 +243,7 @@ export default function MarketplacePage() {
       )}
 
       {/* Category filter */}
-      <div className="flex gap-2 overflow-x-auto -mx-4 px-4 pb-1 mb-5 scrollbar-hide">
+      <div className="flex gap-2 overflow-x-auto -mx-4 px-4 pb-1 mb-3 scrollbar-hide">
         {CATEGORY_FILTERS.map(f => (
           <button
             key={f.key}
@@ -245,6 +259,21 @@ export default function MarketplacePage() {
           </button>
         ))}
       </div>
+
+      {/* Tier shortcut links — only for telescope/all views */}
+      {isTelescopeView && (
+        <div className="flex gap-2 mb-5">
+          <a href="#tier-beginner" className="text-xs px-2.5 py-1 rounded-full" style={{ background: 'rgba(52,211,153,0.08)', color: '#34d399', border: '1px solid rgba(52,211,153,0.2)' }}>
+            Beginner
+          </a>
+          <a href="#tier-intermediate" className="text-xs px-2.5 py-1 rounded-full" style={{ background: 'rgba(245,158,11,0.08)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.2)' }}>
+            Intermediate
+          </a>
+          <a href="#tier-advanced" className="text-xs px-2.5 py-1 rounded-full" style={{ background: 'rgba(139,92,246,0.08)', color: '#8B5CF6', border: '1px solid rgba(139,92,246,0.2)' }}>
+            Advanced
+          </a>
+        </div>
+      )}
 
       {/* Product grid */}
       {products.length === 0 ? (
@@ -262,10 +291,71 @@ export default function MarketplacePage() {
                 product={p}
                 showDealer={false}
                 dealerName="Astroman"
-                solRate={solRate}
               />
             ))}
           </div>
+        </div>
+      ) : isTelescopeView ? (
+        <div className="flex flex-col gap-8">
+          {/* Beginner tier */}
+          {telescopesByTier.beginner.length > 0 && (
+            <div id="tier-beginner">
+              <div className="flex items-center gap-3 mb-3">
+                <div style={{ width: 3, height: 18, borderRadius: 2, background: '#34d399' }} />
+                <p className="text-sm font-semibold" style={{ color: '#34d399' }}>Beginner</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>First telescope · Easy setup</p>
+              </div>
+              <div className="grid gap-3 grid-cols-2">
+                {telescopesByTier.beginner.map(p => (
+                  <ProductCard key={p.id} product={p} showDealer={showDealer} dealerName={getDealerName(p.dealerId)} />
+                ))}
+              </div>
+            </div>
+          )}
+          {/* Intermediate tier */}
+          {telescopesByTier.intermediate.length > 0 && (
+            <div id="tier-intermediate">
+              <div className="flex items-center gap-3 mb-3">
+                <div style={{ width: 3, height: 18, borderRadius: 2, background: '#F59E0B' }} />
+                <p className="text-sm font-semibold" style={{ color: '#F59E0B' }}>Intermediate</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>More aperture · Better optics</p>
+              </div>
+              <div className="grid gap-3 grid-cols-2">
+                {telescopesByTier.intermediate.map(p => (
+                  <ProductCard key={p.id} product={p} showDealer={showDealer} dealerName={getDealerName(p.dealerId)} />
+                ))}
+              </div>
+            </div>
+          )}
+          {/* Advanced tier */}
+          {telescopesByTier.advanced.length > 0 && (
+            <div id="tier-advanced">
+              <div className="flex items-center gap-3 mb-3">
+                <div style={{ width: 3, height: 18, borderRadius: 2, background: '#8B5CF6' }} />
+                <p className="text-sm font-semibold" style={{ color: '#8B5CF6' }}>Advanced</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>GoTo mounts · Deep sky capable</p>
+              </div>
+              <div className="grid gap-3 grid-cols-2">
+                {telescopesByTier.advanced.map(p => (
+                  <ProductCard key={p.id} product={p} showDealer={showDealer} dealerName={getDealerName(p.dealerId)} />
+                ))}
+              </div>
+            </div>
+          )}
+          {/* Non-telescope items if filter === 'all' */}
+          {filter === 'all' && nonTelescopes.length > 0 && (
+            <div>
+              <div className="flex items-center gap-3 mb-3">
+                <div style={{ width: 3, height: 18, borderRadius: 2, background: 'rgba(255,255,255,0.2)' }} />
+                <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Accessories & More</p>
+              </div>
+              <div className="grid gap-3 grid-cols-2">
+                {nonTelescopes.map(p => (
+                  <ProductCard key={p.id} product={p} showDealer={showDealer} dealerName={getDealerName(p.dealerId)} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="grid gap-3 grid-cols-2">
@@ -275,7 +365,6 @@ export default function MarketplacePage() {
               product={p}
               showDealer={showDealer}
               dealerName={getDealerName(p.dealerId)}
-              solRate={solRate}
             />
           ))}
         </div>
