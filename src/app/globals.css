@@ -68,6 +68,19 @@
   --gradient-rank-pathfinder: linear-gradient(135deg, #A855F7 0%, #6366F1 100%);
   --gradient-rank-celestial: linear-gradient(135deg, #FFD166 0%, #F59E0B 100%);
 
+  /* Stellar design tokens — observatory palette */
+  --stellar-void: #070B14;
+  --stellar-night: #0C1221;
+  --stellar-surface: #111827;
+  --stellar-border: rgba(255, 255, 255, 0.06);
+  --stellar-border-hover: rgba(255, 255, 255, 0.12);
+  --stellar-teal: #38F0FF;
+  --stellar-teal-glow: rgba(56, 240, 255, 0.15);
+  --stellar-brass: #FFD166;
+  --stellar-sol-purple: rgba(153, 69, 255, 0.08);
+  --stellar-sol-green: rgba(20, 241, 149, 0.06);
+  --stellar-gradient-sol: linear-gradient(135deg, rgba(153, 69, 255, 0.04) 0%, rgba(56, 240, 255, 0.06) 50%, rgba(20, 241, 149, 0.03) 100%);
+
   /* Shadows */
   --shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
   --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.5), 0 0 0 1px rgba(56,240,255,0.12);
@@ -657,6 +670,26 @@ input, select, textarea { font-size: 16px !important; }
 @keyframes confettiBurst {
   0%   { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
   100% { transform: translate(var(--tx), var(--ty)) scale(0) rotate(var(--rot)); opacity: 0; }
+}
+
+@keyframes hiwSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+@keyframes barGrow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+@keyframes planetSlideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 /* Extended stagger delays */

@@ -458,132 +458,196 @@ export default function HomePage() {
           onMouseLeave={() => { stepPausedRef.current = false; }}
           onTouchStart={() => { stepPausedRef.current = true; }}
         >
-          <p className="text-center text-xs mb-5 tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.25)' }}>
-            — {t('home.howItWorks')} —
-          </p>
+          {/* Section header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 24 }}>
+            <div style={{ width: 32, height: 1, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15))' }} />
+            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 500, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+              {t('home.howItWorks')}
+            </span>
+            <div style={{ width: 32, height: 1, background: 'linear-gradient(90deg, rgba(255,255,255,0.15), transparent)' }} />
+          </div>
 
-          {/* 4 cards — 2×2 on mobile, 4-in-a-row on md+ */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }} className="hiw-grid">
-            <style>{`
-              @media (min-width: 640px) { .hiw-grid { grid-template-columns: repeat(4, 1fr) !important; } }
-              @keyframes hiwCardEnter {
-                from { opacity: 0; transform: translateY(12px) scale(0.97); }
-                to   { opacity: 1; transform: translateY(0) scale(1); }
+          {/* 4 cards — horizontal scroll snap on mobile, 4-in-a-row on sm+ */}
+          <style>{`
+            .hiw-scroll {
+              display: flex;
+              gap: 10px;
+              overflow-x: auto;
+              scroll-snap-type: x mandatory;
+              -webkit-overflow-scrolling: touch;
+              scrollbar-width: none;
+              padding-bottom: 4px;
+            }
+            .hiw-scroll::-webkit-scrollbar { display: none; }
+            .hiw-card {
+              flex: 0 0 72%;
+              scroll-snap-align: center;
+              min-height: 172px;
+            }
+            @media (min-width: 640px) {
+              .hiw-scroll {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                overflow-x: visible;
+                scroll-snap-type: none;
               }
-              @keyframes hiwIconFloat {
-                0%, 100% { transform: translateY(0px); }
-                50%       { transform: translateY(-3px); }
-              }
-            `}</style>
+              .hiw-card { flex: none; }
+            }
+          `}</style>
+
+          <div className="hiw-scroll">
             {howItWorksSteps.map((item, i) => {
               const active = activeStep === i;
-              const STEP_COLORS = ['#34d399', '#38F0FF', '#A855F7', '#FFD166'];
-              const color = active ? STEP_COLORS[i] : 'rgba(255,255,255,0.18)';
               return (
                 <button
                   key={i}
+                  className="hiw-card"
                   onClick={() => { setActiveStep(i); stepPausedRef.current = true; }}
                   style={{
-                    position: 'relative', overflow: 'hidden',
-                    padding: '18px 14px 16px',
-                    borderRadius: 18,
-                    background: active
-                      ? `linear-gradient(160deg, rgba(${i===0?'52,211,153':i===1?'56,240,255':i===2?'168,85,247':'255,209,102'},0.07) 0%, rgba(7,11,20,0.95) 100%)`
-                      : 'rgba(255,255,255,0.025)',
-                    border: `1px solid ${active ? `rgba(${i===0?'52,211,153':i===1?'56,240,255':i===2?'168,85,247':'255,209,102'},0.28)` : 'rgba(255,255,255,0.06)'}`,
-                    cursor: 'pointer', textAlign: 'left',
-                    display: 'flex', flexDirection: 'column', gap: 10,
-                    transition: 'all 0.35s cubic-bezier(0.22,1,0.36,1)',
+                    position: 'relative',
+                    padding: '22px 18px 24px',
+                    borderRadius: 16,
+                    background: 'rgba(12, 18, 33, 0.6)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    border: `1px solid ${active ? 'rgba(56, 240, 255, 0.25)' : 'var(--stellar-border)'}`,
+                    boxShadow: active
+                      ? 'inset 0 1px 0 rgba(255,255,255,0.03), 0 0 20px rgba(56,240,255,0.06), 0 0 40px rgba(56,240,255,0.03)'
+                      : 'inset 0 1px 0 rgba(255,255,255,0.03)',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 0,
+                    transition: 'border-color 0.5s, box-shadow 0.5s, transform 0.3s ease',
                     transform: active ? 'translateY(-2px)' : 'translateY(0)',
-                    boxShadow: active ? `0 8px 32px rgba(${i===0?'52,211,153':i===1?'56,240,255':i===2?'168,85,247':'255,209,102'},0.1)` : 'none',
-                    animation: `hiwCardEnter 0.4s cubic-bezier(0.22,1,0.36,1) ${i * 0.07}s both`,
+                    opacity: 0,
+                    animation: `hiwSlideUp 0.6s ease forwards`,
+                    animationDelay: `${i * 0.12}s`,
                   }}
                 >
-                  {/* Nebula corner glow */}
-                  {active && (
-                    <div style={{
-                      position: 'absolute', top: -20, right: -20, width: 80, height: 80,
-                      borderRadius: '50%',
-                      background: `radial-gradient(circle, rgba(${i===0?'52,211,153':i===1?'56,240,255':i===2?'168,85,247':'255,209,102'},0.18) 0%, transparent 70%)`,
-                      pointerEvents: 'none',
-                    }} />
-                  )}
+                  {/* Step badge */}
+                  <span style={{
+                    display: 'inline-block',
+                    fontSize: 11, fontWeight: 600, letterSpacing: '0.05em',
+                    padding: '2px 8px', borderRadius: 6,
+                    background: 'linear-gradient(135deg, rgba(153,69,255,0.15), rgba(56,240,255,0.15))',
+                    color: 'rgba(255,255,255,0.75)',
+                    marginBottom: 14,
+                    alignSelf: 'flex-start',
+                  }}>
+                    0{i + 1}
+                  </span>
 
-                  {/* Step number + icon row */}
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                    <span style={{
-                      color: active ? color : 'rgba(255,255,255,0.12)',
-                      fontSize: 9.5, fontWeight: 800, letterSpacing: '0.1em',
-                      fontFamily: 'monospace',
-                    }}>0{i + 1}</span>
-                    <div style={{
-                      width: 38, height: 38, borderRadius: 12, flexShrink: 0,
-                      background: active ? `rgba(${i===0?'52,211,153':i===1?'56,240,255':i===2?'168,85,247':'255,209,102'},0.12)` : 'rgba(255,255,255,0.04)',
-                      border: `1px solid ${active ? `rgba(${i===0?'52,211,153':i===1?'56,240,255':i===2?'168,85,247':'255,209,102'},0.3)` : 'rgba(255,255,255,0.07)'}`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      animation: active ? 'hiwIconFloat 2.4s ease-in-out infinite' : 'none',
-                    }}>
-                      <item.icon
-                        size={18}
-                        color={color}
-                        strokeWidth={active ? 2 : 1.5}
-                        className={active ? 'step-icon-active' : ''}
-                      />
-                    </div>
+                  {/* Icon circle */}
+                  <div style={{
+                    width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
+                    background: 'radial-gradient(circle, rgba(56,240,255,0.08) 0%, transparent 70%)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    marginBottom: 14,
+                    transition: 'background 0.4s ease',
+                  }}>
+                    <item.icon
+                      size={20}
+                      color={active ? 'rgba(56,240,255,1)' : 'rgba(56,240,255,0.5)'}
+                      strokeWidth={1.5}
+                      style={{ transition: 'color 0.4s ease' }}
+                    />
                   </div>
 
                   {/* Text */}
-                  <div>
-                    <p style={{
-                      color: active ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.45)',
-                      fontWeight: 700, fontSize: 13, margin: '0 0 4px',
-                      fontFamily: 'var(--font-display)',
-                      transition: 'color 0.3s',
-                    }}>{item.title}</p>
-                    <p style={{
-                      color: active ? 'rgba(255,255,255,0.42)' : 'rgba(255,255,255,0.2)',
-                      fontSize: 10.5, lineHeight: 1.55, margin: 0,
-                      transition: 'color 0.3s',
-                    }}>{item.desc}</p>
-                  </div>
+                  <p style={{
+                    color: active ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.6)',
+                    fontWeight: 600, fontSize: 14, margin: '0 0 6px',
+                    fontFamily: 'var(--font-display)',
+                    transition: 'color 0.3s',
+                  }}>{item.title}</p>
+                  <p style={{
+                    color: 'rgba(255,255,255,0.35)',
+                    fontSize: 12, lineHeight: 1.55, margin: 0,
+                  }}>{item.desc}</p>
                 </button>
               );
             })}
           </div>
 
           {/* Progress dots */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 16 }}>
             {howItWorksSteps.map((_, i) => (
               <div
                 key={i}
                 onClick={() => { setActiveStep(i); stepPausedRef.current = true; }}
                 style={{
-                  width: activeStep === i ? 20 : 5, height: 4, borderRadius: 2, cursor: 'pointer',
-                  background: activeStep === i ? 'linear-gradient(90deg, #34d399, #38F0FF)' : 'rgba(255,255,255,0.1)',
-                  transition: 'all 0.35s cubic-bezier(0.4,0,0.2,1)',
+                  width: activeStep === i ? 20 : 8,
+                  height: 8,
+                  borderRadius: 4,
+                  cursor: 'pointer',
+                  background: activeStep === i ? 'var(--stellar-teal)' : 'rgba(255,255,255,0.15)',
+                  transition: 'width 0.3s ease, background 0.3s ease',
                 }}
               />
             ))}
           </div>
         </div>
 
+        {/* Section separator */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0, margin: '-4px 0' }}>
+          <div style={{ width: 1, height: 32, background: 'linear-gradient(to bottom, transparent, rgba(56,240,255,0.15), transparent)' }} />
+        </div>
+
         {/* Tonight's Sky Preview Strip */}
-        <div style={{ width: '100%', overflow: 'hidden' }}>
-          {/* Section header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <h2 style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>
-                Tonight&apos;s Sky
-              </h2>
-              <span className="badge-pill badge-accent" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10 }}>
-                <span className="live-dot" />
-                Live
-              </span>
+        <div style={{
+          width: '100%',
+          position: 'relative',
+          borderRadius: 20,
+          background: 'rgba(12, 18, 33, 0.4)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          border: '1px solid var(--stellar-border)',
+          boxShadow: '0 4px 30px rgba(0,0,0,0.3)',
+          padding: 24,
+          overflow: 'hidden',
+        }}>
+          {/* Ambient pseudo-glow via absolute divs */}
+          <div style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
+            background: 'var(--stellar-gradient-sol)',
+            borderRadius: 20,
+          }} />
+          <div style={{
+            position: 'absolute', top: '-50%', left: '-50%', width: '200%', height: '200%',
+            background: 'radial-gradient(circle at 30% 40%, rgba(56,240,255,0.02) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(153,69,255,0.015) 0%, transparent 50%)',
+            pointerEvents: 'none', zIndex: 0,
+          }} />
+
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            {/* Section header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <h2 style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)', fontSize: '1.375rem', fontWeight: 600, margin: 0, letterSpacing: '-0.01em' }}>
+                  Tonight&apos;s Sky
+                </h2>
+                {/* Redesigned Live badge */}
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  padding: '3px 10px', borderRadius: 999,
+                  background: 'rgba(52, 211, 153, 0.1)',
+                  border: '1px solid rgba(52, 211, 153, 0.2)',
+                  fontSize: 11, letterSpacing: '0.05em',
+                  color: 'rgba(52, 211, 153, 0.9)',
+                }}>
+                  <span style={{
+                    width: 6, height: 6, borderRadius: '50%',
+                    background: '#34d399', flexShrink: 0,
+                    animation: 'livePulse 2s ease-in-out infinite',
+                  }} />
+                  Live
+                </span>
+              </div>
+              <Link href="/sky" style={{ color: 'var(--stellar-teal)', fontSize: 13, textDecoration: 'none', fontFamily: 'var(--font-display)', fontWeight: 500 }}>
+                View full forecast →
+              </Link>
             </div>
-            <Link href="/sky" style={{ color: 'var(--accent)', fontSize: 13, textDecoration: 'none', fontFamily: 'var(--font-display)', fontWeight: 500 }}>
-              View full forecast →
-            </Link>
-          </div>
 
           <Suspense fallback={
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -602,7 +666,8 @@ export default function HomePage() {
           }>
             <HomeSkyPreview />
           </Suspense>
-        </div>
+          </div>{/* end z-index relative */}
+        </div>{/* end Tonight's Sky container */}
 
         {/* Missions + Leaderboard — side-by-side */}
         <div style={{ width: '100%', display: 'grid', gridTemplateColumns: '1fr', gap: 24, overflow: 'hidden' }} className="md-two-col">

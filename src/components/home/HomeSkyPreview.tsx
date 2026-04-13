@@ -74,32 +74,51 @@ function NightTimeline({ hours, statusColor }: { hours: SkyHour[]; statusColor: 
   for (const h of hours) byHour[new Date(h.time).getHours()] = h.cloudCover;
   const nowHour = new Date().getHours();
 
+  // Find the best window: consecutive clear hours
+  const clearCounts = slots.map(hr => (byHour[hr] ?? 100) < 40 ? 1 : 0);
+  let bestStart = -1, bestLen = 0, cur = 0, curStart = 0;
+  for (let i = 0; i < clearCounts.length; i++) {
+    if (clearCounts[i]) { if (!cur) curStart = i; cur++; if (cur > bestLen) { bestLen = cur; bestStart = curStart; } }
+    else cur = 0;
+  }
+
   return (
     <div>
-      <span style={{ display: 'block', color: 'rgba(255,255,255,0.22)', fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>
+      <span style={{ display: 'block', color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 10 }}>
         Night window  8pm – 4am
       </span>
-      <div style={{ display: 'flex', gap: 4, alignItems: 'flex-end', height: 48 }}>
-        {slots.map(hr => {
+      <div style={{ display: 'flex', gap: 4, alignItems: 'flex-end', height: 52 }}>
+        {slots.map((hr, idx) => {
           const cover = byHour[hr] ?? 100;
           const clear = Math.max(0, 1 - cover / 100);
-          const barH = Math.max(4, Math.round(clear * 42));
+          const barH = Math.max(4, Math.round(clear * 44));
           const isNow = hr === nowHour;
-          const color = cover < 25 ? '#34d399' : cover < 55 ? '#86efac' : cover < 75 ? '#FFD166' : 'rgba(148,163,184,0.2)';
+          const isBest = bestLen >= 2 && idx >= bestStart && idx < bestStart + bestLen;
+          const barGrad = cover < 30
+            ? 'linear-gradient(to top, rgba(52,211,153,0.6), rgba(52,211,153,0.2))'
+            : cover < 60
+              ? 'linear-gradient(to top, rgba(251,191,36,0.5), rgba(251,191,36,0.2))'
+              : 'linear-gradient(to top, rgba(255,255,255,0.08), rgba(255,255,255,0.03))';
           const label = hr === 0 ? '12a' : hr < 4 ? `${hr}a` : `${hr}p`;
           return (
             <div key={hr} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-              <div style={{ width: '100%', height: 42, display: 'flex', alignItems: 'flex-end', borderRadius: 4, background: 'rgba(255,255,255,0.03)', overflow: 'hidden', position: 'relative' }}>
+              <div style={{
+                width: '100%', height: 44,
+                display: 'flex', alignItems: 'flex-end',
+                borderRadius: 4,
+                background: isBest ? 'rgba(56,240,255,0.04)' : 'rgba(255,255,255,0.03)',
+                overflow: 'hidden', position: 'relative',
+              }}>
                 {isNow && <div style={{ position: 'absolute', inset: 0, border: `1px solid ${statusColor}40`, borderRadius: 4 }} />}
                 <div style={{
                   width: '100%', height: barH,
-                  background: cover < 55 ? `linear-gradient(to top, ${color}, ${color}99)` : color,
-                  borderRadius: '2px 2px 0 0',
-                  boxShadow: cover < 55 ? `0 0 8px ${color}60` : 'none',
-                  transition: 'height 1s cubic-bezier(0.22,1,0.36,1)',
+                  background: barGrad,
+                  borderRadius: 3,
+                  transformOrigin: 'bottom',
+                  animation: `barGrow 0.6s ease-out ${idx * 0.05}s both`,
                 }} />
               </div>
-              <span style={{ color: isNow ? statusColor : 'rgba(255,255,255,0.18)', fontSize: 7.5, fontWeight: isNow ? 700 : 500 }}>{label}</span>
+              <span style={{ color: isNow ? statusColor : 'rgba(255,255,255,0.25)', fontSize: 8, fontWeight: isNow ? 700 : 500 }}>{label}</span>
             </div>
           );
         })}
@@ -111,18 +130,21 @@ function NightTimeline({ hours, statusColor }: { hours: SkyHour[]; statusColor: 
 function StatCard({ label, value, sub, warn, icon }: { label: string; value: string; sub?: string; warn?: boolean; icon: string }) {
   return (
     <div style={{
-      padding: '11px 12px',
+      padding: '14px 14px 12px',
       borderRadius: 12,
-      background: warn ? 'rgba(255,180,0,0.04)' : 'rgba(255,255,255,0.03)',
-      border: `1px solid ${warn ? 'rgba(255,180,0,0.18)' : 'rgba(255,255,255,0.07)'}`,
-      display: 'flex', flexDirection: 'column', gap: 3,
+      background: 'rgba(255,255,255,0.02)',
+      border: '1px solid rgba(255,255,255,0.06)',
+      display: 'flex', flexDirection: 'column', gap: 4,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-        <span style={{ fontSize: 11, opacity: 0.5 }}>{icon}</span>
-        <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 8.5, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{label}</span>
+        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>{icon}</span>
+        <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 9.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{label}</span>
       </div>
-      <span style={{ color: warn ? '#FFD166' : 'rgba(255,255,255,0.88)', fontSize: 17, fontWeight: 800, fontFamily: 'monospace', lineHeight: 1 }}>{value}</span>
-      {sub && <span style={{ color: warn ? 'rgba(255,180,0,0.5)' : 'rgba(255,255,255,0.2)', fontSize: 9 }}>{sub}</span>}
+      <span style={{
+        color: warn ? 'rgba(239,68,68,0.8)' : 'rgba(255,255,255,0.92)',
+        fontSize: 26, fontWeight: 600, fontFamily: 'monospace', lineHeight: 1,
+      }}>{value}</span>
+      {sub && <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>{sub}</span>}
     </div>
   );
 }
@@ -200,36 +222,33 @@ export default function HomeSkyPreview() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <style>{`
         @keyframes skyEnter { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes statusGlow { 0%,100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 12px 2px ${SC.color}22; } }
+        @keyframes barGrow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+        @keyframes planetSlideIn { from { opacity:0; transform:translateX(-8px); } to { opacity:1; transform:translateX(0); } }
       `}</style>
 
       {/* ── MAIN CARD ── */}
       <div style={{
         position: 'relative', overflow: 'hidden',
-        borderRadius: 20,
-        background: `linear-gradient(160deg, rgba(10,14,24,0.95) 0%, rgba(7,11,20,1) 100%)`,
+        borderRadius: 16,
+        background: 'rgba(12, 18, 33, 0.6)',
         border: `1px solid ${SC.border}`,
-        padding: '18px 16px 16px',
-        animation: 'skyEnter 0.45s cubic-bezier(0.22,1,0.36,1) both, statusGlow 4s ease-in-out 1s infinite',
+        padding: '16px 16px 14px',
+        animation: 'skyEnter 0.45s cubic-bezier(0.22,1,0.36,1) both',
       }}>
         {/* Nebula bg */}
         <div style={{ position: 'absolute', inset: 0, background: SC.nebula, pointerEvents: 'none' }} />
 
-        {/* Subtle star dots */}
-        <div style={{ position: 'absolute', inset: 0, opacity: 0.4, backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.6) 1px, transparent 1px)', backgroundSize: '32px 32px', pointerEvents: 'none' }} />
-
         <div style={{ position: 'relative' }}>
-          {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          {/* Header row: status badge + day + location */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{
-                fontSize: 11, fontWeight: 800, letterSpacing: '0.08em',
+                fontSize: 11, fontWeight: 700, letterSpacing: '0.1em',
                 padding: '3px 10px', borderRadius: 999,
                 background: SC.bg, border: `1px solid ${SC.border}`,
                 color: SC.color,
-                boxShadow: `0 0 10px ${SC.color}30`,
               }}>{status.toUpperCase()}</span>
-              <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: 500 }}>{dayLabel}</span>
+              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, fontWeight: 500 }}>{dayLabel}</span>
             </div>
             <span style={{ color: 'rgba(255,255,255,0.18)', fontSize: 10, display: 'flex', alignItems: 'center', gap: 3 }}>
               <span>📍</span>{locationLabel}
@@ -240,7 +259,7 @@ export default function HomeSkyPreview() {
           {nightHours.length > 0 && <NightTimeline hours={nightHours} statusColor={SC.color} />}
 
           {/* Condition stats 2x2 */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 14 }}>
             {stats.map(s => <StatCard key={s.label} {...s} />)}
           </div>
 
@@ -248,8 +267,8 @@ export default function HomeSkyPreview() {
           {moonWarn && (
             <div style={{
               marginTop: 10, padding: '8px 12px', borderRadius: 10,
-              background: 'rgba(255,209,102,0.05)', border: '1px solid rgba(255,209,102,0.18)',
-              color: 'rgba(255,209,102,0.7)', fontSize: 11, lineHeight: 1.4,
+              background: 'rgba(255,209,102,0.05)', border: '1px solid rgba(255,209,102,0.15)',
+              color: 'rgba(255,209,102,0.65)', fontSize: 11, lineHeight: 1.4,
             }}>
               ☽ Full moon ({moonPct}%) — faint deep-sky targets will be washed out
             </div>
@@ -260,19 +279,19 @@ export default function HomeSkyPreview() {
       {/* ── PLANETS CARD ── */}
       {(visiblePlanets.length > 0 || moon || planetsLoading) && (
         <div style={{
-          borderRadius: 18,
-          background: 'linear-gradient(160deg, rgba(10,14,24,0.9) 0%, rgba(7,11,20,1) 100%)',
-          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: 16,
+          background: 'rgba(12, 18, 33, 0.5)',
+          border: '1px solid rgba(255,255,255,0.06)',
           overflow: 'hidden',
-          animation: 'skyEnter 0.45s cubic-bezier(0.22,1,0.36,1) 0.08s both',
+          animation: 'skyEnter 0.45s cubic-bezier(0.22,1,0.36,1) 0.1s both',
         }}>
           <div style={{
             padding: '11px 14px 9px',
-            borderBottom: '1px solid rgba(255,255,255,0.05)',
+            borderBottom: '1px solid rgba(255,255,255,0.04)',
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           }}>
-            <span style={{ color: 'rgba(255,255,255,0.28)', fontSize: 9.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Planets tonight</span>
-            <span style={{ color: 'rgba(255,255,255,0.14)', fontSize: 8.5, fontWeight: 600, letterSpacing: '0.06em' }}>Alt · Rise · Set · Dir</span>
+            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Planets tonight</span>
+            <span style={{ color: 'rgba(255,255,255,0.14)', fontSize: 9, fontWeight: 600, letterSpacing: '0.06em' }}>Alt · Rise · Set · Dir</span>
           </div>
 
           {planetsLoading ? (
@@ -281,44 +300,56 @@ export default function HomeSkyPreview() {
             </div>
           ) : (
             <div style={{ padding: '4px 0' }}>
-              {[moon, ...visiblePlanets].filter(Boolean).map((p, i) => {
+              {[moon, ...visiblePlanets].filter(Boolean).map((p, rowIdx) => {
                 if (!p) return null;
                 const quality = p.altitude > 30 ? 'good' : p.altitude > 10 ? 'ok' : 'low';
                 const pColor = PLANET_COLOR[p.key] ?? 'rgba(255,255,255,0.4)';
                 const altColor = quality === 'good' ? '#34d399' : quality === 'ok' ? '#FFD166' : 'rgba(148,163,184,0.35)';
+                const totalRows = [moon, ...visiblePlanets].filter(Boolean).length;
                 return (
                   <div key={p.key} style={{
                     display: 'flex', alignItems: 'center', gap: 10,
                     padding: '9px 14px',
-                    opacity: quality === 'low' ? 0.4 : 1,
-                    borderBottom: i < visiblePlanets.length ? '1px solid rgba(255,255,255,0.03)' : 'none',
-                    transition: 'opacity 0.2s',
-                  }}>
-                    {/* Planet symbol with glow */}
+                    opacity: quality === 'low' ? 0.35 : 1,
+                    borderBottom: rowIdx < totalRows - 1 ? '1px solid rgba(255,255,255,0.03)' : 'none',
+                    transition: 'background 0.2s',
+                    animation: `planetSlideIn 0.4s ease forwards`,
+                    animationDelay: `${rowIdx * 0.08}s`,
+                    animationFillMode: 'both',
+                  }}
+                  onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.02)'; }}
+                  onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                  >
+                    {/* Planet symbol */}
                     <div style={{
-                      width: 28, height: 28, flexShrink: 0, borderRadius: 8,
-                      background: `${pColor}10`, border: `1px solid ${pColor}25`,
+                      width: 32, height: 32, flexShrink: 0, borderRadius: '50%',
+                      background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: 14, color: pColor,
                     }}>
                       {PLANET_SYMBOL[p.key] ?? '✦'}
                     </div>
                     {/* Name */}
-                    <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12, fontWeight: 600, minWidth: 52 }}>
+                    <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13, fontWeight: 500, minWidth: 52 }}>
                       {p.key.charAt(0).toUpperCase() + p.key.slice(1)}
                     </span>
                     {/* Altitude bar */}
-                    <div style={{ flex: 1, height: 3, background: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
-                      <div style={{
-                        height: '100%', width: `${Math.max(2, Math.min(100, (p.altitude / 90) * 100))}%`,
-                        background: altColor, borderRadius: 2,
-                        boxShadow: quality !== 'low' ? `0 0 4px ${altColor}80` : 'none',
-                        transition: 'width 1s cubic-bezier(0.22,1,0.36,1)',
-                      }} />
-                    </div>
-                    {/* Alt */}
-                    <span style={{ color: altColor, fontSize: 11, fontWeight: 700, fontFamily: 'monospace', minWidth: 28, textAlign: 'right' }}>
-                      {Math.round(p.altitude)}°
+                    {quality !== 'low' ? (
+                      <div style={{ flex: 1, height: 3, background: 'rgba(255,255,255,0.04)', borderRadius: 2 }}>
+                        <div style={{
+                          height: '100%',
+                          width: `${Math.max(2, Math.min(100, (p.altitude / 90) * 100))}%`,
+                          background: `linear-gradient(to right, rgba(56,240,255,0.4), rgba(56,240,255,0.8))`,
+                          borderRadius: 2,
+                          transition: 'width 0.8s ease-out',
+                        }} />
+                      </div>
+                    ) : (
+                      <div style={{ flex: 1 }} />
+                    )}
+                    {/* Alt value */}
+                    <span style={{ color: quality === 'low' ? 'rgba(148,163,184,0.35)' : altColor, fontSize: 12, fontWeight: 600, fontFamily: 'monospace', minWidth: 32, textAlign: 'right' }}>
+                      {quality === 'low' ? <span style={{ fontSize: 9 }}>below</span> : `${Math.round(p.altitude)}°`}
                     </span>
                     {/* Rise/Set */}
                     <div style={{ display: 'flex', gap: 5, flexShrink: 0 }}>
