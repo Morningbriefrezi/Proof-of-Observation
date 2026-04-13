@@ -261,17 +261,17 @@ export default function Nav() {
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5" style={{ marginLeft: 12 }}>
                 <button
                   onClick={() => login()}
                   style={{
-                    height: 34,
+                    height: 30,
                     borderRadius: 9999,
                     background: 'rgba(255,255,255,0.05)',
                     border: '1px solid rgba(255,255,255,0.14)',
                     color: 'rgba(255,255,255,0.75)',
-                    padding: '0 14px',
-                    fontSize: 12,
+                    padding: '0 11px',
+                    fontSize: 11,
                     fontWeight: 500,
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
@@ -282,13 +282,13 @@ export default function Nav() {
                 <button
                   onClick={() => login()}
                   style={{
-                    height: 34,
+                    height: 30,
                     borderRadius: 9999,
                     background: 'linear-gradient(135deg, #14F195 0%, #9945FF 100%)',
                     border: 'none',
                     color: '#070B14',
-                    padding: '0 14px',
-                    fontSize: 12,
+                    padding: '0 11px',
+                    fontSize: 11,
                     fontWeight: 700,
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',

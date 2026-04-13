@@ -11,14 +11,21 @@ export default async function SkyPage() {
   const t = await getTranslations('sky');
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 animate-page-enter flex flex-col gap-10">
+    <div className="max-w-3xl mx-auto px-4 pt-4 pb-8 animate-page-enter flex flex-col gap-10">
       <BackButton />
 
       {/* Page header */}
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col items-center gap-1 text-center -mt-6">
         <h1
-          className="text-3xl text-white tracking-tight"
-          style={{ fontFamily: 'var(--font-serif)', fontWeight: 400 }}
+          className="text-4xl tracking-tight"
+          style={{
+            fontFamily: 'var(--font-serif)',
+            fontWeight: 400,
+            background: 'linear-gradient(135deg, #ffffff 0%, #38F0FF 50%, #8B5CF6 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}
         >
           Tonight&apos;s Sky
         </h1>
