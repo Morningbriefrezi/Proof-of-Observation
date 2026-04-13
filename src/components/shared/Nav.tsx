@@ -181,32 +181,29 @@ export default function Nav() {
               <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse" />
             ) : authenticated ? (
               <div className="relative">
-                {/* Avatar button */}
                 <button
                   onClick={() => setShowMenu(v => !v)}
                   title="Account"
                   style={{
                     height: 32,
                     borderRadius: 9999,
-                    background: 'rgba(52,211,153,0.12)',
-                    border: '1px solid rgba(52,211,153,0.35)',
-                    color: '#34d399',
-                    padding: isName ? '0 12px' : '0',
-                    width: isName ? 'auto' : 32,
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    color: 'rgba(255,255,255,0.7)',
+                    padding: '0 12px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: 12,
-                    fontWeight: 600,
+                    fontWeight: 500,
                     cursor: 'pointer',
-                    transition: 'background 0.2s',
-                    whiteSpace: 'nowrap',
+                    gap: 5,
                   }}
                 >
-                  {displayName}
+                  <User size={13} />
+                  Profile
                 </button>
 
-                {/* Dropdown */}
                 {showMenu && (
                   <div className="absolute right-0 top-full mt-2 glass-card p-2 w-40 z-50 flex flex-col gap-0.5">
                     <Link
@@ -214,7 +211,14 @@ export default function Nav() {
                       onClick={() => setShowMenu(false)}
                       className="text-slate-300 hover:text-white text-xs py-2 px-3 rounded-lg hover:bg-white/5 transition-all"
                     >
-                      View profile
+                      Profile
+                    </Link>
+                    <Link
+                      href="/profile?tab=settings"
+                      onClick={() => setShowMenu(false)}
+                      className="text-slate-300 hover:text-white text-xs py-2 px-3 rounded-lg hover:bg-white/5 transition-all"
+                    >
+                      Settings
                     </Link>
                     <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '2px 0' }} />
                     <button
