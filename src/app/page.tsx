@@ -13,11 +13,8 @@ import { Telescope, Camera, Star, ShoppingBag, CloudSun, Satellite, Sparkles, Mo
 import { MISSIONS } from '@/lib/constants';
 import LocationPicker from '@/components/LocationPicker';
 import { useLocation } from '@/lib/location';
-import OnboardingOverlay from '@/components/shared/OnboardingOverlay';
 import PageTransition from '@/components/ui/PageTransition';
 import LoadingRing from '@/components/ui/LoadingRing';
-import OnboardingGate from '@/components/onboarding/OnboardingGate';
-import Dashboard from '@/components/dashboard/Dashboard';
 
 function EmailSubscribe() {
   const [email, setEmail] = useState('');
@@ -197,13 +194,8 @@ export default function HomePage() {
     );
   }
 
-  if (authenticated) {
-    return <OnboardingGate><Dashboard /></OnboardingGate>;
-  }
-
   return (
     <>
-      <OnboardingOverlay />
       <PageTransition>
       <style>{`
         @media (prefers-reduced-motion: no-preference) {
