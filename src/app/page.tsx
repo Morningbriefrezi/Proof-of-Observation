@@ -254,20 +254,20 @@ export default function HomePage() {
           .tagline-star-2 { display: inline-block; animation: twinkleStar 2.1s ease-in-out 0.7s infinite; }
           .tagline-star-3 { display: inline-block; animation: twinkleStar 2.1s ease-in-out 1.4s infinite; }
           @keyframes cosmicGlowPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0), 0 0 12px rgba(52,211,153,0.05); }
-            50% { box-shadow: 0 0 0 6px rgba(52,211,153,0.06), 0 0 28px rgba(52,211,153,0.2); }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0), 0 2px 16px rgba(52,211,153,0.06); }
+            50% { box-shadow: 0 0 0 4px rgba(52,211,153,0.07), 0 2px 32px rgba(52,211,153,0.18); }
           }
-          .step-card-active { animation: cosmicGlowPulse 2.5s ease-in-out infinite; }
+          .step-card-active { animation: cosmicGlowPulse 3s ease-in-out infinite; }
           @keyframes stepContentEnter {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(10px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
           }
-          .step-content-enter { animation: stepContentEnter 0.3s ease-out forwards; }
+          .step-content-enter { animation: stepContentEnter 0.35s cubic-bezier(0.22,1,0.36,1) forwards; }
           @keyframes iconGlow {
             0%, 100% { filter: drop-shadow(0 0 0px rgba(52,211,153,0)); }
-            50% { filter: drop-shadow(0 0 6px rgba(52,211,153,0.7)); }
+            50% { filter: drop-shadow(0 0 8px rgba(52,211,153,0.85)); }
           }
-          .step-icon-active { animation: iconGlow 2s ease-in-out infinite; }
+          .step-icon-active { animation: iconGlow 2.2s ease-in-out infinite; }
           @keyframes orbitRing {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
@@ -479,61 +479,54 @@ export default function HomePage() {
                   onClick={() => { setActiveStep(i); stepPausedRef.current = true; }}
                   style={{
                     flex: 1,
-                    padding: '12px 0 10px',
+                    padding: '14px 0',
                     borderRadius: 14,
-                    border: `1px solid ${active ? 'rgba(52,211,153,0.25)' : 'rgba(255,255,255,0.04)'}`,
+                    border: `1px solid ${active ? 'rgba(52,211,153,0.28)' : 'rgba(255,255,255,0.05)'}`,
                     background: active
-                      ? 'linear-gradient(180deg, rgba(52,211,153,0.1) 0%, rgba(52,211,153,0.04) 100%)'
-                      : 'rgba(255,255,255,0.02)',
+                      ? 'linear-gradient(180deg, rgba(52,211,153,0.1) 0%, rgba(52,211,153,0.03) 100%)'
+                      : 'rgba(255,255,255,0.025)',
                     cursor: 'pointer',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: 8,
+                    justifyContent: 'center',
+                    gap: 0,
                     transition: 'all 0.3s ease',
                     position: 'relative',
                     overflow: 'hidden',
                   }}
                 >
+                  {/* Active top glow */}
                   {active && (
                     <div style={{
                       position: 'absolute', inset: 0, borderRadius: 14,
-                      background: 'radial-gradient(ellipse at 50% 0%, rgba(52,211,153,0.12) 0%, transparent 70%)',
+                      background: 'radial-gradient(ellipse at 50% 10%, rgba(52,211,153,0.18) 0%, transparent 65%)',
                       pointerEvents: 'none',
                     }} />
                   )}
-                  {/* Orbit ring behind number */}
-                  <div style={{ position: 'relative', width: 30, height: 30 }}>
+                  {/* Icon with orbit ring */}
+                  <div style={{ position: 'relative', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {active && (
-                      <div style={{
-                        position: 'absolute', inset: -3, borderRadius: '50%',
-                        border: '1px dashed rgba(52,211,153,0.3)',
-                        animation: 'orbitRing 6s linear infinite',
-                      }} />
+                      <>
+                        <div style={{
+                          position: 'absolute', inset: -5, borderRadius: '50%',
+                          border: '1px dashed rgba(52,211,153,0.4)',
+                          animation: 'orbitRing 4s linear infinite',
+                        }} />
+                        <div style={{
+                          position: 'absolute', inset: 0, borderRadius: '50%',
+                          background: 'radial-gradient(circle, rgba(52,211,153,0.18) 0%, transparent 70%)',
+                        }} />
+                      </>
                     )}
-                    <div style={{
-                      width: 30, height: 30, borderRadius: '50%',
-                      background: active ? 'rgba(52,211,153,0.15)' : 'rgba(255,255,255,0.04)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      transition: 'background 0.3s',
-                      position: 'relative',
-                    }}>
-                      <span style={{
-                        fontSize: 11,
-                        fontFamily: 'var(--font-display)',
-                        fontWeight: 700,
-                        color: active ? '#34d399' : 'rgba(255,255,255,0.25)',
-                      }}>
-                        {i + 1}
-                      </span>
-                    </div>
+                    <item.icon
+                      size={active ? 20 : 17}
+                      color={active ? '#34d399' : 'rgba(255,255,255,0.22)'}
+                      strokeWidth={active ? 2 : 1.5}
+                      className={active ? 'step-icon-active' : ''}
+                      style={{ position: 'relative', zIndex: 1, transition: 'all 0.3s ease' }}
+                    />
                   </div>
-                  <item.icon
-                    size={17}
-                    color={active ? '#34d399' : 'rgba(255,255,255,0.2)'}
-                    strokeWidth={active ? 2 : 1.5}
-                    className={active ? 'step-icon-active' : ''}
-                  />
                 </button>
               );
             })}
@@ -576,8 +569,7 @@ export default function HomePage() {
                   <StepIcon size={26} color="#34d399" strokeWidth={1.5} className="step-icon-active" />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <p style={{ color: 'white', fontWeight: 700, fontSize: 14, margin: '0 0 5px', fontFamily: 'var(--font-display)' }}>
-                    <span style={{ color: 'rgba(52,211,153,0.5)', fontSize: 11, fontWeight: 500, marginRight: 8 }}>0{activeStep + 1}</span>
+                  <p style={{ color: 'white', fontWeight: 700, fontSize: 15, margin: '0 0 5px', fontFamily: 'var(--font-display)' }}>
                     {step.title}
                   </p>
                   <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, lineHeight: 1.65, margin: 0 }}>
