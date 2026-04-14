@@ -1,19 +1,21 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { useCamera, generateSimPhoto } from '@/hooks/useCamera';
-import { RefreshCw, RotateCcw, Camera } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useCamera } from '@/hooks/useCamera';
+import { RefreshCw, RotateCcw, Camera, Upload } from 'lucide-react';
 
 interface CameraCaptureProps {
   missionName: string;
   onCapture: (photo: string) => void;
+  onUpload?: (photo: string) => void;
 }
 
-export default function CameraCapture({ missionName, onCapture }: CameraCaptureProps) {
+export default function CameraCapture({ missionName, onCapture, onUpload }: CameraCaptureProps) {
   const { videoRef, error, startCamera, flipCamera, stopCamera, capture } = useCamera();
   const [preview, setPreview] = useState<string | null>(null);
   const [flash, setFlash] = useState(false);
-  const autoSimDone = useRef(false);
+  const [captureError, setCaptureError] = useState<string | null>(null);
+  const [isUploadPreview, setIsUploadPreview] = useState(false);
 
   useEffect(() => {
     startCamera('environment');
@@ -21,25 +23,38 @@ export default function CameraCapture({ missionName, onCapture }: CameraCaptureP
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-generate sim photo if camera unavailable
-  useEffect(() => {
-    if (error === 'permission_denied' && !autoSimDone.current && !preview) {
-      autoSimDone.current = true;
-      setTimeout(() => setPreview(generateSimPhoto(missionName)), 400);
-    }
-  }, [error, missionName, preview]);
-
   const handleCapture = () => {
     setFlash(true);
     setTimeout(() => setFlash(false), 120);
     const photo = capture(missionName);
+    if (photo === null) {
+      setCaptureError('Frame too dark — please point at the sky and try again');
+      return;
+    }
     stopCamera();
+    setIsUploadPreview(false);
     setPreview(photo);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string;
+      stopCamera();
+      setIsUploadPreview(true);
+      setCaptureError(null);
+      setPreview(dataUrl);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const handleRetake = () => {
     setPreview(null);
-    autoSimDone.current = false;
+    setCaptureError(null);
+    setIsUploadPreview(false);
     startCamera('environment');
   };
 
@@ -50,11 +65,13 @@ export default function CameraCapture({ missionName, onCapture }: CameraCaptureP
         <div className="relative rounded-2xl overflow-hidden bg-black" style={{ height: 'clamp(260px, 52vh, 520px)' }}>
           <img src={preview} alt="Observation preview" className="w-full h-full object-cover" />
           <div className="absolute bottom-0 left-0 right-0 px-3 py-2" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)' }}>
-            <p className="text-[#FFD166] text-[10px] font-mono tracking-widest">STELLAR · {missionName.toUpperCase()} · CAPTURED</p>
+            <p className="text-[#FFD166] text-[10px] font-mono tracking-widest">
+              STELLAR · {missionName.toUpperCase()} · {isUploadPreview ? 'UPLOADED' : 'CAPTURED'}
+            </p>
           </div>
         </div>
         <button
-          onClick={() => onCapture(preview)}
+          onClick={() => isUploadPreview ? (onUpload ?? onCapture)(preview) : onCapture(preview)}
           className="w-full py-4 rounded-xl text-sm font-bold tracking-wide transition-all active:scale-[0.98]"
           style={{ background: 'linear-gradient(135deg, #FFD166, #CC9A33)', color: '#070B14' }}
         >
@@ -71,23 +88,22 @@ export default function CameraCapture({ missionName, onCapture }: CameraCaptureP
     );
   }
 
-  // Loading / waiting for camera
+  // Camera permission denied
   if (error === 'permission_denied') {
-    // Will auto-sim — show brief loading state
     return (
-      <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
-        <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,209,102,0.06)', border: '1px solid rgba(255,209,102,0.15)' }}>
+      <div className="text-center p-6">
+        <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4 mx-auto" style={{ background: 'rgba(255,209,102,0.06)', border: '1px solid rgba(255,209,102,0.15)' }}>
           <Camera size={22} className="text-[#FFD166]/60" />
         </div>
-        <div>
-          <p className="text-white text-sm font-medium">Preparing observation…</p>
-          <p className="text-slate-600 text-xs mt-1">Generating simulated sky photo</p>
-        </div>
-        <div className="flex gap-1.5">
-          {[0,1,2].map(i => (
-            <div key={i} className="w-1 h-1 rounded-full bg-[#FFD166]/40 animate-bounce" style={{ animationDelay: `${i * 160}ms` }} />
-          ))}
-        </div>
+        <p className="text-amber-400 text-sm mb-2">Camera access required</p>
+        <p className="text-slate-500 text-xs mb-5">Allow camera access in your browser settings, or upload a saved sky photo.</p>
+        <label
+          className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold cursor-pointer transition-all hover:opacity-90"
+          style={{ background: 'linear-gradient(135deg, #FFD166, #CC9A33)', color: '#070B14' }}
+        >
+          <Upload size={15} /> Upload from Device
+          <input type="file" accept="image/*" className="sr-only" onChange={handleFileUpload} />
+        </label>
       </div>
     );
   }
@@ -138,8 +154,13 @@ export default function CameraCapture({ missionName, onCapture }: CameraCaptureP
         </button>
       </div>
 
-      {/* Shutter */}
-      <div className="flex items-center justify-center py-2">
+      {/* Capture error */}
+      {captureError && (
+        <p className="text-amber-400 text-xs text-center px-4">{captureError}</p>
+      )}
+
+      {/* Shutter + Upload row */}
+      <div className="flex items-center justify-center gap-5 py-2">
         <button
           onClick={handleCapture}
           className="w-16 h-16 rounded-full flex items-center justify-center active:scale-90 transition-transform"
@@ -151,6 +172,14 @@ export default function CameraCapture({ missionName, onCapture }: CameraCaptureP
         >
           <div className="w-11 h-11 rounded-full" style={{ background: '#fff' }} />
         </button>
+        <label
+          className="w-11 h-11 rounded-full flex items-center justify-center cursor-pointer active:scale-90 transition-transform"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)' }}
+          title="Upload from device"
+        >
+          <Upload size={16} className="text-slate-400" />
+          <input type="file" accept="image/*" className="sr-only" onChange={handleFileUpload} />
+        </label>
       </div>
 
       {/* Capture guide */}
@@ -163,7 +192,7 @@ export default function CameraCapture({ missionName, onCapture }: CameraCaptureP
           {[
             { n: '1', text: 'Point your telescope at the target object' },
             { n: '2', text: 'Hold your phone camera to the eyepiece' },
-            { n: '3', text: 'Center the object in the reticle, then press the shutter' },
+            { n: '3', text: 'Center the object in the reticle, then press the shutter — or tap ↑ to upload a saved photo' },
           ].map(tip => (
             <div key={tip.n} className="flex items-start gap-2.5">
               <span

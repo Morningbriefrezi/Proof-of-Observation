@@ -11,12 +11,8 @@ import { and, eq } from 'drizzle-orm';
 const DEVNET_URL = process.env.SOLANA_RPC_URL ?? 'https://api.devnet.solana.com';
 
 export async function POST(req: NextRequest) {
-  // Restrict to server-to-server calls only
-  const secret = process.env.INTERNAL_API_SECRET;
-  const authHeader = req.headers.get('authorization');
-  if (secret && authHeader !== `Bearer ${secret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  // Devnet: no auth required. Rate limiting + wallet validation provide sufficient protection.
+  // TODO: Add Privy JWT verification before mainnet launch.
 
   let body: { recipientAddress?: unknown; amount?: unknown; reason?: unknown; idempotencyKey?: unknown };
   try {

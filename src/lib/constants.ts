@@ -13,6 +13,19 @@ export const SPONSORS = {
 
 export const MISSIONS: Mission[] = [
   {
+    id: 'demo',
+    name: 'Demo Observation',
+    emoji: '🎯',
+    difficulty: 'Beginner',
+    stars: 50,
+    type: 'naked_eye',
+    desc: 'See the full Stellar flow — simulates an observation and mints a real NFT on devnet.',
+    hint: 'Uses a pre-generated sky photo. Perfect for demos and presentations.',
+    target: null,
+    repeatable: true,
+    demo: true,
+  },
+  {
     id: 'free-observation',
     name: "Tonight's Sky",
     emoji: '🌌',

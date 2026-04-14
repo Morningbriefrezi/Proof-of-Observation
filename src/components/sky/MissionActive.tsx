@@ -3,11 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import type { Mission, SkyVerification, MissionState } from '@/lib/types';
+import type { Mission, SkyVerification, MissionState, PhotoVerificationResult } from '@/lib/types';
 import { usePrivy } from '@privy-io/react-auth';
 import { useAppState } from '@/hooks/useAppState';
 import { getUnlockedRewards, getRank } from '@/lib/rewards';
 import CameraCapture from './CameraCapture';
+import { generateSimPhoto } from '@/hooks/useCamera';
 import Verification from './Verification';
 import MintAnimation from '@/components/shared/MintAnimation';
 import Button from '@/components/shared/Button';
@@ -63,6 +64,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [showSlowMint, setShowSlowMint] = useState(false);
   const [skyScore, setSkyScore] = useState<SkyScoreResult | null>(null);
+  const [photoVerification, setPhotoVerification] = useState<PhotoVerificationResult | null>(null);
 
   useEffect(() => {
     if (step !== 'minting') { setShowSlowMint(false); return; }
@@ -70,7 +72,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
     return () => clearTimeout(t);
   }, [step]);
 
-  const handleCapture = async (p: string) => {
+  const handleCapture = async (p: string, source: 'camera' | 'upload' = 'camera') => {
     setPhoto(p);
     const ts = new Date().toISOString();
     setTimestamp(ts);
@@ -112,6 +114,72 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
       if (!skyData.verified) {
         setMintError('Cloudy sky — observation logged with 0 stars. You can still mint.');
       }
+
+      // Demo missions skip photo verification — go straight to mint
+      if (!mission.demo) {
+        try {
+          const blob = await (await fetch(p)).blob();
+          const mimeType = blob.type || 'image/jpeg';
+          const ext = mimeType.split('/')[1]?.replace('jpeg', 'jpg') ?? 'jpg';
+          const file = new File([blob], `observation.${ext}`, { type: mimeType });
+          const fd = new FormData();
+          fd.append('file', file);
+          fd.append('lat', String(lat));
+          fd.append('lon', String(lon));
+          fd.append('capturedAt', ts);
+          const pvRes = await fetch('/api/observe/verify', { method: 'POST', body: fd });
+          if (pvRes.ok) {
+            const pv: PhotoVerificationResult = await pvRes.json();
+            setPhotoVerification(pv);
+            if (!pv.accepted) {
+              if (source === 'upload') {
+                // Save to gallery without NFT or stars
+                if (solanaWallet?.address) {
+                  fetch('/api/observe/log', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      wallet: solanaWallet.address,
+                      target: mission.name,
+                      stars: 0,
+                      confidence: 'rejected',
+                      mintTx: null,
+                      lat,
+                      lon,
+                    }),
+                  }).catch(() => {});
+                }
+                const isSafePhoto = (url: string) =>
+                  url.startsWith('data:image/jpeg;base64,') ||
+                  url.startsWith('data:image/png;base64,') ||
+                  url.startsWith('data:image/webp;base64,') ||
+                  url.startsWith('blob:');
+                addMission({
+                  id: mission.id + '_gallery_' + Date.now().toString(36),
+                  name: mission.name,
+                  emoji: mission.emoji,
+                  stars: 0,
+                  txId: 'gallery_' + Date.now().toString(36),
+                  photo: isSafePhoto(p) ? p : '',
+                  timestamp: ts,
+                  latitude: lat,
+                  longitude: lon,
+                  sky: skyData,
+                  status: 'gallery',
+                });
+                setStep('gallery-saved');
+                return;
+              }
+              setMintError(pv.reason ?? 'Photo rejected — please retake');
+              setStep('camera');
+              return;
+            }
+          }
+        } catch {
+          // Photo verification offline — allow but log low confidence
+        }
+      }
+
       setStep('verified');
     } catch {
       setMintError('Sky check offline — please try again in a moment');
@@ -187,7 +255,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
           wallet: solanaWallet.address,
           target: mission.target === null ? 'Night Sky' : mission.name,
           stars: effectiveStars,
-          confidence: sky?.verified ? 'high' : 'low',
+          confidence: photoVerification?.confidence ?? (sky?.verified ? 'medium' : 'low'),
           mintTx: txId,
           lat: coords.lat,
           lon: coords.lon,
@@ -458,6 +526,55 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
     );
   }
 
+  if (step === 'gallery-saved') {
+    return (
+      <div className="fixed inset-0 z-50 bg-[#070B14] overflow-y-auto flex flex-col">
+        <div className="flex items-center justify-between px-4 py-3 flex-shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <div className="flex items-center gap-2">
+            <MissionIcon id={mission.id} size={22} />
+            <p className="text-white text-sm font-semibold">{mission.name}</p>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-white transition-colors" style={{ background: 'rgba(255,255,255,0.05)' }}>
+            ✕
+          </button>
+        </div>
+        <div className="flex flex-col items-center gap-4 px-6 py-8 max-w-sm mx-auto w-full text-center">
+          {photo && (
+            <div className="w-full rounded-2xl overflow-hidden bg-black" style={{ aspectRatio: '4/3', maxHeight: 200 }}>
+              <img src={photo} alt="Uploaded observation" className="w-full h-full object-contain" style={{ opacity: 0.85 }} />
+            </div>
+          )}
+          <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(148,163,184,0.08)', border: '1px solid rgba(148,163,184,0.15)' }}>
+            <span style={{ fontSize: 22 }}>📸</span>
+          </div>
+          <div>
+            <h3 className="text-white font-semibold text-base mb-1">Photo Saved</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              {photoVerification?.reason ?? "Your photo didn't pass AI verification."}
+            </p>
+            <p className="text-slate-600 text-xs mt-2">No Stars earned · Not minted as NFT</p>
+          </div>
+          <div className="flex gap-3 w-full mt-2">
+            <button
+              onClick={() => { setStep('camera'); setPhotoVerification(null); }}
+              className="flex-1 py-3 rounded-xl text-sm"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}
+            >
+              Try Again
+            </button>
+            <button
+              onClick={onClose}
+              className="flex-1 py-3 rounded-xl text-sm font-semibold"
+              style={{ background: 'rgba(56,240,255,0.08)', border: '1px solid rgba(56,240,255,0.2)', color: '#38F0FF' }}
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const fullBleed = false;
 
   return (
@@ -552,13 +669,34 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
           </div>
         )}
 
-        {step === 'camera' && (
-          <CameraCapture missionName={mission.name} onCapture={handleCapture} />
+        {step === 'camera' && mission.demo && (
+          <div className="flex flex-col items-center gap-5 py-8 text-center">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,209,102,0.08)', border: '1px solid rgba(255,209,102,0.15)' }}>
+              <span style={{ fontSize: 28 }}>🎯</span>
+            </div>
+            <div>
+              <p className="text-white text-sm font-semibold">Demo Mode</p>
+              <p className="text-slate-500 text-xs mt-1 max-w-xs mx-auto leading-relaxed">
+                Generates a simulated sky photo and mints a real NFT on devnet. Stars are awarded.
+              </p>
+            </div>
+            <Button variant="brass" onClick={() => handleCapture(generateSimPhoto(mission.name), 'camera')} className="w-full">
+              Generate Demo Observation →
+            </Button>
+          </div>
+        )}
+
+        {step === 'camera' && !mission.demo && (
+          <CameraCapture
+            missionName={mission.name}
+            onCapture={(p) => handleCapture(p, 'camera')}
+            onUpload={(p) => handleCapture(p, 'upload')}
+          />
         )}
 
         {step === 'verifying' && (
           <div className="flex flex-col items-center gap-4 py-8">
-            <LoadingRing size={72} message="Analyzing sky conditions..." facts={[]} />
+            <LoadingRing size={72} message="Analyzing sky + photo..." facts={[]} />
             <p className="text-[11px] font-body mt-2" style={{ color: 'var(--text-muted)' }}>This may take a moment</p>
           </div>
         )}
@@ -574,6 +712,17 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
               longitude={coords.lon}
               onMint={handleMint}
             />
+            {photoVerification && (
+              <div className="mt-2 text-center">
+                <span className={`text-xs px-2 py-0.5 rounded-full ${
+                  photoVerification.confidence === 'high' ? 'bg-green-500/20 text-green-400' :
+                  photoVerification.confidence === 'medium' ? 'bg-amber-500/20 text-amber-400' :
+                  'bg-slate-500/20 text-slate-400'
+                }`}>
+                  AI: {photoVerification.identifiedObject} · {photoVerification.confidence} confidence
+                </span>
+              </div>
+            )}
             {mintError && (
               <div className="mt-2 text-center">
                 <p className="text-xs text-amber-400">{mintError}</p>

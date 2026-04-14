@@ -7,11 +7,8 @@ import { observationLog } from '@/lib/schema';
 import { eq, and, gte, isNotNull } from 'drizzle-orm';
 
 export async function POST(req: NextRequest) {
-  const secret = process.env.INTERNAL_API_SECRET;
-  const authHeader = req.headers.get('authorization');
-  if (secret && authHeader !== `Bearer ${secret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  // Devnet: no auth required. Rate limiting + wallet validation provide sufficient protection.
+  // TODO: Add Privy JWT verification before mainnet launch.
 
   const body = await req.json();
   const { userAddress, target, timestampMs, lat, lon, cloudCover, oracleHash, stars } = body;

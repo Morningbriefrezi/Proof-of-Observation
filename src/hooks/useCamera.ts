@@ -60,7 +60,7 @@ export function useCamera() {
     setStream(null);
   }, [stream]);
 
-  const capture = useCallback((missionName: string): string => {
+  const capture = useCallback((_missionName: string): string | null => {
     if (videoRef.current && stream) {
       const canvas = document.createElement('canvas');
       canvas.width = 640;
@@ -69,12 +69,12 @@ export function useCamera() {
       ctx.drawImage(videoRef.current, 0, 0, 640, 480);
 
       if (isImageBlack(canvas)) {
-        return generateSimPhoto(missionName);
+        return null; // Too dark — caller must prompt user to try again
       }
 
       return canvas.toDataURL('image/jpeg', 0.85);
     }
-    return generateSimPhoto(missionName);
+    return null; // No camera stream — caller must show upload or retry UI
   }, [stream]);
 
   return { videoRef, stream, error, facingMode, startCamera, flipCamera, stopCamera, capture };

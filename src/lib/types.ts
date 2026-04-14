@@ -1,6 +1,6 @@
 export type Difficulty = 'Beginner' | 'Intermediate' | 'Advanced' | 'Hard' | 'Expert';
 export type ObsType = 'naked_eye' | 'telescope';
-export type MissionState = 'idle' | 'observing' | 'camera' | 'review' | 'verifying' | 'verified' | 'minting' | 'done';
+export type MissionState = 'idle' | 'observing' | 'camera' | 'review' | 'verifying' | 'verified' | 'minting' | 'done' | 'gallery-saved';
 
 export interface Mission {
   id: string;
@@ -14,6 +14,7 @@ export interface Mission {
   context?: string;
   target?: string | null; // null = free observation (any sky photo)
   repeatable?: boolean;   // true = always visible, never hidden after completion
+  demo?: boolean;         // true = simulated photo, real NFT, no photo verification
 }
 
 export interface SkyVerification {
@@ -39,7 +40,7 @@ export interface CompletedMission {
   latitude: number;
   longitude: number;
   sky: SkyVerification | null;
-  status: 'completed' | 'pending';
+  status: 'completed' | 'pending' | 'gallery';
   method?: 'onchain' | 'simulated';
 }
 

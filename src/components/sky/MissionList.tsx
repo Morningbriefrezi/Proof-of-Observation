@@ -90,6 +90,13 @@ export default function MissionList({ onStart }: MissionListProps) {
                 <p className="text-[10px] mb-1" style={{ color: 'rgba(255,255,255,0.3)' }}>✓ Completed today</p>
               )}
 
+              {/* Demo badge */}
+              {mission.demo && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full mb-1" style={{ background: 'rgba(56,240,255,0.08)', color: '#38F0FF', border: '1px solid rgba(56,240,255,0.15)' }}>
+                  Demo
+                </span>
+              )}
+
               {/* Reward */}
               <p className="text-[#FFD166] text-[11px] font-bold mb-3">+{mission.stars} ✦</p>
 
