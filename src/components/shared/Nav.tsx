@@ -165,6 +165,16 @@ export default function Nav() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="h-14 flex items-center gap-3">
 
+            {/* Desktop: search bar — far left */}
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="nav-search-bar hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full flex-shrink-0"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', fontSize: 12, minWidth: 148, cursor: 'text' }}
+            >
+              <Search size={13} />
+              <span>Search...</span>
+            </button>
+
             {/* Mobile: hamburger */}
             <div className="flex sm:hidden items-center gap-1 flex-shrink-0">
               <button onClick={() => setDrawerOpen(true)} className="w-9 h-9 flex items-center justify-center rounded-xl transition-colors" style={{ color: 'rgba(255,255,255,0.6)' }} aria-label="Open navigation">
@@ -172,7 +182,7 @@ export default function Nav() {
               </button>
             </div>
 
-            {/* Logo */}
+            {/* Logo — desktop left of center, mobile absolutely centered */}
             <div className="sm:hidden absolute left-0 right-0 flex justify-center pointer-events-none">
               <Link href="/" className="pointer-events-auto" title="Stellar">
                 <div style={{ filter: 'drop-shadow(0 0 12px rgba(56,240,255,0.4))' }}>
@@ -187,16 +197,6 @@ export default function Nav() {
                 </div>
               </Link>
             </div>
-
-            {/* Desktop: search bar */}
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="nav-search-bar hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full ml-3"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', fontSize: 12, minWidth: 140, cursor: 'text' }}
-            >
-              <Search size={13} />
-              <span>Search...</span>
-            </button>
 
             {/* Desktop: nav tabs centered */}
             <div className="hidden sm:flex flex-1 items-center justify-center gap-1">
