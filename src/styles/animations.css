@@ -149,16 +149,31 @@
 .animate-toast-in  { animation: toast-in  280ms ease-out both; will-change: transform, opacity; }
 .animate-toast-out { animation: toast-out 240ms ease-in  both; }
 
-/* ── PageLoader orbital dots ──────────────────────────────── */
+/* ── PageLoader planet ────────────────────────────────────── */
 
-@keyframes dot-orbit {
-  from { transform: rotate(0deg) translateX(18px); }
-  to   { transform: rotate(360deg) translateX(18px); }
+@keyframes moon-orbit-loader {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
-.animate-dot-orbit {
-  animation: dot-orbit 1.2s linear infinite;
-  will-change: transform;
+@keyframes planet-glow-breathe {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%       { opacity: 0.9;  transform: scale(1.1); }
+}
+
+@keyframes ring-shimmer-loader {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 0.9; }
+}
+
+@keyframes twinkle-loader {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50%       { opacity: 0.85; transform: scale(1.5); }
+}
+
+@keyframes label-pulse-loader {
+  0%, 100% { opacity: 0.45; letter-spacing: 0.2em; }
+  50%       { opacity: 0.85; letter-spacing: 0.25em; }
 }
 
 /* ── Reduced motion overrides ─────────────────────────────── */
@@ -172,7 +187,6 @@
   .animate-float,
   .animate-breathe,
   .animate-pulse-glow,
-  .animate-dot-orbit,
   .stagger-children > * {
     animation: none !important;
     opacity: 1 !important;
