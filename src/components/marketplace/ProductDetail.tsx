@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import Badge from '@/components/shared/Badge';
 import Button from '@/components/shared/Button';
+import SolanaPayModal from './SolanaPayModal';
 import { Product } from '@/lib/products';
 
 interface Props {
@@ -30,6 +31,7 @@ export default function ProductDetail({ product, solPerGEL, onClose }: Props) {
 
   const [visible, setVisible] = useState(false);
   const [orderRef, setOrderRef] = useState<string | null>(null);
+  const [showSolanaPay, setShowSolanaPay] = useState(false);
 
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
@@ -53,7 +55,23 @@ export default function ProductDetail({ product, solPerGEL, onClose }: Props) {
     setOrderRef(ref);
   };
 
+  const solOrderId = `STELLAR-${product.id}-${Date.now()}`;
+
   return (
+    <>
+    {showSolanaPay && (
+      <SolanaPayModal
+        productName={locale === 'ka' ? product.name.ka : product.name.en}
+        amountSOL={parseFloat(solPrice)}
+        priceGEL={product.priceGEL}
+        orderId={solOrderId}
+        onConfirmed={(sig) => {
+          setShowSolanaPay(false);
+          setOrderRef(`SOL-${sig.slice(0, 12)}`);
+        }}
+        onClose={() => setShowSolanaPay(false)}
+      />
+    )}
     <div
       className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-end sm:justify-end"
       onClick={handleClose}
@@ -152,7 +170,7 @@ export default function ProductDetail({ product, solPerGEL, onClose }: Props) {
               <Button
                 variant="ghost"
                 className="w-full text-sm py-2"
-                onClick={() => alert(t('solComingSoon'))}
+                onClick={() => setShowSolanaPay(true)}
               >
                 {t('paySol')}
               </Button>
@@ -161,5 +179,6 @@ export default function ProductDetail({ product, solPerGEL, onClose }: Props) {
         </div>
       </div>
     </div>
+    </>
   );
 }

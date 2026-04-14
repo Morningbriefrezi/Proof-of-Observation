@@ -31,6 +31,7 @@ export default function ObserveFlow({ onClose, walletAddress }: ObserveFlowProps
   const [verification, setVerification] = useState<PhotoVerificationResult | null>(null);
   const [error, setError] = useState('');
   const [mintTxId, setMintTxId] = useState('');
+  const [mintError, setMintError] = useState('');
   const [cameraActive, setCameraActive] = useState(false);
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [analysisIdx, setAnalysisIdx] = useState(0);
@@ -47,7 +48,8 @@ export default function ObserveFlow({ onClose, walletAddress }: ObserveFlowProps
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) => setLocation({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
-      () => setLocation({ lat: 41.72, lon: 44.83 })
+      () => {}, // leave null — handleVerify falls back to user's stored location or null
+      { timeout: 8000 }
     );
     return () => { streamRef.current?.getTracks().forEach(t => t.stop()); };
   }, []);
@@ -137,8 +139,8 @@ export default function ObserveFlow({ onClose, walletAddress }: ObserveFlowProps
     if (!file) { setError('No photo selected'); setStep('capture'); return; }
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('lat', String(location?.lat ?? 41.72));
-    formData.append('lon', String(location?.lon ?? 44.83));
+    formData.append('lat', String(location?.lat ?? 0));
+    formData.append('lon', String(location?.lon ?? 0));
     formData.append('capturedAt', new Date().toISOString());
     if (firstFrameFile) formData.append('file2', firstFrameFile);
     try {
@@ -174,6 +176,7 @@ export default function ObserveFlow({ onClose, walletAddress }: ObserveFlowProps
   const handleMintObservation = async () => {
     if (!verification || mintingRef.current) return;
     mintingRef.current = true;
+    setMintError('');
     setStep('minting');
     let txId = '';
     try {
@@ -195,9 +198,15 @@ export default function ObserveFlow({ onClose, walletAddress }: ObserveFlowProps
         const data = await res.json();
         txId = data.txId ?? '';
         setMintTxId(txId);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setMintError(data.error ?? 'Minting unavailable — Stars still collected');
       }
-    } catch { /* fall through to done */ }
+    } catch {
+      setMintError('Minting unavailable — Stars still collected');
+    }
     mintingRef.current = false;
+    logObservation(verification, txId || null);
     setStep('done');
   };
 
@@ -214,6 +223,7 @@ export default function ObserveFlow({ onClose, walletAddress }: ObserveFlowProps
     setVerification(null);
     setError('');
     setMintTxId('');
+    setMintError('');
     setFirstFrame(null);
     setCountdown(null);
     firstFrameFileRef.current = null;
@@ -254,8 +264,14 @@ export default function ObserveFlow({ onClose, walletAddress }: ObserveFlowProps
 
   // --- done ---
   if (step === 'done' && verification) {
+    const explorerUrl = mintTxId ? `https://explorer.solana.com/tx/${mintTxId}?cluster=devnet` : null;
+    const shareText = mintTxId
+      ? `Just sealed my observation of ${verification.identifiedObject} on Solana ✦ +${verification.starsEstimate} Stars earned on @stellarrclub\n${explorerUrl}`
+      : `Just observed ${verification.identifiedObject} and earned +${verification.starsEstimate} Stars on @stellarrclub ✦`;
+    const xShareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+
     return (
-      <div className="fixed inset-0 z-[60] bg-[#070B14] flex flex-col items-center justify-center px-6 gap-5">
+      <div className="fixed inset-0 z-[60] bg-[#070B14] flex flex-col items-center justify-center px-6 gap-5 overflow-y-auto py-8">
         <div className="w-20 h-20 rounded-full flex items-center justify-center"
           style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.15), transparent)', border: '2px solid rgba(20,184,166,0.3)' }}>
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
@@ -265,17 +281,37 @@ export default function ObserveFlow({ onClose, walletAddress }: ObserveFlowProps
         <h2 className="text-2xl text-white" style={{ fontFamily: 'Georgia, serif' }}>
           {mintTxId ? 'Discovery Sealed' : 'Stars Collected'}
         </h2>
-        <p className="text-slate-400 text-sm">{verification.identifiedObject}</p>
-        <p className="text-2xl font-bold" style={{ color: '#FFD166' }}>+{verification.starsEstimate} ✦</p>
-        {mintTxId && !mintTxId.startsWith('sim') && (
-          <a href={`https://explorer.solana.com/tx/${mintTxId}?cluster=devnet`}
-            target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs text-[#14B8A6]"
-            style={{ background: 'rgba(20,184,166,0.06)', border: '1px solid rgba(20,184,166,0.2)' }}>
-            View on Solana Explorer <ExternalLink size={12} />
-          </a>
+
+        {/* Proof card */}
+        <div className="w-full max-w-xs rounded-2xl p-5 flex flex-col gap-3"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] tracking-widest uppercase text-slate-500">Stellar Discovery</span>
+            <span className="text-[10px] text-slate-600">{new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          </div>
+          <p className="text-white font-semibold">{verification.identifiedObject}</p>
+          <p className="text-2xl font-bold" style={{ color: '#FFD166' }}>+{verification.starsEstimate} ✦</p>
+          {explorerUrl && (
+            <a href={explorerUrl} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs text-[#14B8A6] truncate">
+              <ExternalLink size={11} />
+              {mintTxId.slice(0, 16)}…
+            </a>
+          )}
+        </div>
+
+        {mintError && (
+          <p className="text-amber-400 text-xs text-center">{mintError}</p>
         )}
-        <div className="flex flex-col gap-3 w-full max-w-xs mt-2">
+
+        {/* Share on X */}
+        <a href={xShareUrl} target="_blank" rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold"
+          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'white' }}>
+          Share on X
+        </a>
+
+        <div className="flex flex-col gap-3 w-full max-w-xs">
           <button onClick={() => router.push('/nfts')}
             className="w-full py-3 rounded-xl text-white text-sm font-semibold"
             style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)' }}>

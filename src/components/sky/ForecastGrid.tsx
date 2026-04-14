@@ -4,11 +4,13 @@ import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { SkyDay } from '@/lib/sky-data';
 import ForecastCard from './ForecastCard';
-import { useLocation } from '@/hooks/useLocation';
+import { useLocation } from '@/lib/location';
 
 export default function ForecastGrid() {
   const t = useTranslations('sky');
-  const { lat, lng, ready } = useLocation();
+  const { location, loading: locationLoading } = useLocation();
+  const { lat, lon: lng, source } = location;
+  const ready = !locationLoading && source !== 'default';
   const [days, setDays] = useState<SkyDay[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);

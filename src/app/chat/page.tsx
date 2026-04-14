@@ -2,24 +2,18 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { ArrowUp } from 'lucide-react';
 import { useLocation } from '@/lib/location';
 
 interface Msg { role: 'user' | 'assistant'; content: string; }
-
-const SUGGESTIONS = [
-  "What's visible tonight? 🌙",
-  "Best telescope for beginners? 🔭",
-  "Explain the Bortle scale",
-  "Why is the sky dark at night?",
-];
 
 export default function ChatPage() {
   const { authenticated, login } = usePrivy();
   const rawLocale = useLocale();
   const locale = rawLocale === 'ka' ? 'ka' : 'en';
   const { location } = useLocation();
+  const ts = useTranslations('chat.suggestions');
 
   const [skySummary, setSkySummary] = useState<{ verified: boolean; cloudCover: number; visibility: string } | null>(null);
 
@@ -91,7 +85,8 @@ export default function ChatPage() {
         for (const line of lines) {
           if (!line.startsWith('data: ')) continue;
           const payload = line.slice(6);
-          if (payload === '[DONE]' || payload === '[ERROR]') break;
+          if (payload === '[DONE]') break;
+          if (payload === '[ERROR]') throw new Error('stream_interrupted');
           setMessages(prev => {
             const u = [...prev];
             u[u.length - 1] = { role: 'assistant', content: u[u.length - 1].content + payload };
@@ -179,7 +174,7 @@ export default function ChatPage() {
               </div>
             )}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {SUGGESTIONS.map(s => (
+              {([ts('page_1'), ts('page_2'), ts('page_3'), ts('page_4')] as string[]).map(s => (
                 <button
                   key={s}
                   onClick={() => send(s)}

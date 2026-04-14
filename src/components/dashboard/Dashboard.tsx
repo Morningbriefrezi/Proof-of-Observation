@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePrivy } from '@privy-io/react-auth'
+import { useTranslations } from 'next-intl'
 import { useAppState } from '@/hooks/useAppState'
 import { useAstronomerProfile } from '@/hooks/useAstronomerProfile'
 import { useLocation } from '@/lib/location'
@@ -38,19 +39,19 @@ const PLANET_LABEL: Record<string, string> = {
   saturn: 'Saturn',
 }
 
-function getGreeting(): string {
+function getGreetingKey(): 'morning' | 'afternoon' | 'evening' | 'night' {
   const h = new Date().getHours()
-  if (h >= 5 && h < 12) return 'Good morning'
-  if (h >= 12 && h < 17) return 'Good afternoon'
-  if (h >= 17 && h < 21) return 'Good evening'
-  return 'Good night'
+  if (h >= 5 && h < 12) return 'morning'
+  if (h >= 12 && h < 17) return 'afternoon'
+  if (h >= 17 && h < 21) return 'evening'
+  return 'night'
 }
 
-function getRank(count: number): string {
-  if (count >= 15) return 'Stellar'
-  if (count >= 7) return 'Celestial'
-  if (count >= 3) return 'Pathfinder'
-  return 'Observer'
+function getRankKey(count: number): 'stellar' | 'celestial' | 'pathfinder' | 'observer' {
+  if (count >= 15) return 'stellar'
+  if (count >= 7) return 'celestial'
+  if (count >= 3) return 'pathfinder'
+  return 'observer'
 }
 
 function skyDayToForecastDay(day: SkyDay): ForecastDay {
@@ -67,7 +68,7 @@ function skyDayToForecastDay(day: SkyDay): ForecastDay {
 
   const badge: ForecastDay['badge'] = avgCloud < 30 ? 'go' : avgCloud < 65 ? 'maybe' : 'skip'
   const date = new Date(day.date + 'T12:00:00')
-  const dayLabel = date.toLocaleDateString('en-US', { weekday: 'short' })
+  const dayLabel = date.toLocaleDateString(undefined, { weekday: 'short' })
 
   return {
     date: day.date,
@@ -98,15 +99,16 @@ export default function Dashboard() {
   const { state } = useAppState()
   const { profile } = useAstronomerProfile()
   const { location } = useLocation()
+  const t = useTranslations('dashboard')
 
   const [skyScore, setSkyScore] = useState<SkyScoreResult | null>(null)
   const [forecast, setForecast] = useState<ForecastDay[]>([])
   const [planets, setPlanets] = useState<PlanetInfo[]>([])
   const [streakDays, setStreakDays] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [greeting, setGreeting] = useState('')
+  const [greetingKey, setGreetingKey] = useState<'morning' | 'afternoon' | 'evening' | 'night'>('morning')
 
-  useEffect(() => { setGreeting(getGreeting()) }, [])
+  useEffect(() => { setGreetingKey(getGreetingKey()) }, [])
 
   const lat = profile?.location?.lat ?? (location.lat !== 0 ? location.lat : 41.6941)
   const lon = profile?.location?.lon ?? (location.lon !== 0 ? location.lon : 44.8337)
@@ -151,7 +153,7 @@ export default function Dashboard() {
   const starsBalance =
     state.completedMissions.reduce((s, m) => s + m.stars, 0) +
     (state.completedQuizzes ?? []).reduce((s, q) => s + q.stars, 0)
-  const rankName = getRank(missionsCount)
+  const rankName = t(`rank.${getRankKey(missionsCount)}`)
 
   const displayPlanets = planets.length > 0
     ? planets.slice(0, 5)
@@ -203,7 +205,7 @@ export default function Dashboard() {
                 fontFamily: 'var(--font-body)',
               }}
             >
-              {greeting}{greeting ? ', ' : ''}{rankName}
+              {t(`greeting.${greetingKey}`)}, {rankName}
             </span>
             <StreakBadge days={streakDays} />
           </div>

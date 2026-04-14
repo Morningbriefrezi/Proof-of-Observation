@@ -7,7 +7,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import type { PlanetInfo } from "@/lib/planets";
 import PlanetCard from './PlanetCard';
 import PlanetDetail from './PlanetDetail';
-import { useLocation } from '@/hooks/useLocation';
+import { useLocation } from '@/lib/location';
 import { MISSIONS } from '@/lib/constants';
 
 const PLANET_MISSION_IDS = ['moon', 'jupiter', 'saturn', 'mars'];
@@ -15,7 +15,9 @@ const STATIC_PLANETS = MISSIONS.filter(m => PLANET_MISSION_IDS.includes(m.id));
 
 export default function PlanetGrid() {
   const t = useTranslations('sky');
-  const { lat, lng, ready } = useLocation();
+  const { location, loading: locationLoading } = useLocation();
+  const { lat, lon: lng, source } = location;
+  const ready = !locationLoading && source !== 'default';
   const router = useRouter();
   const { authenticated, login } = usePrivy();
 

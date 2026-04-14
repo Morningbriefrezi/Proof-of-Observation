@@ -5,7 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Cloud, Wind, Eye, Droplets } from 'lucide-react';
 import { SkyDay, SkyHour } from '@/lib/sky-data';
 import type { PlanetInfo } from "@/lib/planets";
-import { useLocation } from '@/hooks/useLocation';
+import { useLocation } from '@/lib/location';
 
 // ── Moon Phase SVG ────────────────────────────────────────────────────────────
 
@@ -303,7 +303,9 @@ const badgeStyle = {
 export default function TonightHighlights() {
   const t = useTranslations('sky');
   const locale = useLocale();
-  const { lat, lng, ready } = useLocation();
+  const { location, loading: locationLoading } = useLocation();
+  const { lat, lon: lng, source } = location;
+  const ready = !locationLoading && source !== 'default';
   const [card, setCard] = useState<CardData | null>(null);
   const [moonData, setMoonData] = useState<SunMoonData | null>(null);
   const [loading, setLoading] = useState(true);

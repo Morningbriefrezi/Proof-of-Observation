@@ -10,17 +10,36 @@
 // );
 
 import { NextRequest, NextResponse } from 'next/server'
+import { PrivyClient } from '@privy-io/server-auth'
 import { getDb } from '@/lib/db'
 import { users } from '@/lib/schema'
 
+const privy = new PrivyClient(
+  process.env.NEXT_PUBLIC_PRIVY_APP_ID!,
+  process.env.PRIVY_APP_SECRET!,
+)
+
 export async function POST(req: NextRequest) {
-  const secret = process.env.INTERNAL_API_SECRET;
-  const authHeader = req.headers.get('authorization');
-  if (secret && authHeader !== `Bearer ${secret}`) {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  const authHeader = req.headers.get('authorization')
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
+  if (!token) {
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+  }
+
+  let verifiedPrivyId: string
+  try {
+    const claims = await privy.verifyAuthToken(token)
+    verifiedPrivyId = claims.userId
+  } catch {
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
   }
 
   const { privyId, email, walletAddress } = await req.json()
+
+  // Ensure users can only upsert their own record
+  if (privyId !== verifiedPrivyId) {
+    return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
+  }
 
   if (!privyId) {
     return NextResponse.json({ success: false, error: 'privyId required' }, { status: 400 })

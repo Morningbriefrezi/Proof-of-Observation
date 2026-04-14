@@ -92,7 +92,26 @@
     "send": "Send",
     "thinking": "ASTRA is thinking…",
     "clearChat": "Clear conversation",
-    "errorReply": "Sorry, I couldn't reach ASTRA. Try again."
+    "errorReply": "Sorry, I couldn't reach ASTRA. Try again.",
+    "suggestions": {
+      "night_1": "What can I observe right now?",
+      "night_3_beginner": "What's the easiest target for a beginner?",
+      "night_3_next": "What should I observe next?",
+      "night_4": "How do I photograph through an eyepiece?",
+      "morning_1": "What will be visible tonight?",
+      "morning_2": "How do I prepare my telescope during the day?",
+      "morning_3": "What is the Orion Nebula?",
+      "morning_4": "How do I read a star map?",
+      "day_1": "What planets are visible tonight?",
+      "day_2": "How do I collimate a reflector telescope?",
+      "day_3": "What is the Andromeda Galaxy?",
+      "day_4": "How do I photograph the Moon?",
+      "setup_no_brand": "How do I set up my telescope?",
+      "page_1": "What's visible tonight? 🌙",
+      "page_2": "Best telescope for beginners? 🔭",
+      "page_3": "Explain the Bortle scale",
+      "page_4": "Why is the sky dark at night?"
+    }
   },
   "marketplace": {
     "title": "Marketplace",
@@ -155,5 +174,19 @@
     "activatingWallet": "Activating wallet on Solana devnet…",
     "walletActivated": "Wallet activated — 1 devnet SOL funded",
     "viewOnExplorer": "View on Solana Explorer ↗"
+  },
+  "dashboard": {
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening",
+      "night": "Good night"
+    },
+    "rank": {
+      "observer": "Observer",
+      "pathfinder": "Pathfinder",
+      "celestial": "Celestial",
+      "stellar": "Stellar"
+    }
   }
 }

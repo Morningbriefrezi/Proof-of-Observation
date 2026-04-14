@@ -19,6 +19,8 @@
     "@metaplex-foundation/umi-bundle-defaults": "^1.5.1",
     "@neondatabase/serverless": "^1.0.2",
     "@privy-io/react-auth": "^3.19.0",
+    "@privy-io/server-auth": "^1.32.5",
+    "@solana/pay": "^0.2.6",
     "@solana/spl-token": "^0.4.14",
     "@solana/web3.js": "^1.98.4",
     "@types/leaflet": "^1.9.21",
@@ -29,6 +31,7 @@
     "lucide-react": "^0.577.0",
     "next": "^15.5.15",
     "next-intl": "^4.9.0",
+    "qrcode.react": "^4.2.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-leaflet": "^5.0.0"

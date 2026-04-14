@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Send, Minimize2, Maximize2, Radio } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useAppState } from '@/hooks/useAppState';
 
 interface Message {
@@ -9,34 +10,6 @@ interface Message {
   content: string;
 }
 
-const getSuggestions = (telescopeBrand?: string, completedCount?: number): string[] => {
-  const hour = new Date().getHours();
-  const isNight = hour >= 20 || hour < 5;
-  const isMorning = hour >= 5 && hour < 12;
-
-  if (isNight) {
-    return [
-      'What can I observe right now?',
-      telescopeBrand ? `How do I focus my ${telescopeBrand}?` : 'How do I set up my telescope?',
-      completedCount === 0 ? "What's the easiest target for a beginner?" : 'What should I observe next?',
-      'How do I photograph through an eyepiece?',
-    ];
-  } else if (isMorning) {
-    return [
-      'What will be visible tonight?',
-      'How do I prepare my telescope during the day?',
-      'What is the Orion Nebula?',
-      'How do I read a star map?',
-    ];
-  } else {
-    return [
-      'What planets are visible tonight?',
-      'How do I collimate a reflector telescope?',
-      'What is the Andromeda Galaxy?',
-      'How do I photograph the Moon?',
-    ];
-  }
-};
 
 function TypingDots() {
   return (
@@ -54,6 +27,7 @@ function TypingDots() {
 
 export default function AstroChat() {
   const { state } = useAppState();
+  const t = useTranslations('chat.suggestions');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -74,11 +48,25 @@ export default function AstroChat() {
   }, []);
 
   useEffect(() => {
-    setSuggestions(getSuggestions(
-      state.telescope?.brand ?? undefined,
-      state.completedMissions?.filter(m => m.status === 'completed').length ?? 0,
-    ));
-  }, [state.telescope?.brand, state.completedMissions]);
+    const hour = new Date().getHours();
+    const isNight = hour >= 20 || hour < 5;
+    const isMorning = hour >= 5 && hour < 12;
+    const telescopeBrand = state.telescope?.brand;
+    const completedCount = state.completedMissions?.filter(m => m.status === 'completed').length ?? 0;
+
+    if (isNight) {
+      setSuggestions([
+        t('night_1'),
+        telescopeBrand ? `How do I focus my ${telescopeBrand}?` : t('setup_no_brand'),
+        completedCount === 0 ? t('night_3_beginner') : t('night_3_next'),
+        t('night_4'),
+      ]);
+    } else if (isMorning) {
+      setSuggestions([t('morning_1'), t('morning_2'), t('morning_3'), t('morning_4')]);
+    } else {
+      setSuggestions([t('day_1'), t('day_2'), t('day_3'), t('day_4')]);
+    }
+  }, [state.telescope?.brand, state.completedMissions, t]);
 
   useEffect(() => {
     const visits = parseInt(localStorage.getItem('astra_visits') ?? '0', 10);

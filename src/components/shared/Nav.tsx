@@ -43,7 +43,9 @@ export default function Nav() {
     { href: '/marketplace', label: t('marketplace'), icon: <ShoppingBag size={16} /> },
   ];
 
-  const solanaWallet = wallets.find(w => (w as { chainType?: string }).chainType === 'solana');
+  const solanaWallet = wallets.find(
+    w => w.walletClientType === 'privy' && (w as { chainType?: string }).chainType === 'solana'
+  );
 
   // Derive display name for avatar
   const userEmail =
