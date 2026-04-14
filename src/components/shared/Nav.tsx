@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useAppState } from '@/hooks/useAppState';
 import { useState, useEffect } from 'react';
-import { CloudSun, ShoppingBag, Satellite, User, Search, AlignLeft, X, ExternalLink, MessageCircle } from 'lucide-react';
+import { CloudSun, BookOpen, ShoppingBag, Satellite, User, Search, Map, AlignLeft, X, ExternalLink } from 'lucide-react';
 import AstroLogo from './AstroLogo';
 import { useTranslations } from 'next-intl';
 import SearchModal from './SearchModal';
@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { href: '/sky',         label: 'Sky Forecast',  desc: "Tonight's conditions" },
   { href: '/missions',    label: 'Missions',       desc: 'Observe & earn Stars' },
   { href: '/chat',        label: 'ASTRA AI',       desc: 'Your AI astronomer' },
+  { href: '/darksky',     label: 'Dark Sky Map',   desc: 'Find dark sky sites' },
   { href: '/marketplace', label: 'Marketplace',    desc: 'Shop telescopes' },
   { href: '/nfts',        label: 'Discoveries',    desc: 'Your on-chain NFTs' },
   { href: '/profile',     label: 'Profile',        desc: 'Account & stats' },
@@ -28,34 +29,23 @@ export default function Nav() {
   const [showMenu, setShowMenu] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [starsBalance, setStarsBalance] = useState<number | null>(null);
   const t = useTranslations('nav');
 
   useEffect(() => {
     setSearchOpen(false);
   }, [pathname]);
 
-  const solanaWallet = wallets.find(
-    w => w.walletClientType === 'privy' && (w as { chainType?: string }).chainType === 'solana'
-  );
-
-  useEffect(() => {
-    if (!authenticated || !solanaWallet?.address) {
-      setStarsBalance(null);
-      return;
-    }
-    fetch(`/api/stars-balance?address=${solanaWallet.address}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data?.balance != null) setStarsBalance(data.balance); })
-      .catch(() => {});
-  }, [authenticated, solanaWallet?.address]);
-
   const tabs = [
     { href: '/sky',         label: t('sky'),         icon: <CloudSun size={16} /> },
     { href: '/missions',    label: t('missions'),    icon: <Satellite size={16} /> },
-    { href: '/chat',        label: 'ASTRA',          icon: <MessageCircle size={16} /> },
+    { href: '/learn',       label: 'Learn',          icon: <BookOpen size={16} /> },
+    { href: '/darksky',     label: 'Dark Sky',       icon: <Map size={16} /> },
     { href: '/marketplace', label: t('marketplace'), icon: <ShoppingBag size={16} /> },
   ];
+
+  const solanaWallet = wallets.find(
+    w => w.walletClientType === 'privy' && (w as { chainType?: string }).chainType === 'solana'
+  );
 
   // Derive display name for avatar
   const userEmail =
@@ -222,7 +212,7 @@ export default function Nav() {
               >
                 <span style={{ fontSize: 9 }}>✦</span>
                 <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {starsBalance !== null ? starsBalance.toLocaleString() : (state.completedMissions.length * 50).toLocaleString()}
+                  {(state.completedMissions.length * 50).toLocaleString()}
                 </span>
               </Link>
             )}
