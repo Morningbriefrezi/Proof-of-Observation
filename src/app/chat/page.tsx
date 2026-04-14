@@ -32,9 +32,7 @@ export default function ChatPage() {
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, loading]);
   useEffect(() => { setTimeout(() => textareaRef.current?.focus(), 200); }, []);
   useEffect(() => {
-    const lat = location.lat !== 0 ? location.lat : 41.6938;
-    const lon = location.lon !== 0 ? location.lon : 44.8015;
-    fetch(`/api/sky/verify?lat=${lat}&lon=${lon}`)
+    fetch(`/api/sky/verify?lat=${location.lat}&lon=${location.lon}`)
       .then(r => r.json())
       .then(d => setSkySummary({ verified: d.verified, cloudCover: d.cloudCover, visibility: d.visibility }))
       .catch(() => {});
@@ -67,8 +65,8 @@ export default function ChatPage() {
           message: msg,
           history: next.slice(0, -1).map(m => ({ role: m.role, content: m.content })),
           locale,
-          lat: location.lat !== 0 ? location.lat : 41.6938,
-          lon: location.lon !== 0 ? location.lon : 44.8015,
+          lat: location.lat,
+          lon: location.lon,
         }),
       });
       if (!res.ok || !res.body) throw new Error('Stream failed');

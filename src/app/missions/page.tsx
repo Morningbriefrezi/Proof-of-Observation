@@ -47,9 +47,7 @@ export default function MissionsPage() {
 
   useEffect(() => {
     if (authenticated) return;
-    const lat = location.lat !== 0 ? location.lat : 41.6938;
-    const lon = location.lon !== 0 ? location.lon : 44.8015;
-    fetch(`/api/sky/verify?lat=${lat}&lon=${lon}`)
+    fetch(`/api/sky/verify?lat=${location.lat}&lon=${location.lon}`)
       .then(r => r.json())
       .then(d => setSkyConditions({ cloudCover: d.cloudCover, visibility: d.visibility, verified: d.verified }))
       .catch(() => {});

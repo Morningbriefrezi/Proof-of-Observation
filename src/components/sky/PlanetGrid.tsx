@@ -18,8 +18,8 @@ const MISSION_PLANETS = new Set(['moon', 'jupiter', 'saturn']);
 export default function PlanetGrid() {
   const t = useTranslations('sky');
   const { location, loading: locationLoading } = useLocation();
-  const { lat, lon: lng, source } = location;
-  const ready = !locationLoading && source !== 'default';
+  const { lat, lon: lng } = location;
+  const ready = !locationLoading;
   const router = useRouter();
   const { authenticated, login } = usePrivy();
 

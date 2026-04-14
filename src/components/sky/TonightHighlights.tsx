@@ -368,8 +368,8 @@ export default function TonightHighlights() {
   const t = useTranslations('sky');
   const locale = useLocale();
   const { location, loading: locationLoading } = useLocation();
-  const { lat, lon: lng, source } = location;
-  const ready = !locationLoading && source !== 'default';
+  const { lat, lon: lng } = location;
+  const ready = !locationLoading;
   const [card, setCard] = useState<CardData | null>(null);
   const [moonData, setMoonData] = useState<SunMoonData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -458,9 +458,16 @@ export default function TonightHighlights() {
     <div className="glass-card p-5" style={cardBorder[state]}>
       {/* Top row: label + badge + share */}
       <div className="flex items-center justify-between gap-2 mb-4">
-        <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: 'var(--color-text-muted)' }}>
-          {t('tonightHighlight')}
-        </span>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: 'var(--color-text-muted)' }}>
+            {t('tonightHighlight')}
+          </span>
+          {location.city && (
+            <span className="text-[10px] font-mono" style={{ color: 'var(--color-text-muted)', opacity: 0.6 }}>
+              📍 {location.city}{location.country ? `, ${location.country}` : ''}
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <span
             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"

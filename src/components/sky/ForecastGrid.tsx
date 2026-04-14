@@ -9,8 +9,8 @@ import { useLocation } from '@/lib/location';
 export default function ForecastGrid() {
   const t = useTranslations('sky');
   const { location, loading: locationLoading } = useLocation();
-  const { lat, lon: lng, source } = location;
-  const ready = !locationLoading && source !== 'default';
+  const { lat, lon: lng } = location;
+  const ready = !locationLoading;
   const [days, setDays] = useState<SkyDay[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);

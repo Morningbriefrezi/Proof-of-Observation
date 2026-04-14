@@ -46,11 +46,11 @@ export function getRegionForCountry(countryCode: string): Region {
 }
 
 const DEFAULT_LOCATION: UserLocation = {
-  region: 'global',
-  country: '',
-  city: '',
-  lat: 0,
-  lon: 0,
+  region: 'caucasus',
+  country: 'GE',
+  city: 'Tbilisi',
+  lat: 41.6941,
+  lon: 44.8337,
   source: 'default',
 }
 
@@ -64,24 +64,18 @@ const LocationContext = createContext<LocationContextValue | null>(null)
 
 export function LocationProvider({ children }: { children: React.ReactNode }) {
   const [location, setLocationState] = useState<UserLocation>(DEFAULT_LOCATION)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+    // Load stored preference immediately — default (Tbilisi) is valid, no need to block
     const stored = localStorage.getItem('stellar_location')
     if (stored) {
-      try {
-        setLocationState(JSON.parse(stored))
-        setLoading(false)
-        return
-      } catch {
-        // fall through to GPS
-      }
+      try { setLocationState(JSON.parse(stored)) } catch {}
+      return  // User has a preference; skip GPS
     }
 
-    if (!navigator.geolocation) {
-      setLoading(false)
-      return
-    }
+    // No stored preference — silently improve to GPS, Tbilisi stays visible meanwhile
+    if (!navigator.geolocation) return
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -108,12 +102,11 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem('stellar_location', JSON.stringify(loc))
           setLocationState(loc)
         } catch {
-          // leave as default
+          // GPS resolved but reverse geocode failed — keep Tbilisi default
         }
-        setLoading(false)
       },
       () => {
-        setLoading(false)
+        // GPS denied — Tbilisi default is already showing, nothing to do
       },
       { timeout: 8000 }
     )

@@ -110,8 +110,8 @@ export default function Dashboard() {
 
   useEffect(() => { setGreetingKey(getGreetingKey()) }, [])
 
-  const lat = profile?.location?.lat ?? (location.lat !== 0 ? location.lat : 41.6941)
-  const lon = profile?.location?.lon ?? (location.lon !== 0 ? location.lon : 44.8337)
+  const lat = profile?.location?.lat ?? location.lat
+  const lon = profile?.location?.lon ?? location.lon
 
   useEffect(() => {
     setStreakDays(getStreakDays())
