@@ -559,6 +559,18 @@ input, select, textarea { font-size: 16px !important; }
   button, a[role="button"], select, input { min-height: 44px; }
 }
 
+/* Desktop readability — scale rem base and widen page containers */
+@media (min-width: 1024px) {
+  html { font-size: 17px; }
+  main .max-w-2xl { max-width: 860px; }
+  main .max-w-xl  { max-width: 700px; }
+}
+@media (min-width: 1280px) {
+  html { font-size: 18px; }
+  main .max-w-2xl { max-width: 1000px; }
+  main .max-w-xl  { max-width: 820px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-word,
   .animate-page-enter,
