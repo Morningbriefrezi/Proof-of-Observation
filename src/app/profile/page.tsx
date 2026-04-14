@@ -267,6 +267,12 @@ export default function ProfilePage() {
           ))}
         </div>
 
+        {profileLoaded && starsBalance === 0 && (
+          <p className="text-slate-600 text-xs text-center -mt-2">
+            Complete a mission to earn your first Stars →
+          </p>
+        )}
+
         {/* Rank progress bar */}
         <div>
           <div className="flex items-center justify-between mb-1.5">

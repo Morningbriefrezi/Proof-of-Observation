@@ -235,10 +235,10 @@ export default function NftsPage() {
         <div style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, textAlign: 'center' }}>
           <span style={{ fontSize: 60 }}>🔭</span>
           <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 20, color: 'var(--text-primary)', margin: 0 }}>
-            No observations yet
+            No discoveries yet
           </p>
           <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: 0, maxWidth: 280 }}>
-            Complete a sky mission to seal your first discovery on Solana
+            Complete your first mission to mint a verified observation NFT.
           </p>
           <Link href="/missions" className="btn-primary" style={{ textDecoration: 'none', marginTop: 8 }}>
             Start Observing →

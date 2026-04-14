@@ -220,15 +220,15 @@ export default function LeaderboardPage() {
             <span style={{ fontSize: 28 }}>🏆</span>
           </div>
           <div>
-            <p className="text-white/80 font-semibold text-sm">Rankings update daily</p>
-            <p className="text-white/40 text-xs mt-1">Complete observations to appear on the leaderboard</p>
+            <p className="text-white/80 font-semibold text-sm">Be the first on the board</p>
+            <p className="text-white/40 text-xs mt-1">Complete a mission to appear here.</p>
           </div>
           <Link
             href="/missions"
             className="mt-1 px-5 py-2 rounded-xl text-xs font-bold transition-opacity hover:opacity-80"
             style={{ background: 'rgba(56,240,255,0.12)', color: '#38F0FF', border: '1px solid rgba(56,240,255,0.2)' }}
           >
-            Be the first observer →
+            Go to Missions →
           </Link>
         </div>
       )}

@@ -1,3 +1,5 @@
+// Secondary observe flow — accessible via direct URL but not shown in nav.
+// Primary flow: /missions → MissionActive component.
 'use client';
 
 import { usePrivy } from '@privy-io/react-auth';
