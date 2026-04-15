@@ -43,111 +43,100 @@ function PlanetModal({ planet, locale, kidsMode, onClose }: {
         onClick={onClose}
       />
 
-      {/* Modal — centered vertically in viewport */}
+      {/* Compact modal card — centered, no scroll */}
       <div
-        className="fixed inset-x-4 z-[61] rounded-2xl overflow-hidden flex flex-col"
+        className="fixed inset-x-6 z-[61] rounded-2xl"
         style={{
           top: '50%',
           transform: 'translateY(-50%)',
-          maxHeight: '82vh',
           background: '#0d1220',
           border: '1px solid rgba(255,255,255,0.1)',
-          boxShadow: '0 32px 80px rgba(0,0,0,0.9)',
+          boxShadow: '0 24px 60px rgba(0,0,0,0.9)',
+          overflow: 'hidden',
         }}
       >
-        {/* Square hero image */}
-        <div className="relative w-full flex-shrink-0" style={{ aspectRatio: '1 / 1', maxHeight: '38vh' }}>
-          <Image
-            src={planet.img}
-            alt={planet.name[locale]}
-            fill
-            className="object-cover"
-            sizes="(max-width: 672px) 100vw, 672px"
-            priority
-          />
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #0d1220 0%, rgba(13,18,32,0.2) 60%, transparent 100%)' }} />
-          {/* Close */}
-          <button
-            onClick={onClose}
-            className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(255,255,255,0.15)' }}
-            aria-label="Close"
-          >
-            <X size={14} color="rgba(255,255,255,0.8)" />
-          </button>
-          {/* Name overlay */}
-          <div className="absolute bottom-3 left-4 right-12">
+        {/* Header: image + name side by side */}
+        <div className="flex items-stretch" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          {/* Planet image — fixed square */}
+          <div className="relative flex-shrink-0" style={{ width: 110, height: 110 }}>
+            <Image
+              src={planet.img}
+              alt={planet.name[locale]}
+              fill
+              className="object-cover"
+              sizes="110px"
+              priority
+            />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, transparent 60%, #0d1220 100%)' }} />
+            <div className="absolute bottom-0 left-0 right-0 h-[2px]" style={{ background: planet.color, opacity: 0.5 }} />
+          </div>
+
+          {/* Name + badge */}
+          <div className="flex-1 px-4 py-3 flex flex-col justify-center">
             {('missionId' in planet && (planet.key === 'moon' || planet.key === 'jupiter')) && (
               <span
-                className="inline-flex items-center gap-1 mb-1 px-1.5 py-0.5 rounded text-[9px] uppercase tracking-widest"
+                className="inline-flex items-center gap-1 mb-1.5 px-1.5 py-0.5 rounded self-start text-[8px] uppercase tracking-widest font-bold"
                 style={{ background: 'rgba(255,209,102,0.15)', border: '1px solid rgba(255,209,102,0.3)', color: '#FFD166' }}
               >
-                <Star size={8} />
-                {locale === 'ka' ? 'საუკეთესო პირველი სამიზნე' : 'Best First Target'}
+                <Star size={7} /> {locale === 'ka' ? 'საუკეთესო' : 'Best target'}
               </span>
             )}
-            <p className="text-white font-bold text-xl" style={{ fontFamily: 'Georgia, serif', textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}>
+            <p className="text-white font-bold text-lg leading-tight" style={{ fontFamily: 'Georgia, serif' }}>
               {planet.name[locale]}
             </p>
+            <p className="text-xs mt-0.5" style={{ color: planet.color }}>
+              {planet.facts[locale][0].split('—')[0].trim()}
+            </p>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-[2px]" style={{ background: planet.color, opacity: 0.6 }} />
+
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="self-start mt-3 mr-3 w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+            aria-label="Close"
+          >
+            <X size={13} color="rgba(255,255,255,0.7)" />
+          </button>
         </div>
 
-        {/* Content — scrollable only if needed */}
-        <div className="overflow-y-auto flex-1 px-4 py-3 flex flex-col gap-3" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+        {/* Facts */}
+        <div className="px-4 py-3 flex flex-col gap-1.5">
           {kidsMode ? (
-            <div className="flex flex-col gap-2">
-              <p className="text-slate-300 text-sm leading-relaxed flex items-start gap-2">
-                <Star size={12} style={{ color: '#FFD166', flexShrink: 0, marginTop: 3 }} />
-                {planet.kidsLine[locale]}
-              </p>
-              <p className="text-slate-400 text-xs leading-relaxed">{planet.kidsFact[locale]}</p>
-            </div>
+            <p className="text-slate-300 text-xs leading-relaxed">{planet.kidsLine[locale]}</p>
           ) : (
-            <ul className="flex flex-col gap-1.5">
-              {planet.facts[locale].map((f, i) => (
-                <li key={i} className="text-slate-300 text-xs flex items-start gap-2">
-                  <span style={{ color: planet.color, flexShrink: 0, marginTop: 2, fontSize: 8 }}>●</span>
-                  {f}
-                </li>
-              ))}
-            </ul>
+            planet.facts[locale].slice(0, 3).map((f, i) => (
+              <div key={i} className="flex items-start gap-2 text-xs text-slate-300">
+                <span style={{ color: planet.color, flexShrink: 0, fontSize: 7, marginTop: 3 }}>●</span>
+                {f}
+              </div>
+            ))
           )}
+        </div>
 
-          {/* Tip callout */}
-          <div
-            className="rounded-xl p-3 flex items-start gap-2 text-xs"
-            style={{ background: 'rgba(56,240,255,0.05)', border: '1px solid rgba(56,240,255,0.12)', color: 'rgba(56,240,255,0.8)' }}
-          >
-            <Telescope size={12} style={{ flexShrink: 0, marginTop: 1 }} />
-            <span>{planet.tip[locale].split('.')[0]}.</span>
-          </div>
+        {/* Tip */}
+        <div className="mx-4 mb-3 rounded-xl px-3 py-2 flex items-start gap-2 text-xs"
+          style={{ background: 'rgba(56,240,255,0.05)', border: '1px solid rgba(56,240,255,0.1)', color: 'rgba(56,240,255,0.75)' }}>
+          <Telescope size={11} style={{ flexShrink: 0, marginTop: 1 }} />
+          <span>{planet.tip[locale].split('.')[0]}.</span>
+        </div>
 
-          {/* Links */}
-          <div className="flex flex-col gap-2">
-            <Link
-              href="/sky"
-              onClick={onClose}
-              className="inline-flex items-center gap-1.5 text-xs font-medium transition-opacity hover:opacity-80"
-              style={{ color: planet.color }}
-            >
-              <Telescope size={12} />
-              {locale === 'ka'
-                ? `იხილე ${planet.name[locale]} ღამის პროგნოზში →`
-                : `See ${planet.name[locale]} in tonight's forecast →`}
+        {/* Links */}
+        <div className="px-4 pb-4 flex items-center gap-4 flex-wrap">
+          <Link href="/sky" onClick={onClose}
+            className="inline-flex items-center gap-1 text-xs font-medium hover:opacity-80"
+            style={{ color: planet.color }}>
+            <Telescope size={11} />
+            {locale === 'ka' ? 'პროგნოზი →' : 'Forecast →'}
+          </Link>
+          {'missionId' in planet && planet.missionId && (
+            <Link href="/missions" onClick={onClose}
+              className="inline-flex items-center gap-1 text-xs font-medium hover:opacity-80"
+              style={{ color: '#FFD166' }}>
+              <Sparkles size={11} />
+              {locale === 'ka' ? 'მისია →' : 'Mission →'}
             </Link>
-            {'missionId' in planet && planet.missionId && (
-              <Link
-                href="/missions"
-                onClick={onClose}
-                className="inline-flex items-center gap-1.5 text-xs font-medium transition-opacity hover:opacity-80"
-                style={{ color: '#FFD166' }}
-              >
-                <Sparkles size={12} />
-                {locale === 'ka' ? `${planet.name[locale]} მისიის დაწყება →` : `Start ${planet.name[locale]} Mission →`}
-              </Link>
-            )}
-          </div>
+          )}
         </div>
       </div>
     </>
@@ -164,7 +153,7 @@ function PlanetsTab({ locale, kidsMode, onSelect }: { locale: Locale; kidsMode: 
       </p>
 
       {/* Planet grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2">
         {PLANETS.map(p => (
           <button
             key={p.key}
@@ -186,15 +175,15 @@ function PlanetsTab({ locale, kidsMode, onSelect }: { locale: Locale; kidsMode: 
             {/* Best first target badge */}
             {(p.key === 'moon' || p.key === 'jupiter') && (
               <div
-                className="absolute top-2 left-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] uppercase tracking-widest font-bold"
-                style={{ background: 'rgba(255,209,102,0.2)', border: '1px solid rgba(255,209,102,0.4)', color: '#FFD166', backdropFilter: 'blur(4px)' }}
+                className="absolute top-1.5 left-1.5 inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[7px] uppercase tracking-wide font-bold"
+                style={{ background: 'rgba(255,209,102,0.25)', border: '1px solid rgba(255,209,102,0.4)', color: '#FFD166', backdropFilter: 'blur(4px)' }}
               >
-                <Star size={7} />
-                {locale === 'ka' ? 'პირველი' : 'Start here'}
+                <Star size={6} />
+                {locale === 'ka' ? '1-ლი' : '#1'}
               </div>
             )}
             {/* Name */}
-            <p className="absolute bottom-2.5 left-3 text-white font-semibold text-sm leading-tight" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}>
+            <p className="absolute bottom-2 left-2 text-white font-semibold text-xs leading-tight" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}>
               {p.name[locale]}
             </p>
           </button>
