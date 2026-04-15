@@ -176,7 +176,8 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
                   url.startsWith('data:image/jpeg;base64,') ||
                   url.startsWith('data:image/png;base64,') ||
                   url.startsWith('data:image/webp;base64,') ||
-                  url.startsWith('blob:');
+                  url.startsWith('blob:') ||
+                  url.startsWith('/images/');
                 addMission({
                   id: mission.id + '_gallery_' + Date.now().toString(36),
                   name: mission.name,
@@ -706,7 +707,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
               </p>
               <p className="text-slate-600 text-xs leading-relaxed">{mission.hint}</p>
             </div>
-            <Button variant="brass" onClick={() => { setMintError(''); setStep('camera'); }} className="w-full">
+            <Button variant="brass" onClick={() => { setMintError(''); if (mission.demo) { handleCapture('/images/planets/saturn.jpg'); } else { setStep('camera'); } }} className="w-full">
               Begin Observation →
             </Button>
           </div>

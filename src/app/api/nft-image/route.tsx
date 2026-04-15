@@ -113,31 +113,6 @@ export async function GET(req: NextRequest) {
           }}
         />
 
-        {/* Top label */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 32,
-            left: 0,
-            right: 0,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <span
-            style={{
-              fontSize: 14,
-              color: '#FFD166',
-              fontWeight: 700,
-              letterSpacing: 4,
-              textTransform: 'uppercase',
-            }}
-          >
-            STELLAR ✦
-          </span>
-        </div>
-
         {/* Center content */}
         <div
           style={{

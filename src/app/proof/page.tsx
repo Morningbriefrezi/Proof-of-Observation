@@ -17,7 +17,8 @@ const isSafePhoto = (url: string) =>
   url.startsWith('data:image/jpeg;base64,') ||
   url.startsWith('data:image/png;base64,') ||
   url.startsWith('data:image/webp;base64,') ||
-  url.startsWith('blob:');
+  url.startsWith('blob:') ||
+  url.startsWith('/images/');
 
 function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete: () => void }) {
   const [confirming, setConfirming] = useState(false);
