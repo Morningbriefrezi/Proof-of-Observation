@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { Telescope, Satellite, ExternalLink, Lock } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
@@ -11,6 +11,8 @@ import StaggerChildren from '@/components/ui/StaggerChildren';
 import { SkeletonGrid } from '@/components/ui/Skeleton';
 import { REWARDS, MISSION_REWARD_HINTS } from '@/lib/rewards';
 import { MISSIONS } from '@/lib/constants';
+import { useAppState } from '@/hooks/useAppState';
+import type { CompletedMission } from '@/lib/types';
 
 interface NftAttribute {
   trait_type: string;
@@ -30,6 +32,25 @@ interface NftAsset {
 
 function getAttr(attrs: NftAttribute[] | undefined, key: string): string {
   return String(attrs?.find(a => a.trait_type === key)?.value ?? '');
+}
+
+function localToNftAsset(m: CompletedMission): NftAsset {
+  return {
+    id: m.txId,
+    content: {
+      metadata: {
+        name: `Stellar: ${m.name}`,
+        attributes: [
+          { trait_type: 'Target', value: m.name },
+          { trait_type: 'Date', value: new Date(m.timestamp).toISOString().split('T')[0] },
+          { trait_type: 'Location', value: `${m.latitude.toFixed(2)}, ${m.longitude.toFixed(2)}` },
+          { trait_type: 'Cloud Cover', value: `${m.sky?.cloudCover ?? 0}%` },
+          { trait_type: 'Oracle Hash', value: m.sky?.oracleHash ?? '' },
+          { trait_type: 'Stars Earned', value: m.stars },
+        ],
+      },
+    },
+  };
 }
 
 function NftDetailOverlay({ nft, onClose }: { nft: NftAsset; onClose: () => void }) {
@@ -148,22 +169,37 @@ function NftDetailOverlay({ nft, onClose }: { nft: NftAsset; onClose: () => void
         </div>
 
         {/* Solana Explorer link */}
-        <a
-          href={`https://explorer.solana.com/address/${nft.id}?cluster=devnet`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 rounded-xl text-sm"
-          style={{
-            background: 'rgba(56,240,255,0.06)',
-            border: '1px solid rgba(56,240,255,0.15)',
-            color: '#38F0FF',
-            textDecoration: 'none',
-            padding: '12px 0',
-            minHeight: 44,
-          }}
-        >
-          <ExternalLink size={14} /> View on Solana Explorer
-        </a>
+        {nft.id.startsWith('sim') ? (
+          <div
+            className="flex items-center justify-center gap-2 rounded-xl text-sm"
+            style={{
+              background: 'rgba(251,191,36,0.06)',
+              border: '1px solid rgba(251,191,36,0.15)',
+              color: 'var(--warning)',
+              padding: '12px 0',
+              minHeight: 44,
+            }}
+          >
+            Pending sync to Solana
+          </div>
+        ) : (
+          <a
+            href={`https://explorer.solana.com/address/${nft.id}?cluster=devnet`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 rounded-xl text-sm"
+            style={{
+              background: 'rgba(56,240,255,0.06)',
+              border: '1px solid rgba(56,240,255,0.15)',
+              color: '#38F0FF',
+              textDecoration: 'none',
+              padding: '12px 0',
+              minHeight: 44,
+            }}
+          >
+            <ExternalLink size={14} /> View on Solana Explorer
+          </a>
+        )}
 
         {/* Reward hint */}
         {rewardHint && (
@@ -187,6 +223,7 @@ function NftDetailOverlay({ nft, onClose }: { nft: NftAsset; onClose: () => void
 export default function NftsPage() {
   const { authenticated, ready, login } = usePrivy();
   const { wallets } = useWallets();
+  const { state } = useAppState();
   const [nfts, setNfts] = useState<NftAsset[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -278,7 +315,17 @@ export default function NftsPage() {
     );
   }
 
-  const sortedNfts = [...nfts].sort((a, b) => {
+  // Merge on-chain DAS results with locally-stored missions.
+  // Local missions fill the gap when Helius isn't configured or DAS returns 0.
+  const allNfts = useMemo<NftAsset[]>(() => {
+    const dasIds = new Set(nfts.map(n => n.id));
+    const localAssets = state.completedMissions
+      .filter(m => m.status !== 'gallery' && !dasIds.has(m.txId))
+      .map(localToNftAsset);
+    return [...nfts, ...localAssets];
+  }, [nfts, state.completedMissions]);
+
+  const sortedNfts = [...allNfts].sort((a, b) => {
     if (sort === 'stars') {
       const aStars = parseInt(getAttr(a.content?.metadata?.attributes, 'Stars Earned') || getAttr(a.content?.metadata?.attributes, 'Stars') || '0');
       const bStars = parseInt(getAttr(b.content?.metadata?.attributes, 'Stars Earned') || getAttr(b.content?.metadata?.attributes, 'Stars') || '0');
@@ -287,12 +334,12 @@ export default function NftsPage() {
     return 0; // keep API order for recent
   });
 
-  const totalStarsEarned = nfts.reduce((sum, item) => {
+  const totalStarsEarned = allNfts.reduce((sum, item) => {
     const s = parseInt(getAttr(item.content?.metadata?.attributes, 'Stars Earned') || getAttr(item.content?.metadata?.attributes, 'Stars') || '0');
     return sum + s;
   }, 0);
 
-  const bestCloud = nfts.reduce((best, item) => {
+  const bestCloud = allNfts.reduce((best, item) => {
     const cc = parseFloat(getAttr(item.content?.metadata?.attributes, 'Cloud Cover').replace('%', '') || '100');
     return cc < best ? cc : best;
   }, 100);
@@ -310,10 +357,10 @@ export default function NftsPage() {
           My Observations
         </h1>
         {!loading && (
-          <span className="badge-pill badge-muted">{nfts.length} NFTs</span>
+          <span className="badge-pill badge-muted">{allNfts.length} NFTs</span>
         )}
         {/* Sort toggle */}
-        {nfts.length > 1 && (
+        {allNfts.length > 1 && (
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
             {(['recent', 'stars'] as const).map(s => (
               <button
@@ -330,11 +377,11 @@ export default function NftsPage() {
       </div>
 
       {/* Stats bar */}
-      {!loading && nfts.length > 0 && (
+      {!loading && allNfts.length > 0 && (
         <>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
           {[
-            { label: 'Total NFTs', value: String(nfts.length) },
+            { label: 'Total NFTs', value: String(allNfts.length) },
             { label: 'Stars Earned', value: `✦ ${totalStarsEarned}`, gold: true },
             { label: 'Best Night', value: bestCloud < 30 ? 'Clear' : `${Math.round(bestCloud)}%`, clear: bestCloud < 30 },
           ].map(stat => (
@@ -357,7 +404,7 @@ export default function NftsPage() {
 
         {/* Collection progress */}
         {(() => {
-          const ownedTargets = nfts.map(n => {
+          const ownedTargets = allNfts.map(n => {
             const t = getAttr(n.content?.metadata?.attributes, 'Target');
             return MISSIONS.find(m => m.name.toLowerCase() === t.toLowerCase())?.id;
           }).filter(Boolean) as string[];
@@ -445,7 +492,7 @@ export default function NftsPage() {
       )}
 
       {/* Empty state */}
-      {!loading && !error && nfts.length === 0 && (
+      {!loading && !error && allNfts.length === 0 && (
         <div style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, textAlign: 'center' }}>
           <span style={{ fontSize: 60 }}>🔭</span>
           <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 20, color: 'var(--text-primary)', margin: 0 }}>
@@ -461,7 +508,7 @@ export default function NftsPage() {
       )}
 
       {/* NFT Grid */}
-      {!loading && !error && sortedNfts.length > 0 && (
+      {!loading && !error && allNfts.length > 0 && (
         <StaggerChildren stagger={50} className="grid grid-cols-2 gap-3">
           {sortedNfts.map(item => {
             const name = item.content?.metadata?.name ?? 'Stellar Observation';
@@ -536,25 +583,40 @@ export default function NftsPage() {
                     {stars && <span className="badge-pill badge-stars" style={{ fontSize: 10 }}>✦ {stars}</span>}
                   </div>
 
-                  {/* Explorer link */}
-                  <a
-                    href={`https://explorer.solana.com/address/${item.id}?cluster=devnet`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
+                  {/* Explorer link / pending badge */}
+                  {item.id.startsWith('sim') ? (
+                    <span style={{
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: 4,
                       marginTop: 8,
                       fontSize: 10,
                       fontFamily: 'var(--font-mono)',
-                      color: 'var(--accent)',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    <ExternalLink size={12} />
-                    Explorer
-                  </a>
+                      color: 'var(--warning)',
+                    }}>
+                      ⏳ Pending
+                    </span>
+                  ) : (
+                    <a
+                      href={`https://explorer.solana.com/address/${item.id}?cluster=devnet`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={e => e.stopPropagation()}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        marginTop: 8,
+                        fontSize: 10,
+                        fontFamily: 'var(--font-mono)',
+                        color: 'var(--accent)',
+                        textDecoration: 'none',
+                      }}
+                    >
+                      <ExternalLink size={12} />
+                      Explorer
+                    </a>
+                  )}
                 </div>
               </div>
             );
