@@ -266,6 +266,15 @@ export default function NftsPage() {
       .then(r => r.json()).then(d => setStarsBalance(d.balance)).catch(() => {});
   }, [authenticated, address, fetchNfts]);
 
+  // Must be above early return — Rules of Hooks require unconditional hook calls
+  const allNfts = useMemo<NftAsset[]>(() => {
+    const dasIds = new Set(nfts.map(n => n.id));
+    const localAssets = state.completedMissions
+      .filter(m => m.status !== 'gallery' && !dasIds.has(m.txId))
+      .map(localToNftAsset);
+    return [...nfts, ...localAssets];
+  }, [nfts, state.completedMissions]);
+
   if (!ready || !authenticated) {
     const demoNfts = [
       { name: 'Stellar Observation #001', target: 'Moon', date: 'Apr 9, 2026', cloudCover: '12', stars: '50' },
@@ -314,16 +323,6 @@ export default function NftsPage() {
       </div>
     );
   }
-
-  // Merge on-chain DAS results with locally-stored missions.
-  // Local missions fill the gap when Helius isn't configured or DAS returns 0.
-  const allNfts = useMemo<NftAsset[]>(() => {
-    const dasIds = new Set(nfts.map(n => n.id));
-    const localAssets = state.completedMissions
-      .filter(m => m.status !== 'gallery' && !dasIds.has(m.txId))
-      .map(localToNftAsset);
-    return [...nfts, ...localAssets];
-  }, [nfts, state.completedMissions]);
 
   const sortedNfts = [...allNfts].sort((a, b) => {
     if (sort === 'stars') {
