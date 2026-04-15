@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import BackButton from '@/components/shared/BackButton';
+import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import TonightHighlights from '@/components/sky/TonightHighlights';
 import SunMoonBar from '@/components/sky/SunMoonBar';
 import ForecastGrid from '@/components/sky/ForecastGrid';
@@ -40,12 +41,16 @@ export default async function SkyPage() {
 
       {/* Summary card */}
       <div className="flex flex-col gap-3">
-        <Suspense fallback={<div className="h-[180px] rounded-xl bg-white/5 animate-pulse" />}>
-          <TonightHighlights />
-        </Suspense>
-        <Suspense fallback={<div className="h-16 rounded-xl bg-white/5 animate-pulse" />}>
-          <SunMoonBar />
-        </Suspense>
+        <ErrorBoundary fallback={<div className="h-[180px] rounded-xl bg-white/5 flex items-center justify-center"><p className="text-sm text-slate-500">Couldn&apos;t load section</p></div>}>
+          <Suspense fallback={<div className="h-[180px] rounded-xl bg-white/5 animate-pulse" />}>
+            <TonightHighlights />
+          </Suspense>
+        </ErrorBoundary>
+        <ErrorBoundary fallback={<div className="h-16 rounded-xl bg-white/5 flex items-center justify-center"><p className="text-sm text-slate-500">Couldn&apos;t load section</p></div>}>
+          <Suspense fallback={<div className="h-16 rounded-xl bg-white/5 animate-pulse" />}>
+            <SunMoonBar />
+          </Suspense>
+        </ErrorBoundary>
       </div>
 
       {/* Start Observing CTA */}
@@ -54,9 +59,11 @@ export default async function SkyPage() {
       </Suspense>
 
       {/* 7-day forecast */}
-      <Suspense fallback={<div className="h-48 rounded-xl bg-white/5 animate-pulse" />}>
-        <ForecastGrid />
-      </Suspense>
+      <ErrorBoundary fallback={<div className="h-48 rounded-xl bg-white/5 flex items-center justify-center"><p className="text-sm text-slate-500">Couldn&apos;t load section</p></div>}>
+        <Suspense fallback={<div className="h-48 rounded-xl bg-white/5 animate-pulse" />}>
+          <ForecastGrid />
+        </Suspense>
+      </ErrorBoundary>
 
       {/* Planet tracker */}
       <div className="flex flex-col gap-3">
@@ -71,28 +78,44 @@ export default async function SkyPage() {
             {t('planetHint')}
           </p>
         </div>
-        <Suspense fallback={
+        <ErrorBoundary fallback={
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-28 rounded-xl bg-white/5 animate-pulse" />
+              <div key={i} className="h-28 rounded-xl bg-white/5 flex items-center justify-center"><p className="text-sm text-slate-500">Couldn&apos;t load section</p></div>
             ))}
           </div>
         }>
-          <PlanetGrid />
-        </Suspense>
+          <Suspense fallback={
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-28 rounded-xl bg-white/5 animate-pulse" />
+              ))}
+            </div>
+          }>
+            <PlanetGrid />
+          </Suspense>
+        </ErrorBoundary>
       </div>
 
       {/* Best targets tonight */}
       <div className="flex flex-col gap-3">
-        <Suspense fallback={
+        <ErrorBoundary fallback={
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-28 rounded-xl bg-white/5 animate-pulse" />
+              <div key={i} className="h-28 rounded-xl bg-white/5 flex items-center justify-center"><p className="text-sm text-slate-500">Couldn&apos;t load section</p></div>
             ))}
           </div>
         }>
-          <BestTargets />
-        </Suspense>
+          <Suspense fallback={
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-28 rounded-xl bg-white/5 animate-pulse" />
+              ))}
+            </div>
+          }>
+            <BestTargets />
+          </Suspense>
+        </ErrorBoundary>
       </div>
 
       {/* Upcoming events */}

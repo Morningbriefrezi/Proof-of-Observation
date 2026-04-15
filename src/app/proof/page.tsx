@@ -22,8 +22,7 @@ const isSafePhoto = (url: string) =>
 function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete: () => void }) {
   const [confirming, setConfirming] = useState(false);
   const isPending = mission.status === 'pending';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const displayStars = mission.stars ?? (mission as any).points ?? 0;
+  const displayStars = mission.stars ?? 0;
   const isRealTx = !isPending && mission.method === 'onchain' && !!mission.txId && mission.txId.length >= 40;
 
   return (

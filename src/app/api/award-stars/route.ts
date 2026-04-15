@@ -126,7 +126,13 @@ export async function POST(req: NextRequest) {
           stars: amount as number,
           confidence: 'mission',
           mintTx: idempotencyKey,
-        }).catch(err => console.error('[award-stars] idempotency insert failed:', err));
+        }).catch(err => {
+          if ((err as { code?: string })?.code === '23505') {
+            // Unique constraint violation — idempotency key already recorded, expected for retries
+            return { success: true, txId: 'already_awarded', cached: true };
+          }
+          console.error('[award-stars] idempotency insert failed:', err);
+        });
       }
     }
 

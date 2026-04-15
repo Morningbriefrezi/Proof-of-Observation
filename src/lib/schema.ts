@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, integer, timestamp, doublePrecision, boolean } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, integer, timestamp, doublePrecision, boolean, uniqueIndex } from 'drizzle-orm/pg-core'
 // FIX-15: To prevent double-awards, run this once on the DB:
 // CREATE UNIQUE INDEX obs_daily_unique ON observation_log (wallet, target, DATE(created_at AT TIME ZONE 'UTC'));
 // Drizzle schema DSL cannot express DATE() function-based unique indexes; this must be applied manually.
@@ -52,4 +52,7 @@ export const observationLog = pgTable('observation_log', {
   starsAwarded: integer('stars_awarded'),
   oracleHash: text('oracle_hash'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-})
+}, (table) => [
+  // NOTE: A migration must be run to apply this constraint to the existing table.
+  uniqueIndex('observation_log_wallet_mint_tx_unique').on(table.wallet, table.mintTx),
+])

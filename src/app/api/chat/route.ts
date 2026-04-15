@@ -1,8 +1,14 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { PrivyClient } from '@privy-io/server-auth';
 import { fetchSkyForecast } from '@/lib/sky-data';
 import { getVisiblePlanets } from '@/lib/planets';
 import { CLAUDE_MODEL } from '@/lib/ai-config';
+
+const privy = new PrivyClient(
+  process.env.NEXT_PUBLIC_PRIVY_APP_ID!,
+  process.env.PRIVY_APP_SECRET!,
+);
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -70,21 +76,17 @@ async function runTool(name: string, input: Record<string, unknown>, fallbackLat
   return JSON.stringify({ error: 'Unknown tool' });
 }
 
-function sseStream(text: string): Response {
-  const encoder = new TextEncoder();
-  const readable = new ReadableStream({
-    start(controller) {
-      controller.enqueue(encoder.encode(`data: ${text.replace(/\n/g, ' ')}\n\n`));
-      controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-      controller.close();
-    },
-  });
-  return new Response(readable, {
-    headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' },
-  });
-}
-
 export async function POST(req: NextRequest) {
+  const authHeader = req.headers.get('authorization');
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!token) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  try {
+    await privy.verifyAuthToken(token);
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   let message: string;
   let history: { role: 'user' | 'assistant'; content: string }[];
   let locale: string;
@@ -144,13 +146,29 @@ export async function POST(req: NextRequest) {
     return new Response(JSON.stringify({ error: 'AI temporarily unavailable' }), { status: 503 });
   }
 
-  // No tool use — emit the response directly
+  // No tool use — stream the already-collected text word-by-word (no second API call)
   if (firstResponse.stop_reason !== 'tool_use') {
     const text = firstResponse.content
       .filter((b): b is Anthropic.TextBlock => b.type === 'text')
       .map(b => b.text)
       .join('');
-    return sseStream(text);
+
+    const encoder = new TextEncoder();
+    const readable = new ReadableStream({
+      start(controller) {
+        // Split on word boundaries to give a streaming appearance
+        const words = text.split(/(?<=\s)/);
+        for (const word of words) {
+          controller.enqueue(encoder.encode(`data: ${word.replace(/\n/g, '\u2028')}\n\n`));
+        }
+        controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+        controller.close();
+      },
+    });
+
+    return new Response(readable, {
+      headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' },
+    });
   }
 
   // Execute each requested tool
@@ -191,7 +209,7 @@ export async function POST(req: NextRequest) {
         try {
           for await (const chunk of stream) {
             if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
-              controller.enqueue(encoder.encode(`data: ${chunk.delta.text}\n\n`));
+              controller.enqueue(encoder.encode(`data: ${chunk.delta.text.replace(/\n/g, '\u2028')}\n\n`));
             }
           }
           controller.enqueue(encoder.encode('data: [DONE]\n\n'));

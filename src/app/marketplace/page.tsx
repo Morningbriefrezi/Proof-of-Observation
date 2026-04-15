@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useAppState } from '@/hooks/useAppState';
 import { useLocation } from '@/lib/location';
+import { useTranslations } from 'next-intl';
 import LocationPicker from '@/components/LocationPicker';
 import { getProductsByRegion, getDealersByRegion, GLOBAL_FALLBACK } from '@/lib/dealers';
 import type { Product } from '@/lib/dealers';
@@ -27,8 +28,9 @@ export default function MarketplacePage() {
   const { wallets } = useWallets();
   const { state } = useAppState();
   const { location } = useLocation();
+  const t = useTranslations('marketplace');
   const [filter, setFilter] = useState<CategoryFilter>('all');
-  const [starsBalance, setStarsBalance] = useState(0);
+  const [starsBalance, setStarsBalance] = useState<number | null>(null);
 
   const solanaWallet = wallets.find(w => (w as { chainType?: string }).chainType === 'solana');
   const address = solanaWallet?.address ?? state.walletAddress ?? null;
@@ -38,9 +40,6 @@ export default function MarketplacePage() {
     fetch(`/api/stars-balance?address=${encodeURIComponent(address)}`)
       .then(r => r.json()).then(d => setStarsBalance(d.balance)).catch(() => {});
   }, [address]);
-
-  const completed = state.completedMissions.filter(m => m.status === 'completed');
-  const totalStars = completed.reduce((sum, m) => sum + (m.stars ?? 0), 0);
 
   const dealers = getDealersByRegion(location.region);
   const allProducts = getProductsByRegion(location.region);
@@ -69,7 +68,7 @@ export default function MarketplacePage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>
-          Marketplace
+          {t('title')}
         </h1>
         <LocationPicker compact />
       </div>
@@ -77,7 +76,7 @@ export default function MarketplacePage() {
       {/* Stars redemption */}
       {authenticated && (
         <div className="mb-4">
-          <StarsRedemption starsBalance={starsBalance || totalStars} walletAddress={address ?? undefined} />
+          <StarsRedemption starsBalance={starsBalance ?? undefined} walletAddress={address ?? undefined} />
         </div>
       )}
 

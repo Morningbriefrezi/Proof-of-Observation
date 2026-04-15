@@ -88,6 +88,7 @@
   },
   "chat": {
     "title": "AI Companion",
+    "subtitle": "AI Astronomer · Online",
     "welcome": "Hello! I'm ASTRA, your personal astronomer. Ask me anything about tonight's sky, your telescope, or astronomy in general.",
     "placeholder": "Ask about tonight's sky…",
     "send": "Send",
@@ -181,7 +182,11 @@
     "subtitle": "Observe the Moon, Jupiter, Saturn and more. Earn Stars, mint NFTs.",
     "signIn": "Sign In →",
     "availableMissions": "Available Missions",
-    "tonightsSky": "Tonight's Sky"
+    "tonightsSky": "Tonight's Sky",
+    "goodConditions": "Good for observing tonight",
+    "cloudyTonight": "Cloudy tonight",
+    "knowledgeQuizzes": "Knowledge Quizzes",
+    "approximateLocation": "Using approximate location — tap to set yours"
   },
   "dashboard": {
     "greeting": {

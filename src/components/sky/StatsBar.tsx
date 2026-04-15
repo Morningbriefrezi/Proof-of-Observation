@@ -10,8 +10,7 @@ const TOTAL = 5;
 export default function StatsBar() {
   const { state } = useAppState();
   const completed = state.completedMissions.filter(m => m.status === 'completed');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const totalStars = completed.reduce((sum, m) => sum + (m.stars ?? (m as any).points ?? 0), 0);
+  const totalStars = completed.reduce((sum, m) => sum + (m.stars ?? 0), 0);
   const localCount = completed.length;
   const [apiCount, setApiCount] = useState<number | null>(null);
 

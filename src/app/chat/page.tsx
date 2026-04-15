@@ -9,10 +9,11 @@ import { useLocation } from '@/lib/location';
 interface Msg { role: 'user' | 'assistant'; content: string; }
 
 export default function ChatPage() {
-  const { authenticated, login } = usePrivy();
+  const { authenticated, login, getAccessToken } = usePrivy();
   const rawLocale = useLocale();
   const locale = rawLocale === 'ka' ? 'ka' : 'en';
   const { location } = useLocation();
+  const t = useTranslations('chat');
   const ts = useTranslations('chat.suggestions');
 
   const [skySummary, setSkySummary] = useState<{ verified: boolean; cloudCover: number; visibility: string } | null>(null);
@@ -58,9 +59,11 @@ export default function ChatPage() {
     setMessages(next);
     setLoading(true);
     try {
+      const accessToken = await getAccessToken();
+      if (!accessToken) { login(); return; }
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
         body: JSON.stringify({
           message: msg,
           history: next.slice(0, -1).map(m => ({ role: m.role, content: m.content })),
@@ -85,9 +88,10 @@ export default function ChatPage() {
           const payload = line.slice(6);
           if (payload === '[DONE]') break;
           if (payload === '[ERROR]') throw new Error('stream_interrupted');
+          const decoded = payload.replace(/\u2028/g, '\n');
           setMessages(prev => {
             const u = [...prev];
-            u[u.length - 1] = { role: 'assistant', content: u[u.length - 1].content + payload };
+            u[u.length - 1] = { role: 'assistant', content: u[u.length - 1].content + decoded };
             return u;
           });
         }
@@ -138,7 +142,7 @@ export default function ChatPage() {
         <div>
           <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: 'var(--text-primary)', margin: 0, lineHeight: 1.2 }}>ASTRA</p>
           <p style={{ fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--text-muted)', margin: 0 }}>
-            {locale === 'ka' ? 'AI ასტრონომი · ონლაინ' : 'AI Astronomer · Online'}
+            {t('subtitle')}
           </p>
         </div>
 

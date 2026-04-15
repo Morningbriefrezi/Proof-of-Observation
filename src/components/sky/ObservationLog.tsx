@@ -45,8 +45,7 @@ export default function ObservationLog() {
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <div className="flex flex-col items-end gap-0.5">
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                <span className="text-sm font-bold text-[#FFD166]">+{m.stars ?? (m as any).points ?? 0} ✦</span>
+                <span className="text-sm font-bold text-[#FFD166]">+{m.stars ?? 0} ✦</span>
                 {m.status === 'pending'
                   ? <span className="text-[10px] text-amber-400 flex items-center gap-0.5"><Clock size={9} /> Pending</span>
                   : <span className="text-[10px] text-[#34d399]">Verified</span>

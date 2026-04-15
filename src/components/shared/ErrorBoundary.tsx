@@ -2,7 +2,7 @@
 
 import { Component, ReactNode } from 'react';
 
-interface Props { children: ReactNode }
+interface Props { children: ReactNode; fallback?: ReactNode }
 interface State { error: Error | null }
 
 export default class ErrorBoundary extends Component<Props, State> {
@@ -14,6 +14,9 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.error) {
+      if (this.props.fallback !== undefined) {
+        return this.props.fallback;
+      }
       return (
         <div className="min-h-screen bg-[#070B14] flex items-center justify-center px-4">
           <div className="text-center max-w-md">

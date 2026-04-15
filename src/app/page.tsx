@@ -25,11 +25,12 @@ function EmailSubscribe() {
     e.preventDefault();
     if (!email.includes('@')) { setStatus('error'); return; }
     try {
-      await fetch('/api/subscribe', {
+      const res = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
+      if (!res.ok) throw new Error('subscribe_failed');
       setStatus('sent');
       setEmail('');
     } catch {

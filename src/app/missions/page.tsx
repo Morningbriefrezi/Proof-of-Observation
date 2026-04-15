@@ -22,6 +22,7 @@ import { MissionIcon } from '@/components/shared/PlanetIcons';
 import { TelescopeIcon, StarTokenIcon, DifficultyDots } from '@/components/icons/CelestialIcons';
 import AstraQuickAsk from '@/components/AstraQuickAsk';
 import DailyCheckIn from '@/components/dashboard/DailyCheckIn';
+import LocationPicker from '@/components/LocationPicker';
 
 export default function MissionsPage() {
   const { state } = useAppState();
@@ -140,7 +141,7 @@ export default function MissionsPage() {
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full flex-shrink-0 ${skyConditions.verified ? 'bg-[#34d399] animate-pulse' : 'bg-amber-400'}`} />
                 <span className="text-white text-sm font-medium">
-                  {skyConditions.verified ? 'Good for observing tonight' : 'Cloudy tonight'}
+                  {skyConditions.verified ? t('goodConditions') : t('cloudyTonight')}
                 </span>
               </div>
               <div className="flex gap-3 text-xs text-slate-500 flex-shrink-0">
@@ -171,12 +172,18 @@ export default function MissionsPage() {
 
       <div className="max-w-2xl mx-auto px-4 py-3 sm:py-6 flex flex-col gap-3">
         <BackButton />
+        {location.source === 'default' && (
+          <div className="flex items-center justify-between px-3 py-2 rounded-xl text-xs" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', color: 'var(--warning)' }}>
+            <span>{t('approximateLocation')}</span>
+            <LocationPicker compact />
+          </div>
+        )}
         <DailyCheckIn lat={location.lat ?? 41.6941} lon={location.lon ?? 44.8337} />
         <section>
           <div className="flex items-center gap-2 mb-3">
             <Satellite size={16} strokeWidth={1.5} className="text-[#38F0FF]" />
             <h1 className="text-xl sm:text-2xl font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
-              Missions
+              {t('title')}
             </h1>
           </div>
 
@@ -220,7 +227,7 @@ export default function MissionsPage() {
 
         {/* Quiz Missions */}
         <section>
-          <h2 className="text-[11px] uppercase tracking-widest mb-3 mt-6" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-secondary)' }}>Knowledge Quizzes</h2>
+          <h2 className="text-[11px] uppercase tracking-widest mb-3 mt-6" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-secondary)' }}>{t('knowledgeQuizzes')}</h2>
           <div className="flex flex-col gap-2.5">
             {QUIZZES.map(quiz => {
               const bestResult = [...(state.completedQuizzes ?? [])]
