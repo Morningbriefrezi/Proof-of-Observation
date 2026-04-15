@@ -45,21 +45,6 @@ export default function Footer() {
         borderTop: '1px solid rgba(255,255,255,0.04)',
       }}
     >
-      {/* Mobile — minimal */}
-      <div
-        className="sm:hidden flex items-center justify-center px-4"
-        style={{ paddingTop: 16, paddingBottom: 'calc(env(safe-area-inset-bottom) + 72px)' }}
-      >
-        <div className="flex flex-col items-center gap-1 text-center">
-          <span style={{ color: '#FFD166', fontSize: 13, letterSpacing: '0.2em', fontWeight: 800, fontFamily: 'var(--font-display)' }}>
-            ✦ STELLAR
-          </span>
-          <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: 9, margin: 0, letterSpacing: '0.04em' }}>
-            Built on Solana
-          </p>
-        </div>
-      </div>
-
       {/* Desktop — 4-column */}
       <div className="hidden sm:block max-w-5xl mx-auto px-6 py-12">
         <div className="grid grid-cols-4 gap-8 mb-10">
