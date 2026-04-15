@@ -10,7 +10,7 @@ import HomeSkyPreview from '@/components/home/HomeSkyPreview';
 import LiveStatsBar from '@/components/home/LiveStatsBar';
 import { usePrivy } from '@privy-io/react-auth';
 import { useAppState } from '@/hooks/useAppState';
-import { Telescope, Camera, Star, ShoppingBag, CloudSun, Satellite, Sparkles, Moon, Lock, Orbit } from 'lucide-react';
+import { Telescope, Camera, Star, ShoppingBag, CloudSun, Sparkles, Moon, Lock, Orbit } from 'lucide-react';
 import { MISSIONS } from '@/lib/constants';
 import LocationPicker from '@/components/LocationPicker';
 import { useLocation } from '@/lib/location';
@@ -22,16 +22,20 @@ function EmailSubscribe() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'sent' | 'error'>('idle');
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email.includes('@')) { setStatus('error'); return; }
-    // Store in localStorage as a lightweight demo; replace with real API call when ready
     try {
-      const existing = JSON.parse(localStorage.getItem('stellar_subscribers') ?? '[]') as string[];
-      localStorage.setItem('stellar_subscribers', JSON.stringify([...existing, email]));
-    } catch {}
-    setStatus('sent');
-    setEmail('');
+      await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      setStatus('sent');
+      setEmail('');
+    } catch {
+      setStatus('error');
+    }
   }
 
   return (
@@ -453,7 +457,7 @@ export default function HomePage() {
             fontSize: 14,
             margin: 0,
           }}>
-            Photograph celestial objects from anywhere in the world. Earn Stars tokens, collect discovery NFTs, and shop telescopes at your local dealer.
+            Observe the night sky. Get AI-verified by ASTRA. Earn Stars tokens and compressed NFTs sealed on Solana — redeemable for real telescopes at Astroman.ge and partner stores worldwide.
           </p>
 
           <LocationPicker compact />
@@ -470,43 +474,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* App nav shortcuts */}
-          <div style={{
-            display: 'flex',
-            gap: 10,
-            maxWidth: 480,
-            width: '100%',
-            justifyContent: 'center',
-            flexWrap: 'wrap',
-          }}>
-            {[
-              { href: '/sky',         Icon: CloudSun,    label: 'Sky',      sub: "Tonight's forecast",  color: 'var(--accent)' },
-              { href: '/missions',    Icon: Satellite,   label: 'Missions', sub: 'Earn Stars tokens',   color: 'var(--success)' },
-              { href: '/chat',        Icon: Sparkles,    label: 'ASTRA',    sub: 'AI astronomer',       color: '#A855F7' },
-              { href: '/marketplace', Icon: ShoppingBag, label: 'Shop',     sub: 'Partner stores',      color: 'var(--stars)' },
-            ].map(item => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="card-base"
-                style={{
-                  flex: '1 1 80px',
-                  padding: '14px 12px',
-                  textAlign: 'center',
-                  textDecoration: 'none',
-                  minWidth: 72,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 4,
-                }}
-              >
-                <item.Icon size={20} color={item.color} strokeWidth={1.5} />
-                <p style={{ color: item.color, fontSize: 12, fontWeight: 600, margin: 0, fontFamily: 'var(--font-display)' }}>{item.label}</p>
-                <p style={{ color: 'var(--text-muted)', fontSize: 10, margin: 0 }}>{item.sub}</p>
-              </Link>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -542,6 +509,10 @@ export default function HomePage() {
               padding-bottom: 4px;
             }
             .hiw-scroll::-webkit-scrollbar { display: none; }
+            @keyframes hiwSlideUp {
+              from { opacity: 0; transform: translateY(16px); }
+              to { opacity: 1; transform: translateY(0); }
+            }
             .hiw-card {
               flex: 0 0 72%;
               scroll-snap-align: center;

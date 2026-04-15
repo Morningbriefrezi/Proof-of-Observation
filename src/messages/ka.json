@@ -61,7 +61,8 @@
     "planets": "პლანეტები ღამით",
     "sunRises": "ამოდის",
     "sunSets": "ჩადის",
-    "moonPhase": "მთვარის ფაზა"
+    "moonPhase": "მთვარის ფაზა",
+    "planetHint": "შეეხეთ ნებისმიერ პლანეტას ამოსვლის / ტრანზიტის / ჩასვლის დეტალებისთვის"
   },
   "planets": {
     "moon": "მთვარე",
@@ -174,6 +175,13 @@
     "activatingWallet": "საფულის გააქტიურება Solana devnet-ზე…",
     "walletActivated": "საფული გააქტიურდა — 1 devnet SOL დაფინანსდა",
     "viewOnExplorer": "Solana Explorer-ზე ნახვა ↗"
+  },
+  "missions": {
+    "title": "ცის მისიები",
+    "subtitle": "დააკვირდი მთვარეს, იუპიტერს, სატურნს და სხვა ობიექტებს. გამოიმუშავე ვარსკვლავები, მოჭრე NFT-ები.",
+    "signIn": "შესვლა →",
+    "availableMissions": "ხელმისაწვდომი მისიები",
+    "tonightsSky": "დღეს ღამის ცა"
   },
   "dashboard": {
     "greeting": {

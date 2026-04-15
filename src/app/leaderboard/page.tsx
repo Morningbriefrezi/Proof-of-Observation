@@ -40,7 +40,7 @@ function rankFromStars(stars: number): string {
 
 function shortWallet(wallet: string): string {
   if (wallet.length < 10) return wallet;
-  return `${wallet.slice(0, 4)}...${wallet.slice(-4)}`;
+  return `⬡ ${wallet.slice(0, 4)}…${wallet.slice(-4)}`;
 }
 
 function AvatarCircle({ name, size = 40, color }: { name: string; size?: number; color?: string }) {

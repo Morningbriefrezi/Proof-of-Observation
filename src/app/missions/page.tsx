@@ -5,7 +5,7 @@ import { Satellite, Lock } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 import { useAppState } from '@/hooks/useAppState';
 import { usePrivy } from '@privy-io/react-auth';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useLocation } from '@/lib/location';
 import StatsBar from '@/components/sky/StatsBar';
 import MissionList from '@/components/sky/MissionList';
@@ -21,11 +21,13 @@ import PageTransition from '@/components/ui/PageTransition';
 import { MissionIcon } from '@/components/shared/PlanetIcons';
 import { TelescopeIcon, StarTokenIcon, DifficultyDots } from '@/components/icons/CelestialIcons';
 import AstraQuickAsk from '@/components/AstraQuickAsk';
+import DailyCheckIn from '@/components/dashboard/DailyCheckIn';
 
 export default function MissionsPage() {
   const { state } = useAppState();
   const { authenticated, login } = usePrivy();
   const locale = useLocale() === 'ka' ? 'ka' : 'en';
+  const t = useTranslations('missions');
   const { location } = useLocation();
   const [activeQuiz, setActiveQuiz] = useState<QuizDef | null>(null);
   const [activeMission, setActiveMission] = useState<Mission | null>(null);
@@ -76,22 +78,22 @@ export default function MissionsPage() {
               >✦</span>
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-base font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>Sky Missions</h2>
-              <p className="text-slate-500 text-xs mt-0.5">Observe the Moon, Jupiter, Saturn and more. Earn Stars, mint NFTs.</p>
+              <h2 className="text-base font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>{t('title')}</h2>
+              <p className="text-slate-500 text-xs mt-0.5">{t('subtitle')}</p>
             </div>
             <button
               onClick={login}
               className="flex-shrink-0 px-4 py-2 rounded-xl font-bold text-xs transition-all hover:opacity-90"
               style={{ background: 'linear-gradient(135deg, #FFD166, #CC9A33)', color: '#070B14' }}
             >
-              Sign In →
+              {t('signIn')}
             </button>
           </div>
         </div>
 
         {/* Preview mission list */}
         <div>
-          <p className="text-slate-600 text-[11px] uppercase tracking-widest mb-3">Available Missions</p>
+          <p className="text-slate-600 text-[11px] uppercase tracking-widest mb-3">{t('availableMissions')}</p>
           <div className="flex flex-col gap-2.5">
             {MISSIONS.map(mission => (
               <div
@@ -132,7 +134,7 @@ export default function MissionsPage() {
           className="rounded-2xl p-4"
           style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
         >
-          <p className="text-slate-600 text-[11px] uppercase tracking-widest mb-3">Tonight's Sky</p>
+          <p className="text-slate-600 text-[11px] uppercase tracking-widest mb-3">{t('tonightsSky')}</p>
           {skyConditions ? (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -169,6 +171,7 @@ export default function MissionsPage() {
 
       <div className="max-w-2xl mx-auto px-4 py-3 sm:py-6 flex flex-col gap-3">
         <BackButton />
+        <DailyCheckIn lat={location.lat ?? 41.6941} lon={location.lon ?? 44.8337} />
         <section>
           <div className="flex items-center gap-2 mb-3">
             <Satellite size={16} strokeWidth={1.5} className="text-[#38F0FF]" />

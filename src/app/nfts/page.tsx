@@ -5,6 +5,7 @@ import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { Telescope, Satellite, ExternalLink, Lock } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 import Link from 'next/link';
+import Image from 'next/image';
 import PageTransition from '@/components/ui/PageTransition';
 import StaggerChildren from '@/components/ui/StaggerChildren';
 import { SkeletonGrid } from '@/components/ui/Skeleton';
@@ -46,37 +47,10 @@ export default function NftsPage() {
     setLoading(true);
     setError(null);
     try {
-      const endpoint =
-        process.env.NEXT_PUBLIC_HELIUS_RPC_URL ?? 'https://api.devnet.solana.com';
-
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'getAssetsByOwner',
-          params: {
-            ownerAddress: address,
-            page: 1,
-            limit: 100,
-            displayOptions: { showUnverifiedCollections: true },
-          },
-        }),
-      });
-
+      const res = await fetch(`/api/nfts?address=${encodeURIComponent(address)}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      const items: NftAsset[] = data?.result?.items ?? [];
-
-      const collectionMint = process.env.NEXT_PUBLIC_COLLECTION_MINT_ADDRESS;
-      const filtered = collectionMint
-        ? items.filter(item =>
-            item.grouping?.some(
-              g => g.group_key === 'collection' && g.group_value === collectionMint
-            )
-          )
-        : items;
+      const filtered: NftAsset[] = data.items ?? [];
 
       setNfts(filtered);
     } catch (e) {
@@ -278,12 +252,16 @@ export default function NftsPage() {
                 }}
               >
                 {/* Star map image */}
-                <img
-                  src={nftImageUrl}
-                  alt={target}
-                  style={{ width: '100%', height: 160, objectFit: 'cover', display: 'block' }}
-                  loading="lazy"
-                />
+                <div style={{ position: 'relative', width: '100%', height: 160 }}>
+                  <Image
+                    src={nftImageUrl}
+                    alt={target}
+                    fill
+                    unoptimized
+                    style={{ objectFit: 'cover' }}
+                    loading="lazy"
+                  />
+                </div>
 
                 {/* Card content */}
                 <div style={{ padding: 12 }}>

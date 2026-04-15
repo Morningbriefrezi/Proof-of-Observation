@@ -11,6 +11,26 @@ import ObserveCTA from '@/components/sky/ObserveCTA';
 import BestTargets from '@/components/sky/BestTargets';
 import AstraQuickAsk from '@/components/AstraQuickAsk';
 
+export async function generateMetadata() {
+  try {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://stellarrclub.vercel.app';
+    const res = await fetch(`${appUrl}/api/sky/score?lat=41.6941&lon=44.8337`, {
+      next: { revalidate: 3600 },
+    });
+    const data = await res.json();
+    if (data?.score) {
+      return {
+        title: `Sky Score ${data.score}/100 — Stellar`,
+        description: `${data.grade} sky conditions tonight. ${data.emoji} Check planet positions, 7-day forecast, and best observation windows.`,
+      };
+    }
+  } catch {}
+  return {
+    title: "Tonight's Sky — Stellar",
+    description: 'Live sky conditions, planet tracker, and 7-day astronomy forecast.',
+  };
+}
+
 export default async function SkyPage() {
   const t = await getTranslations('sky');
 
@@ -48,7 +68,7 @@ export default async function SkyPage() {
             {t('planets')}
           </h2>
           <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
-            Tap any planet for rise / transit / set details
+            {t('planetHint')}
           </p>
         </div>
         <Suspense fallback={

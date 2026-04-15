@@ -61,7 +61,8 @@
     "planets": "Planets Tonight",
     "sunRises": "Rises",
     "sunSets": "Sets",
-    "moonPhase": "Moon Phase"
+    "moonPhase": "Moon Phase",
+    "planetHint": "Tap any planet for rise / transit / set details"
   },
   "planets": {
     "moon": "Moon",
@@ -174,6 +175,13 @@
     "activatingWallet": "Activating wallet on Solana devnet…",
     "walletActivated": "Wallet activated — 1 devnet SOL funded",
     "viewOnExplorer": "View on Solana Explorer ↗"
+  },
+  "missions": {
+    "title": "Sky Missions",
+    "subtitle": "Observe the Moon, Jupiter, Saturn and more. Earn Stars, mint NFTs.",
+    "signIn": "Sign In →",
+    "availableMissions": "Available Missions",
+    "tonightsSky": "Tonight's Sky"
   },
   "dashboard": {
     "greeting": {

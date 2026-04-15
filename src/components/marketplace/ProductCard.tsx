@@ -1,92 +1,133 @@
 'use client';
 
 import { useState } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
-import Badge from '@/components/shared/Badge';
-import Button from '@/components/shared/Button';
-import { Product } from '@/lib/products';
+import Image from 'next/image';
+import type { Product } from '@/lib/dealers';
 
 interface Props {
   product: Product;
-  solPerGEL: number;
-  onSelect: (p: Product) => void;
+  showDealer: boolean;
+  dealerName: string;
 }
 
-const CATEGORY_ART: Record<string, { emoji: string; label: string; bg: string; border: string }> = {
-  telescope: { emoji: '🔭', label: 'Telescope',  bg: 'radial-gradient(ellipse at 30% 40%, rgba(56,240,255,0.12) 0%, rgba(10,22,40,0.95) 70%)',   border: 'rgba(56,240,255,0.15)' },
-  moonlamp:  { emoji: '🌕', label: 'Moon Lamp',  bg: 'radial-gradient(ellipse at 60% 30%, rgba(255,209,102,0.12) 0%, rgba(26,26,46,0.95) 70%)',   border: 'rgba(255,209,102,0.15)' },
-  projector: { emoji: '✨', label: 'Projector',  bg: 'radial-gradient(ellipse at 40% 60%, rgba(139,92,246,0.12) 0%, rgba(26,20,9,0.95) 70%)',     border: 'rgba(139,92,246,0.15)' },
-  accessory: { emoji: '⚙️', label: 'Accessory',  bg: 'radial-gradient(ellipse at 50% 50%, rgba(100,116,139,0.1) 0%, rgba(13,17,23,0.95) 70%)',   border: 'rgba(100,116,139,0.15)' },
-  digital:   { emoji: '🗺️', label: 'Digital',    bg: 'radial-gradient(ellipse at 50% 30%, rgba(139,92,246,0.15) 0%, rgba(21,13,46,0.95) 70%)',    border: 'rgba(139,92,246,0.2)' },
+const BADGE_STYLES: Record<string, { bg: string; color: string }> = {
+  'Best Seller': { bg: 'rgba(255,209,102,0.15)', color: '#FFD166' },
+  'New': { bg: 'rgba(52,211,153,0.15)', color: '#34d399' },
+  'Popular': { bg: 'rgba(56,240,255,0.15)', color: '#38F0FF' },
 };
 
-export default function ProductCard({ product, solPerGEL, onSelect }: Props) {
-  const t = useTranslations('marketplace');
-  const locale = useLocale();
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const name = locale === 'ka' ? product.name.ka : product.name.en;
-  const solPrice = (product.priceGEL * solPerGEL).toFixed(3);
-  const art = CATEGORY_ART[product.category] ?? CATEGORY_ART.accessory;
+const SKILL_BADGE_STYLES: Record<string, { background: string; color: string; border: string }> = {
+  beginner: { background: 'rgba(52,211,153,0.28)', color: '#34d399', border: '1px solid rgba(52,211,153,0.55)' },
+  intermediate: { background: 'rgba(245,158,11,0.28)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.55)' },
+  advanced: { background: 'rgba(139,92,246,0.28)', color: '#a78bfa', border: '1px solid rgba(139,92,246,0.55)' },
+};
+
+const CATEGORY_FALLBACK: Record<string, { icon: string; label: string; bg: string }> = {
+  telescope: { icon: '🔭', label: 'Telescope', bg: 'rgba(122,95,255,0.07)' },
+  eyepiece:  { icon: '🔬', label: 'Eyepiece',  bg: 'rgba(56,240,255,0.06)' },
+  binocular: { icon: '🌌', label: 'Binoculars', bg: 'rgba(20,184,166,0.07)' },
+  accessory: { icon: '🔧', label: 'Accessory', bg: 'rgba(245,158,11,0.07)' },
+};
+
+export default function ProductCard({ product, showDealer, dealerName }: Props) {
+  const [imgError, setImgError] = useState(false);
+  const badgeStyle = product.badge ? BADGE_STYLES[product.badge] : null;
+  const fallback = CATEGORY_FALLBACK[product.category] ?? CATEGORY_FALLBACK.telescope;
+  const showImg = !!product.image && !imgError;
 
   return (
     <div
-      className={`glass-card flex flex-col overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-xl ${!product.inStock ? 'opacity-60' : ''}`}
-      onClick={() => product.inStock && onSelect(product)}
+      className="flex flex-col rounded-2xl overflow-hidden"
+      style={{
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        backdropFilter: 'blur(8px)',
+      }}
     >
-      {/* Image area — explicit 3:4 aspect ratio so height is always defined */}
-      <div
-        className="relative w-full flex items-center justify-center"
-        style={{ background: art.bg, aspectRatio: '3 / 4' }}
-      >
-        {/* Shimmer skeleton while image loads */}
-        {product.image && !imgLoaded && (
-          <div className="absolute inset-0 animate-shimmer" />
-        )}
-        <span className="text-6xl select-none" style={{ filter: 'drop-shadow(0 0 20px rgba(255,255,255,0.15))' }}>
-          {art.emoji}
-        </span>
-        {product.image && (
-          <img
+      <div className="relative flex-shrink-0" style={{
+        aspectRatio: '1 / 1',
+        background: showImg ? 'rgba(0,0,0,0.3)' : fallback.bg,
+        overflow: 'hidden',
+      }}>
+        {showImg ? (
+          <Image
             src={product.image}
-            alt={name}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
-            onLoad={() => setImgLoaded(true)}
-            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            alt={product.name}
+            fill
+            sizes="(max-width: 768px) 50vw, 300px"
+            style={{ objectFit: 'contain', padding: '12px' }}
+            unoptimized
+            onError={() => setImgError(true)}
           />
-        )}
-        {/* Gradient overlay at bottom for readability */}
-        <div className="absolute inset-x-0 bottom-0 h-16 pointer-events-none"
-          style={{ background: 'linear-gradient(to top, rgba(10,14,26,0.85) 0%, transparent 100%)' }} />
-        {product.featured && (
-          <div className="absolute top-2 left-2">
-            <Badge color="brass">{t('aiPick')}</Badge>
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+            <span className="text-5xl leading-none">{fallback.icon}</span>
+            <p className="text-[10px] font-medium tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.15)' }}>
+              {fallback.label}
+            </p>
           </div>
         )}
-        {!product.inStock && (
-          <div className="absolute top-2 right-2">
-            <Badge color="dim">{t('outOfStock')}</Badge>
-          </div>
+        {badgeStyle && (
+          <span className="absolute top-2 left-2 text-[8px] px-1.5 py-0.5 rounded-full font-semibold"
+            style={{ background: badgeStyle.bg, color: badgeStyle.color }}>
+            {product.badge}
+          </span>
+        )}
+        {product.skillLevel && (
+          <span
+            className="absolute top-2 right-2 text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide"
+            style={SKILL_BADGE_STYLES[product.skillLevel]}
+          >
+            {product.skillLevel === 'intermediate' ? 'Mid' : product.skillLevel}
+          </span>
         )}
       </div>
 
-      {/* Body */}
-      <div className="flex flex-col gap-1.5 p-3 flex-1" style={{ borderTop: `1px solid ${art.border}` }}>
-        <p className="text-white text-sm font-semibold leading-snug line-clamp-2">{name}</p>
+      <div className="flex flex-col p-3 gap-1.5">
+        <p className="text-white text-[12px] font-semibold leading-snug line-clamp-2">{product.name}</p>
 
-        {/* Price row */}
-        <div className="flex items-baseline gap-2 mt-0.5">
-          <p className="text-[#FFD166] font-bold text-base">{product.priceGEL} ₾</p>
-          <p className="text-slate-500 text-xs">≈ {solPrice} SOL</p>
+        {product.specs && (
+          <div className="flex flex-wrap gap-1 mt-0.5">
+            {Object.entries(product.specs).slice(0, 2).map(([k, v]) => (
+              <span key={k} className="text-[9px] px-1.5 py-0.5 rounded"
+                style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.35)' }}>
+                {v}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <p className="text-[10px] line-clamp-2 leading-snug mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>
+          {product.description}
+        </p>
+
+        <div className="flex items-center justify-between mt-1.5">
+          <div>
+            <p className="text-white font-bold text-sm leading-none">
+              {product.currencySymbol}{product.price % 1 !== 0 ? product.price.toFixed(2) : product.price.toLocaleString()}
+            </p>
+            {showDealer && (
+              <p className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                via {dealerName}
+              </p>
+            )}
+          </div>
+          <a
+            href={product.externalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[11px] px-3 py-1.5 rounded-lg flex-shrink-0"
+            style={{
+              background: 'rgba(52,211,153,0.1)',
+              border: '1px solid rgba(52,211,153,0.25)',
+              color: '#34d399',
+              textDecoration: 'none',
+              fontWeight: 600,
+            }}
+          >
+            Buy →
+          </a>
         </div>
-
-        <Button
-          variant="brass"
-          className="w-full text-xs py-2 mt-auto"
-          disabled={!product.inStock}
-          onClick={e => { e.stopPropagation(); onSelect(product); }}
-        >
-          {t('buyNow')}
-        </Button>
       </div>
     </div>
   );

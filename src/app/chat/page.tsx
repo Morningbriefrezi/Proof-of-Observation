@@ -289,7 +289,7 @@ export default function ChatPage() {
           <div className="pointer-events-auto flex flex-col items-center gap-3 px-6 py-5 rounded-2xl text-center mx-4"
             style={{ background: 'rgba(7,11,20,0.95)', border: '1px solid var(--accent-border)', backdropFilter: 'blur(12px)' }}>
             <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 14, color: 'var(--text-primary)', margin: 0 }}>Sign in to chat with ASTRA</p>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 12, margin: 0 }}>Free forever · No wallet needed</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 12, margin: 0 }}>Free forever · No crypto knowledge needed</p>
             <button onClick={() => login()} className="btn-primary" style={{ padding: '8px 24px', fontSize: 13, minHeight: 40 }}>
               Sign In →
             </button>

@@ -31,6 +31,10 @@ export default function ProfilePage() {
   const [telescope, setTelescope] = useState<{ brand: string; model: string; aperture: string; type: string | null } | null>(null);
 
   useEffect(() => {
+    return () => setConfirmSignOut(false);
+  }, []);
+
+  useEffect(() => {
     if (!selectedPhoto) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setSelectedPhoto(null);
