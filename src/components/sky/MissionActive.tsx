@@ -398,21 +398,19 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
     return (
       <div
         id="mission-done-overlay"
-        className="fixed inset-0 z-50 flex flex-col items-center justify-start overflow-y-auto pt-4 pb-12 px-6"
-        style={{
-          background: 'radial-gradient(ellipse at center, rgba(56,240,255,0.05) 0%, transparent 60%), var(--bg-base)',
-        }}
+        className="fixed inset-0 z-50 overflow-hidden"
+        style={{ background: 'radial-gradient(ellipse at 50% -10%, rgba(56,240,255,0.07) 0%, transparent 55%), var(--bg-base)' }}
       >
-        {/* Confetti burst — 16 CSS-only particles */}
+        {/* Confetti burst */}
         {Array.from({ length: 16 }).map((_, i) => (
           <div
             key={i}
             style={{
-              position: 'absolute',
-              top: '50%',
+              position: 'fixed',
+              top: '30%',
               left: '50%',
-              width: 8,
-              height: 8,
+              width: 7,
+              height: 7,
               borderRadius: i % 2 === 0 ? '50%' : 2,
               background: confettiColors[i % 5],
               ['--tx' as string]: `${i * 23 - 80}px`,
@@ -420,108 +418,117 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
               ['--rot' as string]: `${i * 45}deg`,
               animation: `confettiBurst 800ms var(--ease-out-expo) ${i * 40}ms both`,
               pointerEvents: 'none',
+              zIndex: 1,
             }}
           />
         ))}
 
-        {/* Content */}
-        <div className="flex flex-col items-center gap-4 text-center relative z-10 max-w-xs mx-auto w-full">
+        {/* Layout — single column, no scroll */}
+        <div className="relative z-10 flex flex-col gap-2.5 px-4 pt-3 pb-3 max-w-sm mx-auto h-full">
 
-          {/* Checkmark circle */}
-          <div
-            className="w-20 h-20 rounded-full flex items-center justify-center animate-scale-in"
-            style={{ background: 'var(--accent-dim)', border: '2px solid var(--accent)' }}
-          >
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M6 12 l4 4 l8-8"
-                stroke="var(--accent)"
-                strokeWidth={2.5}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ strokeDasharray: 24, strokeDashoffset: 0 }}
-              />
-            </svg>
+          {/* Header row: checkmark + title inline */}
+          <div className="flex items-center gap-3 animate-slide-up">
+            <div
+              className="w-11 h-11 rounded-full flex-shrink-0 flex items-center justify-center"
+              style={{ background: 'var(--accent-dim)', border: '2px solid var(--accent)', boxShadow: '0 0 20px rgba(56,240,255,0.25)' }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M6 12 l4 4 l8-8" stroke="var(--accent)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <div className="text-left">
+              <h2 className="text-xl font-bold leading-tight" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
+                Discovery Sealed <span style={{ color: 'var(--accent)' }}>✦</span>
+              </h2>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  <MissionIcon id={mission.id} size={13} /> {mission.name}
+                </span>
+                {mintTxId && !mintTxId.startsWith('sim') && (
+                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(52,211,153,0.1)', color: 'var(--success)', border: '1px solid rgba(52,211,153,0.2)' }}>
+                    ✦ Solana
+                  </span>
+                )}
+                {mintTxId?.startsWith('sim') && (
+                  <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>local</span>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* Title */}
-          <h2
-            className="text-2xl font-bold animate-slide-up stagger-1"
-            style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}
+          {/* Stars hero — cosmic glow card */}
+          <div
+            className="rounded-2xl py-4 px-5 text-center relative overflow-hidden animate-scale-in"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,209,102,0.08) 0%, rgba(255,180,50,0.04) 100%)',
+              border: '1px solid rgba(255,209,102,0.3)',
+              boxShadow: '0 0 40px rgba(255,209,102,0.08), inset 0 1px 0 rgba(255,209,102,0.1)',
+            }}
           >
-            Discovery Sealed <span style={{ color: 'var(--accent)' }}>✦</span>
-          </h2>
-
-          {/* Mission info */}
-          <p
-            className="text-base animate-fade-in stagger-2 flex items-center gap-2 justify-center"
-            style={{ fontFamily: 'var(--font-body)', color: 'var(--text-secondary)' }}
-          >
-            <MissionIcon id={mission.id} size={20}/> {mission.name}
-          </p>
-
-          {/* On-chain status */}
-          {mintTxId && (
-            mintTxId.startsWith('sim') ? (
-              <p className="text-xs animate-fade-in stagger-2" style={{ color: 'var(--text-muted)' }}>
-                Saved locally — will sync when back online
-              </p>
-            ) : (
-              <p className="text-xs animate-fade-in stagger-2" style={{ color: 'var(--success)' }}>
-                ✦ Sealed on Solana
-              </p>
-            )
-          )}
-
-          {/* NFT image card */}
-          {nftImageUrl && (
-            <div
-              className="w-full max-w-[220px] rounded-2xl overflow-hidden animate-fade-in stagger-2"
+            {/* Glow behind number */}
+            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, rgba(255,209,102,0.12) 0%, transparent 65%)', pointerEvents: 'none' }} />
+            <p
+              className="relative font-black leading-none"
               style={{
-                border: '1px solid rgba(255,209,102,0.15)',
-                boxShadow: '0 0 40px rgba(255,209,102,0.06)',
+                fontSize: 56,
+                color: '#FFD166',
+                fontFamily: 'monospace',
+                textShadow: '0 0 24px rgba(255,209,102,0.8), 0 0 48px rgba(255,209,102,0.5), 0 0 80px rgba(255,209,102,0.25)',
+                letterSpacing: '-0.02em',
               }}
             >
-              <img
-                src={nftImageUrl}
-                alt={`Stellar: ${mission.name}`}
-                width={220}
-                height={220}
-                style={{ width: '100%', height: 'auto', display: 'block' }}
-              />
-            </div>
-          )}
+              +{starsEarned}
+            </p>
+            <p className="relative text-[11px] font-bold tracking-[0.25em] mt-1" style={{ color: 'rgba(255,209,102,0.55)' }}>
+              STARS EARNED
+            </p>
+          </div>
 
-          {/* Stars counter */}
-          <p
-            className="text-4xl font-bold animate-scale-in animate-glow-pulse stagger-3"
-            style={{ color: 'var(--stars)', fontFamily: 'monospace' }}
-          >
-            +{starsEarned} ✦
-          </p>
-
-          {/* Sky score ring */}
-          {skyScore && (
-            <div className="animate-fade-in stagger-4">
-              <ScoreRing size={80} strokeWidth={6} value={skyScore.score} color="gradient" sublabel={skyScore.grade} />
-            </div>
-          )}
-
-          {/* Explorer link */}
-          {isOnChain && (
-            <a
-              href={`https://explorer.solana.com/tx/${mintTxId}?cluster=devnet`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-xs animate-fade-in stagger-5"
-              style={{ color: 'var(--accent)', textDecoration: 'none' }}
+          {/* Middle row: NFT image + score + explorer */}
+          <div className="grid grid-cols-2 gap-2.5 animate-fade-in stagger-2">
+            {/* NFT visual */}
+            <div
+              className="rounded-xl overflow-hidden"
+              style={{
+                aspectRatio: '1 / 1',
+                border: '1px solid rgba(255,209,102,0.15)',
+                boxShadow: '0 0 24px rgba(255,209,102,0.06)',
+                background: 'rgba(255,255,255,0.02)',
+              }}
             >
-              View on Solana Explorer <ExternalLink size={12} className="inline" />
-            </a>
-          )}
+              {nftImageUrl ? (
+                <img src={nftImageUrl} alt={`Stellar: ${mission.name}`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <MissionIcon id={mission.id} size={44} />
+                </div>
+              )}
+            </div>
 
-          {/* Share buttons */}
-          <div className="flex gap-3 justify-center animate-fade-in stagger-5">
+            {/* Score + chain info */}
+            <div
+              className="rounded-xl flex flex-col items-center justify-center gap-2 p-3"
+              style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)' }}
+            >
+              {skyScore && (
+                <ScoreRing size={68} strokeWidth={5} value={skyScore.score} color="gradient" sublabel={skyScore.grade} />
+              )}
+              {isOnChain && (
+                <a
+                  href={`https://explorer.solana.com/tx/${mintTxId}?cluster=devnet`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-[11px]"
+                  style={{ color: 'var(--accent)', textDecoration: 'none' }}
+                >
+                  Explorer <ExternalLink size={10} />
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* Share row */}
+          <div className="grid grid-cols-2 gap-2 animate-fade-in stagger-3">
             <button
               onClick={() => window.open(buildTwitterShareUrl({
                 target: mission.name,
@@ -531,10 +538,10 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
                 appUrl,
                 ogImageUrl,
               }), '_blank')}
-              className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm text-white"
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+              className="flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs text-white"
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
             >
-              <span>𝕏</span> Share on X
+              <span style={{ fontSize: 13 }}>𝕏</span> Share
             </button>
             <button
               onClick={() => window.open(buildFarcasterShareUrl({
@@ -543,28 +550,28 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
                 stars: starsEarned,
                 appUrl,
               }), '_blank')}
-              className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm"
-              style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)', color: '#A855F7' }}
+              className="flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs"
+              style={{ background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.25)', color: '#A855F7' }}
             >
               ⬡ Farcaster
             </button>
           </div>
 
           {/* Action buttons */}
-          <div className="flex flex-col gap-3 w-full animate-slide-up stagger-6">
+          <div className="grid grid-cols-2 gap-2 animate-slide-up stagger-4">
             <button
               onClick={() => { onClose(); router.push('/nfts'); }}
-              className="w-full py-3 rounded-xl font-semibold text-sm"
+              className="py-3 rounded-xl font-semibold text-sm"
               style={{ background: 'var(--gradient-accent)', color: 'var(--bg-base)' }}
             >
-              View My NFTs →
+              View NFTs →
             </button>
             <button
               onClick={onClose}
-              className="w-full py-3 rounded-xl text-sm"
+              className="py-3 rounded-xl text-sm"
               style={{ background: 'transparent', border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}
             >
-              Continue Exploring
+              Continue
             </button>
           </div>
         </div>
