@@ -15,6 +15,7 @@ import LocationPicker from '@/components/LocationPicker';
 import { useLocation } from '@/lib/location';
 import PageTransition from '@/components/ui/PageTransition';
 import LoadingRing from '@/components/ui/LoadingRing';
+import AstraQuickAsk from '@/components/AstraQuickAsk';
 
 function EmailSubscribe() {
   const [email, setEmail] = useState('');
@@ -1159,6 +1160,7 @@ export default function HomePage() {
 
       </div>
       </PageTransition>
+      <AstraQuickAsk />
     </>
   );
 }

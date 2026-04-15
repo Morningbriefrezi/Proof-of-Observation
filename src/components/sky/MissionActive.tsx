@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { Mission, SkyVerification, MissionState, PhotoVerificationResult } from '@/lib/types';
@@ -65,6 +65,12 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
   const [showSlowMint, setShowSlowMint] = useState(false);
   const [skyScore, setSkyScore] = useState<SkyScoreResult | null>(null);
   const [photoVerification, setPhotoVerification] = useState<PhotoVerificationResult | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    containerRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [step]);
 
   useEffect(() => {
     if (step !== 'minting') { setShowSlowMint(false); return; }
@@ -200,7 +206,6 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
   };
 
   const handleMint = async () => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
     setStep('minting');
 
     const effectiveStars = sky?.verified ? mission.stars : 0;
@@ -309,10 +314,8 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
 
       if (justUnlocked.length > 0) {
         setNewRewards(justUnlocked.map(r => ({ icon: r.icon, name: r.name, description: r.description, code: r.code })));
-        window.scrollTo({ top: 0, behavior: 'instant' });
       } else {
         setStep('done');
-        window.scrollTo({ top: 0, behavior: 'instant' });
       }
     }, 1200);
   };
@@ -361,7 +364,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
               className="flex-1 text-center text-xs py-2.5 px-3 border border-[#FFD166]/30 text-[#FFD166] rounded-lg hover:bg-[#FFD166]/10 transition-all">
               Visit astroman.ge →
             </a>
-            <button onClick={() => { setStep('done'); onClose(); window.scrollTo({ top: 0, behavior: 'instant' }); }}
+            <button onClick={() => { setStep('done'); onClose(); }}
               className="flex-1 text-xs py-2.5 px-3 bg-[#34d399]/10 border border-[#34d399]/30 text-[#34d399] rounded-lg hover:bg-[#34d399]/20 transition-all">
               Continue
             </button>
@@ -387,7 +390,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
 
     return (
       <div
-        className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-y-auto py-12 px-6"
+        className="fixed inset-0 z-50 flex flex-col items-center justify-start overflow-y-auto pt-20 pb-12 px-6"
         style={{
           background: 'radial-gradient(ellipse at center, rgba(56,240,255,0.05) 0%, transparent 60%), var(--bg-base)',
         }}
@@ -594,7 +597,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
   const fullBleed = false;
 
   return (
-    <div className={`fixed inset-0 z-50 bg-[#070B14] ${step === 'minting' ? 'overflow-hidden' : 'overflow-y-auto scrollbar-hide'} flex flex-col`}>
+    <div ref={containerRef} className={`fixed inset-0 z-50 bg-[#070B14] ${step === 'minting' ? 'overflow-hidden' : 'overflow-y-auto scrollbar-hide'} flex flex-col`}>
 
       {/* Step progress indicator */}
       {(() => {

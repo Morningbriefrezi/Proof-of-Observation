@@ -149,68 +149,64 @@ export default function Nav() {
         }}
       >
         <div className="max-w-6xl mx-auto px-4">
-          <div className="h-14 grid grid-cols-[auto_1fr_auto] items-center gap-4">
+          <div className="h-14 flex items-center gap-3">
 
-            {/* LEFT: Logo + Search (desktop) / Hamburger + centered logo (mobile) */}
-            <div className="flex items-center gap-2">
-              {/* Mobile: hamburger */}
-              <button onClick={() => setDrawerOpen(true)} className="sm:hidden w-9 h-9 flex items-center justify-center rounded-xl" style={{ color: 'rgba(255,255,255,0.6)' }} aria-label="Open navigation">
+            {/* Desktop: search bar — far left */}
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="nav-search-bar hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full flex-shrink-0"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', fontSize: 12, minWidth: 148, cursor: 'text' }}
+            >
+              <Search size={13} />
+              <span>Search...</span>
+            </button>
+
+            {/* Mobile: hamburger + search */}
+            <div className="flex sm:hidden items-center gap-1 flex-shrink-0">
+              <button onClick={() => setDrawerOpen(true)} className="w-9 h-9 flex items-center justify-center rounded-xl transition-colors" style={{ color: 'rgba(255,255,255,0.6)' }} aria-label="Open navigation">
                 <AlignLeft size={18} />
               </button>
-              {/* Mobile: centered logo */}
-              <div className="sm:hidden absolute left-0 right-0 flex justify-center pointer-events-none">
-                <Link href="/" className="pointer-events-auto" title="Stellar">
-                  <div style={{ filter: 'drop-shadow(0 0 12px rgba(56,240,255,0.4))' }}>
-                    <AstroLogo heightClass="h-7" />
-                  </div>
-                </Link>
-              </div>
-              {/* Mobile: search icon */}
-              <button onClick={() => setSearchOpen(true)} className="sm:hidden w-9 h-9 flex items-center justify-center rounded-xl ml-auto" style={{ color: 'rgba(255,255,255,0.55)' }} aria-label="Search">
+              <button onClick={() => setSearchOpen(true)} className="w-9 h-9 flex items-center justify-center rounded-xl" style={{ color: 'rgba(255,255,255,0.55)' }} aria-label="Search">
                 <Search size={16} />
               </button>
-              {/* Desktop: Logo */}
-              <Link href="/" title="Stellar" className="hidden sm:block flex-shrink-0">
+            </div>
+
+            {/* Logo — mobile absolutely centered, desktop after search */}
+            <div className="sm:hidden absolute left-0 right-0 flex justify-center pointer-events-none">
+              <Link href="/" className="pointer-events-auto" title="Stellar">
+                <div style={{ filter: 'drop-shadow(0 0 12px rgba(56,240,255,0.4))' }}>
+                  <AstroLogo heightClass="h-7" />
+                </div>
+              </Link>
+            </div>
+            <div className="hidden sm:flex items-center flex-shrink-0">
+              <Link href="/" title="Stellar">
                 <div style={{ filter: 'drop-shadow(0 0 14px rgba(56,240,255,0.35))' }}>
                   <AstroLogo heightClass="h-7" />
                 </div>
               </Link>
-              {/* Desktop: Search bar — right of logo */}
-              <button
-                onClick={() => setSearchOpen(true)}
-                className="nav-search-bar hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full flex-shrink-0"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', fontSize: 12, width: 140, cursor: 'text' }}
-              >
-                <Search size={13} />
-                <span>Search...</span>
-              </button>
             </div>
 
-            {/* CENTER: Nav tabs — evenly sized, truly centered */}
-            <div className="hidden sm:flex items-center justify-center">
+            {/* Desktop: nav tabs centered */}
+            <div className="hidden sm:flex flex-1 items-center justify-center gap-1">
               {tabs.map(tab => {
                 const isActive = tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);
                 return (
                   <Link
                     key={tab.href}
                     href={tab.href}
-                    className={`nav-tab flex items-center justify-center gap-1.5 text-xs font-semibold ${isActive ? 'nav-tab-active' : ''}`}
-                    style={{
-                      width: 96,
-                      padding: '6px 0',
-                      textAlign: 'center',
-                      ...(isActive ? {
-                        background: 'linear-gradient(135deg, rgba(124,58,237,0.3) 0%, rgba(56,240,255,0.18) 100%)',
-                        border: '1px solid rgba(56,240,255,0.3)',
-                        color: '#67e8f9',
-                        textDecoration: 'none',
-                        boxShadow: '0 0 16px rgba(56,240,255,0.15), inset 0 1px 0 rgba(255,255,255,0.08)',
-                        textShadow: '0 0 10px rgba(56,240,255,0.5)',
-                      } : {
-                        color: 'rgba(255,255,255,0.6)',
-                        border: '1px solid transparent',
-                        textDecoration: 'none',
-                      }),
+                    className={`nav-tab px-3.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 ${isActive ? 'nav-tab-active' : ''}`}
+                    style={isActive ? {
+                      background: 'linear-gradient(135deg, rgba(124,58,237,0.3) 0%, rgba(56,240,255,0.18) 100%)',
+                      border: '1px solid rgba(56,240,255,0.3)',
+                      color: '#67e8f9',
+                      textDecoration: 'none',
+                      boxShadow: '0 0 16px rgba(56,240,255,0.15), inset 0 1px 0 rgba(255,255,255,0.08)',
+                      textShadow: '0 0 10px rgba(56,240,255,0.5)',
+                    } : {
+                      color: 'rgba(255,255,255,0.6)',
+                      border: '1px solid transparent',
+                      textDecoration: 'none',
                     }}
                   >
                     {tab.icon}
@@ -220,8 +216,8 @@ export default function Nav() {
               })}
             </div>
 
-            {/* RIGHT: Auth */}
-            <div className="flex items-center justify-end gap-2 flex-shrink-0 z-10">
+            {/* Right: auth */}
+            <div className="ml-auto sm:ml-0 flex items-center gap-2 flex-shrink-0 z-10">
 
               {!ready ? (
                 <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse" />

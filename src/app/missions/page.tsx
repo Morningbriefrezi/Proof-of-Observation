@@ -20,6 +20,7 @@ import type { QuizDef } from '@/lib/quizzes';
 import PageTransition from '@/components/ui/PageTransition';
 import { MissionIcon } from '@/components/shared/PlanetIcons';
 import { TelescopeIcon, StarTokenIcon, DifficultyDots } from '@/components/icons/CelestialIcons';
+import AstraQuickAsk from '@/components/AstraQuickAsk';
 
 export default function MissionsPage() {
   const { state } = useAppState();
@@ -265,6 +266,7 @@ export default function MissionsPage() {
         <ObservationLog />
       </div>
       </>
+      <AstraQuickAsk />
     </PageTransition>
   );
 }

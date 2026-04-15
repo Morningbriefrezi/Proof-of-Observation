@@ -9,6 +9,7 @@ import PlanetGrid from '@/components/sky/PlanetGrid';
 import EventBanner from '@/components/sky/EventBanner';
 import ObserveCTA from '@/components/sky/ObserveCTA';
 import BestTargets from '@/components/sky/BestTargets';
+import AstraQuickAsk from '@/components/AstraQuickAsk';
 
 export default async function SkyPage() {
   const t = await getTranslations('sky');
@@ -78,6 +79,8 @@ export default async function SkyPage() {
       <Suspense fallback={null}>
         <EventBanner />
       </Suspense>
+
+      <AstraQuickAsk />
 
       {/* Ask ASTRA */}
       <Link

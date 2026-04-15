@@ -23,7 +23,7 @@ const columns = [
   {
     title: 'Community',
     links: [
-      { label: 'Leaderboard',    href: '/missions' },
+      { label: 'Leaderboard',    href: '/leaderboard' },
       { label: 'Discoveries',    href: '/nfts' },
     ],
   },

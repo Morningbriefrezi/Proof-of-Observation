@@ -1,154 +1,131 @@
-# Stellar — AI-Verified Telescope Observations on Solana
+# Stellar ✦
 
-> AI-verified telescope observations on Solana. Photograph → Verify → Mint NFT → Earn Stars.
+**The night sky app — observe, earn, collect.**
 
-## What Makes This Different
+Stellar turns every clear night into a verified discovery. Check tonight's sky score, complete observation missions, earn Stars tokens, and collect compressed NFT proofs — all powered by invisible Solana infrastructure.
 
-- **Claude Vision anti-cheat** — every photo submission runs through Claude's vision model to detect screenshots, digitally-generated images, and liveness spoofing before minting
-- **Compressed NFTs at ~$0.000005/mint** — Metaplex Bubblegum on Solana devnet; this is actual on-chain proof-of-observation, not just token gating
-- **Real distribution** — Stars tokens are redeemable for physical telescope equipment at [Astroman.ge](https://astroman.ge) (Georgia's first astronomy store, 60K+ followers, active retail inventory)
+🔗 **Live:** [stellarrclub.vercel.app](https://stellarrclub.vercel.app)
+🏗️ **Hackathon:** Colosseum Frontier 2026 · Consumer Track
+👤 **Builder:** Rezi ([@StellarClub26](https://x.com/StellarClub26)) — Founder of [Astroman.ge](https://astroman.ge), Georgia's first astronomy e-commerce store
 
-## Live Demo
+---
 
-**[stellarrclub.vercel.app](https://stellarrclub.vercel.app)**
+## What It Does
 
-## How It Works
+Stellar answers one universal question: **"What can I see in the sky tonight?"**
 
-1. **Observe** — Check tonight's sky forecast, planet positions, and find clear windows
-2. **Capture** — Photograph the sky with your phone
-3. **Verify** — Claude Vision + sky oracle confirms real conditions at your location and time
-4. **Mint** — Compressed NFT sealed on Solana with an on-chain weather oracle hash
-5. **Earn** — Stars SPL tokens awarded per verified observation
-6. **Spend** — Redeem Stars at partner telescope stores in your region
+Users get a real-time Sky Score (0–100), tonight's visible planets and highlights, 7-day forecast, and AI-powered guidance from ASTRA. When conditions are right, users complete observation missions — photograph celestial objects, get AI-verified, and earn:
 
-No wallets. No seed phrases. Users sign up with email and start observing. The Solana layer is invisible until we show them.
+- **Compressed NFTs** (Metaplex Bubblegum) — proof of each observation, ~$0.000005/mint
+- **Stars tokens** (SPL) — redeemable for real telescope equipment at Astroman.ge
 
-## Architecture
+No wallets. No seed phrases. No gas fees. Sign up with email. The blockchain is invisible.
 
-```mermaid
-graph TD
-    A[User] -->|Email / Google login| B[Privy Auth]
-    B --> C[Embedded Solana Wallet — auto-created]
-    A -->|Phone camera| D[Photo]
-    D -->|FormData: file, lat, lon, capturedAt| E[/api/observe/verify]
-    E -->|Claude Vision| F[Confidence Score + Anti-cheat]
-    A -->|Location + timestamp| G[/api/sky/verify]
-    G -->|Open-Meteo API| H[Oracle Hash — SHA-256]
-    F & H -->|Verified| I[/api/mint]
-    I -->|Bubblegum + Umi| J[Compressed NFT on Solana Devnet]
-    I -->|SPL Token| K[Stars minted to user wallet]
-    K -->|/api/stars-balance| L[Marketplace — redeem for real gear]
-```
+---
 
-Plain-text equivalent:
-```
-User → Privy Auth → Email/Google login → Embedded Solana wallet
-User → Camera → Claude Vision (/api/observe/verify) → Confidence score
-User → /api/sky/verify (Open-Meteo) → Oracle hash (SHA-256)
-Server → Bubblegum + Umi → Compressed NFT on Solana devnet
-Server → SPL Token → Stars minted to user wallet
-User → /api/stars-balance → Marketplace → Redeem discount codes
-```
+## Why Blockchain?
 
-## Screenshots
+| Without Solana | With Solana |
+|---|---|
+| Points in localStorage — lost if you clear your browser | Stars as SPL tokens — permanent, verifiable, tradeable |
+| "Trust me, I observed Jupiter" | Compressed NFT with oracle hash, coordinates, timestamp — verifiable on Explorer |
+| Discount codes emailed | Token-gated redemption — balance checked on-chain |
+| App shuts down, history gone | NFTs and tokens persist in your wallet forever |
 
-| Home / Sky Forecast | Mission + Camera | Mint Success | ASTRA Chat |
-|---|---|---|---|
-| *(stellarrclub.vercel.app)* | *(Mission flow)* | *(Explorer link + confetti)* | *(Live planet data)* |
+Compressed NFTs cost ~$0.000005 each. We can mint millions. The fee payer covers all gas — users never need SOL.
 
-## Setup
+---
 
-```bash
-git clone https://github.com/Rezimod/Stellar.git
-cd Stellar
-npm install
-cp .env.example .env.local
-# Fill in env vars — see .env.example
-npm run dev
-```
+## Distribution Advantage
 
-Optional devnet setup (required for on-chain features):
+Stellar isn't starting from zero. [Astroman.ge](https://astroman.ge) is Georgia's first astronomy e-commerce store with:
+- 60K+ social media followers
+- Physical retail in Tbilisi
+- Active telescope customer base
+- Real products in the Stellar marketplace
 
-```bash
-# Fund devnet wallet (~5 SOL needed)
-solana airdrop 5 --url devnet
+Stars tokens earned in-app are redeemable for real discounts at the physical store.
 
-# Create Bubblegum Merkle tree + collection NFT
-npm run setup:bubblegum
-
-# Create Stars SPL token
-npm run setup:token
-```
+---
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Frontend | Next.js 15, React 19, TypeScript, Tailwind CSS 4 |
-| Auth + Wallets | Privy — email/Google/SMS login, embedded Solana wallets |
-| AI | Claude API (claude-sonnet-4-6) — ASTRA companion + photo verification |
-| NFTs | Metaplex Bubblegum compressed NFTs via Umi |
-| Rewards | Custom STARS SPL token |
-| Weather | Open-Meteo API (free, no key required) |
-| Astronomy | astronomy-engine (local JS — no external API) |
-| Database | Neon serverless Postgres via Drizzle ORM |
-| i18n | next-intl (English + Georgian) |
-| Deploy | Vercel |
+**Frontend:** Next.js 15, React 19, TypeScript, Tailwind CSS 4  
+**Auth:** Privy (embedded Solana wallets, email/Google login)  
+**Blockchain:** Metaplex Bubblegum (cNFTs), SPL Token (Stars), Helius DAS API  
+**AI:** Claude API with tool calling (ASTRA), Claude Vision (photo verification)  
+**Data:** Open-Meteo (weather), astronomy-engine (planet positions)  
+**Database:** Neon (Postgres) via Drizzle ORM  
+**Deploy:** Vercel
 
-## Environment Variables
+Built with: Metaplex Bubblegum · Helius · Privy · Open-Meteo · Claude API
 
-See `.env.example` for the full list. Key variables:
+---
 
-```
-NEXT_PUBLIC_PRIVY_APP_ID=       # Privy dashboard → app settings
-ANTHROPIC_API_KEY=              # Anthropic console
-DATABASE_URL=                   # Neon dashboard → connection string
-FEE_PAYER_PRIVATE_KEY=          # Base58 devnet wallet key
-MERKLE_TREE_ADDRESS=            # Output of: npm run setup:bubblegum
-COLLECTION_MINT_ADDRESS=        # Output of: npm run setup:bubblegum
-STARS_TOKEN_MINT=               # Output of: npm run setup:token
-SOLANA_RPC_URL=                 # Helius devnet RPC or https://api.devnet.solana.com
-```
+## Features
 
-## Project Structure
+- **Sky Score** — 0–100 rating for tonight's sky quality
+- **Tonight's Highlights** — visible planets, moon phase, best viewing window
+- **7-Day Forecast** — daily sky quality rated Go/Maybe/Skip
+- **Planet Tracker** — rise/set/transit times for Mercury through Saturn
+- **ASTRA AI** — floating chat widget with live sky tool calling (accessible from every page)
+- **Observation Missions** — 7 targets from Moon (naked eye) to Orion Nebula (telescope)
+- **Knowledge Quizzes** — Solar System, Constellations, Telescopes (EN + Georgian)
+- **NFT Gallery** — compressed observation NFTs fetched via Helius DAS
+- **Marketplace** — real Astroman.ge products, Stars token redemption
+- **Bilingual** — English + Georgian (next-intl)
 
-```
-src/
-  app/
-    page.tsx              — Home dashboard + sky highlights
-    sky/                  — 7-day forecast + planet tracker
-    missions/             — Mission list + observation flow
-    chat/                 — ASTRA AI companion
-    marketplace/          — Location-aware dealer marketplace
-    nfts/                 — NFT gallery (Helius DAS API)
-    profile/              — User profile + Stars balance
-    api/
-      chat/               — Claude streaming
-      sky/verify/         — Sky oracle (Open-Meteo + SHA-256 hash)
-      observe/verify/     — Photo verification (Claude Vision)
-      mint/               — Compressed NFT minting (Bubblegum)
-      award-stars/        — SPL token minting
-      leaderboard/        — Real DB leaderboard
-  lib/
-    mint-nft.ts           — Bubblegum + Umi minting (server-side)
-    stars.ts              — Stars SPL token helpers
-    location.tsx          — GPS + region detection (caucasus / north_america / global)
-    dealers.ts            — Multi-dealer product system
-    sky-data.ts           — Open-Meteo weather + forecast
-    planets.ts            — Planet positions via astronomy-engine
-  components/
-    sky/                  — MissionActive, Camera, Verification, ObserveFlow
-    LocationPicker.tsx    — Region selector pill/modal
+---
+
+## How to Run
+
+```bash
+git clone https://github.com/Morningbriefrezi/Stellar.git
+cd Stellar
+npm install
+cp .env.example .env.local  # fill in your keys
+npm run dev
 ```
 
-## Founder
+Required env vars: see `.env.example`
 
-Built by Rezi Modebadze, founder of Astroman.ge — Georgia's first astronomy store.
+---
 
-## Hackathon
+## On-Chain Setup (devnet)
 
-**Colosseum Frontier 2026** — Consumer Track  
-Submitted by: Rezi (Revaz Modebadze)
+```bash
+# 1. Fund your fee payer wallet
+solana airdrop 5 <FEE_PAYER_ADDRESS> --url devnet
+
+# 2. Create Bubblegum merkle tree + NFT collection
+npm run setup:bubblegum
+
+# 3. Deploy Stars SPL token
+npm run setup:token
+
+# 4. Seed demo observations for judges
+npm run seed:demo
+```
+
+---
+
+## Architecture
+
+```
+User (email login via Privy)
+  → Tonight's Sky Score + Highlights (Open-Meteo + astronomy-engine)
+  → Ask ASTRA (Claude with live tool calling — planet positions, sky conditions)
+  → Start Mission → Camera → Claude Vision photo verification
+  → Sky Oracle hash (deterministic per location/hour)
+  → POST /api/mint → Metaplex Bubblegum cNFT on devnet
+  → POST /api/observe/log → SPL token mintTo (Stars)
+  → NFT Gallery (Helius DAS: getAssetsByOwner)
+  → Marketplace → Stars redemption → Astroman.ge
+```
+
+All transactions use a server-side fee payer. Users never interact with wallets directly.
+
+---
 
 ## License
 

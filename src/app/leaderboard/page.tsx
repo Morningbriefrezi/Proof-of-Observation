@@ -186,6 +186,19 @@ export default function LeaderboardPage() {
         </h1>
       </div>
 
+      {/* Live data notice */}
+      <div
+        className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
+        style={{
+          background: 'rgba(56,240,255,0.05)',
+          border: '1px solid rgba(56,240,255,0.12)',
+          color: 'rgba(56,240,255,0.7)',
+        }}
+      >
+        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#38F0FF', flexShrink: 0, opacity: 0.7, display: 'inline-block' }} />
+        Leaderboard updates with real observer data as missions are completed on-chain
+      </div>
+
       {/* Time filter tabs */}
       <div
         className="flex rounded-xl p-1 gap-1"

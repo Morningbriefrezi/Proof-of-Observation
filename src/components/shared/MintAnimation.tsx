@@ -7,7 +7,7 @@ interface MintAnimationProps {
 
 export default function MintAnimation({ done, slowMsg }: MintAnimationProps) {
   return (
-    <div className="fixed inset-0 z-[60] bg-[#070B14] flex flex-col items-center justify-center gap-10 px-6 text-center">
+    <div className="fixed inset-0 z-[60] bg-[#070B14] flex flex-col items-center justify-start pt-20 gap-10 px-6 text-center">
 
       {/* Ring stack */}
       <div className="relative flex items-center justify-center" style={{ width: 160, height: 160 }}>

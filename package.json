@@ -8,6 +8,7 @@
     "start": "next start",
     "setup:bubblegum": "npx tsx scripts/setup-bubblegum.ts",
     "setup:token": "npx tsx scripts/create-stars-token.ts",
+    "seed:demo": "npx tsx scripts/seed-demo-data.ts",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },

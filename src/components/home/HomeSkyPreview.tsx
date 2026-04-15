@@ -151,12 +151,15 @@ function StatCard({ label, value, sub, warn, icon }: { label: string; value: str
 
 // ── Main component ───────────────────────────────────────────────────────────
 
+interface SkyScoreData { score: number; grade: string; emoji: string }
+
 export default function HomeSkyPreview() {
   const { location } = useLocation();
   const [forecast, setForecast] = useState<SkyDay[] | null>(null);
   const [planets, setPlanets] = useState<PlanetInfo[] | null>(null);
   const [selectedDay, setSelectedDay] = useState(0);
   const [planetsLoading, setPlanetsLoading] = useState(false);
+  const [skyScore, setSkyScore] = useState<SkyScoreData | null>(null);
 
   useEffect(() => {
     const lat = location.lat || 41.6941;
@@ -166,6 +169,8 @@ export default function HomeSkyPreview() {
       .then(r => r.ok ? r.json() : null).then(setForecast).catch(() => setForecast([]));
     fetch(`/api/sky/planets?lat=${lat}&lng=${lng}`)
       .then(r => r.ok ? r.json() : null).then(setPlanets).catch(() => setPlanets([]));
+    fetch(`/api/sky/score?lat=${lat}&lon=${lng}`)
+      .then(r => r.ok ? r.json() : null).then(d => { if (d?.score != null) setSkyScore(d); }).catch(() => {});
   }, [location.lat, location.lon]);
 
   function selectDay(index: number, dateStr: string) {
@@ -218,13 +223,69 @@ export default function HomeSkyPreview() {
     { label: 'Moon', icon: '☽', value: `${moonPct}%`, sub: moonPhaseName(moonIllum), warn: moonWarn },
   ];
 
+  const scoreColor = !skyScore ? '#94a3b8' : skyScore.score >= 70 ? '#34d399' : skyScore.score >= 50 ? '#FBBF24' : '#64748b';
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <style>{`
         @keyframes skyEnter { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
         @keyframes barGrow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
         @keyframes planetSlideIn { from { opacity:0; transform:translateX(-8px); } to { opacity:1; transform:translateX(0); } }
+        @keyframes scoreIn { from { opacity:0; transform:scale(0.85); } to { opacity:1; transform:scale(1); } }
       `}</style>
+
+      {/* ── SKY SCORE ROW ── */}
+      {skyScore && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 14, padding: '12px 16px',
+          borderRadius: 14, background: 'rgba(12,18,33,0.5)',
+          border: `1px solid ${scoreColor}22`,
+          animation: 'scoreIn 0.5s cubic-bezier(0.22,1,0.36,1) both',
+        }}>
+          {/* Circular score */}
+          <div style={{ position: 'relative', width: 64, height: 64, flexShrink: 0 }}>
+            <svg width="64" height="64" style={{ transform: 'rotate(-90deg)' }}>
+              <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="5" />
+              <circle cx="32" cy="32" r="26" fill="none" stroke={scoreColor} strokeWidth="5"
+                strokeDasharray={`${2 * Math.PI * 26}`}
+                strokeDashoffset={`${2 * Math.PI * 26 * (1 - skyScore.score / 100)}`}
+                strokeLinecap="round" />
+            </svg>
+            <div style={{
+              position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexDirection: 'column',
+            }}>
+              <span style={{ color: scoreColor, fontSize: 18, fontWeight: 700, lineHeight: 1, fontFamily: 'monospace' }}>
+                {skyScore.score}
+              </span>
+            </div>
+          </div>
+          {/* Label */}
+          <div style={{ flex: 1 }}>
+            <div style={{ color: scoreColor, fontWeight: 600, fontSize: 14 }}>
+              {skyScore.emoji} {skyScore.grade} Sky Tonight
+            </div>
+            <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, marginTop: 2 }}>
+              Sky Score {skyScore.score}/100
+            </div>
+          </div>
+          {/* Share */}
+          <button
+            onClick={() => {
+              const text = `Tonight's Sky Score: ${skyScore.score}/100 ${skyScore.emoji} — ${skyScore.grade} conditions for stargazing · stellarrclub.vercel.app`;
+              if (navigator.share) { navigator.share({ text }).catch(() => {}); }
+              else { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank'); }
+            }}
+            style={{
+              padding: '6px 12px', borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+              background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+              color: 'rgba(255,255,255,0.5)', whiteSpace: 'nowrap', flexShrink: 0,
+            }}
+          >
+            Share ↗
+          </button>
+        </div>
+      )}
 
       {/* ── MAIN CARD ── */}
       <div style={{
