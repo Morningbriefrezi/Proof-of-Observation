@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
 import { useAppState } from '@/hooks/useAppState';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   CloudSun, ShoppingBag, Satellite, User, Search, BookOpen,
   Trophy, Map, MessageCircle, Telescope, LogOut, Settings, Gem,
@@ -56,6 +56,7 @@ export default function Nav() {
   const [showMenu, setShowMenu] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const logoRef = useRef<HTMLDivElement>(null);
   const t = useTranslations('nav');
 
   useEffect(() => { setSearchOpen(false); setDropdownOpen(false); setShowMenu(false); }, [pathname]);
@@ -109,15 +110,15 @@ export default function Nav() {
             className="fixed z-[56]"
             style={{
               top: 56,
-              left: 0,
+              left: logoRef.current ? logoRef.current.getBoundingClientRect().left : 56,
               width: 196,
               animation: 'dropIn 0.15s cubic-bezier(0.22,1,0.36,1)',
               background: 'rgba(5,8,18,0.97)',
               backdropFilter: 'blur(32px)',
               WebkitBackdropFilter: 'blur(32px)',
-              borderRight: '1px solid rgba(255,255,255,0.07)',
-              borderBottom: '1px solid rgba(255,255,255,0.07)',
-              borderBottomRightRadius: 12,
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderTopColor: 'transparent',
+              borderRadius: '0 0 12px 12px',
               boxShadow: '4px 8px 24px rgba(0,0,0,0.5)',
               padding: '8px 6px 10px',
             }}
@@ -205,18 +206,14 @@ export default function Nav() {
             {/* Logo — mobile: absolutely centered; sm+: in flow */}
             <div className="sm:hidden absolute left-0 right-0 flex justify-center pointer-events-none">
               <Link href="/" className="pointer-events-auto" title="Stellar">
-                <div style={{
-                  filter: 'drop-shadow(0 0 18px rgba(56,240,255,0.6)) drop-shadow(0 0 36px rgba(56,240,255,0.25))',
-                }}>
+                <div style={{ filter: 'drop-shadow(0 0 18px rgba(56,240,255,0.6)) drop-shadow(0 0 36px rgba(56,240,255,0.25))' }}>
                   <AstroLogo heightClass="h-8" size={30} />
                 </div>
               </Link>
             </div>
-            <div className="hidden sm:flex items-center flex-shrink-0">
+            <div ref={logoRef} className="hidden sm:flex items-center flex-shrink-0">
               <Link href="/" title="Stellar">
-                <div style={{
-                  filter: 'drop-shadow(0 0 18px rgba(56,240,255,0.6)) drop-shadow(0 0 36px rgba(56,240,255,0.25))',
-                }}>
+                <div style={{ filter: 'drop-shadow(0 0 18px rgba(56,240,255,0.6)) drop-shadow(0 0 36px rgba(56,240,255,0.25))' }}>
                   <AstroLogo heightClass="h-8" size={30} />
                 </div>
               </Link>
