@@ -171,6 +171,20 @@ export default function Nav() {
               <AlignLeft size={17} />
             </button>
 
+            {/* Hamburger — desktop only, toggles sidebar */}
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('stellar:sidebar-toggle'))}
+              className="nav-icon-btn hidden lg:flex w-9 h-9 items-center justify-center rounded-xl flex-shrink-0"
+              style={{ color: 'rgba(255,255,255,0.55)', background: 'transparent' }}
+              aria-label="Toggle sidebar"
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 3.5, alignItems: 'flex-start' }}>
+                <span style={{ display: 'block', width: 16, height: 1.5, borderRadius: 2, background: 'rgba(255,255,255,0.55)' }} />
+                <span style={{ display: 'block', width: 11, height: 1.5, borderRadius: 2, background: 'rgba(56,240,255,0.7)' }} />
+                <span style={{ display: 'block', width: 14, height: 1.5, borderRadius: 2, background: 'rgba(255,255,255,0.55)' }} />
+              </div>
+            </button>
+
             {/* Logo — mobile: absolutely centered; desktop: in flow */}
             <div className="sm:hidden absolute left-0 right-0 flex justify-center pointer-events-none">
               <Link href="/" className="pointer-events-auto" title="Stellar">
@@ -179,7 +193,7 @@ export default function Nav() {
                 </div>
               </Link>
             </div>
-            <div className="hidden sm:flex lg:hidden items-center flex-shrink-0">
+            <div className="hidden sm:flex items-center flex-shrink-0">
               <Link href="/" title="Stellar">
                 <div style={{ filter: 'drop-shadow(0 0 14px rgba(56,240,255,0.35))' }}>
                   <AstroLogo heightClass="h-7" />

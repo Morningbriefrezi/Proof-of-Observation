@@ -60,6 +60,13 @@ export default function DesktopSidebar() {
     return () => { document.body.classList.remove('sidebar-expanded'); };
   }, [collapsed]);
 
+  // Listen for toggle event dispatched by Nav hamburger
+  useEffect(() => {
+    const handler = () => setCollapsed(v => !v);
+    window.addEventListener('stellar:sidebar-toggle', handler);
+    return () => window.removeEventListener('stellar:sidebar-toggle', handler);
+  }, []);
+
   const handleLogout = async () => {
     await logout();
     setWallet('');
@@ -70,10 +77,10 @@ export default function DesktopSidebar() {
     <aside
       className="hidden lg:flex flex-col fixed left-0 top-14 h-[calc(100vh-56px)] z-30 overflow-hidden"
       style={{
-        width: collapsed ? 52 : 216,
+        width: collapsed ? 0 : 216,
         transition: 'width 0.22s cubic-bezier(0.16,1,0.3,1)',
         background: 'rgba(4, 6, 14, 0.98)',
-        borderRight: '1px solid rgba(255,255,255,0.06)',
+        borderRight: collapsed ? 'none' : '1px solid rgba(255,255,255,0.06)',
       }}
     >
       <style>{`
@@ -116,47 +123,20 @@ export default function DesktopSidebar() {
         }
       `}</style>
 
-      {/* Toggle button */}
-      <div style={{ padding: collapsed ? '10px 8px' : '10px 10px', flexShrink: 0 }}>
-        <button
-          onClick={() => setCollapsed(v => !v)}
-          className="sb-toggle w-full flex items-center gap-2.5"
-          style={{
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            padding: collapsed ? '6px 6px' : '6px 8px',
-            height: 36,
-            justifyContent: collapsed ? 'center' : 'space-between',
-          }}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {!collapsed && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ filter: 'drop-shadow(0 0 6px rgba(56,240,255,0.4))' }}>
-                <AstroLogo heightClass="h-5" />
-              </div>
-            </div>
-          )}
-          {/* Lines icon when collapsed, chevron when expanded */}
-          <div style={{
-            display: 'flex', flexDirection: 'column', gap: 3.5, flexShrink: 0,
-            alignItems: 'center', justifyContent: 'center',
-            width: 18,
-          }}>
-            {collapsed ? (
-              <>
-                <span style={{ display: 'block', width: 16, height: 1.5, borderRadius: 2, background: 'rgba(255,255,255,0.45)' }} />
-                <span style={{ display: 'block', width: 11, height: 1.5, borderRadius: 2, background: 'rgba(56,240,255,0.6)' }} />
-                <span style={{ display: 'block', width: 14, height: 1.5, borderRadius: 2, background: 'rgba(255,255,255,0.45)' }} />
-              </>
-            ) : (
-              <ChevronRight
-                size={14}
-                style={{ color: 'rgba(255,255,255,0.35)', transform: 'rotate(180deg)' }}
-              />
-            )}
+      {/* Header: logo + close chevron */}
+      <div style={{ padding: '10px 10px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ filter: 'drop-shadow(0 0 6px rgba(56,240,255,0.4))' }}>
+            <AstroLogo heightClass="h-5" />
           </div>
+        </div>
+        <button
+          onClick={() => setCollapsed(true)}
+          className="sb-toggle"
+          style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '6px', borderRadius: 8 }}
+          aria-label="Collapse sidebar"
+        >
+          <ChevronRight size={14} style={{ color: 'rgba(255,255,255,0.35)', transform: 'rotate(180deg)', display: 'block' }} />
         </button>
       </div>
 

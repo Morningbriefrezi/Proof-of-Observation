@@ -21,6 +21,7 @@ interface NftAttribute {
 
 interface NftAsset {
   id: string;
+  photo?: string;
   content?: {
     metadata?: {
       name?: string;
@@ -37,6 +38,7 @@ function getAttr(attrs: NftAttribute[] | undefined, key: string): string {
 function localToNftAsset(m: CompletedMission): NftAsset {
   return {
     id: m.txId,
+    photo: m.photo,
     content: {
       metadata: {
         name: `Stellar: ${m.name}`,
@@ -53,7 +55,7 @@ function localToNftAsset(m: CompletedMission): NftAsset {
   };
 }
 
-function NftDetailOverlay({ nft, onClose }: { nft: NftAsset; onClose: () => void }) {
+function NftDetailOverlay({ nft, onClose, onRetryMint, retrying }: { nft: NftAsset; onClose: () => void; onRetryMint?: () => void; retrying?: boolean }) {
   const attrs = nft.content?.metadata?.attributes;
   const name = nft.content?.metadata?.name ?? 'Stellar Observation';
   const target = getAttr(attrs, 'Target') || name.replace('Stellar: ', '') || 'Unknown';
@@ -106,7 +108,14 @@ function NftDetailOverlay({ nft, onClose }: { nft: NftAsset; onClose: () => void
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto px-4 py-5 flex flex-col gap-4 max-w-lg mx-auto w-full">
 
-        {/* NFT image — large */}
+        {/* Observation photo — show actual captured image if available */}
+        {nft.photo && (
+          <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+            <img src={nft.photo} alt="Your observation" style={{ width: '100%', height: 'auto', display: 'block', maxHeight: 320, objectFit: 'cover' }} />
+          </div>
+        )}
+
+        {/* NFT certificate art */}
         <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,209,102,0.12)' }}>
           <Image
             src={nftImageUrl}
@@ -168,20 +177,24 @@ function NftDetailOverlay({ nft, onClose }: { nft: NftAsset; onClose: () => void
           </button>
         </div>
 
-        {/* Solana Explorer link */}
+        {/* Solana Explorer link / retry */}
         {nft.id.startsWith('sim') ? (
-          <div
-            className="flex items-center justify-center gap-2 rounded-xl text-sm"
+          <button
+            onClick={onRetryMint}
+            disabled={retrying || !onRetryMint}
+            className="flex items-center justify-center gap-2 rounded-xl text-sm w-full"
             style={{
-              background: 'rgba(251,191,36,0.06)',
-              border: '1px solid rgba(251,191,36,0.15)',
+              background: retrying ? 'rgba(251,191,36,0.04)' : 'rgba(251,191,36,0.08)',
+              border: '1px solid rgba(251,191,36,0.25)',
               color: 'var(--warning)',
               padding: '12px 0',
               minHeight: 44,
+              cursor: retrying ? 'wait' : 'pointer',
+              transition: 'background 0.15s',
             }}
           >
-            Pending sync to Solana
-          </div>
+            {retrying ? 'Syncing to Solana…' : 'Seal on Solana →'}
+          </button>
         ) : (
           <a
             href={`https://explorer.solana.com/address/${nft.id}?cluster=devnet`}
@@ -221,7 +234,7 @@ function NftDetailOverlay({ nft, onClose }: { nft: NftAsset; onClose: () => void
 }
 
 export default function NftsPage() {
-  const { authenticated, ready, login } = usePrivy();
+  const { authenticated, ready, login, getAccessToken } = usePrivy();
   const { wallets } = useWallets();
   const { state } = useAppState();
   const [nfts, setNfts] = useState<NftAsset[]>([]);
@@ -230,6 +243,40 @@ export default function NftsPage() {
   const [starsBalance, setStarsBalance] = useState<number>(0);
   const [sort, setSort] = useState<'recent' | 'stars'>('recent');
   const [selectedNft, setSelectedNft] = useState<NftAsset | null>(null);
+  const [retrying, setRetrying] = useState(false);
+
+  const handleRetryMint = async () => {
+    if (!selectedNft || !address) return;
+    const mission = state.completedMissions.find(m => m.txId === selectedNft.id);
+    if (!mission) return;
+    setRetrying(true);
+    try {
+      const authToken = await getAccessToken().catch(() => null);
+      const res = await fetch('/api/mint', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        },
+        body: JSON.stringify({
+          userAddress: address,
+          target: mission.name,
+          timestampMs: new Date(mission.timestamp).getTime(),
+          lat: mission.latitude,
+          lon: mission.longitude,
+          cloudCover: mission.sky?.cloudCover ?? 0,
+          oracleHash: mission.sky?.oracleHash ?? 'retry',
+          stars: mission.stars,
+        }),
+      });
+      if (res.ok) {
+        setSelectedNft(null);
+        await fetchNfts();
+      }
+    } finally {
+      setRetrying(false);
+    }
+  };
 
   const solanaWallet = wallets.find(w => (w as { chainType?: string }).chainType === 'solana');
   const address = solanaWallet?.address ?? null;
@@ -345,7 +392,7 @@ export default function NftsPage() {
 
   return (
     <>
-    {selectedNft && <NftDetailOverlay nft={selectedNft} onClose={() => setSelectedNft(null)} />}
+    {selectedNft && <NftDetailOverlay nft={selectedNft} onClose={() => setSelectedNft(null)} onRetryMint={selectedNft.id.startsWith('sim') ? handleRetryMint : undefined} retrying={retrying} />}
     <PageTransition>
     <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10 flex flex-col gap-6">
       <BackButton />

@@ -62,7 +62,7 @@ export default function CameraCapture({ missionName, onCapture, onUpload }: Came
   if (preview) {
     return (
       <div className="flex flex-col gap-3 w-full">
-        <div className="relative rounded-2xl overflow-hidden bg-black" style={{ height: 'clamp(260px, 52vh, 520px)' }}>
+        <div className="relative rounded-2xl overflow-hidden bg-black" style={{ height: 'clamp(220px, 42vh, 340px)' }}>
           <img src={preview} alt="Observation preview" className="w-full h-full object-cover" />
           <div className="absolute bottom-0 left-0 right-0 px-3 py-2" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)' }}>
             <p className="text-[#FFD166] text-[10px] font-mono tracking-widest">
@@ -112,7 +112,7 @@ export default function CameraCapture({ missionName, onCapture, onUpload }: Came
   return (
     <div className="flex flex-col gap-3 w-full">
       {/* Viewfinder */}
-      <div className="relative rounded-2xl overflow-hidden bg-black" style={{ aspectRatio: '4/3' }}>
+      <div className="relative rounded-2xl overflow-hidden bg-black" style={{ aspectRatio: '4/3', maxHeight: 'clamp(220px, 42vh, 340px)' }}>
         <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
         {flash && <div className="absolute inset-0 bg-white/30 pointer-events-none" />}
 
