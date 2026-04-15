@@ -247,6 +247,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
           cloudCover: sky?.cloudCover ?? 0,
           oracleHash: sky?.oracleHash ?? 'sim',
           stars: effectiveStars,
+          demo: mission.demo === true,
         }),
       });
       clearTimeout(timer);
@@ -254,19 +255,20 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
       if (res.ok) {
         const data = await res.json();
         txId = data.txId;
-      } else if (res.status === 400) {
+      } else {
         const errData = await res.json().catch(() => ({}));
         const msg: string = errData?.error ?? '';
-        if (msg.toLowerCase().includes('cloud cover') || msg.toLowerCase().includes('sky conditions')) {
+        console.error('[mint] API error', res.status, msg);
+        if (res.status === 400 && (msg.toLowerCase().includes('cloud cover') || msg.toLowerCase().includes('sky conditions'))) {
           setMintError('The sky is too cloudy to verify tonight. Check back when cloud cover drops below 70%.');
           setStep('verified');
           setMintDone(false);
           return;
         }
-        // Other 400 errors: fall through to sim_ path
+        // Other errors: fall through to sim_ path
       }
-      // On other API errors: txId stays as sim_… and observation is saved as pending
-    } catch {
+    } catch (err) {
+      console.error('[mint] Network/timeout error:', err);
       // Network / timeout: txId stays as sim_… — observation saved as pending
     }
 
@@ -707,7 +709,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
               </p>
               <p className="text-slate-600 text-xs leading-relaxed">{mission.hint}</p>
             </div>
-            <Button variant="brass" onClick={() => { setMintError(''); if (mission.demo) { handleCapture('/images/planets/saturn.jpg'); } else { setStep('camera'); } }} className="w-full">
+            <Button variant="brass" onClick={() => { setMintError(''); if (mission.demo) { handleCapture(mission.demoPhoto ?? '/images/planets/saturn.jpg'); } else { setStep('camera'); } }} className="w-full">
               Begin Observation →
             </Button>
           </div>

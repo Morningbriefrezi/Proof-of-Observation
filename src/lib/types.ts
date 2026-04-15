@@ -15,6 +15,7 @@ export interface Mission {
   target?: string | null; // null = free observation (any sky photo)
   repeatable?: boolean;   // true = always visible, never hidden after completion
   demo?: boolean;         // true = simulated photo, real NFT, no photo verification
+  demoPhoto?: string;     // preset photo path for demo missions (e.g. /images/planets/saturn.jpg)
 }
 
 export interface SkyVerification {

@@ -14,9 +14,10 @@ const privy = new PrivyClient(
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { userAddress, target, timestampMs, lat, lon, cloudCover, oracleHash, stars } = body;
+  const { userAddress, target, timestampMs, lat, lon, cloudCover, oracleHash, stars, demo } = body;
 
-  const isDemoMint = target === 'Demo Observation';
+  // demo missions: skip auth, skip rate-limit, fall back to mock txId on Solana failure
+  const isDemoMint = demo === true || target === 'Demo Observation';
 
   // Auth check — skipped for demo observations so the demo flow always works
   if (!isDemoMint) {

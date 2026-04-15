@@ -24,9 +24,15 @@ export async function mintCompressedNFT(params: ObservationMintParams): Promise<
   if (!MERKLE_TREE_ADDRESS) throw new Error('MERKLE_TREE_ADDRESS not set');
   if (!COLLECTION_MINT_ADDRESS) throw new Error('COLLECTION_MINT_ADDRESS not set');
 
+  // Prefer Helius RPC (faster, more reliable) over public devnet
+  const rpcUrl =
+    process.env.NEXT_PUBLIC_HELIUS_RPC_URL ??
+    process.env.SOLANA_RPC_URL ??
+    'https://api.devnet.solana.com';
+
   const secretKey = bs58.decode(FEE_PAYER_PRIVATE_KEY);
 
-  const umi = createUmi(process.env.SOLANA_RPC_URL ?? 'https://api.devnet.solana.com')
+  const umi = createUmi(rpcUrl)
     .use(mplBubblegum())
     .use(mplTokenMetadata());
 
@@ -38,6 +44,9 @@ export async function mintCompressedNFT(params: ObservationMintParams): Promise<
   const name = `Stellar: ${params.target}`;
   const uri = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://stellarrclub.vercel.app'}/api/metadata/observation?target=${encodeURIComponent(params.target)}&ts=${params.timestampMs}&lat=${params.lat.toFixed(4)}&lon=${params.lon.toFixed(4)}&cc=${params.cloudCover}&hash=${params.oracleHash}&stars=${params.stars}`;
 
+  // Use 'processed' commitment: confirms in ~1s vs 30s+ for 'finalized'.
+  // Critical for Vercel serverless (10s timeout on hobby plan).
+  // collection.verified: false avoids the separate verifyCollection CPI requirement.
   const { signature } = await mintV1(umi, {
     leafOwner: recipient,
     merkleTree: toPublicKey(MERKLE_TREE_ADDRESS),
@@ -45,13 +54,10 @@ export async function mintCompressedNFT(params: ObservationMintParams): Promise<
       name,
       uri,
       sellerFeeBasisPoints: 0,
-      // verified: true is safe here because the fee payer keypair is the collection update authority
-      // (set during npm run setup:bubblegum). A proper verifyCollection call post-mint would require
-      // fetching the asset proof via DAS API, which is not available at mint time without Helius.
-      collection: { key: toPublicKey(COLLECTION_MINT_ADDRESS), verified: true },
+      collection: { key: toPublicKey(COLLECTION_MINT_ADDRESS), verified: false },
       creators: [],
     },
-  }).sendAndConfirm(umi);
+  }).sendAndConfirm(umi, { confirm: { commitment: 'processed' } });
 
   const txId = bs58.encode(Buffer.from(signature));
   return { txId };
