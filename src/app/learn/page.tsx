@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import BackButton from '@/components/shared/BackButton';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -34,7 +35,8 @@ function PlanetModal({ planet, locale, kidsMode, onClose }: {
     return () => { document.body.style.overflow = prev; };
   }, []);
 
-  return (
+  // Portal to document.body escapes any parent transform that breaks position:fixed
+  return createPortal(
     <>
       {/* Full-screen backdrop — z-[60] to sit above BottomNav (z-50) and Nav (z-40) */}
       <div
@@ -139,7 +141,8 @@ function PlanetModal({ planet, locale, kidsMode, onClose }: {
           )}
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }
 
