@@ -73,55 +73,54 @@ function NightTimeline({ hours, statusColor }: { hours: SkyHour[]; statusColor: 
   const byHour: Record<number, number> = {};
   for (const h of hours) byHour[new Date(h.time).getHours()] = h.cloudCover;
   const nowHour = new Date().getHours();
+  const nowIdx = slots.indexOf(nowHour);
 
-  // Find the best window: consecutive clear hours
-  const clearCounts = slots.map(hr => (byHour[hr] ?? 100) < 40 ? 1 : 0);
-  let bestStart = -1, bestLen = 0, cur = 0, curStart = 0;
-  for (let i = 0; i < clearCounts.length; i++) {
-    if (clearCounts[i]) { if (!cur) curStart = i; cur++; if (cur > bestLen) { bestLen = cur; bestStart = curStart; } }
-    else cur = 0;
+  function segColor(cover: number): string {
+    if (cover < 30) return 'rgba(52,211,153,0.65)';
+    if (cover < 60) return 'rgba(251,191,36,0.5)';
+    return 'rgba(255,255,255,0.07)';
   }
 
   return (
     <div>
-      <span style={{ display: 'block', color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 10 }}>
+      <span style={{ display: 'block', color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>
         Night window  8pm – 4am
       </span>
-      <div style={{ display: 'flex', gap: 4, alignItems: 'flex-end', height: 52 }}>
+      {/* Segmented heatmap strip */}
+      <div style={{ display: 'flex', gap: 2 }}>
         {slots.map((hr, idx) => {
           const cover = byHour[hr] ?? 100;
-          const clear = Math.max(0, 1 - cover / 100);
-          const barH = Math.max(4, Math.round(clear * 44));
-          const isNow = hr === nowHour;
-          const isBest = bestLen >= 2 && idx >= bestStart && idx < bestStart + bestLen;
-          const barGrad = cover < 30
-            ? 'linear-gradient(to top, rgba(52,211,153,0.6), rgba(52,211,153,0.2))'
-            : cover < 60
-              ? 'linear-gradient(to top, rgba(251,191,36,0.5), rgba(251,191,36,0.2))'
-              : 'linear-gradient(to top, rgba(255,255,255,0.08), rgba(255,255,255,0.03))';
-          const label = hr === 0 ? '12a' : hr < 4 ? `${hr}a` : `${hr}p`;
+          const isNow = nowIdx === idx;
           return (
-            <div key={hr} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-              <div style={{
-                width: '100%', height: 44,
-                display: 'flex', alignItems: 'flex-end',
-                borderRadius: 4,
-                background: isBest ? 'rgba(56,240,255,0.04)' : 'rgba(255,255,255,0.03)',
-                overflow: 'hidden', position: 'relative',
-              }}>
-                {isNow && <div style={{ position: 'absolute', inset: 0, border: `1px solid ${statusColor}40`, borderRadius: 4 }} />}
-                <div style={{
-                  width: '100%', height: barH,
-                  background: barGrad,
-                  borderRadius: 3,
-                  transformOrigin: 'bottom',
-                  animation: `barGrow 0.6s ease-out ${idx * 0.05}s both`,
-                }} />
-              </div>
-              <span style={{ color: isNow ? statusColor : 'rgba(255,255,255,0.25)', fontSize: 8, fontWeight: isNow ? 700 : 500 }}>{label}</span>
-            </div>
+            <div key={hr} style={{
+              flex: 1, height: 18, borderRadius: 3,
+              background: segColor(cover),
+              position: 'relative',
+              outline: isNow ? `1.5px solid ${statusColor}` : 'none',
+              outlineOffset: 1,
+              transition: 'opacity 0.3s',
+            }} />
           );
         })}
+      </div>
+      {/* Time anchors */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5 }}>
+        <span style={{ color: 'rgba(255,255,255,0.22)', fontSize: 9 }}>8pm</span>
+        <span style={{ color: 'rgba(255,255,255,0.22)', fontSize: 9 }}>12am</span>
+        <span style={{ color: 'rgba(255,255,255,0.22)', fontSize: 9 }}>4am</span>
+      </div>
+      {/* Legend */}
+      <div style={{ display: 'flex', gap: 10, marginTop: 7 }}>
+        {[
+          { color: 'rgba(52,211,153,0.65)', label: 'Clear' },
+          { color: 'rgba(251,191,36,0.5)', label: 'Partly cloudy' },
+          { color: 'rgba(255,255,255,0.15)', label: 'Overcast' },
+        ].map(item => (
+          <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div style={{ width: 10, height: 6, borderRadius: 2, background: item.color }} />
+            <span style={{ color: 'rgba(255,255,255,0.22)', fontSize: 9 }}>{item.label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -229,8 +228,7 @@ export default function HomeSkyPreview() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <style>{`
         @keyframes skyEnter { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes barGrow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
-        @keyframes planetSlideIn { from { opacity:0; transform:translateX(-8px); } to { opacity:1; transform:translateX(0); } }
+@keyframes planetSlideIn { from { opacity:0; transform:translateX(-8px); } to { opacity:1; transform:translateX(0); } }
         @keyframes scoreIn { from { opacity:0; transform:scale(0.85); } to { opacity:1; transform:scale(1); } }
       `}</style>
 
