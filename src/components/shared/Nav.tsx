@@ -38,7 +38,7 @@ export default function Nav() {
     { href: '/missions',    label: t('missions'), icon: <Satellite size={15} /> },
     { href: '/learn',       label: 'Learning',    icon: <BookOpen size={15} /> },
     { href: '/marketplace', label: 'Shop',        icon: <ShoppingBag size={15} /> },
-    { href: '/profile',     label: 'Profile',     icon: <User size={15} /> },
+    { href: '/nfts',        label: 'Gallery',     icon: <Satellite size={15} /> },
   ];
 
   const solanaWallet = wallets.find(
@@ -66,14 +66,6 @@ export default function Nav() {
           from { transform: translateX(-100%); opacity: 0; }
           to   { transform: translateX(0); opacity: 1; }
         }
-        @keyframes starPulse {
-          0%, 100% { box-shadow: 0 0 6px rgba(255,209,102,0.3); }
-          50%       { box-shadow: 0 0 18px rgba(255,209,102,0.6), 0 0 36px rgba(255,209,102,0.15); }
-        }
-        @keyframes navGlow {
-          0%, 100% { opacity: 0.7; }
-          50%       { opacity: 1; }
-        }
         .nav-tab {
           position: relative;
           transition: all 0.18s ease;
@@ -83,11 +75,6 @@ export default function Nav() {
           background: rgba(255,255,255,0.06);
           color: rgba(255,255,255,0.9) !important;
         }
-        .nav-search-bar { transition: all 0.18s ease; }
-        .nav-search-bar:hover {
-          background: rgba(255,255,255,0.06) !important;
-          border-color: rgba(56,240,255,0.35) !important;
-        }
         .drawer-nav-link {
           border-left: 2px solid transparent;
           transition: all 0.15s ease;
@@ -96,10 +83,11 @@ export default function Nav() {
           background: rgba(56,240,255,0.05) !important;
           border-left-color: rgba(56,240,255,0.5) !important;
         }
+        .nav-icon-btn { transition: color 0.15s ease, background 0.15s ease; }
+        .nav-icon-btn:hover { background: rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.9) !important; }
         .nav-login-btn:hover {
           background: rgba(124,58,237,0.2) !important;
           border-color: rgba(124,58,237,0.6) !important;
-          box-shadow: 0 0 20px rgba(124,58,237,0.3) !important;
         }
       `}</style>
 
@@ -109,10 +97,13 @@ export default function Nav() {
           <div className="absolute inset-0" style={{ background: 'rgba(4,7,15,0.85)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', animation: 'fadeIn 0.18s ease' }} />
           <div
             className="absolute top-0 left-0 h-full flex flex-col"
-            style={{ width: 'min(290px, 82vw)', background: 'linear-gradient(180deg, #070C1A 0%, #060A15 100%)', borderRight: '1px solid rgba(124,58,237,0.2)', boxShadow: '4px 0 48px rgba(0,0,0,0.8)', animation: 'slideInLeft 0.22s cubic-bezier(0.22,1,0.36,1)' }}
+            style={{ width: 'min(280px, 80vw)', background: 'linear-gradient(180deg, #070C1A 0%, #060A15 100%)', borderRight: '1px solid rgba(124,58,237,0.2)', boxShadow: '4px 0 48px rgba(0,0,0,0.8)', animation: 'slideInLeft 0.22s cubic-bezier(0.22,1,0.36,1)' }}
             onClick={e => e.stopPropagation()}
           >
+            {/* Drawer top accent */}
             <div style={{ height: 2, background: 'linear-gradient(90deg, rgba(124,58,237,0.9) 0%, rgba(56,240,255,1) 60%, transparent 100%)', flexShrink: 0 }} />
+
+            {/* Drawer header */}
             <div className="flex items-center justify-between px-5 py-4 flex-shrink-0" style={{ borderBottom: '1px solid rgba(124,58,237,0.1)' }}>
               <div className="flex items-center gap-2.5">
                 <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'radial-gradient(circle, #a78bfa, #38F0FF)', boxShadow: '0 0 12px rgba(167,139,250,0.9)', display: 'inline-block' }} />
@@ -122,19 +113,42 @@ export default function Nav() {
                 <X size={13} />
               </button>
             </div>
-            <nav className="flex-1 overflow-y-auto px-3 py-4" style={{ scrollbarWidth: 'none' }}>
+
+            {/* Drawer nav links */}
+            <nav className="flex-1 overflow-y-auto px-3 py-3" style={{ scrollbarWidth: 'none' }}>
               {NAV_LINKS.map(link => (
-                <Link key={link.href} href={link.href} onClick={() => setDrawerOpen(false)} className="drawer-nav-link flex flex-col px-4 py-3 rounded-xl mb-1" style={{ textDecoration: 'none', background: 'transparent' }}>
+                <Link key={link.href} href={link.href} onClick={() => setDrawerOpen(false)} className="drawer-nav-link flex flex-col px-4 py-2.5 rounded-xl mb-0.5" style={{ textDecoration: 'none', background: 'transparent' }}>
                   <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.88)' }}>{link.label}</span>
                   <span className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>{link.desc}</span>
                 </Link>
               ))}
             </nav>
-            <div className="px-5 py-4 flex-shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-              <a href="https://stellarrclub.vercel.app" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 mb-2" style={{ color: '#38F0FF', fontSize: 11, textDecoration: 'none', opacity: 0.6 }}>
-                stellarrclub.vercel.app <ExternalLink size={9} />
-              </a>
-              <p style={{ color: 'rgba(255,255,255,0.18)', fontSize: 11, margin: 0 }}>© 2026 Stellar · Built on Solana</p>
+
+            {/* Drawer footer: settings + logout */}
+            <div className="px-3 pb-3 flex-shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+              {authenticated && (
+                <>
+                  <Link href="/profile" onClick={() => setDrawerOpen(false)} className="drawer-nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl mt-2" style={{ textDecoration: 'none' }}>
+                    <User size={14} style={{ color: 'rgba(255,255,255,0.4)', flexShrink: 0 }} />
+                    <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                      {username || 'Profile'}
+                    </span>
+                  </Link>
+                  <Link href="/profile?tab=settings" onClick={() => setDrawerOpen(false)} className="drawer-nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl" style={{ textDecoration: 'none' }}>
+                    <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, flexShrink: 0 }}>⚙</span>
+                    <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.7)' }}>Settings</span>
+                  </Link>
+                  <button
+                    onClick={() => { handleLogout(); setDrawerOpen(false); }}
+                    className="drawer-nav-link w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left"
+                    style={{ background: 'transparent', border: 'none' }}
+                  >
+                    <span style={{ color: 'rgba(248,113,113,0.7)', fontSize: 14, flexShrink: 0 }}>→</span>
+                    <span className="text-sm font-semibold" style={{ color: 'rgba(248,113,113,0.8)' }}>Sign out</span>
+                  </button>
+                </>
+              )}
+              <p style={{ color: 'rgba(255,255,255,0.15)', fontSize: 10, margin: '8px 16px 0', letterSpacing: '0.04em' }}>© 2026 Stellar · Built on Solana</p>
             </div>
           </div>
         </div>
@@ -148,30 +162,20 @@ export default function Nav() {
           WebkitBackdropFilter: 'blur(32px)',
         }}
       >
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="h-14 flex items-center gap-3">
+        <div className="max-w-6xl mx-auto px-3">
+          <div className="h-14 flex items-center gap-2">
 
-            {/* Desktop: search bar — far left */}
+            {/* Hamburger — always visible */}
             <button
-              onClick={() => setSearchOpen(true)}
-              className="nav-search-bar hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full flex-shrink-0"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', fontSize: 12, minWidth: 148, cursor: 'text' }}
+              onClick={() => setDrawerOpen(true)}
+              className="nav-icon-btn w-9 h-9 flex items-center justify-center rounded-xl flex-shrink-0"
+              style={{ color: 'rgba(255,255,255,0.55)', background: 'transparent' }}
+              aria-label="Open navigation"
             >
-              <Search size={13} />
-              <span>Search...</span>
+              <AlignLeft size={17} />
             </button>
 
-            {/* Mobile: hamburger + search */}
-            <div className="flex sm:hidden items-center gap-1 flex-shrink-0">
-              <button onClick={() => setDrawerOpen(true)} className="w-9 h-9 flex items-center justify-center rounded-xl transition-colors" style={{ color: 'rgba(255,255,255,0.6)' }} aria-label="Open navigation">
-                <AlignLeft size={18} />
-              </button>
-              <button onClick={() => setSearchOpen(true)} className="w-9 h-9 flex items-center justify-center rounded-xl" style={{ color: 'rgba(255,255,255,0.55)' }} aria-label="Search">
-                <Search size={16} />
-              </button>
-            </div>
-
-            {/* Logo — mobile absolutely centered, desktop after search */}
+            {/* Logo — mobile: absolutely centered; desktop: in flow */}
             <div className="sm:hidden absolute left-0 right-0 flex justify-center pointer-events-none">
               <Link href="/" className="pointer-events-auto" title="Stellar">
                 <div style={{ filter: 'drop-shadow(0 0 12px rgba(56,240,255,0.4))' }}>
@@ -187,7 +191,17 @@ export default function Nav() {
               </Link>
             </div>
 
-            {/* Desktop: nav tabs centered */}
+            {/* Search icon — right of logo */}
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="nav-icon-btn w-9 h-9 flex items-center justify-center rounded-xl flex-shrink-0"
+              style={{ color: 'rgba(255,255,255,0.5)', background: 'transparent' }}
+              aria-label="Search"
+            >
+              <Search size={16} />
+            </button>
+
+            {/* Nav tabs — desktop only, centered */}
             <div className="hidden sm:flex flex-1 items-center justify-center gap-1">
               {tabs.map(tab => {
                 const isActive = tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);
@@ -216,9 +230,8 @@ export default function Nav() {
               })}
             </div>
 
-            {/* Right: auth */}
-            <div className="ml-auto sm:ml-0 flex items-center gap-2 flex-shrink-0 z-10">
-
+            {/* Right: profile / login */}
+            <div className="ml-auto sm:ml-0 flex items-center flex-shrink-0 z-10">
               {!ready ? (
                 <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse" />
               ) : authenticated ? (
@@ -230,13 +243,13 @@ export default function Nav() {
                       background: 'rgba(124,58,237,0.12)',
                       border: '1px solid rgba(124,58,237,0.35)',
                       color: 'rgba(255,255,255,0.85)',
-                      padding: '0 13px',
+                      padding: '0 12px',
                       display: 'flex', alignItems: 'center', fontSize: 12, fontWeight: 600, gap: 6,
                       transition: 'all 0.18s ease',
                     }}
                   >
                     <User size={13} />
-                    <span className="hidden sm:inline" style={{ maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <span style={{ maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {username || 'Profile'}
                     </span>
                   </button>
@@ -264,7 +277,7 @@ export default function Nav() {
                     background: 'rgba(124,58,237,0.15)',
                     border: '1px solid rgba(124,58,237,0.5)',
                     color: '#c4b5fd',
-                    padding: '0 18px',
+                    padding: '0 16px',
                     fontSize: 12, fontWeight: 700,
                     letterSpacing: '0.04em',
                     transition: 'all 0.18s ease',
