@@ -9,7 +9,6 @@ import {
   Trophy, Map, MessageCircle, Telescope, LogOut, Settings, ChevronRight, Gem,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import AstroLogo from './AstroLogo';
 
 const SECTIONS = [
   {
@@ -123,13 +122,8 @@ export default function DesktopSidebar() {
         }
       `}</style>
 
-      {/* Header: logo + close chevron */}
-      <div style={{ padding: '10px 10px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ filter: 'drop-shadow(0 0 6px rgba(56,240,255,0.4))' }}>
-            <AstroLogo heightClass="h-5" />
-          </div>
-        </div>
+      {/* Header: close chevron only — logo lives in Nav */}
+      <div style={{ padding: '10px 10px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
         <button
           onClick={() => setCollapsed(true)}
           className="sb-toggle"
