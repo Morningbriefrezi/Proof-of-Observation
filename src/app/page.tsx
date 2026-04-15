@@ -7,6 +7,7 @@ import Link from 'next/link';
 
 import { useTranslations } from 'next-intl';
 import HomeSkyPreview from '@/components/home/HomeSkyPreview';
+import LiveStatsBar from '@/components/home/LiveStatsBar';
 import { usePrivy } from '@privy-io/react-auth';
 import { useAppState } from '@/hooks/useAppState';
 import { Telescope, Camera, Star, ShoppingBag, CloudSun, Satellite, Sparkles, Moon, Lock, Orbit } from 'lucide-react';
@@ -92,6 +93,8 @@ export default function HomePage() {
   const stepPausedRef = useRef(false);
   const [liveLeaders, setLiveLeaders] = useState<{ handle: string; observations: number; stars: number }[]>([]);
   const [leadersLoading, setLeadersLoading] = useState(true);
+  const [homeStars, setHomeStars] = useState(0);
+  const [homeStarsLoaded, setHomeStarsLoaded] = useState(false);
 
   const { location } = useLocation();
 
@@ -204,6 +207,16 @@ export default function HomePage() {
       .catch(() => setLiveLeaders([]))
       .finally(() => setLeadersLoading(false));
   }, []);
+
+  useEffect(() => {
+    const addr = walletAddress ?? state.walletAddress;
+    if (!authenticated || !addr) { setHomeStarsLoaded(true); return; }
+    fetch(`/api/stars-balance?address=${encodeURIComponent(addr)}`)
+      .then(r => r.json())
+      .then(d => setHomeStars(d.balance ?? 0))
+      .catch(() => {})
+      .finally(() => setHomeStarsLoaded(true));
+  }, [authenticated, walletAddress, state.walletAddress]);
 
   const stepIcons = [Telescope, Camera, Star, ShoppingBag];
   const howItWorksSteps = [
@@ -466,6 +479,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <LiveStatsBar />
 
       {/* Remaining sections */}
       <div className="max-w-3xl w-full mx-auto px-4 pt-1 pb-4 sm:pb-8 flex flex-col items-center gap-5 sm:gap-8 animate-page-enter overflow-x-hidden">
@@ -1085,12 +1100,14 @@ export default function HomePage() {
           }}>
             <div>
               <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: '0 0 4px 0' }}>Your Stars</p>
-              <p style={{ color: 'var(--stars)', fontWeight: 700, fontSize: 24, margin: 0, fontFamily: 'var(--font-mono)' }}>0 ✦</p>
+              <p style={{ color: 'var(--stars)', fontWeight: 700, fontSize: 24, margin: 0, fontFamily: 'var(--font-mono)' }}>{homeStarsLoaded ? `${homeStars} ✦` : '— ✦'}</p>
             </div>
             <div style={{ flex: 1, minWidth: 160, maxWidth: 280 }}>
-              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, margin: '0 0 6px 0' }}>Next reward at 50 ✦</p>
+              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, margin: '0 0 6px 0' }}>
+                {homeStars >= 250 ? 'Next reward at 500 ✦' : homeStars >= 50 ? 'Next reward at 250 ✦' : 'Next reward at 50 ✦'}
+              </p>
               <div style={{ width: '100%', height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 999 }}>
-                <div style={{ width: '0%', height: '100%', background: '#34d399', borderRadius: 999 }} />
+                <div style={{ width: `${Math.min(100, Math.round((homeStars / 50) * 100))}%`, height: '100%', background: '#34d399', borderRadius: 999 }} />
               </div>
             </div>
           </div>
