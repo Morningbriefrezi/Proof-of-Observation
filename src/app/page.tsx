@@ -388,17 +388,46 @@ export default function HomePage() {
         {/* Hero content — mobile: centered column | lg: two-column */}
         <div className="hero-inner" style={{ position: 'relative', zIndex: 1, flex: 1, display: 'flex', alignItems: 'center', padding: '16px 16px 32px' }}>
           <style>{`
-            .hero-inner { flex-direction: column; text-align: center; justify-content: center; gap: 24px; }
+            .hero-inner {
+              flex-direction: column;
+              text-align: center;
+              justify-content: center;
+              gap: 0;
+            }
+            .hero-left {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              gap: 24px;
+              width: 100%;
+            }
+            .hero-right { display: none; }
             @media (min-width: 1024px) {
-              .hero-inner { flex-direction: row; text-align: left; justify-content: center; gap: 0; max-width: 1000px; margin: 0 auto; width: 100%; padding: 48px 48px 56px; }
-              .hero-left { flex: 1; display: flex; flex-direction: column; gap: 22px; align-items: flex-start; padding-right: 56px; }
-              .hero-right { width: 340px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px; }
+              .hero-inner {
+                flex-direction: row;
+                text-align: left;
+                justify-content: center;
+                max-width: 1000px;
+                margin: 0 auto;
+                width: 100%;
+                padding: 48px 48px 56px;
+                gap: 0;
+              }
+              .hero-left {
+                flex: 1;
+                align-items: flex-start;
+                gap: 22px;
+                padding-right: 56px;
+              }
+              .hero-right {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                width: 340px;
+                flex-shrink: 0;
+              }
               .hero-tagline-center { align-self: flex-start !important; }
               .hero-cta-row { justify-content: flex-start !important; }
-            }
-            @media (max-width: 1023px) {
-              .hero-left { display: contents; }
-              .hero-right { display: none; }
             }
           `}</style>
 

@@ -6,7 +6,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { useAppState } from '@/hooks/useAppState';
 import {
   CloudSun, Satellite, ShoppingBag, User, BookOpen,
-  Trophy, Map, MessageCircle, Telescope, LogOut, Settings, ChevronRight,
+  Trophy, Map, MessageCircle, Telescope, LogOut, Settings, ChevronRight, Gem,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import AstroLogo from './AstroLogo';
@@ -26,7 +26,7 @@ const SECTIONS = [
     label: 'Community',
     links: [
       { href: '/leaderboard', label: 'Leaderboard',   icon: Trophy },
-      { href: '/nfts',        label: 'Discoveries',   icon: Satellite },
+      { href: '/nfts',        label: 'Discoveries',   icon: Gem },
       { href: '/club',        label: 'My Telescope',  icon: Telescope },
     ],
   },
@@ -52,12 +52,12 @@ export default function DesktopSidebar() {
   const username = userEmail ? userEmail.split('@')[0] : '';
 
   useEffect(() => {
-    if (collapsed) {
-      document.body.classList.add('sidebar-collapsed');
+    if (!collapsed) {
+      document.body.classList.add('sidebar-expanded');
     } else {
-      document.body.classList.remove('sidebar-collapsed');
+      document.body.classList.remove('sidebar-expanded');
     }
-    return () => { document.body.classList.remove('sidebar-collapsed'); };
+    return () => { document.body.classList.remove('sidebar-expanded'); };
   }, [collapsed]);
 
   const handleLogout = async () => {

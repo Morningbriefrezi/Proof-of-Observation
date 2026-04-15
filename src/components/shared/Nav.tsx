@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { usePrivy } from '@privy-io/react-auth';
 import { useAppState } from '@/hooks/useAppState';
 import { useState, useEffect } from 'react';
 import { CloudSun, ShoppingBag, Satellite, User, Search, AlignLeft, X, ExternalLink, BookOpen } from 'lucide-react';
@@ -24,7 +24,6 @@ export default function Nav() {
   const pathname = usePathname();
   const router = useRouter();
   const { logout, authenticated, ready, login, user } = usePrivy();
-  const { wallets } = useWallets();
   const { setWallet } = useAppState();
   const [showMenu, setShowMenu] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -40,10 +39,6 @@ export default function Nav() {
     { href: '/marketplace', label: 'Shop',        icon: <ShoppingBag size={15} /> },
     { href: '/nfts',        label: 'Gallery',     icon: <Satellite size={15} /> },
   ];
-
-  const solanaWallet = wallets.find(
-    w => w.walletClientType === 'privy' && (w as { chainType?: string }).chainType === 'solana'
-  );
 
   const userEmail =
     user?.email?.address ??
@@ -184,7 +179,7 @@ export default function Nav() {
                 </div>
               </Link>
             </div>
-            <div className="hidden sm:flex items-center flex-shrink-0">
+            <div className="hidden sm:flex lg:hidden items-center flex-shrink-0">
               <Link href="/" title="Stellar">
                 <div style={{ filter: 'drop-shadow(0 0 14px rgba(56,240,255,0.35))' }}>
                   <AstroLogo heightClass="h-7" />
