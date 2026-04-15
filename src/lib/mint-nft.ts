@@ -44,10 +44,11 @@ export async function mintCompressedNFT(params: ObservationMintParams): Promise<
   const name = `Stellar: ${params.target}`;
   const uri = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://stellarrclub.vercel.app'}/api/metadata/observation?target=${encodeURIComponent(params.target)}&ts=${params.timestampMs}&lat=${params.lat.toFixed(4)}&lon=${params.lon.toFixed(4)}&cc=${params.cloudCover}&hash=${params.oracleHash}&stars=${params.stars}`;
 
-  // Use 'processed' commitment: confirms in ~1s vs 30s+ for 'finalized'.
-  // Critical for Vercel serverless (10s timeout on hobby plan).
-  // collection.verified: false avoids the separate verifyCollection CPI requirement.
-  const { signature } = await mintV1(umi, {
+  // Use 'processed' commitment (~1s) and a hard 8s timeout so the function
+  // never hangs past Vercel's 10s serverless limit on the hobby plan.
+  const TIMEOUT_MS = 8000;
+
+  const mintPromise = mintV1(umi, {
     leafOwner: recipient,
     merkleTree: toPublicKey(MERKLE_TREE_ADDRESS),
     metadata: {
@@ -58,6 +59,12 @@ export async function mintCompressedNFT(params: ObservationMintParams): Promise<
       creators: [],
     },
   }).sendAndConfirm(umi, { confirm: { commitment: 'processed' } });
+
+  const timeoutPromise = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error(`Mint timeout after ${TIMEOUT_MS}ms`)), TIMEOUT_MS)
+  );
+
+  const { signature } = await Promise.race([mintPromise, timeoutPromise]);
 
   const txId = bs58.encode(Buffer.from(signature));
   return { txId };
