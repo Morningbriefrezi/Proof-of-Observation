@@ -14,7 +14,7 @@ import Button from '@/components/shared/Button';
 import LoadingRing from '@/components/ui/LoadingRing';
 import ScoreRing from '@/components/ui/ScoreRing';
 import { calculateSkyScore, visibilityToMeters, type SkyScoreResult } from '@/lib/sky-score';
-import { Copy, Check, Telescope, Award, ExternalLink } from 'lucide-react';
+import { Copy, Check, Telescope, Award, ExternalLink, Camera, X } from 'lucide-react';
 import { MissionIcon } from '@/components/shared/PlanetIcons';
 import { buildTwitterShareUrl, buildFarcasterShareUrl, buildShareImageUrl } from '@/lib/share';
 import RewardIcon from '@/components/shared/RewardIcon';
@@ -339,8 +339,8 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
   // Reward unlock modal
   if (newRewards.length > 0) {
     return (
-      <div className="fixed inset-0 z-[60] bg-[#070B14] grid place-items-center p-4">
-        <div className="glass-card glow-emerald max-w-sm w-full p-5 flex flex-col gap-3 text-center max-h-[85vh] overflow-y-auto">
+      <div className="fixed inset-0 z-[60] bg-[#070B14] overflow-y-auto px-4 pt-4 pb-6">
+        <div className="glass-card glow-emerald max-w-sm w-full mx-auto p-5 flex flex-col gap-3 text-center">
           <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-[#34d399]/10 border border-[#34d399]/20 flex items-center justify-center mx-auto">
             <Award size={22} className="text-[#34d399]" />
           </div>
@@ -398,7 +398,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
     return (
       <div
         id="mission-done-overlay"
-        className="fixed inset-0 z-50 flex flex-col items-center justify-start overflow-y-auto pt-8 pb-12 px-6"
+        className="fixed inset-0 z-50 flex flex-col items-center justify-start overflow-y-auto pt-4 pb-12 px-6"
         style={{
           background: 'radial-gradient(ellipse at center, rgba(56,240,255,0.05) 0%, transparent 60%), var(--bg-base)',
         }}
@@ -581,7 +581,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
             <p className="text-white text-sm font-semibold">{mission.name}</p>
           </div>
           <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-white transition-colors" style={{ background: 'rgba(255,255,255,0.05)' }}>
-            ✕
+            <X size={14} />
           </button>
         </div>
         <div className="flex flex-col items-center gap-4 px-6 py-8 max-w-sm mx-auto w-full text-center">
@@ -591,7 +591,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
             </div>
           )}
           <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(148,163,184,0.08)', border: '1px solid rgba(148,163,184,0.15)' }}>
-            <span style={{ fontSize: 22 }}>📸</span>
+            <Camera size={22} className="text-slate-400" />
           </div>
           <div>
             <h3 className="text-white font-semibold text-base mb-1">Photo Saved</h3>
@@ -685,7 +685,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
           className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-white transition-colors"
           style={{ background: 'rgba(255,255,255,0.05)' }}
         >
-          ✕
+          <X size={14} />
         </button>
       </div>
 

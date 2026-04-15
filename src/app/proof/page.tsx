@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { ExternalLink, Trash2, Clock, CheckCircle2, Cloud, ImageIcon } from 'lucide-react';
+import { ExternalLink, Trash2, Clock, CheckCircle2, Cloud, ImageIcon, AlertTriangle, Telescope } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 import { useAppState } from '@/hooks/useAppState';
 import { getUnlockedRewards, getRank } from '@/lib/rewards';
@@ -37,7 +37,7 @@ function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete:
         <p className="text-slate-400 text-xs">{new Date(mission.timestamp).toLocaleString()}</p>
         <div className="flex items-center gap-2">
           <p className="text-[#FFD166] font-bold">+{displayStars} stars ✦</p>
-          {isPending && <span className="text-amber-400 text-xs">⏳ Pending</span>}
+          {isPending && <span className="text-amber-400 text-xs flex items-center gap-1"><Clock size={11} /> Pending</span>}
         </div>
         <div className="flex gap-3 text-xs text-[var(--text-secondary)]">
           <span className="flex items-center gap-1"><Cloud size={11} />{mission.sky ? `${mission.sky.cloudCover}%` : '—'}</span>
@@ -50,10 +50,10 @@ function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete:
               {mission.txId.slice(0, 8)}...{mission.txId.slice(-8)}
             </p>
             {isRealTx && (
-              <span className="text-[#34d399] text-xs shrink-0">✅ On-chain</span>
+              <span className="text-[#34d399] text-xs shrink-0 flex items-center gap-1"><CheckCircle2 size={11} /> On-chain</span>
             )}
             {!isRealTx && !isPending && (
-              <span className="text-amber-400 text-xs shrink-0">⚠️ Local</span>
+              <span className="text-amber-400 text-xs shrink-0 flex items-center gap-1"><AlertTriangle size={11} /> Local</span>
             )}
           </div>
         )}
@@ -169,7 +169,7 @@ export default function ProofPage() {
 
       {proofs.length === 0 ? (
         <div className="text-center py-20 rounded-xl" style={{ border: '1px dashed rgba(56,240,255,0.12)' }}>
-          <p className="text-4xl mb-4">🌌</p>
+          <Telescope size={36} className="text-[#38F0FF]/30 mx-auto mb-4" />
           <p className="text-slate-400 mb-4">No observations minted yet</p>
           <Link href="/missions" className="px-6 py-3 bg-gradient-to-r from-[#FFD166] to-[#CC9A33] text-black font-bold rounded-lg">
             Begin Observation →

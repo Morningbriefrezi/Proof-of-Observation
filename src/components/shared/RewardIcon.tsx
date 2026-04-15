@@ -1,4 +1,4 @@
-import { Ticket, Moon, Globe, Star, Sparkles, Trophy, Compass } from 'lucide-react';
+import { Ticket, Moon, Globe, Star, Sparkles, Trophy, Compass, Telescope } from 'lucide-react';
 
 const iconMap: Record<string, { Icon: React.ComponentType<{ size?: number; className?: string }>; color: string }> = {
   '🎫': { Icon: Ticket, color: 'text-[#FFD166]' },
@@ -9,6 +9,8 @@ const iconMap: Record<string, { Icon: React.ComponentType<{ size?: number; class
   '🏆': { Icon: Trophy, color: 'text-[#FFD166]' },
   '⭐': { Icon: Star, color: 'text-[#FFD166]' },
   '🧭': { Icon: Compass, color: 'text-[#38F0FF]' },
+  '🎟️': { Icon: Ticket, color: 'text-[#FFD166]' },
+  '🔭': { Icon: Telescope, color: 'text-[#38F0FF]' },
 };
 
 export default function RewardIcon({ emoji, size = 20 }: { emoji: string; size?: number }) {
