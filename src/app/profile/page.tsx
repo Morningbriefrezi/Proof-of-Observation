@@ -47,7 +47,7 @@ export default function ProfilePage() {
   const address = solanaWallet?.address ?? state.walletAddress ?? null;
 
   useEffect(() => {
-    if (!address) return;
+    if (!address) { setProfileLoaded(true); return; }
     setProfileLoaded(false);
     Promise.allSettled([
       fetch(`/api/stars-balance?address=${encodeURIComponent(address)}`)
@@ -388,7 +388,7 @@ export default function ProfilePage() {
                 }}
               >
                 <div className="flex items-center justify-center" style={{ height: 40 }}>
-                  <MissionIcon id={m.id} size={36} />
+                  <MissionIcon id={m.id} size={36} animate />
                 </div>
                 <p className="text-white text-xs font-medium text-center leading-tight line-clamp-2 max-w-[72px]">{m.name}</p>
                 <span className="text-[#FFD166] text-[10px] font-semibold">+{m.stars} ✦</span>
@@ -423,7 +423,7 @@ export default function ProfilePage() {
                   }}
                 >
                   {item.type === 'mission'
-                    ? <MissionIcon id={item.id} size={16} />
+                    ? <MissionIcon id={item.id} size={16} animate />
                     : <Camera size={12} className="text-[#14B8A6]" />}
                 </div>
                 <div className="flex-1 min-w-0">
