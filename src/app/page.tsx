@@ -95,6 +95,7 @@ export default function HomePage() {
   const [leadersLoading, setLeadersLoading] = useState(true);
   const [homeStars, setHomeStars] = useState(0);
   const [homeStarsLoaded, setHomeStarsLoaded] = useState(false);
+  const [heroSkyScore, setHeroSkyScore] = useState<{ score: number; grade: string; emoji: string } | null>(null);
 
   const { location } = useLocation();
 
@@ -217,6 +218,15 @@ export default function HomePage() {
       .catch(() => {})
       .finally(() => setHomeStarsLoaded(true));
   }, [authenticated, walletAddress, state.walletAddress]);
+
+  useEffect(() => {
+    const lat = location.lat || 41.6941;
+    const lon = location.lon || 44.8337;
+    fetch(`/api/sky/score?lat=${lat}&lon=${lon}`)
+      .then(r => r.json())
+      .then(d => { if (d?.score != null) setHeroSkyScore(d); })
+      .catch(() => {});
+  }, [location.lat, location.lon]);
 
   const stepIcons = [Telescope, Camera, Star, ShoppingBag];
   const howItWorksSteps = [
@@ -414,6 +424,26 @@ export default function HomePage() {
           }}>
             Observe <span className="tagline-star-1" style={{ color: '#38F0FF', margin: '0 2px' }}>✦</span> Verify <span className="tagline-star-2" style={{ color: '#38F0FF', margin: '0 2px' }}>✦</span> Earn Stars <span className="tagline-star-3" style={{ color: '#38F0FF', margin: '0 2px' }}>✦</span>
           </p>
+
+          {/* Sky Score pill */}
+          {heroSkyScore && (
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 12,
+              padding: '10px 20px', borderRadius: 999,
+              background: heroSkyScore.score >= 70 ? 'rgba(52,211,153,0.08)' : heroSkyScore.score >= 50 ? 'rgba(255,209,102,0.08)' : 'rgba(255,255,255,0.04)',
+              border: `1px solid ${heroSkyScore.score >= 70 ? 'rgba(52,211,153,0.2)' : heroSkyScore.score >= 50 ? 'rgba(255,209,102,0.2)' : 'rgba(255,255,255,0.08)'}`,
+            }}>
+              <span style={{ fontSize: 16 }}>{heroSkyScore.emoji}</span>
+              <span style={{
+                color: heroSkyScore.score >= 70 ? '#34d399' : heroSkyScore.score >= 50 ? '#FFD166' : 'rgba(255,255,255,0.5)',
+                fontSize: 22, fontWeight: 700, fontFamily: 'var(--font-mono)', lineHeight: 1,
+              }}>{heroSkyScore.score}</span>
+              <div>
+                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, fontWeight: 600 }}>{heroSkyScore.grade} sky tonight</div>
+                <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10 }}>Sky Score · Your location</div>
+              </div>
+            </div>
+          )}
 
           {/* Sub-copy */}
           <p style={{

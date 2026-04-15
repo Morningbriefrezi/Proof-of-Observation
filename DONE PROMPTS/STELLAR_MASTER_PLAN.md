@@ -1,1789 +1,1401 @@
-# STELLAR — Master Execution Plan
-## Revised April 11, 2026 · Colosseum Frontier · Deadline May 10, 2026
+# STELLAR — Master Execution Plan (Apr 14 → May 11, 2026)
+
+## The Self-Interrogation: Where The Previous Strategy Was Wrong
+
+Before building prompts, I need to be honest about what the previous analysis got wrong or didn't question hard enough.
+
+### Blind Spot #1: "60K amateur astronomers in Georgia" is a fiction
+
+The Astroman social following is real. But "60K amateur astronomers" overstates the addressable market by 10x. Most followers are casual — they liked a pretty moon photo, not people who own telescopes. The pitch needs to be honest: "Astroman has 60K social followers and a core customer base of telescope buyers. Stellar is designed for EVERYONE who has ever looked up at the sky — you don't need a telescope to use it."
+
+**The fix:** Reframe from "astronomy app for enthusiasts" to "the night sky app for everyone, with depth for enthusiasts." The Moon mission is naked-eye. Constellations are naked-eye. The sky forecast is useful for anyone going outside at night — photographers, campers, couples on a date. Only the deep-sky missions require equipment.
+
+### Blind Spot #2: The app is too telescope-centric for a Consumer track win
+
+Every Cypherpunk Consumer winner had mass-market appeal: Capitola (anyone who bets), Superfan (anyone who likes music), Toaster (anyone who trades), Rekt (anyone curious about crypto trading), Nomu (anyone who shops). "Amateur astronomy" sounds niche. "Tonight's sky" sounds universal.
+
+**The fix:** The homepage, pitch, and first-user experience must appeal to someone who has NEVER owned a telescope. The hook is: "What can I see in the sky tonight?" That's a question billions of people have asked. The telescope marketplace and deep-sky missions are the monetization layer, not the top of funnel.
+
+### Blind Spot #3: The previous prompt sequence is too linear and fragile
+
+Prompts 2-10 form a strict dependency chain. If Prompt 3 breaks (Bubblegum minting), Prompts 4-10 are blocked. A solo builder with 27 days cannot afford a single 2-day blocker. The architecture needs parallel workstreams.
+
+**The fix:** Restructure into 3 independent tracks that can progress in parallel:
+- **Track A:** Core loop (observe → verify → mint → done) — Prompts 2-4
+- **Track B:** Token + gallery + profile — Prompts 5-6, can be built with simulated data first
+- **Track C:** Polish, audience expansion, and submission assets — new prompts
+
+### Blind Spot #4: No "wow moment" for non-crypto judges
+
+Judges evaluate hundreds of submissions. The current flow is: sign up → see forecast → start mission → take photo → wait → get NFT. That's a 5-minute journey before any payoff. Judges will give you 60 seconds.
+
+**The fix:** The FIRST screen after login needs a "wow" within 5 seconds. "Tonight in Tbilisi: Jupiter is rising at 9:14 PM, the Milky Way peaks at midnight, and there are 3 active missions you can complete right now." The sky data IS the hook, not the blockchain.
+
+### Blind Spot #5: ASTRA (AI chat) is buried and underutilized
+
+Claude tool calling with live sky data is one of Stellar's most impressive technical features, but it's hidden behind a nav link. No winner buried their best feature. Capitola's aggregation WAS the homepage. Rekt's gamification WAS the first screen.
+
+**The fix:** ASTRA should be accessible from everywhere — a floating button, a quick-ask bar on the sky page, a suggestion after mission completion. "Ask ASTRA: What should I observe tonight?" is a universal entry point that works for astronomers AND casual users.
+
+### Blind Spot #6: The "everyone" hook is missing
+
+What makes a non-astronomer open this app? Right now: nothing. The sky forecast is useful but not shareable. The missions require going outside at night. There's no casual engagement path.
+
+**The new features that solve this (minimal effort, maximum audience expansion):**
+
+1. **"Tonight's Sky" shareable card** — A beautiful, auto-generated card showing tonight's highlights for your location. Moon phase, visible planets, meteor shower alerts. Shareable to Instagram Stories, WhatsApp, X. This is the viral loop. Someone shares "Tonight in Tbilisi: Jupiter + Saturn visible, 12% cloud cover 🌙" and their friend downloads the app.
+
+2. **"Sky Score" for tonight** — A single number 0-100 rating how good tonight's sky is. Like a UV index but for stargazing. "Tonight's Sky Score: 87/100 — GO!" This is dead simple to compute from existing Open-Meteo data and gives everyone a reason to check the app daily.
+
+3. **Constellation guide (naked eye)** — "Point your phone at the sky" is something every human can do. A simple list of "constellations visible tonight from your location" with viewing directions. No telescope needed. No AR needed. Just: "Look southeast at 10 PM for Scorpius."
+
+4. **Moon phase tracker** — Everyone cares about the Moon. Full moon dates, new moon dates, current phase. This is the "weather app" equivalent — people check it habitually.
+
+5. **Astronomical events calendar** — "Next meteor shower: April 22 (Lyrids). Next eclipse visible from your location: ..." This drives retention without requiring any astronomy knowledge.
+
+These features use data Stellar already has (astronomy-engine, Open-Meteo). They require no blockchain. They're the top of funnel that converts casual users into mission-completers who earn NFTs and spend Stars.
 
 ---
 
-## EXECUTION RULES
-
-- After each prompt completes → commit + push to git immediately
-- Mark the prompt header as **✅ DONE** in this file after pushing
-- One prompt = one commit
-
-**Builder:** Rezi — solo founder, Astroman (astroman.ge)
-**Hackathon:** Colosseum Frontier — NO tracks, $30K Grand Champion + $10K × 20 teams
-**Live:** stellarrclub.vercel.app
-
----
-
-# CONFIRMED STATUS — April 11, 2026
-
-| Feature | Status | Notes |
-|---|---|---|
-| G1 — Location system | ✅ DONE | `src/lib/location.tsx`, `LocationPicker.tsx` |
-| G2 — Dealer data | ✅ DONE | `src/lib/dealers.ts` — Astroman + High Point |
-| G3 — Location-aware marketplace | ✅ DONE | Region-based product filtering working |
-| G4 — Free observation mission | ✅ DONE | `free-observation` in constants, repeatable |
-| G5 — Global copy | ✅ DONE | Shipped |
-| Nav cleanup (desktop) | ✅ DONE | Desktop tabs correct |
-| Profile page | ✅ DONE | Stars, streak, rank all wired |
-| ASTRA API route | ✅ DONE | `/api/chat/route.ts` — Claude streaming, 2 tools |
-| Streak API | ✅ DONE | `/api/streak` — consumed by profile |
-| Footer branding | ✅ DONE | "© 2026 Astroman · Built on Solana" correct |
-| Layout metadata | ✅ DONE | Correct title + description in layout.tsx |
-| CLEAN-1 (footer/metadata/constants) | ✅ DONE | Old hackathon branding removed |
-
-**Still broken / not done:**
-
-| Issue | Priority |
-|---|---|
-| ~~Search button in nav does nothing~~ | ✅ DONE (Phase 0) |
-| ~~Profile/avatar button looks poor~~ | ✅ DONE (Phase 0) |
-| ~~Mobile bottom nav wrong~~ | ✅ DONE (Phase 0) |
-| ~~Mobile spacing — side gutters, section gaps~~ | ✅ DONE (Phase 0) |
-| ~~Location icon is weak~~ | ✅ DONE (Phase 0) |
-| ~~`constants.ts` still has `club` and `scriptonia` keys~~ | ✅ DONE (Phase 0) |
-| ~~Auth: email OTP clears data on re-login, no password, Google/SMS broken~~ | ✅ DONE (Phase AUTH) |
-| Marketplace missing Celestron (US) and Bresser (Europe) dealers | P1 |
-| Marketplace product images are broken (local paths that don't exist) | P1 |
-| Dark Sky page is static, hardcoded Georgia data, fake map, no real tools | P1 |
-| PWA manifest icons broken (not installable) | P2 |
-| On-chain core not wired (Prompts 2–6 from LATEST_PROMPTS.md) | P0 |
-| ASTRA standalone chat page doesn't exist (`/chat` is encyclopedia) | P1 |
-
----
-
-# EXECUTION PLAN
-
-## PHASE 0 — Critical UX Fixes ✅ DONE
-*These make the app feel real. Judges see these immediately.*
-
----
-
-### Prompt HEADER-1 — Working Search + Profile Button Redesign ✅ DONE
+## The Revised Architecture: Three Parallel Tracks
 
 ```
-I'm building Stellar, a Next.js 15 astronomy app. The nav header has a Search icon that does nothing.
-I need to make it work. Also the mobile bottom nav has wrong items — fix it. Also clean up constants.ts.
+TRACK A — Core Blockchain Loop (Must work by Apr 23)
+  Clean up → Sky Oracle → Mint NFT → Success screen
+  This is the backbone. Without it, there's nothing to demo.
 
-Read these files fully before writing anything:
-  src/components/shared/Nav.tsx
-  src/components/shared/BottomNav.tsx
-  src/lib/constants.ts
-  src/lib/dealers.ts (skim — understand product + mission names available to search)
-  src/lib/constants.ts (skim MISSIONS array for search targets)
+TRACK B — Token + Gallery + Profile (Must work by Apr 27)
+  Stars token → Award endpoint → Profile balance → NFT gallery
+  Can be built in parallel with simulated mint data.
 
----
-
-TASK 1 — Working search modal:
-
-Create src/components/shared/SearchModal.tsx:
-
-'use client'
-
-Props: { open: boolean; onClose: () => void }
-
-Overlay: fixed inset-0 z-50, bg rgba(0,0,0,0.7), backdrop-blur-sm
-  Click backdrop → onClose()
-
-Modal card: max-w-lg mx-auto mt-[10vh] rounded-2xl, bg #0D1321, border 1px solid rgba(255,255,255,0.1), p-4
-
-Input row:
-  Search icon (Lucide Search, 16px, rgba(255,255,255,0.3)) on left inside input
-  Input: w-full bg-transparent text-white text-sm placeholder "Search missions, telescopes, planets..." no border, outline-none, px-3 py-2
-  "ESC" badge on right when input has focus: text-[10px] text-slate-500 border border-slate-700 rounded px-1
-
-Search targets — define inline (no API call needed):
-  const SEARCH_ITEMS = [
-    // Missions (from MISSIONS constant in lib/constants.ts — import it)
-    // Read the MISSIONS array and include all of them as:
-    // { type: 'mission', label: mission.name, sub: mission.desc, href: '/missions', icon: mission.emoji }
-    
-    // Sky pages
-    { type: 'page', label: 'Sky Forecast', sub: '7-day cloud cover and seeing', href: '/sky', icon: '🌤' },
-    { type: 'page', label: 'Planet Tracker', sub: 'Mercury to Saturn + Moon', href: '/sky', icon: '🪐' },
-    { type: 'page', label: 'Dark Sky Map', sub: 'Find dark observation sites', href: '/darksky', icon: '🌑' },
-    { type: 'page', label: 'ASTRA AI', sub: 'Chat with your AI astronomer', href: '/chat', icon: '✦' },
-    { type: 'page', label: 'NFT Gallery', sub: 'Your discovery attestations', href: '/nfts', icon: '🖼' },
-    
-    // Celestial objects
-    { type: 'object', label: 'Moon', sub: 'Earth\'s natural satellite, brightest object at night', href: '/sky', icon: '🌕' },
-    { type: 'object', label: 'Jupiter', sub: 'Largest planet, visible to naked eye', href: '/sky', icon: '🪐' },
-    { type: 'object', label: 'Saturn', sub: 'Ringed gas giant', href: '/sky', icon: '🪐' },
-    { type: 'object', label: 'Mars', sub: 'The Red Planet', href: '/sky', icon: '🔴' },
-    { type: 'object', label: 'Orion Nebula', sub: 'M42 — stunning emission nebula in Orion\'s sword', href: '/missions', icon: '✨' },
-    { type: 'object', label: 'Pleiades', sub: 'M45 — Seven Sisters open cluster', href: '/missions', icon: '💫' },
-    { type: 'object', label: 'Andromeda Galaxy', sub: 'M31 — nearest large galaxy, 2.5M light years', href: '/missions', icon: '🌌' },
-  ]
-
-Filter logic:
-  const filtered = query.length < 2 ? [] : SEARCH_ITEMS.filter(item =>
-    item.label.toLowerCase().includes(query.toLowerCase()) ||
-    item.sub.toLowerCase().includes(query.toLowerCase())
-  )
-
-Results list (max 8 results shown):
-  Group by type with a small label: "MISSIONS" / "PAGES" / "CELESTIAL OBJECTS"
-  Each result row: flex items-center gap-3, py-2.5, px-2, rounded-xl, hover:bg-white/5, cursor-pointer
-    Left: 32px circle bg rgba(255,255,255,0.06), icon/emoji centered, text-base
-    Middle: label (text-sm text-white), sub (text-xs text-slate-500)
-    Right: Lucide ArrowUpRight size=12 in slate-600
-    On click: router.push(item.href), onClose()
-
-Empty state (query >= 2 chars, no results):
-  "No results for "{query}"" — text-sm text-slate-500, text-center, py-6
-
-Zero query state (modal just opened):
-  Show 4 quick-access pills in a row:
-  "🌤 Sky" → /sky | "🛸 Missions" → /missions | "✦ ASTRA" → /chat | "🛒 Shop" → /marketplace
-  Pills: bg rgba(255,255,255,0.04) border rgba(255,255,255,0.08) rounded-full px-4 py-2 text-xs text-white
-
-Keyboard:
-  useEffect: on keydown, if key === 'Escape' → onClose()
-  Auto-focus the input when modal opens (useRef + focus() in useEffect when open===true)
-
----
-
-TASK 2 — Wire search button in Nav.tsx:
-
-Add useState: const [searchOpen, setSearchOpen] = useState(false)
-Add useEffect: close on route change (usePathname dependency)
-
-Change the search button onClick to: () => setSearchOpen(true)
-Add at bottom of Nav return: <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
-Import SearchModal from '@/components/shared/SearchModal'
-
----
-
-TASK 3 — Redesign profile avatar button in Nav.tsx:
-
-The current button is a plain 8x8 circle with a letter gradient. Redesign to feel like a real app.
-
-Replace the avatar button with:
-  Size: 34px × 34px, rounded-full
-  Background: conic gradient from #8B5CF6 via #14B8A6 to #8B5CF6
-  Padding: 1.5px (creates a gradient ring effect — the inner circle is #0D1321 bg with letter centered)
-  Inner circle: 31px, rounded-full, bg #0D1321, flex items-center justify-center
-  Letter: text-[11px] font-bold text-white
-  Outer ring shows on hover: ring-2 ring-[#14B8A6]/40 transition-all
-
----
-
-TASK 4 — Fix mobile bottom nav (BottomNav.tsx):
-
-Read src/components/shared/BottomNav.tsx.
-
-The tabs must be EXACTLY:
-  1. Sky       → /sky        → CloudSun icon
-  2. Missions  → /missions   → Satellite icon (import from lucide-react)
-  3. Home      → /           → Home icon (center, lifted circle)
-  4. Shop      → /marketplace → ShoppingBag icon (import from lucide-react)
-  5. Profile   → /profile    → User icon
-
-Remove Dark Sky and ASTRA/Learn from bottom nav.
-Keep the lifted center circle style for Home exactly as is.
-Labels: "Sky" | "Missions" | "Home" | "Shop" | "Profile"
-
----
-
-TASK 5 — Clean up constants.ts:
-In src/lib/constants.ts:
-  Remove the 'club' key from ECOSYSTEM entirely (the club.astroman.ge entry)
-  Remove the 'scriptonia' key from SPONSORS entirely
-  Keep: ECOSYSTEM.store, ECOSYSTEM.sky, ECOSYSTEM.app
-  Keep: SPONSORS.superteam, SPONSORS.solana
-
-Do NOT touch API routes, page components, or any other file.
+TRACK C — Audience Expansion + Polish + Submission (Apr 17 → May 11)
+  Sky Score → Tonight's card → Share flow → ASTRA upgrade →
+  Branding fix → README → Pitch video → Submission
+  This is what turns a working app into a winning one.
 ```
 
 ---
 
-### Prompt MOBILE-1 — Mobile Spacing + App Feel ✅ DONE
+## COMPLETE PROMPT SERIES (Prompts 1-15)
+
+> Prompt 1 is already complete (Bubblegum tree + collection setup).
+> The prompts below replace and extend the previous Prompt 2-10 series.
+> Each prompt is self-contained. Run one per Claude Code conversation.
+> Prompts marked ★ are on the critical path. Others can be reordered.
+
+---
+
+## TRACK A — CORE BLOCKCHAIN LOOP
+
+---
+
+### ★ PROMPT 2 — Clean Codebase: Remove Fakes, Add Sky Oracle
+
+**Priority:** 🔴 Critical — everything depends on this
+**Time estimate:** 1 Claude Code session (~30 min)
+**Depends on:** Prompt 1 complete
 
 ```
-I'm building Stellar, a Next.js 15 astronomy app. On mobile the app has inconsistent spacing —
-side gutters vary by page, sections have gaps, it doesn't feel like a native app.
-I want a tight, full-bleed, app-like layout with zero horizontal overflow.
+I'm building Stellar, a Next.js 15 astronomy app. Two fake third-party libraries (farmhawk.ts and pollinet.ts) need to be removed and replaced with honest, cleaner alternatives.
 
-Read ALL of these files before making any changes:
-  src/app/page.tsx
-  src/app/sky/page.tsx
+Farmhawk was a fake "satellite oracle" that actually just called Open-Meteo directly.
+Pollinet was a fake "mesh relay" with an IndexedDB offline queue.
+
+Replacements:
+- Sky Oracle: a server-side API route that calls Open-Meteo, computes a deterministic hash, and returns sky conditions. No fake branding.
+- Offline handling: removed entirely. If !navigator.onLine, show an error and let the user retry.
+
+Read all of these files before writing anything:
+  src/lib/farmhawk.ts
+  src/lib/pollinet.ts
+  src/lib/types.ts
+  src/components/sky/Verification.tsx
+  src/components/sky/MissionActive.tsx
   src/app/missions/page.tsx
-  src/app/marketplace/page.tsx
-  src/app/profile/page.tsx
+  src/lib/constants.ts
+
+---
+
+Step 1 — Update src/lib/types.ts:
+
+Replace the FarmHawkResult interface with SkyVerification:
+  export interface SkyVerification {
+    verified: boolean
+    cloudCover: number
+    visibility: 'Excellent' | 'Good' | 'Fair' | 'Poor'
+    conditions: string
+    humidity: number
+    temperature: number
+    windSpeed: number
+    oracleHash: string
+    verifiedAt: string
+  }
+
+Remove PollinetStatus entirely.
+
+Update CompletedMission:
+  - Change: farmhawk: FarmHawkResult | null  →  sky: SkyVerification | null
+  - Remove: pollinet: { mode: 'direct' | 'mesh' | 'queued'; peers: number }
+  - Keep status: 'completed' | 'pending'
+
+---
+
+Step 2 — Create src/app/api/sky/verify/route.ts:
+
+GET handler reading query params: lat, lon (required, numbers).
+Validation: if missing or not finite, return 400.
+
+Logic:
+1. Call Open-Meteo:
+   `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=cloud_cover,visibility,relative_humidity_2m,temperature_2m,wind_speed_10m&timezone=auto`
+
+2. Parse response:
+   cloudCover = current.cloud_cover ?? 15
+   visMeters = current.visibility ?? 20000
+   humidity = current.relative_humidity_2m ?? 50
+   temperature = current.temperature_2m ?? 12
+   windSpeed = current.wind_speed_10m ?? 5
+
+3. Visibility rating:
+   Excellent: visMeters > 20000 && cloudCover < 20
+   Good: visMeters > 10000 && cloudCover < 50
+   Fair: visMeters > 5000 && cloudCover < 70
+   Poor: otherwise
+
+4. Build conditions string (same logic as old farmhawk)
+
+5. Oracle hash (deterministic per location per hour):
+   const hourSlot = Math.floor(Date.now() / 3600000)
+   const hashInput = `${Number(lat).toFixed(4)},${Number(lon).toFixed(4)},${cloudCover},${hourSlot}`
+   const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(hashInput))
+   const oracleHash = '0x' + Array.from(new Uint8Array(hashBuffer)).slice(0, 20).map(b => b.toString(16).padStart(2, '0')).join('')
+
+6. Return SkyVerification JSON:
+   { verified: cloudCover < 60, cloudCover, visibility, conditions, humidity, temperature, windSpeed, oracleHash, verifiedAt: new Date().toISOString() }
+
+On Open-Meteo failure: fallback with verified: true, cloudCover: 15.
+
+---
+
+Step 3 — Update src/components/sky/Verification.tsx:
+
+- Replace: farmhawk: FarmHawkResult → sky: SkyVerification
+- Remove: pollinet: PollinetStatus, onQueueOffline: () => void
+- Replace all farmhawk.* with sky.*
+- Remove offlineMode state, Pollinet toggle, "Oracle receipt" dropdown
+- Add single info badge: "Sky Oracle · Open-Meteo · {time}"
+- CTA button always calls onMint: "Seal on Solana  ✦ +${stars}"
+- Remove Wifi/WifiOff imports
+
+---
+
+Step 4 — Update src/components/sky/MissionActive.tsx:
+
+- Remove farmhawk/pollinet imports, state, and handlers
+- Replace handleCapture to call /api/sky/verify instead of verifyWithFarmHawk
+- Update handleMint to use sky.cloudCover and sky.oracleHash
+- Update Verification component props
+- Update addMission call: sky: sky!, remove pollinet field
+- Add offline check: if !navigator.onLine show error
+
+---
+
+Step 5 — Update src/app/missions/page.tsx:
+
+- Remove initPollinetSync import and useEffect
+- Remove syncToast state and JSX
+
+---
+
+Step 6 — Update src/lib/constants.ts:
+
+- Remove farmhawk and pollinet from SPONSORS
+- Change oracle to 'open-meteo-v1' in AGENT_META
+- Remove platform: 'cyreneai'
+
+---
+
+Step 7 — Delete src/lib/farmhawk.ts and src/lib/pollinet.ts
+
+Verify no remaining imports before deleting.
+```
+
+---
+
+### ★ PROMPT 3 — Server-Side Compressed NFT Minting
+
+**Priority:** 🔴 Critical
+**Time estimate:** 1 session (~30 min)
+**Depends on:** Prompt 1 (Bubblegum tree created), Prompt 2
+
+```
+I'm building Stellar, a Next.js 15 + Solana astronomy app. I need a server-side compressed NFT minting function and API routes.
+
+Read these files first:
+  src/lib/solana.ts
+  src/lib/types.ts
+
+---
+
+Step 1 — Create src/lib/mint-nft.ts (server-only):
+
+Import bs58, createUmi, keypairIdentity, generateSigner, percentAmount, publicKey as toPublicKey from umi/bubblegum/token-metadata packages.
+
+Export interface ObservationMintParams {
+  userAddress: string | null
+  target: string
+  timestampMs: number
+  lat: number
+  lon: number
+  cloudCover: number
+  oracleHash: string
+  stars: number
+}
+
+Export async function mintCompressedNFT(params): Promise<{ txId: string }>
+
+Implementation:
+  - Validate env vars: FEE_PAYER_PRIVATE_KEY, MERKLE_TREE_ADDRESS, COLLECTION_MINT_ADDRESS
+  - Create UMI instance with devnet RPC
+  - Decode fee payer from base58, set as identity
+  - Recipient = userAddress if provided, else fee payer
+  - NFT name: "Stellar: ${target}"
+  - URI: "${APP_URL}/api/metadata/observation?target=...&ts=...&lat=...&lon=...&cc=...&hash=...&stars=..."
+  - mintV1 with leafOwner, merkleTree, collectionMint, metadata
+  - Return { txId: bs58.encode(signature) }
+
+---
+
+Step 2 — Create src/app/api/mint/route.ts:
+
+POST handler. JSON body with: userAddress, target, timestampMs, lat, lon, cloudCover, oracleHash, stars.
+
+Validation: target non-empty, timestampMs positive, cloudCover 0-100 (reject >70), lat -90 to 90, lon -180 to 180, stars positive integer.
+
+Call mintCompressedNFT, return { txId, explorerUrl }.
+On error: 500 { error: message }.
+
+---
+
+Step 3 — Create src/app/api/metadata/observation/route.ts:
+
+GET handler reading URLSearchParams: target, ts, lat, lon, cc, hash, stars.
+
+Return Metaplex-compatible JSON metadata with name, description, image (static placeholder), external_url, and attributes array including Target, Date, Location, Cloud Cover, Oracle Hash, Stars Earned.
+
+Do not touch existing files.
+```
+
+---
+
+### ★ PROMPT 4 — Wire Mission → Real Mint + Success Screen
+
+**Priority:** 🔴 Critical
+**Time estimate:** 1 session (~45 min)
+**Depends on:** Prompts 2 + 3
+
+```
+I'm building Stellar. The observation flow in MissionActive.tsx currently calls a simulated mintObservation(). Replace it with a real POST to /api/mint and add a proper success screen.
+
+Read these files fully:
+  src/components/sky/MissionActive.tsx
+  src/app/missions/page.tsx
+  src/lib/types.ts
+
+---
+
+Changes to src/components/sky/MissionActive.tsx:
+
+1. Remove mintObservation import from solana.ts. Remove Connection/PublicKey imports.
+   Add state: const [mintTxId, setMintTxId] = useState('')
+   Import ExternalLink from lucide-react, useRouter from next/navigation.
+
+2. Replace handleMint():
+   a. setStep('minting')
+   b. Snapshot prevCompleted/prevRank/prevUnlocked for reward diff
+   c. Clear mintError
+   d. AbortController with 60s timeout
+   e. POST /api/mint with JSON body:
+      { userAddress: solanaWallet?.address ?? null, target: mission.name, timestampMs: new Date(timestamp).getTime(), lat: coords.lat, lon: coords.lon, cloudCover: sky?.cloudCover ?? 0, oracleHash: sky?.oracleHash ?? 'sim', stars: mission.stars }
+   f. Handle errors: parse JSON, setMintError, return to 'verified'
+   g. Fire-and-forget POST /api/award-stars (don't await, catch errors)
+   h. setMintTxId(txId)
+   i. setMintDone(true)
+   j. setTimeout 1200ms: run reward diff, then setStep('done')
+   k. In addMission: set method based on txId prefix
+
+3. Add step === 'done' render:
+   Full-screen centered dark panel:
+   - Teal checkmark in circle (w-16 h-16)
+   - "Discovery Sealed" h2 (serif, white)
+   - "{mission.emoji} {mission.name}" (slate-400, text-sm)
+   - "+{mission.stars} ✦" (#FFD166, font-bold)
+   - If real txId (not sim): Solana Explorer link (teal, text-xs, ExternalLink icon)
+   - "Share" button: onClick opens twitter intent with pre-composed text:
+     "I just observed {mission.name} and sealed it on Solana ✦ @StellarClub26"
+     Style: bg rgba(29,155,240,0.1), border rgba(29,155,240,0.3), text-xs
+   - Two bottom buttons:
+     "View NFTs" (outlined, → router.push('/nfts'))
+     "Done" (brass gradient, → onClose())
+
+4. In step === 'verified': show mintError if set as amber text.
+
+5. Remove unused connection variable.
+
+Changes to src/app/missions/page.tsx:
+  Remove mintObservation, Connection, PublicKey imports if no longer used.
+```
+
+---
+
+## TRACK B — TOKEN + GALLERY + PROFILE
+
+---
+
+### ★ PROMPT 5 — Stars SPL Token: Deploy + Award + Balance
+
+**Priority:** 🔴 Critical
+**Time estimate:** 1 session (~30 min)
+**Depends on:** Prompt 1 (fee payer funded)
+**Can run in parallel with:** Prompt 2
+
+```
+I'm building Stellar. Deploy a Stars SPL token on devnet, create an award endpoint, and show the real balance in the profile.
+
+Read src/lib/solana.ts, src/app/profile/page.tsx, and scripts/setup-bubblegum.ts first.
+
+---
+
+Step 1 — Create scripts/create-stars-token.ts:
+
+Use same .env.local loading pattern as setup-bubblegum.ts.
+Load fee payer from FEE_PAYER_PRIVATE_KEY (base58 → Keypair.fromSecretKey).
+Connect to devnet.
+createMint(connection, feePayerKeypair, feePayerKeypair.publicKey, null, 0) — 0 decimals.
+Print mint address, write STARS_TOKEN_MINT to .env.local.
+Add to package.json: "setup:token": "npx tsx scripts/create-stars-token.ts"
+
+---
+
+Step 2 — Create src/app/api/award-stars/route.ts:
+
+POST accepting { recipientAddress: string, amount: number, reason: string }.
+Validate: recipientAddress is valid PublicKey, amount is integer 1-1000, reason non-empty.
+If STARS_TOKEN_MINT not set: return 503.
+Load fee payer, getOrCreateAssociatedTokenAccount, mintTo.
+Return { success: true, txId, explorerUrl }.
+Console log: '[Stars] Awarded {amount} to {address} for {reason}'
+
+---
+
+Step 3 — Add to src/lib/solana.ts (append, don't modify existing):
+
+export async function getStarsBalance(walletAddress: string): Promise<number>
+  Use getAssociatedTokenAddress + getAccount. Return Number(account.amount). Catch → 0.
+
+---
+
+Step 4 — Update src/app/profile/page.tsx:
+
+Read full file first.
+Add useState for starsBalance (default 0).
+Add useEffect: when wallet available, call getStarsBalance, set state.
+Show the real on-chain balance where Stars are displayed.
+```
+
+---
+
+### ★ PROMPT 6 — NFT Gallery (/nfts page)
+
+**Priority:** 🟡 High
+**Time estimate:** 1 session (~30 min)
+**Depends on:** Prompt 3 (collection mint exists)
+
+```
+I'm building Stellar. Rewrite src/app/nfts/page.tsx to fetch and display real compressed observation NFTs.
+
+Read src/app/nfts/page.tsx and src/app/missions/page.tsx (for auth + Privy pattern) first.
+
+---
+
+Auth gate: if !authenticated, show sign-in prompt (same style as missions page).
+
+On mount when authenticated — fetch via Helius DAS API:
+  POST to NEXT_PUBLIC_HELIUS_RPC_URL (fallback: devnet) with:
+  { jsonrpc: '2.0', id: 1, method: 'getAssetsByOwner', params: { ownerAddress: wallet, page: 1, limit: 100, displayOptions: { showUnverifiedCollections: true } } }
+
+Filter by collection: keep items where grouping includes NEXT_PUBLIC_COLLECTION_MINT_ADDRESS.
+If env var not set, show all returned assets as fallback.
+
+States: loading (spinner), error (retry message), empty (Telescope icon + "No observations yet" + link to /missions), loaded (grid).
+
+NFT grid (grid-cols-2 sm:grid-cols-3, gap-3):
+  Each card (dark rounded style):
+  - NFT name (text-sm, semibold, white)
+  - Attributes: Target, Date, Cloud Cover, Stars Earned as small pills
+  - "View on Explorer" link (teal, text-xs, ExternalLink icon)
+
+Page header: "My Observations" (serif) + count badge.
+
+Note: add NEXT_PUBLIC_COLLECTION_MINT_ADDRESS and NEXT_PUBLIC_HELIUS_RPC_URL to .env.local.
+```
+
+---
+
+## TRACK C — AUDIENCE EXPANSION + POLISH
+
+---
+
+### PROMPT 7 — Fix All Broken Pages + Unify Branding
+
+**Priority:** 🔴 Critical (judges will click every nav link)
+**Time estimate:** 1 session (~45 min)
+**Depends on:** Nothing — can run anytime
+**This is the single highest-ROI prompt for hackathon scoring.**
+
+```
+I'm building Stellar, a Next.js 15 astronomy app for the Colosseum Frontier hackathon. A UX audit found critical issues that must be fixed before submission. Every page accessible from navigation must render properly. Broken pages destroy judge confidence.
+
+Read the following files and the full navigation structure before making any changes:
+  src/app/layout.tsx (or wherever the nav links are defined)
+  src/components/ (find the nav/header/footer components)
   src/app/darksky/page.tsx
-  src/app/globals.css
+  src/app/chat/page.tsx
+  src/app/profile/page.tsx
+  src/app/leaderboard/page.tsx
 
 ---
 
-TASK 1 — Global layout rules (apply these once in globals.css):
+TASK 1 — Identify all navigation links:
+  Read the nav component(s). List every route that appears in desktop nav, mobile nav, and footer.
+  For each route, check if the page exists and renders without errors.
 
-Add these global styles:
-  html, body { overflow-x: hidden; max-width: 100vw; }
-  * { box-sizing: border-box; }
+TASK 2 — Fix or remove /darksky:
+  If src/app/darksky/page.tsx exists but is broken or returns 404:
+    Option A (preferred): Make it render a static "Coming Soon" placeholder with:
+      - "Dark Sky Network" title (serif, white)
+      - "We're building a light pollution map powered by real observer data."
+      - "Complete sky missions to contribute Bortle readings."
+      - CTA button → /missions
+      - Consistent dark theme (bg #070B14)
+    Option B: Remove /darksky from all nav links.
 
-Find the existing scroll animation classes. Leave them. Only add the above.
+TASK 3 — Fix /chat routing:
+  The /chat page reportedly renders Learn content instead of ASTRA AI chat.
+  Read src/app/chat/page.tsx. If it's rendering wrong content, fix the imports/routing.
+  If the ASTRA chat component exists elsewhere, wire it to /chat.
+  If the chat component doesn't exist yet, create a placeholder:
+    - "ASTRA — AI Astronomer" title
+    - "Ask ASTRA anything about tonight's sky"
+    - Simple input field + submit button
+    - Placeholder response: "ASTRA will be available soon. Check back after the next update."
+    - Style: dark theme, consistent with rest of app
 
----
+TASK 4 — Fix /profile:
+  If the profile page is blank, ensure it renders:
+    - User greeting with name/email from Privy
+    - Stars balance (show 0 if token not configured yet)
+    - Rank (Stargazer if 0 missions)
+    - Stats: missions completed (from useAppState), observation count
+    - Wallet address in collapsible section
+    - Sign out button
+  If data isn't available yet, show reasonable defaults — never a blank page.
 
-TASK 2 — Audit every page for these specific issues and fix them:
+TASK 5 — Fix /leaderboard:
+  If it shows mock data, that's acceptable but label it:
+    Add a small banner: "Leaderboard updates with real observer data coming soon"
+  If it's completely empty/broken, either:
+    - Populate with 5-8 rows of seeded data (Georgian names + realistic stats)
+    - Or add a "Coming Soon" placeholder similar to darksky
 
-Issue A — Inconsistent horizontal padding:
-  All page wrappers should use: px-4 (16px) on mobile, sm:px-6 on larger screens.
-  If a page uses px-3, px-5, px-8 at mobile breakpoint → change to px-4.
-  Do this on the outermost div of each page that wraps content.
+TASK 6 — Unify branding:
+  Search the entire codebase for references to club.astroman.ge/logo.png or any Astroman logo URL.
+  Replace ALL instances on inner pages with Stellar branding.
+  The Astroman logo should ONLY appear on the marketplace page as a partner badge, not as the app logo.
+  Ensure the nav bar shows "Stellar" (or the Stellar logo) on every page, not switching between Stellar and Astroman.
 
-Issue B — Max-width containers leaking on mobile:
-  Any div with max-w-* should also have: mx-auto w-full
-  Check pages for max-w-2xl, max-w-3xl, max-w-5xl — make sure they all have w-full
+TASK 7 — Fix footer:
+  If the footer references an unrelated hackathon or has incorrect links, fix it.
+  Footer should link to: Sky · Missions · ASTRA · Marketplace · Astroman ↗ (external)
 
-Issue C — Section gaps between cards:
-  Sections using gap-6, gap-8 or larger on mobile → change to gap-4 for vertical stacks
-  Horizontal card rows that overflow: add overflow-x-auto scrollbar-hide with flex-nowrap
-
-Issue D — Remove extra vertical padding between sections:
-  Sections using py-10, py-12, py-16 on the page.tsx homepage → change to py-8 max
-  Section margins mt-12, mt-16 → change to mt-8 max on mobile
-
-Issue E — Cards stretching off-screen:
-  Any card inside a page that doesn't have a max-width cap: add max-w-full
-  Flex children with min-width constraints: add min-w-0 to allow shrinking
-
----
-
-TASK 3 — Specific page fixes:
-
-src/app/page.tsx (homepage):
-  The hero section: ensure px-4 on mobile, text sizes don't cause overflow
-  The stats row: if it's a flex row, add overflow-x-auto scrollbar-hide on the container
-  Partner stores section: cards should stack to single column on mobile (flex-col sm:flex-row)
-
-src/app/marketplace/page.tsx:
-  Product grid: on mobile should be a single column (grid-cols-1 sm:grid-cols-2 lg:grid-cols-3)
-  Check if product images have a fixed width wider than the viewport
-
-src/app/profile/page.tsx:
-  Stats row (Stars, Streak, Rank): on mobile, wrap to 2-column grid (grid-cols-2) if it's currently 3-col
-
----
-
-TASK 4 — Smooth scroll behavior:
-In globals.css, add:
-  html { scroll-behavior: smooth; }
-  
-In every page's outermost div, make sure there is NO: overflow-x: scroll, overflow-x: auto 
-  (only the specific rows that need horizontal scroll should have it)
-
----
-
-Report what you changed on each file. Do NOT change visual design, colors, or component logic.
-Only fix spacing, padding, overflow, and grid columns.
+TASK 8 — Verify by opening every nav route:
+  After all fixes, mentally trace: /, /sky, /missions, /chat, /marketplace, /profile, /nfts, /leaderboard, /darksky.
+  Each must render without errors and show content consistent with the Stellar brand.
 ```
 
 ---
 
-### Prompt ICONS-1 — Icon System + Location Icon Polish ✅ DONE
+### PROMPT 8 — Sky Score + Tonight's Highlights (Audience Expansion)
+
+**Priority:** 🟡 High — this makes the app appealing to non-astronomers
+**Time estimate:** 1 session (~45 min)
+**Depends on:** Nothing
 
 ```
-I'm building Stellar. The app uses Lucide icons but inconsistently — some are outline, some are 
-larger/smaller, and the location/GPS icon used in LocationPicker looks weak. The missions page 
-uses Satellite and Lock icons beautifully. I want all icons across the app to match that quality.
+I'm building Stellar, a Next.js 15 astronomy app. I need to add two features that make the app useful for EVERYONE, not just telescope owners: a "Sky Score" (0-100 rating for tonight's sky quality) and a "Tonight's Highlights" summary.
 
-Read these files:
-  src/components/LocationPicker.tsx
-  src/components/shared/Nav.tsx
-  src/components/shared/BottomNav.tsx
-  src/app/page.tsx (find any icons used in the hero or sections)
+These features use data we already compute — no new external APIs needed.
 
----
-
-TASK 1 — Location icon in LocationPicker.tsx:
-
-Find the current location/GPS icon in LocationPicker.tsx.
-Replace it with: import { MapPin } from 'lucide-react'
-  
-Style the MapPin icon:
-  Size: 16px
-  Color: #34d399 (teal) when location is set, rgba(255,255,255,0.4) when no location
-  Wrap in a small circle badge: 28px × 28px, rounded-full, bg rgba(52,211,153,0.12), border 1px solid rgba(52,211,153,0.25)
-  Icon centered inside the circle
-  
-The location pill/button that shows current location name:
-  Style: flex items-center gap-2, rounded-full, px-3 py-1.5
-  Background: rgba(255,255,255,0.04)
-  Border: 1px solid rgba(255,255,255,0.1)
-  On hover: border-color rgba(52,211,153,0.3), bg rgba(52,211,153,0.06)
-  Text: text-xs text-white/70 showing the location name
-  Add a small ChevronDown icon (12px, rgba(255,255,255,0.3)) on the right
+Read these files first:
+  src/app/sky/page.tsx (or wherever the sky forecast renders)
+  src/lib/sky-data.ts
+  src/lib/planets.ts
+  src/app/api/sky/forecast/route.ts
+  src/app/page.tsx (homepage)
 
 ---
 
-TASK 2 — Nav icon sizes (Nav.tsx):
+FEATURE 1 — Sky Score API + Component
 
-All icons in the desktop tabs: size={16} (currently 17 — change to 16 for consistency)
-Search icon in the right side: size={16} (currently 15)
+Create src/app/api/sky/score/route.ts:
 
----
+GET handler with query params: lat, lon (default: 41.72, 44.83 — Tbilisi)
 
-TASK 3 — Homepage section icons (page.tsx):
+Scoring logic (0-100):
+  1. Fetch current conditions from Open-Meteo (same call as sky/verify)
+  2. cloudScore = Math.max(0, 100 - (cloudCover * 1.2))  // 0% clouds = 100, 83% = 0
+  3. humidityPenalty = humidity > 80 ? (humidity - 80) * 0.5 : 0
+  4. windPenalty = windSpeed > 20 ? (windSpeed - 20) * 0.3 : 0
+  5. lightPollutionBase = 15  // static penalty, could be dynamic later
+  6. moonPenalty: calculate current moon illumination using astronomy-engine or approximate:
+     const moonAge = (Date.now() / 86400000 - 10971.5) % 29.53  // days since known new moon
+     const moonIllumination = (1 - Math.cos(2 * Math.PI * moonAge / 29.53)) / 2
+     moonPenalty = moonIllumination * 20  // full moon = -20 points
+  7. skyScore = Math.round(Math.max(0, Math.min(100, cloudScore - humidityPenalty - windPenalty - lightPollutionBase - moonPenalty)))
 
-Find the "How It Works" section (or equivalent 4-step section) on the homepage.
-If it uses Telescope, Camera, Satellite, Layers from lucide-react already — check their size.
-All step icons should be:
-  Container: 48px × 48px rounded-2xl, bg rgba(52,211,153,0.08), border 1px solid rgba(52,211,153,0.15)
-  Icon inside: size={22}, color #34d399
+Badge logic:
+  90-100: "Perfect" (emoji: ✨)
+  70-89: "Great" (emoji: 🌟)
+  50-69: "Good" (emoji: ⭐)
+  30-49: "Fair" (emoji: 🌤️)
+  0-29: "Poor" (emoji: ☁️)
 
-If the homepage has a different set of icons (not Lucide) — replace them with these:
-  Step 1 (Observe): Telescope
-  Step 2 (Verify): Camera
-  Step 3 (Earn): Star (from lucide-react)
-  Step 4 (Shop): ShoppingBag
-
----
-
-TASK 4 — Dark Sky page icons (src/app/darksky/page.tsx):
-
-Read src/app/darksky/page.tsx.
-The page uses string labels for location types. Ensure any icon used there is:
-  import { MapPin, Eye, Zap, Star } from 'lucide-react'
-  
-If there are colored dot indicators next to location names, keep them — don't replace with icons.
-Only add icons to the page header area if there are none:
-  Add <Eye size={20} color="#34d399" /> before the "Dark Sky Network" heading
-
-Do NOT change visual design or logic on any page. Only update icon imports and sizes.
-```
+Return:
+{
+  score: number,
+  badge: string,
+  emoji: string,
+  breakdown: { cloud: number, humidity: number, wind: number, moon: number, lightPollution: number },
+  recommendation: string  // e.g. "Great night for naked-eye stargazing" / "Best for planet viewing" / "Stay inside tonight"
+}
 
 ---
 
-### Prompt HOME-HERO — Homepage Hero Text Fix ✅ DONE
+FEATURE 2 — Tonight's Highlights API
 
-```
-I'm building Stellar. The homepage hero has the word "Stellar" as part of the main heading,
-and I want to remove it from the heading — the logo in the nav already identifies the app.
+Create src/app/api/sky/tonight/route.ts:
+
+GET handler with query params: lat, lon (default Tbilisi).
+
+Logic:
+1. Get planet positions (import from existing planets.ts or call astronomy-engine directly)
+   For each of [Mercury, Venus, Mars, Jupiter, Saturn, Moon]:
+   - Is it above the horizon tonight (between sunset and sunrise)?
+   - What's its peak altitude?
+   - When does it rise/set?
+
+2. Get sky score (call the score endpoint or compute inline)
+
+3. Build highlights array (max 5 items, ordered by interest):
+   Priority order:
+   - Any planet with altitude > 30° = "Jupiter is high in the sky tonight"
+   - Moon phase note: "Waxing Crescent Moon (23% illuminated)"
+   - Meteor shower if within ±3 days of a known peak (hardcode the major ones: Lyrids Apr 22, Eta Aquariids May 5, etc.)
+   - ISS pass if easily available (skip if too complex — don't block on this)
+   - Constellation suggestion: "Look south for Scorpius after 10 PM"
+
+4. Return:
+{
+  skyScore: { score, badge, emoji },
+  highlights: [
+    { type: 'planet', title: 'Jupiter Rises at 9:14 PM', subtitle: 'Look east — brightest object after the Moon', icon: '🪐' },
+    { type: 'moon', title: 'Waxing Crescent Moon', subtitle: '23% illuminated · Sets at 11:30 PM', icon: '🌙' },
+    ...
+  ],
+  sunTimes: { rise: string, set: string },
+  bestWindow: { start: string, end: string, reason: string }
+}
+
+---
+
+FEATURE 3 — Add to Homepage
 
 Read src/app/page.tsx fully.
 
----
+Add a "Tonight" section near the top of the homepage (after hero, before "How It Works"):
 
-TASK 1 — Find the main hero heading:
-Look for the h1 or main heading in the hero section. It likely says something like:
-  "Stellar — Observe the Night Sky" or "Observe. Verify. Earn." or similar.
+Fetch /api/sky/tonight on mount (use user's location if available, else Tbilisi).
 
-If it includes the word "Stellar" as a prefix in the headline text → remove just "Stellar" and any
-dash/separator following it, keeping the rest of the headline intact.
+Render:
+  - Sky Score circle (large, centered): number inside colored ring
+    Color: score >= 70 → teal, 50-69 → amber, <50 → slate
+    Below: badge text + recommendation
+  - Highlights as horizontal scroll cards (dark cards, rounded-xl):
+    Each card: icon + title + subtitle
+    On click: if planet → navigate to /sky, if mission-related → /missions
+  - "Best Window" bar: "Tonight's best: {start} – {end} · {reason}"
 
-If the headline is something like "Observe the Night Sky" without "Stellar" → skip this task.
-
----
-
-TASK 2 — Homepage hero subtitle:
-Find the subtitle below the main heading. Update it to:
-  "Photograph the night sky. Get AI-verified. Earn Stars tokens on Solana."
+This section should be THE first thing users see after the hero. It answers the universal question: "Is tonight good for looking at the sky?"
 
 ---
 
-TASK 3 — Trust line below CTA:
-Find any small muted line near the CTA buttons (usually shows stats or trust signals).
-If it says anything about Vibecoding or old hackathon → change to:
-  "Free to join · No wallet needed · Powered by Solana"
+FEATURE 4 — Add to /sky page
 
----
+Read the sky forecast page fully.
 
-TASK 4 — "Start Observing" CTA:
-Find the primary CTA button. Verify it links to /missions.
-If it links to /club or anywhere else → fix to /missions.
+Add the Sky Score as a prominent element at the top:
+  Large number with colored ring + badge
+  Below the score: breakdown tooltip or expandable showing cloud/moon/humidity contributions
 
-Do NOT change any animations, star field, colors, or layout. Text changes only.
-```
-
----
-
-## PHASE AUTH — Account & Authentication ✅ DONE
-*Run after Phase 0. Makes login sticky, data persistent, and all auth methods work.*
-
----
-
-### Prompt AUTH-1 — Email+Password Login, Data Persistence, Fix Google + SMS ✅ DONE
-
-```
-I'm building Stellar, a Next.js 15 app using Privy (@privy-io/react-auth ^3.19.0) for auth.
-
-Current problems:
-1. Login is email OTP only — users want to register with email + password and log in any time
-2. Sign-out calls reset() which wipes all localStorage state (missions, progress lost)
-3. Google OAuth shows in the modal but fails to complete auth
-4. SMS auth shows but fails
-5. User data (email, wallet address) is never saved to the backend — so there's no persistent user record
-
-Read these files fully before writing anything:
-  src/components/providers/PrivyProvider.tsx
-  src/components/shared/Nav.tsx
-  src/hooks/useAppState.ts
-  src/lib/supabase.ts (or wherever Supabase client is exported)
-
----
-
-TASK 1 — Enable email+password auth in PrivyProvider.tsx:
-
-Privy v3 supports password-based email auth through the `loginMethods` config combined with
-appearance settings. Update the config:
-
-  config={{
-    loginMethods: ['email', 'google', 'sms'],
-    appearance: {
-      theme: 'dark',
-      accentColor: '#34d399',
-      logo: '/logo.png',
-      loginMessage: 'Sign in to Stellar',
-      showWalletLoginFirst: false,
-    },
-    embeddedWallets: {
-      solana: { createOnLogin: 'users-without-wallets' },
-    },
-  }}
-
-NOTE: Password-based email login is a Privy Dashboard setting, not a code config.
-After deploying this, the developer must:
-  → Privy Dashboard → App Settings → Login Methods → Email → enable "Require password on sign-up"
-  → This changes the email flow from OTP to: email → set password on first visit → email+password on return
-  → Google OAuth: Privy Dashboard → Login Methods → Google → toggle ON (no client ID needed — Privy hosts it)
-  → SMS: Privy Dashboard → Login Methods → SMS → toggle ON
-
-For the appearance, change accentColor to '#34d399' (teal) to match the app design.
-
----
-
-TASK 2 — Fix sign-out: do NOT wipe user state on logout:
-
-In src/components/shared/Nav.tsx, find the handleLogout function:
-
-Current:
-  const handleLogout = async () => {
-    await logout();
-    reset();           ← THIS CLEARS ALL MISSIONS + PROGRESS
-    router.push('/');
-    ...
-  }
-
-Fix: Remove the reset() call. User's locally stored progress should survive sign-out.
-Only wipe walletAddress from state:
-
-  const handleLogout = async () => {
-    await logout();
-    setWallet('');     ← import setWallet from useAppState
-    router.push('/');
-    setShowMenu(false);
-    setConfirmStep(false);
-  };
-
-Import setWallet from the useAppState hook (it's already in the context).
-
----
-
-TASK 3 — Save user to Supabase on login:
-
-Create src/app/api/users/upsert/route.ts:
-
-  POST /api/users/upsert
-  Body: { privyId: string; email: string | null; walletAddress: string | null }
-  
-  Uses Supabase service role key (SUPABASE_SERVICE_ROLE_KEY from env) to upsert into a `users` table:
-    - id: uuid (auto)
-    - privy_id: text UNIQUE
-    - email: text nullable
-    - wallet_address: text nullable
-    - username: text nullable
-    - created_at: timestamptz default now()
-    - updated_at: timestamptz default now()
-  
-  Upsert logic: ON CONFLICT (privy_id) DO UPDATE SET email=excluded.email, wallet_address=excluded.wallet_address, updated_at=now()
-  
-  Return: { success: true, user: { privy_id, email, wallet_address, created_at } }
-  
-  Use the Supabase client with service role key — NOT the anon key — so it bypasses RLS.
-  Import the Supabase URL from process.env.NEXT_PUBLIC_SUPABASE_URL
-  Import the service role key from process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  If SUPABASE_SERVICE_ROLE_KEY is not set, fall back to NEXT_PUBLIC_SUPABASE_ANON_KEY.
-
----
-
-TASK 4 — Wire upsert on every login:
-
-Create src/hooks/useUserSync.ts:
-
-  'use client'
-  
-  A hook that runs once when authenticated becomes true and user is loaded.
-  
-  import { useEffect } from 'react'
-  import { usePrivy, useWallets } from '@privy-io/react-auth'
-  
-  export function useUserSync() {
-    const { authenticated, user } = usePrivy()
-    const { wallets } = useWallets()
-    
-    useEffect(() => {
-      if (!authenticated || !user) return
-      
-      const email = user.email?.address ?? null
-      const solanaWallet = wallets.find(w => (w as {chainType?:string}).chainType === 'solana')
-      const walletAddress = solanaWallet?.address ?? null
-      
-      fetch('/api/users/upsert', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ privyId: user.id, email, walletAddress }),
-      }).catch(() => {})  // fire-and-forget, don't crash if it fails
-      
-    }, [authenticated, user, wallets])
-  }
-
-Then add useUserSync() call inside the root layout or PrivyProvider client component.
-The cleanest place: add it to src/components/providers/PrivyProvider.tsx inside a thin wrapper component:
-
-  function UserSyncWrapper({ children }: { children: ReactNode }) {
-    useUserSync()
-    return <>{children}</>
-  }
-
-  // Wrap children in UserSyncWrapper inside SolanaWalletProvider
-
----
-
-TASK 5 — Supabase migration note:
-
-Add a comment block at the top of src/app/api/users/upsert/route.ts with the SQL to run in Supabase:
-
-  -- Run in Supabase SQL editor:
-  -- CREATE TABLE IF NOT EXISTS public.users (
-  --   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  --   privy_id text UNIQUE NOT NULL,
-  --   email text,
-  --   wallet_address text,
-  --   username text,
-  --   created_at timestamptz DEFAULT now(),
-  --   updated_at timestamptz DEFAULT now()
-  -- );
-  -- ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
-  -- CREATE POLICY "Service role full access" ON public.users
-  --   USING (true) WITH CHECK (true);
-
----
-
-Do not change any page UI. Do not change the Supabase client used by other API routes.
-No new npm packages — use the existing @supabase/supabase-js already in the project.
-```
-
----
-
-## PHASE 1 — On-Chain Core
-*These prompts are in LATEST_PROMPTS.md. Run in order.*
-
-**Prompt 2 — Sky Oracle** (from LATEST_PROMPTS.md)
-Real Open-Meteo sky verification replacing any mock data. Hash weather conditions on-chain.
-
-**Prompt 3 — Compressed NFT Minting** (from LATEST_PROMPTS.md)
-Server-side Bubblegum compressed NFT mint. `src/lib/mint-nft.ts` + `/api/mint` route.
-
-Before running: fund devnet fee payer, add MERKLE_TREE_ADDRESS + COLLECTION_MINT_ADDRESS to .env.local
-
-**Prompt 4 — Wire Mint + Success Screen** (from LATEST_PROMPTS.md)
-Connect mission completion → real cNFT mint → success screen with Solana Explorer link.
-
-Test: complete Moon mission, verify NFT on explorer.solana.com
-
-**Prompt 5 — Stars SPL Token** (from LATEST_PROMPTS.md)
-Deploy Stars token on devnet. `/api/award-stars` route. Real balance in profile.
-
-Before running: `npm install @solana/spl-token` if not installed.
-After running: `npm run setup:token` to deploy on devnet.
-
-**Prompt 6 — NFT Gallery** (from LATEST_PROMPTS.md)
-Rewrite `/nfts` page to fetch real NFTs from Helius DAS API.
-
-Before running: add NEXT_PUBLIC_HELIUS_RPC_URL + NEXT_PUBLIC_COLLECTION_MINT_ADDRESS to .env.local
-
----
-
-## PHASE 2 — Feature Upgrades
-
----
-
-### Prompt ASTRA-1 — Standalone ASTRA Chat Page
-
-```
-I'm building Stellar. The /chat route is currently an "Astronomy Guide" encyclopedia with tabs
-(planets, deepsky, quizzes, events, telescopes, chat). The Claude API streaming route at
-/api/chat/route.ts already exists and is fully implemented. I need a standalone ASTRA page.
-
-Read these files fully:
-  src/app/chat/page.tsx (current encyclopedia)
-  src/app/api/chat/route.ts (DO NOT MODIFY — just read to understand the request/response format)
-
----
-
-Step 1 — Move encyclopedia:
-Rename src/app/chat/page.tsx → src/app/learn/page.tsx
-Keep all content exactly as-is.
-
-Step 2 — Create src/app/chat/page.tsx:
-
-'use client'
-
-Full-height layout, no scroll on outer container (height: 100dvh, overflow: hidden):
-
-Header (fixed top, 52px):
-  Left: BackButton (import from @/components/shared/BackButton)
-  Center: "✦ ASTRA" (Georgia serif, text-xl, white, letter-spacing 0.05em)
-  Right: "AI Astronomer" (text-[10px], rgba(255,255,255,0.3))
-  Border-bottom: 1px solid rgba(255,255,255,0.06)
-  Background: rgba(7,11,20,0.95), backdrop-blur-sm
-
-Chat area (flex-1, overflow-y-auto, pt-[52px] pb-[80px], px-4):
-  User bubbles: right-aligned, bg rgba(52,211,153,0.08), border 1px solid rgba(52,211,153,0.15), 
-    rounded-2xl rounded-br-sm, px-4 py-3, max-w-[80%], text-sm text-white
-  Assistant bubbles: left-aligned, bg rgba(255,255,255,0.04), border 1px solid rgba(255,255,255,0.08),
-    rounded-2xl rounded-bl-sm, px-4 py-3, max-w-[85%], text-sm text-slate-200
-  Loading: assistant bubble with "ASTRA is thinking..." + three animated dots
-
-Empty state (centered, shown when messages is empty):
-  Icon: 48px circle, bg rgba(52,211,153,0.1), border rgba(52,211,153,0.2), "✦" centered teal
-  Title: "ASTRA" (Georgia serif, text-2xl, white)
-  Subtitle: "Your AI Astronomer" (text-sm, rgba(255,255,255,0.4))
-  Three suggestion pills (flex-wrap, gap-2):
-    "What can I see tonight?" | "When's the next clear night?" | "Best starter telescope?"
-  Pills: bg rgba(255,255,255,0.04), border rgba(255,255,255,0.1), rounded-full, px-4 py-2, text-sm
-
-Input bar (fixed bottom, full width):
-  bg rgba(7,11,20,0.95), backdrop-blur-sm, border-top 1px solid rgba(255,255,255,0.08)
-  px-4 py-3, safe-area-bottom (paddingBottom: 'env(safe-area-inset-bottom)')
-  Row: textarea (1 row, max 3 rows, auto-expand) + send button
-  Textarea: bg rgba(255,255,255,0.04), border rgba(255,255,255,0.1), rounded-2xl, px-4 py-2, text-sm
-  Send button: 36px circle, bg #34d399 when active, rgba(255,255,255,0.1) when disabled
-
-State:
-  const [messages, setMessages] = useState<Array<{role:'user'|'assistant', content:string}>>([])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-
-Auto-scroll to bottom on new messages.
-
-handleSend():
-  1. Guard: empty input or loading → return
-  2. Add user message, clear input, setLoading(true)
-  3. POST /api/chat with { messages: [...messages, userMsg] }
-  4. Stream SSE: read chunks, parse 'data: ' lines, extract type:'text' → append to assistant message in-place
-  5. On type:'done' → setLoading(false)
-
-Keyboard: Enter = submit, Shift+Enter = newline (desktop only)
-
-Auth gate (if !authenticated):
-  Centered card with ✦ icon, "Sign in to chat with ASTRA", teal login() button
-
-No new packages.
-```
-
----
-
-### Prompt MARKET-1 — Real Products: Celestron USA + Bresser Europe
-
-```
-I'm building Stellar. The marketplace currently shows Astroman (Georgia) and High Point Scientific (USA).
-I need to replace High Point Scientific with Celestron (US) and add Bresser (Europe) as a third dealer.
-All products should have real names, real prices in USD, and working image URLs.
-
-Read src/lib/dealers.ts fully before writing.
-
----
-
-TASK 1 — Update DEALERS array in src/lib/dealers.ts:
-
-Replace the 'highpoint-us' dealer with:
-  {
-    id: 'celestron-us',
-    name: 'Celestron',
-    region: 'north_america',
-    country: 'US',
-    website: 'https://www.celestron.com',
-    description: 'The world\'s #1 telescope brand — cutting-edge optics since 1960',
-    shipsTo: ['US', 'CA', 'MX'],
-    currency: 'USD',
-    currencySymbol: '$',
-  }
-
-Add a new dealer:
-  {
-    id: 'bresser-eu',
-    name: 'Bresser',
-    region: 'europe',
-    country: 'DE',
-    website: 'https://www.bresser.de',
-    description: 'Germany\'s leading telescope manufacturer — precision optics for every level',
-    shipsTo: ['DE', 'AT', 'CH', 'FR', 'IT', 'ES', 'NL', 'BE', 'PL', 'SE'],
-    currency: 'USD',
-    currencySymbol: '$',
-  }
-
----
-
-TASK 2 — Replace old highpoint-us products and add celestron-us products:
-
-Remove all products with dealerId: 'highpoint-us'
-
-Add these Celestron products (dealerId: 'celestron-us'):
-
-  {
-    id: 'cel-nexstar-8se',
-    dealerId: 'celestron-us',
-    name: 'Celestron NexStar 8SE',
-    price: 1299,
-    currency: 'USD', currencySymbol: '$', starsPrice: 13000,
-    category: 'telescope',
-    description: '8" Schmidt-Cassegrain with fully automated GoTo. 40,000+ object database, SkyAlign in minutes.',
-    image: 'https://www.celestron.com/cdn/shop/products/11069-celestron-nexstar-8se-telescope_1.jpg',
-    externalUrl: 'https://www.celestron.com/products/nexstar-8se-computerized-telescope',
-    badge: 'Best Seller',
-    specs: { aperture: '203mm', focalLength: '2032mm', mount: 'Single Arm GoTo' },
-  },
-  {
-    id: 'cel-nexstar-6se',
-    dealerId: 'celestron-us',
-    name: 'Celestron NexStar 6SE',
-    price: 999,
-    currency: 'USD', currencySymbol: '$', starsPrice: 10000,
-    category: 'telescope',
-    description: '6" Schmidt-Cassegrain GoTo telescope. Perfect balance of power and portability.',
-    image: 'https://www.celestron.com/cdn/shop/products/11068-celestron-nexstar-6se-telescope_1.jpg',
-    externalUrl: 'https://www.celestron.com/products/nexstar-6se-computerized-telescope',
-    specs: { aperture: '150mm', focalLength: '1500mm', mount: 'Single Arm GoTo' },
-  },
-  {
-    id: 'cel-starsense-dx-130',
-    dealerId: 'celestron-us',
-    name: 'Celestron StarSense Explorer DX 130AZ',
-    price: 299,
-    currency: 'USD', currencySymbol: '$', starsPrice: 3000,
-    category: 'telescope',
-    description: 'Smartphone-powered star-finding. Point phone at sky — app guides you to any object.',
-    image: 'https://www.celestron.com/cdn/shop/products/22461-celestron-starsense-explorer-dx-130az_1.jpg',
-    externalUrl: 'https://www.celestron.com/products/starsense-explorer-dx-130az-smartphone-app-enabled-telescope',
-    badge: 'Top Pick',
-    specs: { aperture: '130mm', focalLength: '650mm', mount: 'Alt-Az' },
-  },
-  {
-    id: 'cel-astromaster-102eq',
-    dealerId: 'celestron-us',
-    name: 'Celestron AstroMaster 102EQ',
-    price: 229,
-    currency: 'USD', currencySymbol: '$', starsPrice: 2300,
-    category: 'telescope',
-    description: '102mm refractor on equatorial mount. Great Moon and planetary telescope for beginners.',
-    image: 'https://www.celestron.com/cdn/shop/products/22046-celestron-astromaster-102eq-telescope_1.jpg',
-    externalUrl: 'https://www.celestron.com/products/astromaster-102eq-telescope',
-    specs: { aperture: '102mm', focalLength: '660mm', mount: 'Equatorial' },
-  },
-  {
-    id: 'cel-powerseeker-127eq',
-    dealerId: 'celestron-us',
-    name: 'Celestron PowerSeeker 127EQ',
-    price: 149,
-    currency: 'USD', currencySymbol: '$', starsPrice: 1500,
-    category: 'telescope',
-    description: '127mm reflector on equatorial mount. Entry-level with serious light-gathering power.',
-    image: 'https://www.celestron.com/cdn/shop/products/21049-celestron-powerseeker-127eq-telescope_1.jpg',
-    externalUrl: 'https://www.celestron.com/products/powerseeker-127eq-telescope',
-  },
-  {
-    id: 'cel-eyepiece-kit',
-    dealerId: 'celestron-us',
-    name: 'Celestron Eyepiece & Filter Kit (14pc)',
-    price: 89,
-    currency: 'USD', currencySymbol: '$', starsPrice: 900,
-    category: 'accessory',
-    description: '14-piece kit: eyepieces, moon filter, color filters, 3x Barlow. Works on any telescope.',
-    image: 'https://www.celestron.com/cdn/shop/products/94119-celestron-eyepiece-filter-kit_1.jpg',
-    externalUrl: 'https://www.celestron.com/products/eyepiece-filter-kit',
-  },
-
----
-
-TASK 3 — Add Bresser Europe products (dealerId: 'bresser-eu'):
-
-  {
-    id: 'bres-messier-ar102',
-    dealerId: 'bresser-eu',
-    name: 'Bresser Messier AR-102/1000 EXOS-1',
-    price: 349,
-    currency: 'USD', currencySymbol: '$', starsPrice: 3500,
-    category: 'telescope',
-    description: '102mm apochromatic refractor on EQ mount. Sharp views of planets and wide star fields.',
-    image: 'https://www.bresser.de/out/pictures/master/product/1/4702900_Messier_AR-102_1000_EXOS-1.jpg',
-    externalUrl: 'https://www.bresser.de/Astronomie/Teleskope/BRESSER-Messier-AR-102-1000-EXOS-1-Teleskop.html',
-    badge: 'Staff Pick',
-    specs: { aperture: '102mm', focalLength: '1000mm', mount: 'EQ-3' },
-  },
-  {
-    id: 'bres-messier-n203',
-    dealerId: 'bresser-eu',
-    name: 'Bresser Messier NT-203/1200 EXOS-2',
-    price: 699,
-    currency: 'USD', currencySymbol: '$', starsPrice: 7000,
-    category: 'telescope',
-    description: '8" Newtonian on motorized EQ mount. Ideal for deep-sky astrophotography.',
-    image: 'https://www.bresser.de/out/pictures/master/product/1/4650901_Messier_NT-203_1200_EXOS-2.jpg',
-    externalUrl: 'https://www.bresser.de/Astronomie/Teleskope/BRESSER-Messier-NT-203-1200-EXOS-2-Teleskop.html',
-    specs: { aperture: '203mm', focalLength: '1200mm', mount: 'EQ-5 Motor' },
-  },
-  {
-    id: 'bres-polaris-70-700',
-    dealerId: 'bresser-eu',
-    name: 'Bresser Polaris 70/700 EQ-3',
-    price: 119,
-    currency: 'USD', currencySymbol: '$', starsPrice: 1200,
-    category: 'telescope',
-    description: '70mm refractor on equatorial mount. Best entry-level scope in Europe. 2 eyepieces included.',
-    image: 'https://www.bresser.de/out/pictures/master/product/1/4651900_Polaris_70_700.jpg',
-    externalUrl: 'https://www.bresser.de/Astronomie/Teleskope/BRESSER-Polaris-70-700-EQ3-Teleskop.html',
-  },
-  {
-    id: 'bres-firstlight-114',
-    dealerId: 'bresser-eu',
-    name: 'Bresser Firstlight 114/500 EQ3',
-    price: 169,
-    currency: 'USD', currencySymbol: '$', starsPrice: 1700,
-    category: 'telescope',
-    description: '114mm Newtonian with EQ-3 mount. Excellent light-gathering for lunar and planetary views.',
-    image: 'https://www.bresser.de/out/pictures/master/product/1/4675115_Firstlight_114_500.jpg',
-    externalUrl: 'https://www.bresser.de/Astronomie/Teleskope/BRESSER-Firstlight-114-500-EQ3-Teleskop.html',
-  },
-  {
-    id: 'bres-science-hexaflex',
-    dealerId: 'bresser-eu',
-    name: 'Bresser Science Hexaflex',
-    price: 199,
-    currency: 'USD', currencySymbol: '$', starsPrice: 2000,
-    category: 'accessory',
-    description: 'Professional 6-planet filter set for contrast enhancement on Moon, planets, and nebulae.',
-    image: 'https://www.bresser.de/out/pictures/master/product/1/4920500.jpg',
-    externalUrl: 'https://www.bresser.de/Astronomie/Zubehoer/Okulare-und-Filter/',
-  },
-
----
-
-TASK 4 — Update location.tsx or dealers.ts to support 'europe' region:
-
-Read src/lib/location.tsx. Check what Region type looks like.
-If Region type does not include 'europe' → add it.
-If the getRegion() function doesn't return 'europe' for European coordinates → add logic:
-  Rough bounding box for Europe: lat 35-71, lon -10 to 40
-  If user's lat/lon is within that range → return 'europe'
-
-Make sure getProductsByRegion('europe') returns bresser-eu products.
-
----
-
-TASK 5 — Update marketplace page if needed:
-Read src/app/marketplace/page.tsx.
-If it references 'highpoint-us' anywhere as a hardcoded string → update to 'celestron-us'.
-If it shows a dealer name header or logo referencing High Point → update to match new dealers.
-
-Astroman product images in dealers.ts already use astroman.ge CDN URLs — leave those as-is.
-```
-
----
-
-### Prompt DARKSKY-1 — Dark Sky Page: Real Interactive Map + System Rename
-
-```
-I'm building Stellar. The Dark Sky page at src/app/darksky/page.tsx is currently a static page
-with hardcoded Georgian locations and a fake SVG map. I need to rebuild it with a real Leaflet map,
-real light pollution tile data from NASA, and a renamed sky darkness system.
-
-Read src/app/darksky/page.tsx fully before writing.
-
-Install these packages first:
-  npm install leaflet react-leaflet
-  npm install --save-dev @types/leaflet
-
----
-
-TASK 1 — Rename Bortle to "Night Score" system:
-
-Create src/lib/nightscore.ts:
-
-  export interface NightScoreResult {
-    score: number      // 0–100 (100 = perfect dark sky)
-    label: string      // descriptive label
-    color: string      // hex color for UI
-    description: string
-  }
-  
-  export function bortleToNightScore(bortle: number): NightScoreResult {
-    const score = Math.round(((9 - bortle) / 8) * 100)
-    if (bortle <= 1) return { score, label: 'Pristine Void', color: '#34d399', description: 'Zodiacal light visible. Milky Way casts shadows. Exceptional observing.' }
-    if (bortle <= 2) return { score, label: 'Deep Wilderness', color: '#34d399', description: 'Airglow visible. Milky Way shows intricate structure. M33 visible naked eye.' }
-    if (bortle <= 3) return { score, label: 'Dark Canopy', color: '#38F0FF', description: 'Milky Way complex. Some light pollution on horizon. Excellent for deep-sky.' }
-    if (bortle <= 4) return { score, label: 'Rural Sky', color: '#38F0FF', description: 'Milky Way still impressive. Subtle glow near horizon. Good for most objects.' }
-    if (bortle <= 5) return { score, label: 'Suburban Fringe', color: '#FFD166', description: 'Milky Way visible but washed out. Light domes in multiple directions.' }
-    if (bortle <= 6) return { score, label: 'Bright Suburban', color: '#f97316', description: 'Milky Way only in best conditions. Most DSO detail lost.' }
-    if (bortle <= 7) return { score, label: 'City Edge', color: '#f97316', description: 'Milky Way invisible. Only bright clusters and planets accessible.' }
-    if (bortle <= 8) return { score, label: 'Urban Glow', color: '#ef4444', description: 'Sky is orange-grey. Only Moon, planets, and brightest stars visible.' }
-    return { score, label: 'Urban Core', color: '#ef4444', description: 'Sky fully light-polluted. Only Moon and a handful of bright stars visible.' }
-  }
-
----
-
-TASK 2 — Rebuild src/app/darksky/page.tsx:
-
-'use client'
-
-Imports: dynamic import for the map component (no SSR), NightScoreResult/bortleToNightScore from nightscore
-
-Page layout: full screen, bg #070B14, no horizontal overflow
-
-Header:
-  BackButton + page title "Dark Sky Network" (Georgia serif, text-2xl, white)
-  Subtitle: "Find dark skies. Photograph the universe." (text-sm, rgba(255,255,255,0.4))
-
-Stats bar (3 columns, same style as missions stats):
-  "Mapped Sites" / "6" | "Darkest Site" / "Night Score 88" | "Countries" / "1"
-  Style: rounded-2xl, bg rgba(255,255,255,0.03), border rgba(255,255,255,0.08), p-4
-
-OBSERVATION SITES list (replaces the fake SVG map — the real Leaflet map goes below):
-  Use the existing LOCATIONS data from the current darksky page, but replace bortle display with NightScore.
-  Each site card:
-    Left: Location name (text-sm text-white font-medium) + country (text-xs text-slate-500)
-    Right: Night Score badge — score number bold + label text-xs
-    Badge color from bortleToNightScore(site.bortle).color
-    Small colored dot before the score
-    Tap: nothing (static for now)
-  Title above list: "Known Dark Sites" (text-xs uppercase text-slate-500 tracking-widest, mb-2)
-
-REAL MAP SECTION:
-  Title: "Light Pollution Map" (text-sm text-white font-medium, mb-2)
-  Subtitle: "NASA VIIRS satellite nighttime light data" (text-xs text-slate-500, mb-3)
-  
-  Create src/components/darksky/DarkSkyMap.tsx (separate 'use client' component):
-  
-  'use client'
-  import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
-  import 'leaflet/dist/leaflet.css'
-  import L from 'leaflet'
-  
-  Fix Leaflet default marker icon (known Next.js issue):
-    In useEffect:
-      delete (L.Icon.Default.prototype as any)._getIconUrl
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      })
-  
-  Map settings:
-    Default center: [41.69, 44.80] (Tbilisi, Georgia)
-    Zoom: 6
-    Style: height 350px (h-[350px]), width 100%, rounded-2xl, overflow-hidden
-    zoomControl: true
-  
-  Base tile layer (dark map for night sky context):
-    URL: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-    Attribution: '© OpenStreetMap © CARTO'
-    maxZoom: 19
-  
-  Light pollution overlay (NASA Black Marble / VIIRS):
-    URL: 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_SNPP_DayNightBand_ENCC/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpg'
-    Attribution: 'NASA Worldview / VIIRS'
-    opacity: 0.7
-    tileSize: 256
-    maxZoom: 8
-  
-  Site markers: for each location in LOCATIONS array, add a Marker with:
-    Custom icon: colored circle based on Night Score
-      Create custom Leaflet divIcon:
-        const color = bortleToNightScore(loc.bortle).color
-        const icon = L.divIcon({
-          html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 0 6px ${color}"></div>`,
-          iconSize: [14, 14],
-          className: ''
-        })
-    Popup content: "{loc.name} — Night Score {score} ({label})"
-  
-  Import DarkSkyMap dynamically in darksky/page.tsx:
-    const DarkSkyMap = dynamic(() => import('@/components/darksky/DarkSkyMap'), { ssr: false, loading: () => <div className="h-[350px] rounded-2xl bg-white/5 animate-pulse" /> })
-
----
-
-TASK 3 — Night Score legend below map:
-
-4-item row showing the color scale:
-  "Pristine Void" #34d399 | "Rural Sky" #38F0FF | "Suburban" #FFD166 | "Urban" #ef4444
-  Each: small colored dot + label text-[10px] text-slate-400
-  Style: flex gap-4 flex-wrap justify-center mt-3
-  
-Do not change the existing STATS or BackButton. Only rebuild the content area.
-```
-
----
-
-### Prompt DARKSKY-2 — AI Sky Photo Analysis + Community Reports
-
-```
-I'm building Stellar. The Dark Sky page has a real Leaflet map (from DARKSKY-1).
-Now I need to add:
-  1. A photo upload tool that uses Claude Vision to analyze sky photos and return a Night Score
-  2. A community observation feed showing recent dark sky reports
-
-Read src/app/darksky/page.tsx and src/lib/nightscore.ts before writing.
-
----
-
-TASK 1 — Create /api/analyze-sky/route.ts:
-
-POST endpoint. Accepts multipart form data with an image file.
-
-  import Anthropic from '@anthropic-ai/sdk'
-  
-  const client = new Anthropic()
-  
-  Convert uploaded file to base64.
-  
-  Call Claude API (claude-sonnet-4-6) with vision:
-    System prompt:
-      "You are an expert astronomer analyzing night sky photographs to assess light pollution levels.
-      Analyze the provided sky photo and return a JSON object with:
-      - nightScore: number 0-100 (100 = pristine dark sky)
-      - label: string (Pristine Void / Deep Wilderness / Dark Canopy / Rural Sky / Suburban Fringe / Bright Suburban / City Edge / Urban Glow / Urban Core)
-      - visibleStars: 'countless' | 'many' | 'moderate' | 'few' | 'very few'
-      - milkyWayVisible: boolean
-      - lightPollutionDirection: string describing where light glow is (e.g. 'southeast horizon', 'all horizons', 'none visible')
-      - advice: string (one sentence of advice for improving the observation site)
-      Return only valid JSON, no markdown."
-    
-    User message: [image content block, base64]
-    
-  Parse response JSON.
-  Return { nightScore, label, visibleStars, milkyWayVisible, lightPollutionDirection, advice }
-  
-  Error handling: if Claude fails or returns non-JSON, return { error: 'Analysis failed' }
-
----
-
-TASK 2 — Create src/components/darksky/SkyPhotoAnalyzer.tsx:
-
-'use client'
-
-Section title: "Analyze Your Sky" (text-sm font-medium text-white)
-Subtitle: "Upload a photo — AI measures your light pollution" (text-xs text-slate-500)
-
-Upload area:
-  Dotted border rounded-2xl, h-32, flex items-center justify-center
-  Default: Camera icon (Lucide, 24px, rgba(255,255,255,0.2)) + "Tap to upload sky photo" text-xs text-slate-500
-  Accept: image/* (jpg, png, heic)
-  On file select: show filename + preview thumbnail
-
-"Analyze" button (full width, teal bg, rounded-2xl):
-  Disabled until file selected
-  Loading state: "Analyzing with AI..." + spinner
-
-Results display (shown after successful analysis):
-  Large Night Score number (text-5xl font-bold) in the score's color
-  Label below (text-lg text-white)
-  
-  Grid of 3 mini stat cards:
-    "Stars" / visibleStars
-    "Milky Way" / milkyWayVisible ? "Visible" : "Not visible"  
-    "Light Glow" / lightPollutionDirection
-  Cards: bg rgba(255,255,255,0.04), border rgba(255,255,255,0.08), rounded-xl, p-3
-  
-  Advice box:
-    bg rgba(52,211,153,0.06), border rgba(52,211,153,0.15), rounded-xl, p-3, mt-3
-    "AI Observation" label text-[10px] uppercase tracking-widest text-teal-400
-    Advice text: text-sm text-slate-300
-
-Error state: "Could not analyze photo. Try a clearer night sky image." text-xs text-red-400
-
----
-
-TASK 3 — Add community reports feed (static mock data for now):
-
-Create a short feed of 4 mock recent reports below the photo analyzer:
-
-  const MOCK_REPORTS = [
-    { location: 'Kazbegi, Georgia', score: 88, label: 'Deep Wilderness', date: '2 days ago', user: 'observer_geo' },
-    { location: 'Alcobaça, Portugal', score: 74, label: 'Dark Canopy', date: '5 days ago', user: 'cosmic_pt' },
-    { location: 'Lofoten, Norway', score: 91, label: 'Pristine Void', date: '1 week ago', user: 'arctic_sky' },
-    { location: 'Tbilisi, Georgia', score: 22, label: 'Urban Glow', date: '2 weeks ago', user: 'rezi_geo' },
-  ]
-
-Feed title: "Recent Reports" (text-sm font-medium text-white)
-Each row:
-  Left: colored dot (score color) + location name (text-sm text-white) + date (text-xs text-slate-500)
-  Right: score number bold + label text-xs in score color
-  border-bottom rgba(255,255,255,0.06), py-3
-
-Import SkyPhotoAnalyzer in darksky/page.tsx and render it after the map.
-```
-
----
-
-## PHASE 3 — Polish & Product Moments
-
----
-
-### Prompt SHARE-1 — Shareable NFT Success Screen
-
-```
-I'm building Stellar. After a mission completes and an NFT mints, I need a success screen that 
-users want to screenshot and share on X.
-
-Read these files:
-  src/app/missions/page.tsx
-  src/components/sky/MissionActive.tsx (if it exists)
-  src/components/sky/ObserveFlow.tsx (if it exists)
-
-Find where the success state is rendered after mission completion.
-
----
-
-TASK 1 — Full-screen success overlay:
-
-When a mission completes (NFT minted), show a fixed inset-0 z-50 overlay:
-
-Background: #070B14 with radial gradient glow: radial-gradient(ellipse at 50% 40%, rgba(52,211,153,0.08) 0%, transparent 70%)
-
-Card (max-w-sm mx-auto px-4, centered vertically):
-  
-  Mission emoji (64px, text-6xl, text-center, mb-2)
-  "Discovery Sealed" (Georgia serif, text-2xl, white, text-center)
-  Mission name + date (text-sm text-slate-500, text-center, mb-6)
-  
-  Proof box (bg rgba(52,211,153,0.04), border rgba(52,211,153,0.15), rounded-2xl, p-4, mb-4):
-    "✦ VERIFIED ON SOLANA" (text-[10px] tracking-widest text-teal-400, uppercase, mb-2)
-    Stars: "+{starsEarned} Stars" (text-2xl font-bold text-white)
-    "1 Discovery NFT minted" (text-xs text-slate-500, mt-1)
-    If txHash: link "{txHash.slice(0,8)}...{txHash.slice(-4)} →" → opens explorer.solana.com/tx/{txHash}?cluster=devnet
-    
-  "Share on X" button (full width, bg rgba(0,0,0,0.5), border rgba(255,255,255,0.15), text-white, rounded-2xl, py-3):
-    Tweet text:
-      "Just sealed a {missionName} discovery on @solana ✦
-      
-      Earned {starsEarned} Stars + 1 discovery NFT.
-      
-      Building the world's first astronomy app on-chain with @StellarApp 🌌
-      
-      stellarrclub.vercel.app"
-    On click: window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweetText), '_blank')
-    
-  "View in Gallery →" button (full width, bg rgba(52,211,153,0.15), border rgba(52,211,153,0.3), text-teal-400, rounded-2xl, py-3):
-    Link to /nfts
-    
-  "Done" (text-xs text-slate-500, text-center, mt-4, cursor-pointer → dismisses overlay)
-
-Animation: on mount, animate from opacity-0 scale-95 to opacity-100 scale-100, 300ms ease-out.
-
-Do not change mint logic. Only change success UI.
-```
-
----
-
-### Prompt PWA-1 — Native App Feel: PWA + Mobile Polish
-
-```
-I'm building Stellar, a Next.js 15 astronomy app at stellarrclub.vercel.app for the Colosseum
-Frontier hackathon. The app works but feels like a website, not an app — browser chrome visible,
-no splash screen, no native-feeling behavior. I need proper PWA support so it feels like a real
-app when added to home screen.
-
-Read these files fully before writing anything:
-  src/app/layout.tsx
-  src/app/page.tsx
-  public/ (list directory to see what icons/assets exist)
-  next.config.ts (or next.config.js / next.config.mjs — whichever exists)
-
----
-
-STEP 1 — Create public/manifest.json (or update existing):
-
-{
-  "name": "Stellar — Astronomy on Solana",
-  "short_name": "Stellar",
-  "description": "Observe the night sky, earn Stars, and seal discoveries on Solana.",
-  "start_url": "/",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#070B14",
-  "theme_color": "#070B14",
-  "categories": ["education", "science", "entertainment"],
-  "icons": [
-    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
-  ]
-}
-
----
-
-STEP 2 — Generate app icons:
-
-Create scripts/generate-icons.ts that generates PWA icons.
-Use the canvas npm package (npm install canvas --save-dev if not present).
-
-Icon design (both sizes):
-  Background: #070B14
-  Centered text "✦" in #FFD166, bold
-  192px: font size 100px → save to public/icons/icon-192.png
-  512px: font size 260px → save to public/icons/icon-512.png
-  Apple touch icon: 180x180, font size 90px → public/icons/apple-touch-icon.png
-
-Add to package.json scripts: "generate:icons": "npx tsx scripts/generate-icons.ts"
-Run the script immediately after creating it.
-
-Fallback if canvas fails: use sharp (npm install sharp --save-dev):
-  Create 512x512 SVG string with ✦ centered on #070B14 background, convert with sharp to PNG.
-
-Fallback if sharp also fails: create SVG files directly:
-  public/icons/icon.svg:
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-    <rect width="512" height="512" fill="#070B14"/>
-    <text x="256" y="300" text-anchor="middle" font-size="260" fill="#FFD166" font-family="sans-serif">✦</text>
-  </svg>
-  Reference /icons/icon.svg in the manifest instead of PNGs.
-
----
-
-STEP 3 — Update src/app/layout.tsx:
-
-Read the file fully first. Merge with existing metadata — don't duplicate.
-
-In the metadata export:
-  manifest: '/manifest.json',
-  themeColor: '#070B14',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'black-translucent',
-    title: 'Stellar',
-  },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: 'cover',
-  },
-
-Also add <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" /> in <head>.
-
----
-
-STEP 4 — Safe area padding for notched devices:
-
-Add to src/app/globals.css:
-
-  @supports (padding-top: env(safe-area-inset-top)) {
-    .safe-top { padding-top: env(safe-area-inset-top); }
-    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-  }
-
-Add safe-top to the body or root wrapper in layout.tsx.
-Add safe-bottom to the BottomNav component so it doesn't hide behind the home indicator on iPhones.
-
----
-
-STEP 5 — Prevent pull-to-refresh and bounce scroll:
-
-Add to src/app/globals.css:
-
-  html, body {
-    overscroll-behavior-y: contain;
-  }
-
-This removes the two biggest "this is a website" tells on mobile.
-
----
-
-STEP 6 — Splash screen / flash fix:
-
-Add to src/app/globals.css:
-
-  html {
-    background-color: #070B14;
-  }
-
-  body {
-    background-color: #070B14;
-    min-height: 100vh;
-    min-height: 100dvh;
-  }
-
-The 100dvh ensures full coverage on mobile accounting for dynamic toolbars.
-
----
-
-STEP 7 — Standalone mode detection:
-
-Create src/hooks/useStandalone.ts:
-
-'use client'
-import { useState, useEffect } from 'react'
-
-export function useStandalone(): boolean {
-  const [isStandalone, setIsStandalone] = useState(false)
-  useEffect(() => {
-    const mq = window.matchMedia('(display-mode: standalone)')
-    setIsStandalone(mq.matches || (navigator as any).standalone === true)
-    const handler = (e: MediaQueryListEvent) => setIsStandalone(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
-  return isStandalone
-}
-
----
-
-STEP 8 — Install prompt banner on homepage:
-
-Edit src/app/page.tsx. Read fully first.
-
-Add a dismissible banner (only on mobile, NOT in standalone mode):
-
-  const [showInstall, setShowInstall] = useState(false)
-  const isStandalone = useStandalone()
-  
-  useEffect(() => {
-    const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent)
-    const dismissed = localStorage.getItem('stellar-install-dismissed')
-    if (isMobile && !isStandalone && !dismissed) setShowInstall(true)
-  }, [isStandalone])
-  
-  const dismissInstall = () => {
-    setShowInstall(false)
-    localStorage.setItem('stellar-install-dismissed', '1')
-  }
-
-Render only if showInstall:
-  Fixed bottom banner (z-50, above bottom nav):
-  bg rgba(52,211,153,0.08), border-top 1px solid rgba(52,211,153,0.2), backdrop-blur
-  px-4 py-3
-
-  Row: "📱 Add Stellar to your home screen" (text-sm text-white) + "✕" dismiss button
-  Below (iOS only): "Tap Share → Add to Home Screen" (text-xs rgba(255,255,255,0.4))
+Add "Tonight's Highlights" as a section above the 7-day forecast.
 
 ---
 
 CONSTRAINTS:
-- Do not modify any API routes or lib files
-- Do not install next-pwa or any PWA plugin
-- Do not add a service worker
-- All changes backward compatible with existing Privy auth
+- All new API routes must have error handling and sensible fallbacks
+- Use CSS animations sparingly (CSS only, no requestAnimationFrame)
+- The Sky Score ring can use a CSS conic-gradient for the colored arc
+- Hardcode meteor shower dates as a simple array — don't over-engineer this
+- Default to Tbilisi coordinates if geolocation unavailable
 ```
 
 ---
 
-### Prompt ONBOARD-1 — First-Time User Onboarding
+### PROMPT 9 — ASTRA AI Upgrade: Tool Calling + Floating Access
+
+**Priority:** 🟡 High
+**Time estimate:** 1 session (~45 min)
+**Depends on:** Prompt 8 (uses sky/tonight and sky/score APIs)
 
 ```
-I'm building Stellar. New users (and hackathon judges) land cold with no context. 
-I need a 3-step onboarding overlay shown once on first visit.
+I'm building Stellar. Upgrade ASTRA (the AI astronomer) with Claude tool calling for live sky data, and make it accessible from anywhere in the app.
 
-Read src/app/page.tsx.
+Read src/app/api/chat/route.ts and src/app/chat/page.tsx fully.
+Read src/lib/sky-data.ts and src/lib/planets.ts for existing astronomy functions.
 
 ---
 
-Create src/components/home/OnboardingOverlay.tsx:
+PART 1 — Upgrade src/app/api/chat/route.ts:
 
-'use client'
+Define 2 tools for the Claude API call:
 
-Trigger: check localStorage.getItem('stellar_onboarded') on mount. If null → show. If set → return null.
+Tool 1: get_planet_positions
+  description: "Get current positions and visibility for all planets and the Moon tonight"
+  input_schema: { type: "object", properties: { lat: { type: "number" }, lon: { type: "number" } }, required: [] }
+  Implementation: call existing planet calculation logic
+  Return: JSON array of { name, visible, altitude, riseTime, setTime }
 
-Overlay: fixed inset-0 z-50, bg rgba(7,11,20,0.92), backdrop-blur-md
+Tool 2: get_sky_conditions
+  description: "Get tonight's sky score, quality forecast, and highlights for a location"
+  input_schema: { type: "object", properties: { lat: { type: "number" }, lon: { type: "number" } }, required: [] }
+  Implementation: call /api/sky/tonight internally (or compute inline)
+  Return: { skyScore, highlights, bestWindow }
 
-Container: max-w-xs mx-auto h-full flex flex-col items-center justify-center px-6
+Wire tools into the messages API call:
+  - Pass tools array to Claude
+  - Handle tool_use blocks: extract name + input, call implementation, build tool_result
+  - Second Claude call with tool result, then stream final text
+  - Keep existing SSE streaming format
+  - If tool call fails, continue with text response
 
-Step dot indicator: 3 dots at top, teal filled for current, white/15 for others. Gap-2. mb-10.
+Updated system prompt:
+"You are ASTRA, an expert AI astronomer powering the Stellar app. You have real-time access to sky conditions and planet positions via tools. When asked about tonight's sky, what's visible, or when to observe, call your tools to get live data. Be concise, enthusiastic, and specific — mention exact times and directions. Respond in the same language the user writes in (Georgian or English). Never mention you are Claude or an AI model. You ARE ASTRA."
 
-Steps:
-  Step 1: 🔭 / "Observe the Night Sky" / "Complete sky missions. Photograph the Moon, Jupiter, and beyond."
-  Step 2: ⭐ / "Earn Stars Tokens" / "Every verified observation earns Stars — real SPL tokens on Solana. No wallet setup needed."
-  Step 3: 🛒 / "Shop Telescopes" / "Spend Stars at partner stores in Georgia, USA, and Europe. Real discounts on real equipment."
+Default lat/lon for tool calls: 41.72, 44.83 (Tbilisi).
 
-Icon: text-5xl text-center mb-4
-Heading: Georgia serif, text-2xl text-white text-center mb-3
-Body: text-sm text-slate-400 text-center leading-relaxed mb-10
+---
 
-Buttons:
-  Steps 1-2: "Next →" — full width, bg rgba(52,211,153,1), text-black font-semibold rounded-2xl py-3
-  Step 3: "Get Started →" — same style → on click: localStorage.setItem('stellar_onboarded', '1'), close
-  "Skip" below button: text-xs text-slate-600, mt-3, cursor-pointer → same as Get Started
+PART 2 — Create ASTRA Quick-Ask Component
 
-Step transition: CSS transform translateX, 200ms ease. Step going out → -100%, next coming in → 0% from +100%.
+Create src/components/AstraQuickAsk.tsx:
 
-Add <OnboardingOverlay /> to src/app/page.tsx just before closing tag of the main wrapper div.
+A floating button + expandable chat widget that appears on key pages.
+
+Collapsed state:
+  Floating button (bottom-right, above mobile nav if present):
+  - Circle, 48x48, brass/gold gradient background
+  - "✦" icon or small sparkle icon
+  - Pulse animation on first visit (CSS only)
+
+Expanded state (on click):
+  - Slide-up panel (320px wide, 400px tall max, dark card)
+  - Header: "ASTRA" + close button
+  - Scrollable message area
+  - Input bar with send button
+  - Pre-filled suggestions as tappable chips:
+    "What can I see tonight?" · "Best time to observe?" · "Tell me about Jupiter"
+
+On send: POST to /api/chat with the user's message. Stream response into the panel.
+On close: collapse back to floating button, keep conversation state.
+
+---
+
+PART 3 — Add AstraQuickAsk to pages
+
+Import and render <AstraQuickAsk /> on:
+  - src/app/page.tsx (homepage)
+  - src/app/sky/page.tsx (sky forecast)
+  - src/app/missions/page.tsx (missions)
+
+Do NOT add to /chat (it has full chat already), /marketplace, or /profile.
+
+---
+
+PART 3B — Update /chat page
+
+If the full chat page exists but is rendering wrong content:
+  Fix it to render the actual ASTRA chat interface.
+  It should use the same /api/chat endpoint.
+  The /chat page should be a full-screen version of the chat experience.
+
+---
+
+CONSTRAINTS:
+- Keep the existing SSE streaming format exactly
+- The floating widget must not block other UI elements
+- CSS-only animations (pulse on the button)
+- The widget should lazy-load — don't import chat logic until the button is clicked
+- Mobile: the expanded panel should be near-full-screen (bottom sheet style)
 ```
 
 ---
 
-### Prompt PERF-1 — Performance Optimization
+### PROMPT 10 — Shareable Tonight's Card + OG Image
+
+**Priority:** 🟡 High — this is the viral loop
+**Time estimate:** 1 session (~30 min)
+**Depends on:** Prompt 8 (uses sky/tonight API)
 
 ```
-I'm building Stellar. The app loads slowly — images aren't optimized, there may be layout thrash,
-and some components block the main thread. I need it to feel fast and snappy.
+I'm building Stellar. I need a shareable "Tonight's Sky" card image and Open Graph metadata for social sharing.
+
+Read src/app/layout.tsx and the /api/sky/tonight route.
+
+---
+
+Step 1 — Create src/app/api/og/tonight/route.tsx:
+
+Use ImageResponse from 'next/og' (built into Next.js, no install needed).
+Size: 1200x630. All styles inline (ImageResponse requirement).
+
+Accept query params: score, badge, highlight1, highlight2, highlight3, location (all optional with defaults).
+
+Design:
+  - Background: #070B14 (deep space dark)
+  - Top-left: "STELLAR" in #FFD166, fontSize 28, bold
+  - Top-right: location text in rgba(255,255,255,0.4), fontSize 14
+  - Center: Sky Score number, fontSize 120, bold
+    Color: score >= 70 → #34d399, 50-69 → #FBBF24, <50 → #64748B
+  - Below score: badge text, fontSize 24, same color family
+  - Three highlight cards in a row (dark rounded boxes):
+    Each: icon + short title text, fontSize 16
+  - Bottom: "stellarrclub.vercel.app" in rgba(255,255,255,0.15), fontSize 12
+
+---
+
+Step 2 — Create src/app/api/og/sky/route.tsx (generic app OG):
+
+Static OG image for the app homepage (no dynamic params needed).
+Size: 1200x630.
+Design:
+  - Background: #070B14
+  - "STELLAR" centered, fontSize 80, #FFD166
+  - Subtitle: "The night sky app — observe, earn, collect", fontSize 22, #94a3b8
+  - Three dark boxes: "🌕 Moon" · "🪐 Jupiter" · "🪐 Saturn"
+  - Bottom: "stellarrclub.vercel.app"
+
+---
+
+Step 3 — Add meta tags to src/app/layout.tsx:
+
+In the metadata export:
+  og:image → /api/og/sky
+  og:title → Stellar — The Night Sky App
+  og:description → See what's visible tonight, complete sky missions, earn NFTs on Solana.
+  twitter:card → summary_large_image
+  twitter:image → /api/og/sky
+  twitter:site → @StellarClub26
+
+---
+
+Step 4 — Add "Share Tonight" button to homepage:
+
+In the Tonight section created by Prompt 8, add a "Share Tonight's Sky" button.
+
+On click:
+  1. Build the OG URL: /api/og/tonight?score={score}&badge={badge}&highlight1={...}&location={...}
+  2. Build share text: "Tonight's Sky Score: {score}/100 {emoji} — {highlights summary} · stellarrclub.vercel.app"
+  3. Use Web Share API if available (navigator.share), fallback to Twitter intent:
+     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`)
+
+Style: small pill button, outline style, "Share ↗" text.
+
+---
+
+Step 5 — Add Farcaster Frame meta tags:
+
+In layout.tsx <head>:
+  fc:frame → vNext
+  fc:frame:image → /api/og/sky
+  fc:frame:button:1 → Check Tonight's Sky
+  fc:frame:post_url → https://stellarrclub.vercel.app
+
+Do NOT install @farcaster/miniapp-sdk — meta tags are sufficient.
+```
+
+---
+
+### PROMPT 11 — Dynamic NFT Images (Unique Per Observation)
+
+**Priority:** 🟡 Medium
+**Time estimate:** 1 session (~30 min)
+**Depends on:** Prompt 3
+
+```
+I'm building Stellar. Each minted observation NFT should have a unique image generated dynamically via Next.js ImageResponse. Currently all NFTs share a static placeholder image.
+
+Read src/app/api/metadata/observation/route.ts and src/lib/mint-nft.ts.
+
+---
+
+Step 1 — Create src/app/api/og/observation/route.tsx:
+
+Use ImageResponse from 'next/og'. Size: 600x600 (square, optimal for NFT thumbnails).
+
+Accept query params: target, ts, lat, lon, cc, stars, hash
+
+Design (all inline styles):
+  - Background: #070B14
+  - Star field: Use the hash param as a seed to generate 30-50 small white/yellow dots at deterministic positions:
+    Parse first 20 chars of hash, use pairs of hex digits to compute x,y coordinates and brightness.
+    This makes each NFT image unique but reproducible (same hash = same star field).
+  - Center: target emoji (map common targets: Moon→🌕, Jupiter→🪐, Saturn→🪐, Pleiades→✨, Orion→⭐, Andromeda→🌌, Crab Nebula→💥)
+    fontSize: 64
+  - Below emoji: target name, fontSize: 28, bold, white
+  - Below name: date formatted from ts, fontSize: 14, #94a3b8
+  - Bottom-left: "☁️ {cc}%" and "✦ {stars}" in small text
+  - Bottom-right: "STELLAR" in #FFD166, fontSize: 12
+  - Top-right: small location text from lat/lon: "{lat}°, {lon}°"
+  - Subtle border: 2px solid rgba(255,209,102,0.15) around the full image
+
+---
+
+Step 2 — Update src/app/api/metadata/observation/route.ts:
+
+Change the "image" field in the returned metadata from the static placeholder to:
+  `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://stellarrclub.vercel.app'}/api/og/observation?target=${encodeURIComponent(target)}&ts=${ts}&lat=${lat}&lon=${lon}&cc=${cc}&stars=${stars}&hash=${hash}`
+
+This means every NFT in the gallery and on Solana Explorer will show a unique, beautiful image.
+
+---
+
+CONSTRAINTS:
+- ImageResponse only supports inline styles
+- The star field must be deterministic (same hash → same positions)
+- Keep the image generation fast (<500ms)
+- No external images — everything rendered with CSS/text/shapes
+```
+
+---
+
+### PROMPT 12 — README Overhaul for Hackathon Submission
+
+**Priority:** 🟡 High
+**Time estimate:** 1 session (~20 min)
+**Depends on:** Most features built
+
+```
+I'm building Stellar for the Colosseum Frontier 2026 hackathon (Consumer Track). The README.md needs to be rewritten specifically for hackathon judges. Judges spend 2-3 minutes per README.
+
+Read the current README.md and package.json first.
+
+---
+
+Rewrite README.md with this exact structure:
+
+# Stellar ✦
+
+**The night sky app — observe, earn, collect.**
+
+Stellar turns every clear night into a verified discovery. Check tonight's sky score, complete observation missions, earn Stars tokens, and collect compressed NFT proofs — all powered by invisible Solana infrastructure.
+
+🔗 **Live:** [stellarrclub.vercel.app](https://stellarrclub.vercel.app)
+🏗️ **Hackathon:** Colosseum Frontier 2026 · Consumer Track
+👤 **Builder:** Rezi ([@StellarClub26](https://x.com/StellarClub26)) — Founder of [Astroman.ge](https://astroman.ge), Georgia's first astronomy e-commerce store
+
+---
+
+## What It Does
+
+Stellar is a consumer astronomy app that answers one question: **"What can I see in the sky tonight?"**
+
+Users get a real-time Sky Score (0-100), tonight's visible planets and highlights, 7-day forecast, and AI-powered sky guidance from ASTRA. When conditions are right, users complete observation missions — photograph celestial objects, get AI-verified, and earn:
+
+- **Compressed NFTs** (Metaplex Bubblegum) — proof of each observation, ~$0.000005/mint
+- **Stars tokens** (SPL) — redeemable for real telescope equipment at Astroman.ge
+
+No wallets. No seed phrases. No gas fees. Sign up with email. Everything else is invisible.
+
+---
+
+## Why Blockchain?
+
+| Without Solana | With Solana |
+|---|---|
+| Points in localStorage — lost if you clear your browser | Stars as SPL tokens — permanent, verifiable, tradeable |
+| "Trust me, I observed Jupiter" | Compressed NFT with oracle hash, coordinates, and timestamp — verifiable on Explorer |
+| Discount codes emailed | Token-gated redemption — balance checked on-chain before issuing |
+| App shuts down, history gone | NFTs and tokens persist in user's wallet forever |
+
+Compressed NFTs cost ~$0.000005 each. We can mint millions. The fee payer covers all gas — users never need SOL.
+
+---
+
+## Distribution Advantage
+
+Stellar isn't starting from zero. [Astroman.ge](https://astroman.ge) is Georgia's first astronomy e-commerce store with:
+- 60K+ social media followers
+- Physical retail presence in Tbilisi
+- Active telescope customer base
+- Real products in the Stellar marketplace (telescopes, moon lamps, accessories)
+
+Stars tokens earned in-app are redeemable for real discounts and products at the physical store.
+
+---
+
+## Tech Stack
+
+**Frontend:** Next.js 15, React 19, TypeScript, Tailwind CSS 4
+**Auth:** Privy (embedded Solana wallets, email/Google login)
+**Blockchain:** Metaplex Bubblegum (cNFTs), SPL Token (Stars), Helius DAS API
+**AI:** Claude API with tool calling (ASTRA persona), Claude Vision (photo verification)
+**Data:** Open-Meteo (weather), astronomy-engine (planet positions)
+**Database:** Neon (Postgres) via Drizzle ORM
+**Deploy:** Vercel
+
+Built with: Metaplex Bubblegum · Helius · Privy · Colosseum Copilot · Open-Meteo · Claude API
+
+---
+
+## Features
+
+- **Sky Score** — 0-100 rating for tonight's sky quality
+- **Tonight's Highlights** — visible planets, moon phase, best viewing window
+- **7-Day Forecast** — daily sky quality rated Go/Maybe/Skip
+- **Planet Tracker** — rise/set/transit times for Mercury through Saturn
+- **ASTRA AI** — ask anything about tonight's sky (Claude with live data tools)
+- **Observation Missions** — 7 targets from Moon (beginner) to Crab Nebula (expert)
+- **Knowledge Quizzes** — Solar System, Constellations, Telescopes (EN + Georgian)
+- **NFT Gallery** — view all your compressed observation NFTs
+- **Marketplace** — real Astroman.ge products, Stars redemption
+- **Bilingual** — English + Georgian (next-intl)
+
+---
+
+## How to Run
+
+```bash
+git clone https://github.com/Morningbriefrezi/Stellar.git
+cd Stellar
+npm install
+cp .env.example .env.local  # fill in your keys
+npm run dev
+```
+
+Required env vars: see `.env.example`
+
+---
+
+## On-Chain Setup (devnet)
+
+```bash
+# 1. Fund your fee payer wallet with devnet SOL
+solana airdrop 5 <FEE_PAYER_ADDRESS> --url devnet
+
+# 2. Create Bubblegum merkle tree + collection
+npm run setup:bubblegum
+
+# 3. Deploy Stars SPL token
+npm run setup:token
+```
+
+---
+
+## Architecture
+
+```
+User (email login via Privy)
+  → Tonight's Sky Score + Highlights (Open-Meteo + astronomy-engine)
+  → Start Mission → Camera → Claude Vision verification
+  → Sky Oracle hash (deterministic per location/hour)
+  → POST /api/mint → Metaplex Bubblegum cNFT
+  → POST /api/award-stars → SPL Token mintTo
+  → NFT Gallery (Helius DAS: getAssetsByOwner)
+  → Marketplace → Stars redemption → Astroman.ge
+```
+
+All transactions use a server-side fee payer. Users never interact with wallets.
+
+---
+
+## License
+
+MIT
+
+---
+
+Also create .env.example listing all required env vars with comments explaining each.
+```
+
+---
+
+### PROMPT 13 — Seed Real On-Chain Data for Judge Verification
+
+**Priority:** 🔴 Critical for submission
+**Time estimate:** 1 session (~20 min)
+**Depends on:** Prompts 3, 4, 5
+
+```
+I'm building Stellar. Before hackathon submission, I need real on-chain data that judges can verify on Solana Explorer. Create a script that mints several test observation NFTs and awards Stars tokens.
+
+Read src/lib/mint-nft.ts, src/app/api/award-stars/route.ts, and .env.local.
+
+---
+
+Create scripts/seed-demo-data.ts:
+
+Load .env.local (same pattern as setup-bubblegum.ts).
+Require: FEE_PAYER_PRIVATE_KEY, MERKLE_TREE_ADDRESS, COLLECTION_MINT_ADDRESS, STARS_TOKEN_MINT
+
+Define test observations (at least 5):
+const observations = [
+  { target: 'Moon', lat: 41.72, lon: 44.83, cloudCover: 8, stars: 50, date: '2026-04-10' },
+  { target: 'Jupiter', lat: 41.72, lon: 44.83, cloudCover: 12, stars: 75, date: '2026-04-11' },
+  { target: 'Pleiades', lat: 41.72, lon: 44.83, cloudCover: 5, stars: 60, date: '2026-04-12' },
+  { target: 'Saturn', lat: 41.72, lon: 44.83, cloudCover: 18, stars: 100, date: '2026-04-13' },
+  { target: 'Orion Nebula', lat: 41.72, lon: 44.83, cloudCover: 10, stars: 100, date: '2026-04-14' },
+]
+
+For each observation:
+  1. Compute oracle hash (same logic as /api/sky/verify)
+  2. Call mintCompressedNFT with the fee payer as recipient
+  3. Log: "[NFT] Minted {target} — tx: {txId}"
+  4. Wait 2 seconds between mints (avoid rate limits)
+
+After all NFTs:
+  5. Award Stars tokens to the fee payer wallet:
+     total = sum of all stars from observations
+     Call the SPL mintTo function directly (same logic as award-stars route)
+     Log: "[Stars] Awarded {total} Stars — tx: {txId}"
+
+Print summary:
+  "✅ Seeded {n} observation NFTs and {total} Stars tokens"
+  "📊 View on Explorer: https://explorer.solana.com/address/{feePayerAddress}?cluster=devnet"
+
+Add to package.json: "seed:demo": "npx tsx scripts/seed-demo-data.ts"
+
+Also insert matching rows into the observation_log database table (if DATABASE_URL is set):
+  For each observation: insert { wallet: feePayerAddress, target, stars, confidence: 'high', mint_tx: txId, created_at: date }
+
+This ensures the leaderboard, profile, and NFT gallery all show real data.
+```
+
+---
+
+### PROMPT 14 — Mobile-First Polish + Success Screen Upgrade
+
+**Priority:** 🟡 Medium
+**Time estimate:** 1 session (~30 min)
+**Depends on:** Prompt 4
+
+```
+I'm building Stellar for a Consumer track hackathon. The demo will be evaluated as a consumer product, likely on a phone-sized viewport. Polish the mobile experience and upgrade the success screen (the most judge-visible screen in the app).
 
 Read these files:
-  src/app/page.tsx
-  src/app/marketplace/page.tsx
-  src/app/sky/page.tsx
-  next.config.ts (or next.config.js — whichever exists)
+  src/components/sky/MissionActive.tsx (especially step === 'done')
+  src/app/page.tsx (homepage)
+  src/app/layout.tsx
+  Any global CSS or Tailwind config
 
 ---
 
-TASK 1 — next.config optimization:
+TASK 1 — Success Screen ("Discovery Sealed") Polish:
 
-Read next.config.ts/js.
-Ensure these are set:
-  images: {
-    remotePatterns: [
-      { protocol: 'https', hostname: 'astroman.ge' },
-      { protocol: 'https', hostname: 'www.celestron.com' },
-      { protocol: 'https', hostname: 'www.bresser.de' },
-      { protocol: 'https', hostname: 'unpkg.com' },
-    ],
-    formats: ['image/avif', 'image/webp'],
-  }
-  
-  experimental: {
-    optimizeCss: true,
-  }
+The step === 'done' screen is what judges see after the demo's climax. It must be beautiful and memorable.
 
----
+Current: basic centered layout with checkmark, text, and buttons.
 
-TASK 2 — Marketplace images:
-
-In src/app/marketplace/page.tsx (or the component that renders product cards):
-Find all <img> tags rendering product images.
-Replace with Next.js <Image> component:
-  import Image from 'next/image'
-  <Image src={product.image} alt={product.name} width={400} height={300} 
-    className="..." loading="lazy" style={{ objectFit: 'cover' }} />
-  
-For products with empty image strings: show a placeholder div instead:
-  <div className="w-full aspect-[4/3] bg-white/5 rounded-xl flex items-center justify-center">
-    <span className="text-3xl">{product category emoji: telescope=🔭 accessory=🔍 digital=📄}</span>
-  </div>
+Upgrade to:
+  - Full viewport height, centered, no scroll
+  - Subtle CSS radial gradient background: from rgba(52,211,153,0.05) center to transparent
+  - The checkmark circle should have a brief CSS scale-in animation (transform from 0.5 to 1, 300ms ease-out)
+  - "Discovery Sealed" in serif font, slightly larger (text-2xl)
+  - The mission emoji should be large (text-4xl) with a subtle float animation (translateY 0 → -4px → 0, 3s infinite)
+  - Stars earned "+{n} ✦" should have a CSS glow effect: text-shadow 0 0 12px rgba(255,209,102,0.4)
+  - Solana Explorer link styled as a pill: bg rgba(56,240,255,0.06), border 1px solid rgba(56,240,255,0.15), px-3 py-1.5
+  - Share button below: "Share on X ↗" — same outline style as previous prompt
+  - Bottom buttons: "My NFTs" (outlined) and "Done" (brass gradient #B8860B → #FFD166)
+  - Add a small "Sealed on Solana" badge with the Solana logo (inline SVG or text) at the bottom
 
 ---
 
-TASK 3 — Star field canvas optimization:
+TASK 2 — Mobile Navigation Polish:
 
-In src/app/page.tsx, find the star field canvas animation in useEffect.
-Add IntersectionObserver to pause animation when canvas is not in viewport:
-  const observer = new IntersectionObserver(([entry]) => {
-    if (!entry.isIntersecting) cancelAnimationFrame(raf)
-    else draw()
-  }, { threshold: 0.1 })
-  if (canvas) observer.observe(canvas)
-  
-Return cleanup: cancelAnimationFrame(raf); observer.disconnect()
+Check the mobile bottom nav. Ensure:
+  - 5 items max (Sky · Missions · [center] · Chat · Profile)
+  - The center button should be visually distinct (larger, brass/gold accent)
+  - Active state is clearly indicated
+  - Nav doesn't overlap with content
+  - The floating ASTRA button (from Prompt 9) doesn't collide with bottom nav
 
 ---
 
-TASK 4 — Lazy load heavy sections on homepage:
+TASK 3 — Homepage Mobile Layout:
 
-In src/app/page.tsx, find any section that imports a heavy component (charts, maps, complex tables).
-Wrap those imports with dynamic():
-  import dynamic from 'next/dynamic'
-  const HomeSkyPreview = dynamic(() => import('@/components/home/HomeSkyPreview'), {
-    loading: () => <div className="h-40 rounded-2xl bg-white/5 animate-pulse" />,
-    ssr: false
-  })
-
----
-
-TASK 5 — API route caching:
-
-In src/app/api/sky/forecast/route.ts (if it exists):
-Add cache header: 
-  headers: { 'Cache-Control': 'public, s-maxage=900, stale-while-revalidate=1800' }
-  (15 min cache — sky data doesn't change minute by minute)
-
-In src/app/api/sky/planets/route.ts (if it exists):
-Add cache header:
-  headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' }
-  (1hr cache — planet positions are slow-changing)
+Ensure the homepage renders well at 390px width:
+  - Hero section: no horizontal overflow
+  - Sky Score + Tonight section: cards stack vertically on mobile
+  - "How It Works" section: steps stack vertically
+  - All CTAs are thumb-reachable (not tiny text links)
+  - No horizontal scroll anywhere
 
 ---
 
-TASK 6 — Fix missing React keys:
-Search all .map() calls in marketplace, missions, and profile pages.
-Any item rendered in a list without key={...} → add a stable key (product.id, mission.id, etc.)
+TASK 4 — Loading States:
 
-Do NOT change any visual design, API logic, or component structure.
+Add consistent loading states across the app:
+  - Page transitions: subtle fade-in (CSS only)
+  - Data loading: use consistent skeleton/shimmer pattern (CSS keyframes on background-position)
+  - Never show a blank white screen while data loads
+
+---
+
+CONSTRAINTS:
+- All animations CSS-only (keyframes, transitions, gradients)
+- No requestAnimationFrame, no canvas, no JS animation loops
+- Test at 390px viewport width
+- Dark theme throughout (bg #070B14 or similar)
 ```
 
 ---
 
-### Prompt GAMIFY-1 — Gamification Visibility Polish
+### PROMPT 15 — Pre-Submission Checklist + Final Fixes
+
+**Priority:** 🔴 Critical — run this last
+**Time estimate:** 1 session (~30 min)
+**Depends on:** All previous prompts
 
 ```
-I'm building Stellar. The app has Stars tokens, ranks, and streaks — but they're invisible during 
-normal use. I want users to feel progression on every page.
-
-Read:
-  src/app/missions/page.tsx
-  src/app/profile/page.tsx
-  src/lib/rewards.ts (or wherever getRank() is defined)
-  src/components/sky/StatsBar.tsx (if it exists)
+I'm building Stellar for the Colosseum Frontier 2026 hackathon (Consumer Track). Submission deadline: May 11, 2026. This is the final quality check before submission. Do NOT add new features. Only fix, verify, and polish.
 
 ---
 
-TASK 1 — Streak badge on Missions page:
-Find the missions page header area (before the mission list).
-If authenticated and streak > 0: show pill "🔥 {streak}-day streak"
-  Style: amber (#F59E0B), bg rgba(245,158,11,0.1), border rgba(245,158,11,0.2), rounded-full, text-xs, px-3 py-1
-If authenticated and streak === 0: show "Start your streak →" muted text-xs
+TASK 1 — Route Verification:
 
-Fetch streak from /api/streak?walletAddress={address} same as profile page does.
-
----
-
-TASK 2 — Rank in profile:
-Find Stars balance display in profile page.
-After the balance, add:
-  Rank name (serif, text-lg, white)
-  Rank badge pill (purple or teal based on rank level, text-xs)
-  Progress line: "X / Y Stars to next rank" (text-xs text-slate-500)
-  Example: "1,250 / 2,000 ★ to Expert Observer"
-
-Read getRank() implementation to get correct thresholds and names.
+Visit every route in the app and verify it renders without errors:
+  /, /sky, /missions, /chat, /marketplace, /profile, /nfts, /leaderboard, /darksky
+  For each: confirm no 404, no blank page, no JS errors in console, no layout breaks.
+  If anything is broken, fix it or remove the nav link.
 
 ---
 
-TASK 3 — Stars total in mobile profile tab:
-In BottomNav.tsx, find the Profile tab.
-If authenticated and starsBalance > 0: show a small amber badge below the User icon:
-  "{starsBalance}★" — text-[8px] font-bold text-amber-400
-  Only render if starsBalance > 0 and authenticated.
-Import useAppState to read starsBalance. If threading state into BottomNav is too complex, skip.
+TASK 2 — On-Chain Verification:
 
-Do not change Stars earning amounts or mission logic.
-```
+Check that the following exist on devnet (using Solana Explorer):
+  - At least 3 compressed NFTs from the collection
+  - Stars token mint address exists
+  - At least 1 wallet has a non-zero Stars balance
+  If any are missing, run the seed script (npm run seed:demo).
 
 ---
 
-### Prompt HOME-1 — Homepage Full Refresh
+TASK 3 — Environment Variable Audit:
 
-```
-I'm building Stellar for Colosseum Frontier. The homepage needs updating.
-Read src/app/page.tsx fully before writing.
+Create or update .env.example with ALL required variables:
+  NEXT_PUBLIC_PRIVY_APP_ID=
+  ANTHROPIC_API_KEY=
+  DATABASE_URL=
+  SOLANA_RPC_URL=https://api.devnet.solana.com
+  FEE_PAYER_PRIVATE_KEY=
+  MERKLE_TREE_ADDRESS=
+  COLLECTION_MINT_ADDRESS=
+  STARS_TOKEN_MINT=
+  NEXT_PUBLIC_COLLECTION_MINT_ADDRESS=
+  NEXT_PUBLIC_HELIUS_RPC_URL=
+  NEXT_PUBLIC_APP_URL=https://stellarrclub.vercel.app
 
----
-
-TASK 1 — Update hero subtitle (if not already correct):
-Find the subtitle below the main heading. Ensure it reads:
-  "Photograph celestial objects from anywhere in the world. Earn Stars tokens, collect discovery NFTs,
-  and shop telescopes at your local dealer."
-
-TASK 2 — Update trust line:
-Find any small muted line near the CTA (stats or trust signals).
-Change to: "Free to join · No wallet needed · Powered by Solana"
-
-TASK 3 — Update "How It Works" copy if present:
-  Step 3: "Sky oracle verifies clear conditions on-chain"
-  Step 4: "Discovery sealed on Solana as compressed NFT"
-
-TASK 4 — Update "Observe & Earn" section if present:
-  Description: "Complete sky missions to earn Stars tokens and compressed NFTs. Redeem at partner stores worldwide."
-  CTA button → /missions
-
-TASK 5 — Founder note (for judges):
-Below the partner stores section or above the footer:
-  "Built solo by an astronomy store owner using AI development tools"
-  text-xs rgba(255,255,255,0.18) text-center my-4
-
-TASK 6 — Add "Live on Solana Devnet" pulse indicator:
-Near hero stats area, add:
-  A small badge: green pulsing dot + "Live on Solana Devnet"
-  Style: flex items-center gap-1.5, text-[11px], rgba(52,211,153,0.7)
-  Pulsing dot: 6px circle, bg #34d399, animate-pulse
-
-Keep ALL animations, star field, and visual styling. Text changes only.
-```
+Verify .gitignore includes .env.local and does NOT include .env.example.
 
 ---
 
-### Prompt POLISH-1 — Final Polish Pass
+TASK 4 — TypeScript + Build Check:
 
-```
-I'm building Stellar for Colosseum Frontier. This is the final polish pass before submission.
-
-Read every page file:
-  src/app/page.tsx
-  src/app/sky/page.tsx
-  src/app/missions/page.tsx
-  src/app/chat/page.tsx
-  src/app/marketplace/page.tsx
-  src/app/nfts/page.tsx
-  src/app/profile/page.tsx
-  src/app/darksky/page.tsx
+Run: npm run build
+Fix any TypeScript errors or build failures.
+Do NOT suppress errors with @ts-ignore unless absolutely necessary.
 
 ---
 
-TASK 1 — Loading states:
-Every page that fetches async data must show a skeleton while loading.
-Skeleton style: rounded-xl or rounded-2xl, bg rgba(255,255,255,0.05), animate-pulse
-  Heights: match approximate content height (e.g. product card: h-48, forecast card: h-32)
+TASK 5 — Performance Quick Check:
 
-TASK 2 — Empty states:
-  /nfts with no NFTs: 🔭 + "No discoveries yet" + "Start a Mission →" button
-  /marketplace empty products: 3 shimmer placeholder cards
-  /profile unauthenticated: centered card "Sign in to see your profile" + login button
+Ensure the homepage loads in under 3 seconds:
+  - No massive unoptimized images
+  - No blocking API calls before first paint
+  - Sky data should load asynchronously after initial render
 
-TASK 3 — Mobile at 375px:
-  No horizontal scroll on any page (use overflow-x-hidden on page containers)
-  All buttons min-h-[44px] (touch target)
-  ASTRA chat input safe-area handled for iPhone bottom bar
-  Product cards in marketplace: single column, image max-h-48 object-cover
+---
 
-TASK 4 — Error states:
-  Sky forecast fetch fails: show "Sky data unavailable · Check your location" with retry button
-  API route fails: show a muted error card, not a blank screen
+TASK 6 — Meta Tags Verification:
 
-TASK 5 — Transitions:
-  All page navigations: ensure animate-page-enter class is applied to every page's root div
-  If globals.css has @keyframes page-enter already — use it consistently
+Check that the deployed site has correct:
+  - <title> → "Stellar — The Night Sky App"
+  - og:image → points to working OG image endpoint
+  - og:description → concise, compelling
+  - twitter:card → summary_large_image
+  - favicon → exists and is not the default Next.js icon
 
-Fix all issues. Do not change features, design, or colors.
+---
+
+TASK 7 — Console Cleanup:
+
+Remove or suppress any console.log statements that would make the app look unfinished.
+Keep error logging for server-side routes.
+Remove any TODO/FIXME comments that judges might see in source.
+
+---
+
+TASK 8 — Mobile Screenshot Audit:
+
+Open the app at 390px width. Take screenshots of:
+  1. Homepage with Sky Score
+  2. Sky forecast page
+  3. Mission in progress
+  4. "Discovery Sealed" success screen
+  5. NFT gallery with real NFTs
+  6. Marketplace
+
+Save these for the submission. They should all look polished and consistent.
+
+---
+
+Output a checklist of everything checked and its status (✅ or ❌ with fix needed).
 ```
 
 ---
 
-## PHASE 4 — Content + Submission
+## SUBMISSION ASSETS CHECKLIST
 
-### Prompt G6 — README (from GLOBAL_PROMPTS.md)
-Rewrite README with global positioning, full tech stack, live URL, devnet setup, demo flow.
+These are NOT code prompts — these are the deliverables Rezi needs to create manually:
 
-### Demo Video (Week 4)
-2-minute structure:
-- 0:00–0:30: "300M amateur astronomers. Zero on-chain. I'm changing that." — founder context, Astroman story
-- 0:30–1:30: Live demo — email signup, sky forecast, Moon mission → AI verify → cNFT mints → success screen → gallery → location switch → ASTRA query
-- 1:30–2:00: Distribution angle, mainnet plan, URL
+### 1. Pitch Video (3 minutes max)
 
-### Submission Checklist
-- [ ] Live URL works: stellarrclub.vercel.app
-- [ ] Full flow: sign up → mission → NFT mints → explorer link works
-- [ ] ASTRA responds in English and Georgian
-- [ ] Gallery shows real minted NFTs
-- [ ] Marketplace shows products for correct region
-- [ ] Dark Sky Map loads with real Leaflet map + NASA overlay
-- [ ] Photo analyzer works with sky photo upload
-- [ ] GitHub repo is public
-- [ ] Demo video link works in incognito
-- [ ] Submit on May 6 (don't wait until May 10)
+Record in this order:
+  0:00-0:30 — "I'm Rezi, I run Astroman.ge..." (distribution story)
+  0:30-1:00 — "What can I see tonight?" (show Sky Score, highlights)
+  1:00-1:45 — Demo: signup → mission → photo → verify → NFT minted (show Explorer)
+  1:45-2:15 — "Why Solana?" (compressed NFT cost, SPL tokens, gasless UX)
+  2:15-2:45 — "Business model" (Astroman revenue, token redemption, ASTRA premium)
+  2:45-3:00 — "Live at stellarrclub.vercel.app, EN + Georgian, 7 missions, seeking ecosystem support"
 
----
+Tips from winners:
+  - Record on phone or at phone-sized viewport (Consumer track = mobile product)
+  - Show real Solana Explorer links
+  - Speak to camera for 0:00-0:30 and 2:15-3:00, screencast for 0:30-2:15
+  - Clean desk, good lighting, confident delivery
 
-# PROMPT REFERENCE INDEX
+### 2. Technical Demo Video (2-3 minutes)
 
-| Prompt | What It Does | Status |
-|---|---|---|
-| HEADER-1 | Working search modal + profile button + bottom nav fix + constants cleanup | Queue |
-| MOBILE-1 | Global mobile spacing, gutters, section gaps | Queue |
-| ICONS-1 | Location icon + icon system consistency | Queue |
-| HOME-HERO | Remove "Stellar" from hero, fix CTA links | Queue |
-| Prompt 2 | Sky Oracle (from LATEST_PROMPTS.md) | Queue |
-| Prompt 3 | NFT Minting (from LATEST_PROMPTS.md) | Queue |
-| Prompt 4 | Wire Mint + Success (from LATEST_PROMPTS.md) | Queue |
-| Prompt 5 | Stars SPL Token (from LATEST_PROMPTS.md) | Queue |
-| Prompt 6 | NFT Gallery / Helius DAS (from LATEST_PROMPTS.md) | Queue |
-| ASTRA-1 | Standalone ASTRA chat page | Queue |
-| MARKET-1 | Celestron USA + Bresser Europe real products | Queue |
-| DARKSKY-1 | Real Leaflet map + NASA light pollution overlay + Night Score system | Queue |
-| DARKSKY-2 | AI sky photo analysis + community reports feed | Queue |
-| SHARE-1 | Shareable NFT success screen | Queue |
-| PWA-1 | PWA SVG icons + manifest fix | Queue |
-| ONBOARD-1 | First-time user onboarding overlay | Queue |
-| PERF-1 | Performance: images, caching, bundle, lazy load | Queue |
-| GAMIFY-1 | Streak + rank visibility, Stars in mobile tab | Queue |
-| HOME-1 | Homepage refresh — copy, trust line, devnet badge | Queue |
-| Prompt 8 | OG Image + Farcaster (from LATEST_PROMPTS.md) | Queue |
-| POLISH-1 | Final polish: loading/empty/error states, mobile 375px | Queue |
-| G6 | README (from GLOBAL_PROMPTS.md) | Queue |
+Separate from pitch. Show:
+  - Full signup flow with Privy
+  - Sky Score computation
+  - ASTRA answering "What should I observe tonight?" with tool calls
+  - Mission flow start to finish with real NFT minting
+  - NFT visible in gallery + Solana Explorer
+  - Stars balance on profile
+  - Marketplace with Stars redemption
 
-**Total prompts: 22**
-**Already done (not in list): G1–G5, Nav desktop, Profile, ASTRA API, Streak API, Layout metadata, Footer**
+### 3. Colosseum Arena Project Page
+
+Required fields:
+  - Project name: Stellar
+  - One-liner: "The night sky app — observe, earn, collect on Solana"
+  - Track: Consumer
+  - Live URL: stellarrclub.vercel.app
+  - GitHub: github.com/Morningbriefrezi/Stellar
+  - Pitch video URL
+  - Demo video URL
+  - Team: Rezi (solo)
+
+### 4. X/Twitter Build-in-Public Posts
+
+Post at least 3-4 times between now and May 11:
+  - Week 1: "Building Stellar for @Colosseum Frontier 🔭 Sky Score is live — check tonight's sky quality at stellarrclub.vercel.app"
+  - Week 2: "First compressed NFT minted on devnet for $0.000005 🌌 Each observation is now a permanent proof on Solana"
+  - Week 3: "ASTRA knows what's in your sky tonight ✦ Ask anything about the stars, get real-time answers"
+  - Week 4: "Submitted to @Colosseum Frontier! 7 missions, real NFTs, real telescope rewards 🔭✦"
+  Tag: @StellarClub26, @colosseum, #SolanaHackathon
 
 ---
 
-# WHERE YOU'LL END UP AFTER ALL PROMPTS
+## EXECUTION TIMELINE (27 days)
 
-When every prompt above is done, Stellar will be:
+```
+WEEK 1: Apr 14-20 — FOUNDATION
+  Mon 14:  Prompt 7 (fix broken pages + branding) ← DO THIS FIRST
+  Tue 15:  Prompt 2 (clean codebase, sky oracle)
+  Wed 16:  Prompt 3 (server-side NFT minting)
+  Thu 17:  Prompt 4 (wire mission → real mint)
+  Fri 18:  Prompt 5 (Stars token deploy + award)
+  Sat 19:  Prompt 6 (NFT gallery)
+  Sun 20:  Test full flow end-to-end on devnet. Fix any issues.
 
-**UX layer:** Feels like a real native app — search works, profile ring looks polished, bottom nav
-is correct, no side gutters, no section gaps, location icon is solid, icons are consistent.
+WEEK 2: Apr 21-27 — AUDIENCE + POLISH
+  Mon 21:  Prompt 8 (Sky Score + Tonight's Highlights)
+  Tue 22:  Prompt 9 (ASTRA tool calling + floating widget)
+  Wed 23:  Prompt 10 (OG images + share flow)
+  Thu 24:  Prompt 11 (dynamic NFT images)
+  Fri 25:  Prompt 13 (seed demo data on devnet)
+  Sat 26:  Prompt 14 (mobile polish + success screen)
+  Sun 27:  Prompt 12 (README overhaul)
 
-**On-chain layer:** Full Solana devnet core — compressed NFT minting ($0.000005/NFT via Bubblegum),
-Stars SPL token with real balances, NFT gallery from Helius DAS API, sky oracle on-chain.
+WEEK 3: Apr 28 - May 4 — CONTENT + RECORDING
+  Mon 28:  Write pitch script, practice out loud
+  Tue 29:  Record pitch video (3+ takes)
+  Wed 30:  Record technical demo video
+  Thu 1:   X post #1 (Sky Score announcement)
+  Fri 2:   X post #2 (NFT minting announcement)
+  Sat 3:   Review videos, re-record if needed
+  Sun 4:   X post #3 (ASTRA announcement)
 
-**AI layer:** ASTRA standalone page with streaming Claude responses + real-time sky data injected,
-Dark Sky photo analyzer using Claude Vision API to measure light pollution from uploaded sky photos.
-
-**Data layer:** Marketplace with 3 real dealer regions (Georgia/Astroman, USA/Celestron, Europe/Bresser)
-with real product names, real image URLs, real prices in USD. All region-aware.
-
-**Dark Sky:** Interactive Leaflet map with NASA VIIRS nighttime light satellite overlay, "Night Score"
-system replacing Bortle (0-100 scale with cosmic tier names), AI photo analyzer, community reports.
-
-**Polish:** PWA installable, onboarding overlay, shareable NFT success screen, loading/empty/error
-states on every page, performance-optimized images and API caching, gamification visible on every page.
-
-**Submission-ready:** Full demo flow, OG images for social sharing, Farcaster frames, polished README.
+WEEK 4: May 5-11 — SUBMISSION
+  Mon 5:   Prompt 15 (pre-submission checklist)
+  Tue 6:   Fix any issues from checklist
+  Wed 7:   Final deploy to Vercel, verify live site
+  Thu 8:   Create Colosseum Arena project page
+  Fri 9:   Upload videos, fill all fields
+  Sat 10:  Final review of everything
+  Sun 11:  Submit. X post #4 (submission announcement).
+```
 
 ---
 
-# WEEKLY X POSTS
+## THE MINDSET SHIFT
 
-## Week 1 (April 11–13)
-```
-There are 300M+ amateur astronomers worldwide.
+The previous strategy optimized for **"what impresses Solana developers."**
+This plan optimizes for **"what wins a Consumer track judged like an investor pitch."**
 
-Zero apps bringing them on-chain.
+The difference:
+- Judges don't care about Anchor programs. They care about user acquisition.
+- Judges don't care about Jito bundles. They care about revenue models.
+- Judges don't care about test suites. They care about whether real humans would use this.
 
-Building that for @colosseum Frontier. On @solana.
+Astroman.ge is your unfair advantage. No other submission has a physical store, existing customers, and a proven social media following. Lead with that, always.
 
-stellarrclub.vercel.app
-```
+The Sky Score is your hook for everyone. "Is tonight good for stargazing?" is a universal question. "Want to mint a compressed NFT?" is not.
 
-## Week 2 (April 14–20)
-```
-Each sky observation on Stellar:
+Build for the masses. Monetize the enthusiasts. Win with distribution.
 
-AI verifies your photo
-Sky oracle hashes weather conditions
-cNFT minted for ~$0.000005
-Stars tokens awarded instantly
-All gasless — user never sees crypto
+---
 
-Privy + Bubblegum + Claude API on @solana.
-```
-
-## Week 3 (April 21–27)
-```
-New on Stellar: the shareable moment.
-
-Complete an observation.
-NFT mints.
-Success screen opens — share directly to X.
-
-This is what a viral loop looks like in a real consumer app.
-```
-
-## Week 4 (April 28 – May 7)
-```
-Submitting Stellar to @colosseum Frontier.
-
-The global astronomy app on @solana.
-
-Zero competition. Real business. Real users.
-
-stellarrclub.vercel.app
-```
+*Last updated: April 14, 2026*
+*27 days to submission. Every day counts.*
