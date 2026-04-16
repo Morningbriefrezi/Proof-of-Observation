@@ -23,11 +23,22 @@ export async function GET(req: NextRequest) {
 
   const data = await res.json();
   const items = data?.result?.items ?? [];
-  const filtered = collectionMint
-    ? items.filter((item: { grouping?: { group_key: string; group_value: string }[] }) =>
-        item.grouping?.some(g => g.group_key === 'collection' && g.group_value === collectionMint)
-      )
-    : items;
+
+  if (!collectionMint) {
+    return NextResponse.json(
+      { error: 'Collection mint address not configured', nfts: [] },
+      { status: 200 }
+    );
+  }
+
+  const filtered = items.filter((item: { grouping?: { group_key: string; group_value: string; verified?: boolean }[] }) =>
+    item.grouping?.some(
+      (g) =>
+        g.group_key === 'collection' &&
+        g.group_value === collectionMint &&
+        g.verified === true
+    )
+  );
 
   return NextResponse.json({ items: filtered });
 }

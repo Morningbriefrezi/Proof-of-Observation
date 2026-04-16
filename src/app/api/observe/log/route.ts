@@ -112,6 +112,27 @@ export async function POST(req: NextRequest) {
       todayStars = Number(rows[0]?.total ?? 0)
     }
 
+    // Per-object cooldown: user can only submit same target once per 24 hours
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const recentSameTarget = await db
+      .select({ id: observationLog.id })
+      .from(observationLog)
+      .where(
+        and(
+          eq(observationLog.wallet, wallet),
+          eq(observationLog.target, target),
+          gte(observationLog.createdAt, oneDayAgo)
+        )
+      )
+      .limit(1);
+
+    if (recentSameTarget.length > 0) {
+      return NextResponse.json(
+        { logged: false, reason: 'You already observed this target today. Come back tomorrow for a new observation!' },
+        { status: 200 }
+      );
+    }
+
     const starsToAward = todayStars + stars > DAILY_STARS_CAP
       ? Math.max(DAILY_STARS_CAP - todayStars, 0)
       : stars

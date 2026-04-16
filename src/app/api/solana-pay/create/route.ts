@@ -2,8 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import { encodeURL } from '@solana/pay';
 import BigNumber from 'bignumber.js';
+import { PrivyClient } from '@privy-io/server-auth';
+
+const privy = new PrivyClient(
+  process.env.NEXT_PUBLIC_PRIVY_APP_ID!,
+  process.env.PRIVY_APP_SECRET!,
+);
 
 export async function POST(req: NextRequest) {
+  const authHeader = req.headers.get('authorization');
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!token) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  let claims;
+  try {
+    claims = await privy.verifyAuthToken(token);
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { amountSOL, label, orderId } = await req.json();
 
   const merchantWallet = process.env.NEXT_PUBLIC_MERCHANT_WALLET;
@@ -38,5 +56,6 @@ export async function POST(req: NextRequest) {
     url: url.toString(),
     reference: reference.toBase58(),
     orderId,
+    userAddress: claims.userId,
   });
 }

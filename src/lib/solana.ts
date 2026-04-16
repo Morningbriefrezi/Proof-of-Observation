@@ -6,11 +6,18 @@ import {
 } from '@solana/web3.js';
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 
-const RPC_URL = process.env.SOLANA_RPC_URL ?? 'https://api.devnet.solana.com';
 const MEMO_PROGRAM_ID = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
 
-function getConnection(): Connection {
-  return new Connection(RPC_URL, 'confirmed');
+export function getConnection(): Connection {
+  const rpcUrl = process.env.SOLANA_RPC_URL;
+  if (!rpcUrl) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('SOLANA_RPC_URL must be set in production');
+    }
+    console.warn('SOLANA_RPC_URL not set, falling back to devnet. This is OK for local development only.');
+    return new Connection('https://api.devnet.solana.com', 'confirmed');
+  }
+  return new Connection(rpcUrl, 'confirmed');
 }
 
 export type MintResult = {
@@ -29,6 +36,11 @@ function simResult(): MintResult {
 }
 
 export async function ensureBalance(publicKey: PublicKey): Promise<void> {
+  const rpcUrl = process.env.SOLANA_RPC_URL;
+  if (process.env.NODE_ENV === 'production' || !rpcUrl?.includes('devnet')) {
+    // Never airdrop on mainnet
+    return;
+  }
   const connection = getConnection();
   try {
     const balance = await connection.getBalance(publicKey);
@@ -66,7 +78,13 @@ async function createOnChainProof(
 
     const signature = await sendTransaction(transaction, connection);
     const latestBlockhash = await connection.getLatestBlockhash();
-    await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed');
+    const confirmResult = await connection.confirmTransaction(
+      { signature, ...latestBlockhash },
+      'confirmed'
+    );
+    if (confirmResult.value.err) {
+      throw new Error(`Transaction failed on-chain: ${JSON.stringify(confirmResult.value.err)}`);
+    }
 
     return { success: true, txId: signature, method: 'onchain' };
   } catch (error: unknown) {

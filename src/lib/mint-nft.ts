@@ -58,13 +58,24 @@ export async function mintCompressedNFT(params: ObservationMintParams): Promise<
       collection: { key: toPublicKey(COLLECTION_MINT_ADDRESS), verified: false },
       creators: [],
     },
-  }).sendAndConfirm(umi, { confirm: { commitment: 'processed' } });
+  }).sendAndConfirm(umi, { confirm: { commitment: 'confirmed' } });
 
   const timeoutPromise = new Promise<never>((_, reject) =>
     setTimeout(() => reject(new Error(`Mint timeout after ${TIMEOUT_MS}ms`)), TIMEOUT_MS)
   );
 
   const { signature } = await Promise.race([mintPromise, timeoutPromise]);
+
+  // Explicit confirmation check after sendAndConfirm
+  try {
+    const { blockhash, lastValidBlockHeight } = await umi.rpc.getLatestBlockhash();
+    await umi.rpc.confirmTransaction(signature, {
+      strategy: { type: 'blockhash', blockhash, lastValidBlockHeight },
+      commitment: 'confirmed',
+    });
+  } catch {
+    throw new Error('NFT mint confirmed on-chain failed — check RPC connection');
+  }
 
   const txId = bs58.encode(Buffer.from(signature));
   return { txId };
