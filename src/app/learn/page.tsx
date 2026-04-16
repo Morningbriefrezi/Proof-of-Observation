@@ -156,37 +156,35 @@ function PlanetsTab({ locale, kidsMode, onSelect }: { locale: Locale; kidsMode: 
       </p>
 
       {/* Planet grid */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-4 gap-2">
         {PLANETS.map(p => (
           <button
             key={p.key}
             onClick={() => onSelect(p)}
-            className="relative rounded-2xl overflow-hidden group text-left"
-            style={{ aspectRatio: '1 / 1' }}
+            className="flex flex-col items-center gap-1.5 group text-left"
           >
-            <Image
-              src={p.img}
-              alt={p.name[locale]}
-              fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-              sizes="(max-width: 640px) 50vw, 33vw"
-            />
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 55%, transparent 100%)' }} />
-            {/* Color accent border on hover */}
-            <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              style={{ boxShadow: `inset 0 0 0 1.5px ${p.color}60` }} />
-            {/* Best first target badge */}
-            {(p.key === 'moon' || p.key === 'jupiter') && (
-              <div
-                className="absolute top-1.5 left-1.5 inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[7px] uppercase tracking-wide font-bold"
-                style={{ background: 'rgba(255,209,102,0.25)', border: '1px solid rgba(255,209,102,0.4)', color: '#FFD166', backdropFilter: 'blur(4px)' }}
-              >
-                <Star size={6} />
-                {locale === 'ka' ? '1-ლი' : '#1'}
-              </div>
-            )}
-            {/* Name */}
-            <p className="absolute bottom-2 left-2 text-white font-semibold text-xs leading-tight" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}>
+            <div className="relative w-full rounded-xl overflow-hidden" style={{ aspectRatio: '1 / 1' }}>
+              <Image
+                src={p.img}
+                alt={p.name[locale]}
+                fill
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                sizes="(max-width: 640px) 25vw, 160px"
+              />
+              <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                style={{ boxShadow: `inset 0 0 0 1.5px ${p.color}70` }} />
+              {(p.key === 'moon' || p.key === 'jupiter') && (
+                <div
+                  className="absolute top-1 left-1 inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[6px] uppercase tracking-wide font-bold"
+                  style={{ background: 'rgba(255,209,102,0.25)', border: '1px solid rgba(255,209,102,0.4)', color: '#FFD166', backdropFilter: 'blur(4px)' }}
+                >
+                  <Star size={5} />
+                  {locale === 'ka' ? '#1' : '#1'}
+                </div>
+              )}
+            </div>
+            <p className="text-white text-[11px] font-medium leading-tight text-center w-full truncate px-0.5"
+              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
               {p.name[locale]}
             </p>
           </button>
@@ -194,25 +192,25 @@ function PlanetsTab({ locale, kidsMode, onSelect }: { locale: Locale; kidsMode: 
       </div>
 
       {/* Constellations */}
-      <div className="mt-1 pt-4 border-t border-white/[0.05]">
-        <p className="text-[10px] uppercase tracking-widest text-slate-600 mb-3">
+      <div className="mt-1 pt-3 border-t border-white/[0.05]">
+        <p className="text-[10px] uppercase tracking-widest text-slate-600 mb-2">
           {locale === 'ka' ? 'თანავარსკვლავედები' : 'Constellations'}
         </p>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {CONSTELLATIONS.map(c => (
             <div key={c.id} className="glass-card overflow-hidden">
-              <div className="relative w-full" style={{ height: '120px' }}>
+              <div className="relative w-full" style={{ height: '88px' }}>
                 <Image src={c.img} alt={c.name['en']} fill className="object-cover" sizes="(max-width: 672px) 100vw, 672px" />
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(7,11,20,0.85) 40%, transparent 100%)' }} />
-                <div className="absolute inset-0 flex flex-col justify-center px-4 gap-1">
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(7,11,20,0.88) 45%, transparent 100%)' }} />
+                <div className="absolute inset-0 flex flex-col justify-center px-4 gap-0.5">
                   <div className="flex items-center gap-2">
-                    <p className="text-white font-bold text-base">{c.name[locale]}</p>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: `${c.color}20`, color: c.color, border: `1px solid ${c.color}30` }}>
+                    <p className="text-white font-bold text-sm">{c.name[locale]}</p>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: `${c.color}20`, color: c.color, border: `1px solid ${c.color}30` }}>
                       {c.season[locale]}
                     </span>
                   </div>
-                  <p className="text-slate-300 text-xs leading-relaxed max-w-[240px]">{c.desc[locale]}</p>
-                  <p className="text-xs mt-0.5" style={{ color: c.color }}>{c.highlight[locale]}</p>
+                  <p className="text-slate-400 text-[11px] leading-snug max-w-[220px] line-clamp-1">{c.desc[locale]}</p>
+                  <p className="text-[10px]" style={{ color: c.color }}>{c.highlight[locale]}</p>
                 </div>
               </div>
             </div>
