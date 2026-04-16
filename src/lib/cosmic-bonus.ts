@@ -21,9 +21,11 @@ const MESSAGES = [
   'Universe rewards the curious',
 ];
 
-export function rollCosmicBonus(rarity: NftRarity, oracleHash: string): CosmicBonus {
-  const cleanHash = (oracleHash || '').replace(/^0x/, '').replace(/[^0-9a-f]/gi, '');
-  const hashNum = cleanHash.length >= 8 ? parseInt(cleanHash.slice(0, 8), 16) : Date.now();
+export function rollCosmicBonus(rarity: NftRarity, oracleHash: string, userId = '', targetId = ''): CosmicBonus {
+  const seed = userId + new Date().toISOString().slice(0, 10) + targetId + (oracleHash || '');
+  let h = 5381;
+  for (let i = 0; i < seed.length; i++) h = ((h << 5) + h) + seed.charCodeAt(i);
+  const hashNum = Math.abs(h);
   const roll = (hashNum % 1000) / 1000;
   const cfg = BONUS_TABLE[rarity] ?? BONUS_TABLE.Common;
   if (roll < cfg.chance) {

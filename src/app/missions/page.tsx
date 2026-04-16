@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { getActiveChallenge, getChallengeProgress, claimChallengeReward } from '@/lib/celestial-challenges';
 import { Satellite, Lock } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
@@ -35,10 +35,9 @@ export default function MissionsPage() {
   const [skyConditions, setSkyConditions] = useState<{ cloudCover: number; visibility: string; verified: boolean } | null>(null);
   const [streak, setStreak] = useState<number>(0);
   const [isNight, setIsNight] = useState(false);
+  const [skyTimeout, setSkyTimeout] = useState(false);
   const [activeChallenge] = useState(() => getActiveChallenge());
   const [chProgress, setChProgress] = useState(() => getChallengeProgress());
-  const prevAuthRef = useRef(false);
-
   useEffect(() => {
     const h = new Date().getHours();
     setIsNight(h >= 18 || h < 5);
@@ -53,10 +52,17 @@ export default function MissionsPage() {
   }, [authenticated, state.walletAddress]);
 
   useEffect(() => {
+    const timer = setTimeout(() => setSkyTimeout(true), 10000);
     fetch(`/api/sky/verify?lat=${location.lat}&lon=${location.lon}`)
       .then(r => r.json())
-      .then(d => setSkyConditions({ cloudCover: d.cloudCover, visibility: d.visibility, verified: d.verified }))
-      .catch(() => {});
+      .then(d => {
+        setSkyConditions({ cloudCover: d.cloudCover, visibility: d.visibility, verified: d.verified });
+        // If verified, we know it's actually night — override the rough time check
+        if (d.verified) setIsNight(true);
+      })
+      .catch(() => {})
+      .finally(() => clearTimeout(timer));
+    return () => clearTimeout(timer);
   }, [location.lat, location.lon]);
 
   if (!authenticated) {
@@ -200,6 +206,11 @@ export default function MissionsPage() {
                     : `Cloudy tonight · ${skyConditions.cloudCover}% cloud cover`}
                 </span>
               </>
+            ) : skyTimeout ? (
+              <>
+                <div className="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-slate-700" />
+                <span className="text-[11px] text-slate-500">Sky conditions unavailable — showing all missions</span>
+              </>
             ) : (
               <>
                 <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isNight ? 'bg-[#34d399] animate-pulse' : 'bg-slate-700'}`} />
@@ -209,6 +220,8 @@ export default function MissionsPage() {
               </>
             )}
           </div>
+
+          <MissionList onStart={setActiveMission} />
 
           {/* Weekly challenge strip */}
           <button
@@ -276,8 +289,6 @@ export default function MissionsPage() {
           </button>
           <StatsBar />
         </section>
-
-        <MissionList onStart={setActiveMission} />
 
         {/* Quiz Missions */}
         <section>

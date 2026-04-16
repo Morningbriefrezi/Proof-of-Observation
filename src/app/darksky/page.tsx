@@ -8,7 +8,15 @@ import { LOCATIONS } from '@/lib/darksky-locations';
 
 const DarkSkyMap = dynamic(
   () => import('@/components/darksky/DarkSkyMap'),
-  { ssr: false, loading: () => <div style={{ height: 400, background: '#0D1321', borderRadius: 0 }} /> }
+  {
+    ssr: false,
+    loading: () => (
+      <div style={{ height: 400, background: '#0D1321', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+        <div style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid #38F0FF', borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
+        <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>Loading map...</span>
+      </div>
+    ),
+  }
 );
 
 function bortleColor(b: number): string {
@@ -25,13 +33,16 @@ function bortleLabel(b: number): string {
   return 'City';
 }
 
-const STATS = [
-  { label: 'Sites Mapped', value: '9' },
-  { label: 'Dark Sites (Bortle ≤3)', value: '5' },
-  { label: 'Countries', value: '3' },
-];
-
 export default function DarkSkyPage() {
+  const totalSites = LOCATIONS.length;
+  const darkSites = LOCATIONS.filter(l => l.bortle <= 3).length;
+  const countries = new Set(LOCATIONS.map(l => l.region)).size;
+  const STATS = [
+    { label: 'Sites Mapped', value: String(totalSites) },
+    { label: 'Dark Sites (Bortle ≤3)', value: String(darkSites) },
+    { label: 'Countries', value: String(countries) },
+  ];
+
   return (
     <div
       className="min-h-screen px-4 py-8 sm:py-12"
@@ -79,7 +90,7 @@ export default function DarkSkyPage() {
         >
           <div className="px-5 pt-5 pb-3 flex items-center justify-between">
             <span className="text-white font-semibold text-sm">Global — Light Pollution Readings</span>
-            <span className="text-[11px] text-slate-600">9 observer reports</span>
+            <span className="text-[11px] text-slate-600">{totalSites} observer reports</span>
           </div>
 
           <DarkSkyMap />

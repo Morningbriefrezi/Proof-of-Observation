@@ -76,6 +76,8 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
   const [cosmicBonus, setCosmicBonus] = useState<CosmicBonus | null>(null);
   const [totalStarsEarned, setTotalStarsEarned] = useState<number>(0);
   const [challengeCompleted, setChallengeCompleted] = useState<boolean>(false);
+  const [overlayVisible, setOverlayVisible] = useState(false);
+  const [challengeVisible, setChallengeVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -91,6 +93,18 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
     const t = setTimeout(() => setShowSlowMint(true), 30000);
     return () => clearTimeout(t);
   }, [step]);
+
+  useEffect(() => {
+    if (!overlayVisible) return;
+    const t = setTimeout(() => setOverlayVisible(false), 2800);
+    return () => clearTimeout(t);
+  }, [overlayVisible]);
+
+  useEffect(() => {
+    if (!challengeVisible) return;
+    const t = setTimeout(() => setChallengeVisible(false), 3300);
+    return () => clearTimeout(t);
+  }, [challengeVisible]);
 
   const handleCapture = async (p: string, source: 'camera' | 'upload' = 'camera') => {
     setPhoto(p);
@@ -279,6 +293,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
           oracleHash: sky?.oracleHash ?? 'sim',
           stars: effectiveStars,
           rarity: rarityInfo.rarity,
+          multiplier: tier.multiplier,
           demo: mission.demo === true,
         }),
       });
@@ -309,9 +324,10 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
     const nftUrl = `/api/nft-image?target=${encodeURIComponent(targetName)}&ts=${new Date(timestamp).getTime()}&lat=${coords.lat.toFixed(4)}&lon=${coords.lon.toFixed(4)}&cc=${sky?.cloudCover ?? 0}&stars=${effectiveStars}&rarity=${rarityInfo.rarity}`;
     setNftImageUrl(nftUrl);
 
-    // --- Roll cosmic bonus (deterministic from oracle hash) ---
-    const bonus = rollCosmicBonus(rarityInfo.rarity, sky?.oracleHash ?? 'sim');
+    // --- Roll cosmic bonus (seeded per user+date+target) ---
+    const bonus = rollCosmicBonus(rarityInfo.rarity, sky?.oracleHash ?? 'sim', user?.id ?? '', mission.id);
     setCosmicBonus(bonus);
+    setOverlayVisible(bonus.triggered);
 
     // --- Compute TRUE total stars including bonus ---
     const totalStars = effectiveStars + (bonus.triggered ? bonus.amount : 0);
@@ -342,6 +358,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
     const chResult = recordChallengeProgress(skyScore?.score ?? 0, targetName);
     if (chResult.justCompleted) {
       setChallengeCompleted(true);
+      setChallengeVisible(true);
       const cb = claimChallengeReward();
       if (cb > 0 && solanaWallet?.address) {
         const authToken = await getAccessToken().catch(() => null);
@@ -527,10 +544,11 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
         {/* Cosmic bonus overlay */}
         {cosmicBonus?.triggered && (
           <div
-            className="fixed top-16 left-1/2 -translate-x-1/2 z-20"
+            className="fixed top-16 left-1/2 -translate-x-1/2 z-20 animate-cosmic-reveal"
             style={{
               pointerEvents: 'none',
-              animation: 'cosmicReveal 520ms var(--ease-out-expo) forwards, fadeIn 400ms ease 2400ms reverse forwards',
+              opacity: overlayVisible ? 1 : 0,
+              transition: 'opacity 400ms ease',
             }}
           >
             <div
@@ -555,10 +573,11 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
         {/* Weekly challenge complete */}
         {challengeCompleted && (
           <div
-            className="fixed bottom-32 left-1/2 -translate-x-1/2 z-20"
+            className="fixed bottom-32 left-1/2 -translate-x-1/2 z-20 animate-cosmic-reveal"
             style={{
               pointerEvents: 'none',
-              animation: 'cosmicReveal 520ms var(--ease-out-expo) 500ms both, fadeIn 400ms ease 2900ms reverse forwards',
+              opacity: challengeVisible ? 1 : 0,
+              transition: 'opacity 400ms ease',
             }}
           >
             <div
@@ -637,6 +656,11 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
             <p className="relative text-[10px] font-bold tracking-[0.25em] mt-0.5" style={{ color: 'rgba(255,209,102,0.55)' }}>
               STARS EARNED
             </p>
+            {starsEarned >= 100 && (
+              <p className="relative text-[9px] mt-1" style={{ color: 'rgba(255,209,102,0.4)' }}>
+                ≈ {Math.floor(starsEarned / 100)}% off at astroman.ge
+              </p>
+            )}
           </div>
 
           {/* Photo card — fills remaining space */}

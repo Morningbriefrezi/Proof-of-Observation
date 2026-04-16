@@ -19,10 +19,12 @@ import LoadingRing from '@/components/ui/LoadingRing';
 function EmailSubscribe() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'sent' | 'error'>('idle');
+  const [emailInvalid, setEmailInvalid] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email.includes('@')) { setStatus('error'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { setEmailInvalid(true); return; }
+    setEmailInvalid(false);
     try {
       const res = await fetch('/api/subscribe', {
         method: 'POST',
@@ -55,32 +57,44 @@ function EmailSubscribe() {
       {status === 'sent' ? (
         <p style={{ color: '#34d399', fontSize: 13, fontWeight: 600 }}>✦ You&apos;re on the list — clear skies ahead!</p>
       ) : (
-        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 8, maxWidth: 360, margin: '0 auto' }}>
-          <input
-            type="email"
-            placeholder="your@email.com"
-            value={email}
-            onChange={e => { setEmail(e.target.value); setStatus('idle'); }}
-            style={{
-              flex: 1, padding: '8px 12px', borderRadius: 10, fontSize: 13,
-              background: 'rgba(255,255,255,0.05)',
-              border: `1px solid ${status === 'error' ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.1)'}`,
-              color: 'white', outline: 'none',
-            }}
-          />
-          <button
-            type="submit"
-            style={{
-              padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              background: 'rgba(52,211,153,0.15)',
-              border: '1px solid rgba(52,211,153,0.3)',
-              color: '#34d399',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            Notify me
-          </button>
-        </form>
+        <>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 8, maxWidth: 360, margin: '0 auto' }}>
+            <input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={e => { setEmail(e.target.value); setStatus('idle'); setEmailInvalid(false); }}
+              style={{
+                flex: 1, padding: '8px 12px', borderRadius: 10, fontSize: 13,
+                background: 'rgba(255,255,255,0.05)',
+                border: `1px solid ${emailInvalid || status === 'error' ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                color: 'white', outline: 'none',
+              }}
+            />
+            <button
+              type="submit"
+              style={{
+                padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                background: 'rgba(52,211,153,0.15)',
+                border: '1px solid rgba(52,211,153,0.3)',
+                color: '#34d399',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Notify me
+            </button>
+          </form>
+          {emailInvalid && (
+            <p style={{ color: 'rgba(239,68,68,0.8)', fontSize: 11, textAlign: 'center', marginTop: 4 }}>
+              Please enter a valid email address.
+            </p>
+          )}
+          {status === 'error' && !emailInvalid && (
+            <p style={{ color: 'rgba(239,68,68,0.8)', fontSize: 11, textAlign: 'center', marginTop: 4 }}>
+              Something went wrong. Please try again.
+            </p>
+          )}
+        </>
       )}
     </div>
   );
@@ -98,6 +112,9 @@ export default function HomePage() {
   const [homeStars, setHomeStars] = useState(0);
   const [homeStarsLoaded, setHomeStarsLoaded] = useState(false);
   const [heroSkyScore, setHeroSkyScore] = useState<{ score: number; grade: string; emoji: string } | null>(null);
+  const [starsError, setStarsError] = useState(false);
+  const [skyScoreError, setSkyScoreError] = useState(false);
+  const [leadersError, setLeadersError] = useState(false);
 
   const { location } = useLocation();
 
@@ -198,7 +215,7 @@ export default function HomePage() {
         }));
         setLiveLeaders(entries);
       })
-      .catch(() => setLiveLeaders([]))
+      .catch(() => { setLiveLeaders([]); setLeadersError(true); })
       .finally(() => setLeadersLoading(false));
   }, []);
 
@@ -208,7 +225,7 @@ export default function HomePage() {
     fetch(`/api/stars-balance?address=${encodeURIComponent(addr)}`)
       .then(r => r.json())
       .then(d => setHomeStars(d.balance ?? 0))
-      .catch(() => {})
+      .catch(() => { setStarsError(true); })
       .finally(() => setHomeStarsLoaded(true));
   }, [authenticated, walletAddress, state.walletAddress]);
 
@@ -218,7 +235,7 @@ export default function HomePage() {
     fetch(`/api/sky/score?lat=${lat}&lon=${lon}`)
       .then(r => r.json())
       .then(d => { if (d?.score != null) setHeroSkyScore(d); })
-      .catch(() => {});
+      .catch(() => { setSkyScoreError(true); });
   }, [location.lat, location.lon]);
 
   if (!ready) {
@@ -512,7 +529,7 @@ export default function HomePage() {
           {/* Right: live stats panel — desktop only */}
           <div className="hero-right">
             {/* Sky score */}
-            {heroSkyScore && (
+            {heroSkyScore ? (
               <div style={{
                 padding: '20px 24px', borderRadius: 20,
                 background: 'rgba(12,18,33,0.7)',
@@ -535,7 +552,30 @@ export default function HomePage() {
                   Full forecast →
                 </Link>
               </div>
-            )}
+            ) : skyScoreError ? (
+              <div style={{
+                padding: '20px 24px', borderRadius: 20,
+                background: 'rgba(12,18,33,0.7)',
+                backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                display: 'flex', flexDirection: 'column', gap: 12,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontSize: 28 }}>🌫️</span>
+                  <div>
+                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Sky Score Tonight</div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                      <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 36, fontWeight: 700, fontFamily: 'var(--font-mono)', lineHeight: 1 }}>?</span>
+                      <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>/100</span>
+                    </div>
+                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>Forecast unavailable</div>
+                  </div>
+                </div>
+                <Link href="/sky" style={{ display: 'block', textAlign: 'center', padding: '8px', borderRadius: 10, background: 'rgba(56,240,255,0.06)', border: '1px solid rgba(56,240,255,0.15)', color: '#38F0FF', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>
+                  Full forecast →
+                </Link>
+              </div>
+            ) : null}
 
             {/* Top observers */}
             {liveLeaders.length > 0 && (
@@ -838,6 +878,11 @@ export default function HomePage() {
                     <div style={{ width: 60, height: 11, borderRadius: 4, background: 'rgba(255,255,255,0.03)', animation: 'pulse 2s ease-in-out infinite' }} />
                   </div>
                 ))
+              ) : leadersError ? (
+                <div style={{ textAlign: 'center', padding: '20px 0', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>
+                  <p style={{ margin: '0 0 6px' }}>Couldn&apos;t load leaderboard.</p>
+                  <button onClick={() => window.location.reload()} style={{ color: '#38F0FF', background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, textDecoration: 'underline' }}>Refresh</button>
+                </div>
               ) : liveLeaders.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '20px 0', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>
                   No observers yet — be the first!
@@ -1122,9 +1167,9 @@ export default function HomePage() {
             <style>{`@media (max-width: 639px) { .rewards-grid { grid-template-columns: 1fr !important; } }`}</style>
 
             {[
-              { icon: Moon, iconBg: 'rgba(52,211,153,0.1)', iconColor: '#34d399', title: 'First Observation', reward: 'Free Moon Lamp for your first lunar observation', stars: '50 ✦', progress: 0 },
-              { icon: Star, iconBg: 'rgba(255,209,102,0.1)', iconColor: '#FFD166', title: 'Mission Complete', reward: 'Free Custom Star Map for completing all 5 missions', stars: '500 ✦', progress: 0 },
-              { icon: Telescope, iconBg: 'rgba(56,240,255,0.1)', iconColor: '#38F0FF', title: 'Power Observer', reward: 'Discounts up to 20% on telescopes at partner stores', stars: '1000 ✦', progress: 0 },
+              { icon: Moon, iconBg: 'rgba(52,211,153,0.1)', iconColor: '#34d399', title: 'First Observation', reward: 'Free Moon Lamp for your first lunar observation', stars: '50 ✦', progress: Math.min(100, Math.round((homeStars / 50) * 100)) },
+              { icon: Star, iconBg: 'rgba(255,209,102,0.1)', iconColor: '#FFD166', title: 'Mission Complete', reward: 'Free Custom Star Map for completing all 5 missions', stars: '500 ✦', progress: Math.min(100, Math.round((homeStars / 500) * 100)) },
+              { icon: Telescope, iconBg: 'rgba(56,240,255,0.1)', iconColor: '#38F0FF', title: 'Power Observer', reward: 'Discounts up to 20% on telescopes at partner stores', stars: '1000 ✦', progress: Math.min(100, Math.round((homeStars / 1000) * 100)) },
             ].map(card => (
               <div
                 key={card.title}
@@ -1170,7 +1215,7 @@ export default function HomePage() {
           }}>
             <div>
               <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: '0 0 4px 0' }}>Your Stars</p>
-              <p style={{ color: 'var(--stars)', fontWeight: 700, fontSize: 24, margin: 0, fontFamily: 'var(--font-mono)' }}>{homeStarsLoaded ? `${homeStars} ✦` : '— ✦'}</p>
+              <p style={{ color: 'var(--stars)', fontWeight: 700, fontSize: 24, margin: 0, fontFamily: 'var(--font-mono)' }} title={starsError ? "Couldn't load balance" : undefined}>{homeStarsLoaded ? (starsError ? '— ✦' : `${homeStars} ✦`) : '— ✦'}</p>
             </div>
             <div style={{ flex: 1, minWidth: 160, maxWidth: 280 }}>
               <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, margin: '0 0 6px 0' }}>

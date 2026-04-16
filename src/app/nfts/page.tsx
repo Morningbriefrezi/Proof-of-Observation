@@ -44,6 +44,7 @@ function localToNftAsset(m: CompletedMission): NftAsset {
       metadata: {
         name: `Stellar: ${m.name}`,
         attributes: [
+          { trait_type: 'Mission-ID', value: m.id },
           { trait_type: 'Target', value: m.name },
           { trait_type: 'Date', value: new Date(m.timestamp).toISOString().split('T')[0] },
           { trait_type: 'Location', value: `${m.latitude.toFixed(2)}, ${m.longitude.toFixed(2)}` },
@@ -452,6 +453,8 @@ export default function NftsPage() {
         {/* Collection progress */}
         {(() => {
           const ownedTargets = allNfts.map(n => {
+            const missionId = getAttr(n.content?.metadata?.attributes, 'Mission-ID');
+            if (missionId && MISSIONS.find(m => m.id === missionId)) return missionId;
             const t = getAttr(n.content?.metadata?.attributes, 'Target');
             return MISSIONS.find(m => m.name.toLowerCase() === t.toLowerCase())?.id;
           }).filter(Boolean) as string[];
@@ -605,6 +608,7 @@ export default function NftsPage() {
                     unoptimized
                     style={{ objectFit: 'cover' }}
                     loading="lazy"
+                    onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/placeholder-nft.svg'; }}
                   />
                 </div>
 

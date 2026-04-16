@@ -43,6 +43,11 @@ function shortWallet(wallet: string): string {
   return `⬡ ${wallet.slice(0, 4)}…${wallet.slice(-4)}`;
 }
 
+function walletColor(address: string): string {
+  const hex = address.replace(/[^0-9a-fA-F]/g, '').slice(0, 2) || '00';
+  return `hsl(${parseInt(hex, 16) * 1.4}, 60%, 55%)`;
+}
+
 function AvatarCircle({ name, size = 40, color }: { name: string; size?: number; color?: string }) {
   const initial = name[0]?.toUpperCase() ?? '?';
   return (
@@ -123,6 +128,7 @@ export default function LeaderboardPage() {
   const [entries, setEntries] = useState<DisplayEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [podiumVisible, setPodiumVisible] = useState(false);
+  const [leaderError, setLeaderError] = useState(false);
 
   const { user } = usePrivy();
   const { wallets } = useWallets();
@@ -131,6 +137,7 @@ export default function LeaderboardPage() {
   useEffect(() => {
     setLoading(true);
     setPodiumVisible(false);
+    setLeaderError(false);
     const period = activeTab === 'This Week' ? 'week' : activeTab === 'All Time' ? 'all' : 'month';
     fetch(`/api/leaderboard?period=${period}`)
       .then(r => r.json())
@@ -147,12 +154,20 @@ export default function LeaderboardPage() {
       })
       .catch(() => {
         setEntries([]);
+        setLeaderError(true);
       })
       .finally(() => {
         setLoading(false);
-        setTimeout(() => setPodiumVisible(true), 50);
       });
   }, [activeTab]);
+
+  // Only show podium when data is loaded and entries exist
+  useEffect(() => {
+    if (!loading && entries.length > 0) {
+      const t = setTimeout(() => setPodiumVisible(true), 50);
+      return () => clearTimeout(t);
+    }
+  }, [loading, entries.length]);
 
   const top3  = entries.slice(0, 3);
   const rest  = entries.slice(3);
@@ -163,7 +178,7 @@ export default function LeaderboardPage() {
   const currentUserInTop20 = currentUserIndex >= 0 && currentUserIndex < 20;
   const currentUserNotShown = currentUserIndex >= 20;
 
-  const isEmpty = !loading && entries.length === 0;
+  const isEmpty = !loading && entries.length === 0 && !leaderError;
 
   // Podium display order: [2nd, 1st, 3rd]
   const podiumSlots = [
@@ -219,6 +234,21 @@ export default function LeaderboardPage() {
           </button>
         ))}
       </div>
+
+      {/* Error state */}
+      {leaderError && !loading && (
+        <div className="rounded-2xl p-8 text-center flex flex-col items-center gap-3"
+          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <p className="text-white/60 text-sm">Couldn&apos;t load the leaderboard.</p>
+          <button
+            onClick={() => { setLeaderError(false); setActiveTab(t => t); }}
+            className="px-4 py-2 rounded-xl text-xs font-semibold transition-opacity hover:opacity-80"
+            style={{ background: 'rgba(56,240,255,0.12)', color: '#38F0FF', border: '1px solid rgba(56,240,255,0.2)' }}
+          >
+            Try again
+          </button>
+        </div>
+      )}
 
       {/* Empty state */}
       {isEmpty && (
@@ -339,6 +369,7 @@ export default function LeaderboardPage() {
                   const rankLabel = RANK_LABELS[entry.rank] ?? RANK_LABELS['Stargazer'];
                   const isCurrentUser = currentWallet && entry.wallet.toLowerCase() === currentWallet.toLowerCase();
                   const rankNumColor = i === 0 ? '#FFD166' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : 'var(--color-text-muted)';
+                  const avatarColor = i < 3 ? rankNumColor : walletColor(entry.wallet);
                   const rowBg = i % 2 === 1 ? 'rgba(255,255,255,0.015)' : 'transparent';
 
                   return (
@@ -359,7 +390,7 @@ export default function LeaderboardPage() {
                         {i + 1}
                       </span>
 
-                      <AvatarCircle name={entry.handle} size={30} color={rankNumColor} />
+                      <AvatarCircle name={entry.handle} size={30} color={avatarColor} />
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 min-w-0">

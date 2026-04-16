@@ -64,7 +64,7 @@ export default function ClubPage() {
   }, [authenticated, getAccessToken]);
 
   const handleSave = async () => {
-    if (!form.model.trim() || !form.aperture.trim()) return;
+    if (!form.brand.trim() || !form.model.trim() || !form.aperture.trim()) return;
     setLoading(true);
     setError('');
     try {
@@ -82,13 +82,14 @@ export default function ClubPage() {
       });
       if (!res.ok) {
         const d = await res.json().catch(() => ({}));
-        setError(d.error ?? 'Save failed');
+        setError(d.error ?? 'Save failed. Please try again.');
         return;
       }
       const d = await res.json();
       setTelescope(d.telescope);
       setStarsEarned(d.starsAwarded ?? 0);
       setSaved(true);
+      setError('');
     } catch {
       setError('Network error — please try again');
     } finally {
@@ -130,7 +131,7 @@ export default function ClubPage() {
       <div className="max-w-lg mx-auto px-4 py-8">
         <BackButton />
         <div className="mt-4">
-          {starsEarned > 0 && (
+          {starsEarned > 0 ? (
             <div
               className="mb-4 rounded-2xl px-4 py-3 flex items-center gap-3"
               style={{ background: 'rgba(255,209,102,0.08)', border: '1px solid rgba(255,209,102,0.2)' }}
@@ -141,7 +142,14 @@ export default function ClubPage() {
                 <p className="text-slate-400 text-xs">First telescope registration bonus</p>
               </div>
             </div>
-          )}
+          ) : telescope?.starsAwarded ? (
+            <div
+              className="mb-4 rounded-2xl px-4 py-3"
+              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
+            >
+              <p className="text-slate-500 text-xs">Bonus Stars already awarded on first registration.</p>
+            </div>
+          ) : null}
           <Card glow="cyan" className="p-6">
             <div className="flex items-center gap-4 mb-5">
               <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(56,240,255,0.08)', border: '1px solid rgba(56,240,255,0.2)' }}>

@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
   const hash = searchParams.get('hash') ?? '';
   const stars = searchParams.get('stars') ?? '0';
   const rarity = searchParams.get('rarity') ?? 'Common';
+  const multiplier = searchParams.get('multiplier') ?? '1';
   const wallet = searchParams.get('wallet') ?? '';
 
   // Verify auth
@@ -85,6 +86,7 @@ export async function GET(req: NextRequest) {
       { trait_type: 'Oracle Hash', value: hash },
       { trait_type: 'Stars Earned', value: Number(stars) },
       { trait_type: 'Rarity', value: rarity },
+      { trait_type: 'Streak Multiplier', value: Number(multiplier) },
     ],
   });
 }

@@ -18,7 +18,13 @@ const isSafePhoto = (url: string) =>
   url.startsWith('data:image/png;base64,') ||
   url.startsWith('data:image/webp;base64,') ||
   url.startsWith('blob:') ||
-  url.startsWith('/images/');
+  url.startsWith('/images/') ||
+  (url.startsWith('https://') && (
+    url.includes('vercel.app') ||
+    url.includes('supabase.co') ||
+    url.includes('cloudinary.com') ||
+    url.includes('s3.amazonaws.com')
+  ));
 
 function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete: () => void }) {
   const [confirming, setConfirming] = useState(false);
@@ -37,7 +43,7 @@ function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete:
         <p className="text-slate-400 text-xs">{new Date(mission.timestamp).toLocaleString()}</p>
         <div className="flex items-center gap-2">
           <p className="text-[#FFD166] font-bold">+{displayStars} stars ✦</p>
-          {isPending && <span className="text-amber-400 text-xs flex items-center gap-1"><Clock size={11} /> Pending</span>}
+          {isPending && <span className="text-amber-400 text-xs flex items-center gap-1" title="Transaction is being confirmed on Solana. This usually takes 15-30 seconds."><Clock size={11} /> Pending</span>}
         </div>
         <div className="flex gap-3 text-xs text-[var(--text-secondary)]">
           <span className="flex items-center gap-1"><Cloud size={11} />{mission.sky ? `${mission.sky.cloudCover}%` : '—'}</span>
@@ -74,10 +80,12 @@ function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete:
           )}
           <button
             onClick={() => openExplorer(mission)}
+            disabled={!isRealTx}
+            title={isRealTx ? 'View on Solana Explorer' : 'Transaction not yet confirmed on-chain'}
             className={`flex-1 text-center text-xs px-2 py-1.5 border rounded transition-all flex items-center justify-center gap-1 ${
               isRealTx
                 ? 'border-[rgba(56,240,255,0.12)] hover:border-[#38F0FF] text-slate-400 hover:text-[#38F0FF] btn-glow-cyan'
-                : 'border-[rgba(56,240,255,0.12)] text-slate-600 cursor-default'
+                : 'border-[rgba(56,240,255,0.12)] text-slate-600 opacity-50 cursor-not-allowed'
             }`}
           >
             <ExternalLink size={12} /> {isRealTx ? 'Explorer →' : 'Local only'}

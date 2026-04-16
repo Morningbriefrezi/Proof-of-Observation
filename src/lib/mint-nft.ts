@@ -17,6 +17,7 @@ export interface ObservationMintParams {
   oracleHash: string;
   stars: number;
   rarity?: string;
+  multiplier?: number;
 }
 
 export async function mintCompressedNFT(params: ObservationMintParams): Promise<{ txId: string }> {
@@ -43,7 +44,7 @@ export async function mintCompressedNFT(params: ObservationMintParams): Promise<
   const recipient = params.userAddress ? toPublicKey(params.userAddress) : keypair.publicKey;
 
   const name = `Stellar: ${params.target}`;
-  const uri = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://stellarrclub.vercel.app'}/api/metadata/observation?target=${encodeURIComponent(params.target)}&ts=${params.timestampMs}&lat=${params.lat.toFixed(4)}&lon=${params.lon.toFixed(4)}&cc=${params.cloudCover}&hash=${params.oracleHash}&stars=${params.stars}&rarity=${encodeURIComponent(params.rarity ?? 'Common')}`;
+  const uri = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://stellarrclub.vercel.app'}/api/metadata/observation?target=${encodeURIComponent(params.target)}&ts=${params.timestampMs}&lat=${params.lat.toFixed(4)}&lon=${params.lon.toFixed(4)}&cc=${params.cloudCover}&hash=${params.oracleHash}&stars=${params.stars}&rarity=${encodeURIComponent(params.rarity ?? 'Common')}&multiplier=${params.multiplier ?? 1}`;
 
   // Use 'processed' commitment (~1s) and a hard 8s timeout so the function
   // never hangs past Vercel's 10s serverless limit on the hobby plan.

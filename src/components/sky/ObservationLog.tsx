@@ -2,14 +2,33 @@
 
 import Link from 'next/link';
 import { useAppState } from '@/hooks/useAppState';
+import { usePrivy } from '@privy-io/react-auth';
 import { Clock, Trash2 } from 'lucide-react';
 
 export default function ObservationLog() {
   const { state, removeMission } = useAppState();
+  const { authenticated } = usePrivy();
   const all = [...state.completedMissions].reverse();
   const missions = all.slice(0, 3);
 
-  if (missions.length === 0) return null;
+  if (missions.length === 0) {
+    if (!authenticated) return null;
+    return (
+      <div className="flex flex-col gap-3 mt-2">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="ornament-line flex-1" />
+          <span className="text-[10px] text-slate-600 uppercase tracking-widest font-medium whitespace-nowrap">Recent Observations</span>
+          <div className="ornament-line flex-1" />
+        </div>
+        <div className="rounded-xl px-4 py-5 text-center" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <p className="text-slate-500 text-sm">Your completed observations will appear here.</p>
+          <p className="text-slate-600 text-xs mt-1">
+            <Link href="/missions" className="text-[#38F0FF] hover:underline">Complete your first mission →</Link>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

@@ -70,7 +70,10 @@ export default function MarketplacePage() {
         <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>
           {t('title')}
         </h1>
-        <LocationPicker compact />
+        <div className="flex items-center gap-2">
+          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Your region:</span>
+          <LocationPicker compact />
+        </div>
       </div>
 
       {/* Stars redemption */}
@@ -98,7 +101,7 @@ export default function MarketplacePage() {
               style={
                 filter === f.key
                   ? { background: 'rgba(52,211,153,0.18)', color: '#34d399', boxShadow: 'inset 0 0 0 1px rgba(52,211,153,0.3)' }
-                  : { color: 'rgba(255,255,255,0.4)' }
+                  : { color: 'rgba(255,255,255,0.65)' }
               }
             >
               {f.label}
@@ -123,7 +126,30 @@ export default function MarketplacePage() {
       )}
 
       {/* Product grid */}
-      {products.length === 0 ? (
+      {products.length === 0 && filter !== 'all' ? (
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col items-center gap-3 py-6 text-center">
+            <p className="text-white font-semibold">
+              No {CATEGORY_FILTERS.find(f => f.key === filter)?.label.toLowerCase()} available in your region yet.
+            </p>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              Showing all products instead
+            </p>
+            <button
+              onClick={() => setFilter('all')}
+              className="text-xs px-3 py-1.5 rounded-xl"
+              style={{ background: 'rgba(52,211,153,0.1)', color: '#34d399', border: '1px solid rgba(52,211,153,0.2)' }}
+            >
+              Clear filter
+            </button>
+          </div>
+          <div className="grid gap-3 grid-cols-2">
+            {GLOBAL_FALLBACK.map(p => (
+              <ProductCard key={p.id} product={p} showDealer={false} dealerName="Astroman" />
+            ))}
+          </div>
+        </div>
+      ) : products.length === 0 ? (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col items-center gap-2 py-8 text-center">
             <p className="text-white font-semibold">No stores in your region yet</p>

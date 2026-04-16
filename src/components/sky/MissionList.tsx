@@ -109,7 +109,9 @@ export default function MissionList({ onStart }: MissionListProps) {
                 style={{ background: 'rgba(255,209,102,0.04)', border: '1px solid rgba(255,209,102,0.1)', color: 'rgba(255,209,102,0.5)' }}
               >
                 <span className="font-semibold">No Starlight</span>
-                <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>Resets at sunset</span>
+                <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>
+                  {new Date().getHours() < 19 ? 'Resets at 19:00' : 'Resets tomorrow at 19:00'}
+                </span>
               </div>
             ) : (
               <button

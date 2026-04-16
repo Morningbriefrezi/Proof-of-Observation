@@ -462,8 +462,8 @@ function GuideTab({ locale }: { locale: Locale }) {
   const [search, setSearch] = useState('');
 
   const now = Date.now();
-  const upcoming = ALL_EVENTS.filter(e => new Date(e.date + 'T12:00:00').getTime() >= now);
-  const past = ALL_EVENTS.filter(e => new Date(e.date + 'T12:00:00').getTime() < now);
+  const upcoming = ALL_EVENTS.filter(e => new Date(e.date + 'T12:00:00Z').getTime() >= now);
+  const past = ALL_EVENTS.filter(e => new Date(e.date + 'T12:00:00Z').getTime() < now);
   const [showPast, setShowPast] = useState(false);
   const nextEvent = upcoming[0];
 
@@ -877,7 +877,12 @@ export default function LearnPage() {
   const locale: Locale = rawLocale === 'ka' ? 'ka' : 'en';
   const [tab, setTab] = useState<Tab>('planets');
   const [activeQuiz, setActiveQuiz] = useState<QuizDef | null>(null);
-  const [kidsMode, setKidsMode] = useState(false);
+  const [kidsMode, setKidsMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('stellar_kids_mode') === 'true';
+    }
+    return false;
+  });
   const [selectedPlanet, setSelectedPlanet] = useState<Planet | null>(null);
   const { state } = useAppState();
   const completedQuizzes = state.completedQuizzes ?? [];
@@ -992,7 +997,11 @@ export default function LearnPage() {
 
           {/* Kids mode toggle */}
           <button
-            onClick={() => setKidsMode(k => !k)}
+            onClick={() => {
+              const next = !kidsMode;
+              setKidsMode(next);
+              localStorage.setItem('stellar_kids_mode', String(next));
+            }}
             className="absolute right-4 top-4 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-medium transition-all"
             style={{
               background: kidsMode ? 'rgba(255,209,102,0.12)' : 'rgba(255,255,255,0.05)',
@@ -1002,6 +1011,9 @@ export default function LearnPage() {
             }}
           >
             {kidsMode ? <Star size={11} /> : <Moon size={11} />}
+            <span className="sm:hidden">
+              {locale === 'ka' ? 'ბ' : 'Kids'}
+            </span>
             <span className="hidden sm:inline">
               {kidsMode
                 ? (locale === 'ka' ? 'ბავშვების რეჟიმი' : 'Kids Mode ON')

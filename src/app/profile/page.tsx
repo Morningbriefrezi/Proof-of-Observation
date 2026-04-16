@@ -27,6 +27,8 @@ export default function ProfilePage() {
   const [obsStreak, setObsStreak] = useState<number>(0);
   const [recentObs, setRecentObs] = useState<{ id: string; target: string; confidence: string; stars: number; created_at: string }[]>([]);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [allApisFailed, setAllApisFailed] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
   const [selectedPhoto, setSelectedPhoto] = useState<{ photo: string; name: string } | null>(null);
   const [telescope, setTelescope] = useState<{ brand: string; model: string; aperture: string; type: string | null } | null>(null);
 
@@ -49,6 +51,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!address) { setProfileLoaded(true); return; }
     setProfileLoaded(false);
+    setAllApisFailed(false);
     Promise.allSettled([
       fetch(`/api/stars-balance?address=${encodeURIComponent(address)}`)
         .then(r => r.json()).then(d => setStarsBalance(d.balance)),
@@ -62,8 +65,11 @@ export default function ProfilePage() {
       fetch(`/api/streak?walletAddress=${encodeURIComponent(address)}`)
         .then(r => r.json())
         .then(d => setObsStreak(d.streak ?? 0)),
-    ]).finally(() => setProfileLoaded(true));
-  }, [address]);
+    ]).then(results => {
+      if (results.every(r => r.status === 'rejected')) setAllApisFailed(true);
+      setProfileLoaded(true);
+    });
+  }, [address, retryKey]);
 
   useEffect(() => {
     if (!authenticated) return;
@@ -106,34 +112,17 @@ export default function ProfilePage() {
           </div>
         </Card>
 
-        {/* Blurred preview */}
-        <div className="relative rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          <div className="absolute inset-0 z-10 backdrop-blur-[2px] bg-[#070B14]/50 flex flex-col items-center justify-center gap-2 rounded-2xl">
-            <Lock size={18} className="text-slate-400" />
-            <span className="text-slate-400 text-xs font-medium">Sign in to unlock your profile</span>
-          </div>
-          <div className="p-5 select-none pointer-events-none flex flex-col gap-4" aria-hidden="true">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full flex-shrink-0" style={{ background: 'linear-gradient(135deg, rgba(122,95,255,0.3), rgba(20,184,166,0.2))' }} />
-              <div className="flex-1">
-                <div className="h-4 w-28 rounded bg-slate-800 mb-1.5" />
-                <div className="h-3 w-20 rounded bg-slate-800/60 mb-1" />
-                <div className="h-3 w-16 rounded bg-slate-800/40" />
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-3 text-center">
-              {['Missions', 'Stars', 'Streak'].map(l => (
-                <div key={l} className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                  <p className="text-slate-700 text-base font-bold">—</p>
-                  <p className="text-slate-800 text-xs">{l}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* Stats preview */}
+        <div className="rounded-2xl p-6 flex flex-col items-center gap-3 text-center" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <Lock size={18} className="text-slate-500" />
+          <p className="text-slate-300 text-sm font-medium">Sign in to see your stats</p>
+          <p className="text-slate-600 text-xs">Missions completed, Stars earned, observation streak</p>
         </div>
       </div>
     );
   }
+
+  const cluster = process.env.NEXT_PUBLIC_SOLANA_CLUSTER ?? 'devnet';
 
   const email =
     user?.email?.address ??
@@ -171,7 +160,7 @@ export default function ProfilePage() {
     txId: null,
   }));
   const activityFeed = [...missionItems, ...obsItems]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort((a, b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime())
     .slice(0, 6);
 
   return (
@@ -283,7 +272,22 @@ export default function ProfilePage() {
           ))}
         </div>
 
-        {profileLoaded && starsBalance === 0 && (
+        {allApisFailed && profileLoaded && (
+          <div
+            className="rounded-xl px-4 py-3 flex items-center justify-between gap-3"
+            style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)' }}
+          >
+            <p className="text-red-400 text-xs">Couldn&apos;t load your profile data.</p>
+            <button
+              onClick={() => setRetryKey(k => k + 1)}
+              className="text-xs text-red-300 hover:text-white transition-colors flex-shrink-0"
+            >
+              Try again
+            </button>
+          </div>
+        )}
+
+        {!allApisFailed && profileLoaded && starsBalance === 0 && (
           <p className="text-slate-600 text-xs text-center -mt-2">
             Complete a mission to earn your first Stars →
           </p>
@@ -325,7 +329,7 @@ export default function ProfilePage() {
               {copied ? <Check size={11} color="var(--success)" /> : <Copy size={11} />}
             </button>
             <a
-              href={`https://explorer.solana.com/address/${address}?cluster=devnet`}
+              href={`https://explorer.solana.com/address/${address}?cluster=${cluster}`}
               target="_blank" rel="noopener noreferrer"
               style={{ color: 'var(--text-muted)', flexShrink: 0 }}
               title="View on explorer"
@@ -433,7 +437,7 @@ export default function ProfilePage() {
                 <span className="text-[#FFD166] text-xs font-semibold flex-shrink-0">+{item.stars} ✦</span>
                 {item.txId && (
                   <a
-                    href={`https://explorer.solana.com/tx/${item.txId}?cluster=devnet`}
+                    href={`https://explorer.solana.com/tx/${item.txId}?cluster=${cluster}`}
                     target="_blank" rel="noopener noreferrer"
                     className="text-slate-700 hover:text-[#38F0FF] transition-colors flex-shrink-0"
                     onClick={e => e.stopPropagation()}
