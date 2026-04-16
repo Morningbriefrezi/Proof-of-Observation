@@ -3,15 +3,12 @@
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
-import { Copy, Check, ExternalLink, Telescope, Camera, Lock, ChevronRight, Wallet, X } from 'lucide-react';
+import { Copy, Check, ExternalLink, Telescope, Lock, ChevronRight, Globe, Bell, Moon, LogOut, X } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAppState } from '@/hooks/useAppState';
 import { getRank } from '@/lib/rewards';
-import Card from '@/components/shared/Card';
 import Button from '@/components/shared/Button';
-import StarsRedemption from '@/components/shared/StarsRedemption';
-import { MissionIcon } from '@/components/shared/PlanetIcons';
 import PageTransition from '@/components/ui/PageTransition';
 
 export default function ProfilePage() {
@@ -24,13 +21,10 @@ export default function ProfilePage() {
   const [copied, setCopied] = useState(false);
   const [confirmSignOut, setConfirmSignOut] = useState(false);
   const [obsCount, setObsCount] = useState<number>(0);
-  const [obsStreak, setObsStreak] = useState<number>(0);
   const [recentObs, setRecentObs] = useState<{ id: string; target: string; confidence: string; stars: number; created_at: string }[]>([]);
   const [profileLoaded, setProfileLoaded] = useState(false);
-  const [allApisFailed, setAllApisFailed] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
   const [selectedPhoto, setSelectedPhoto] = useState<{ photo: string; name: string } | null>(null);
-  const [telescope, setTelescope] = useState<{ brand: string; model: string; aperture: string; type: string | null } | null>(null);
 
   useEffect(() => {
     return () => setConfirmSignOut(false);
@@ -38,9 +32,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!selectedPhoto) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSelectedPhoto(null);
-    };
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelectedPhoto(null); };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [selectedPhoto]);
@@ -51,7 +43,6 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!address) { setProfileLoaded(true); return; }
     setProfileLoaded(false);
-    setAllApisFailed(false);
     Promise.allSettled([
       fetch(`/api/stars-balance?address=${encodeURIComponent(address)}`)
         .then(r => r.json()).then(d => setStarsBalance(d.balance)),
@@ -60,27 +51,10 @@ export default function ProfilePage() {
         .then(d => {
           const obs = d.observations ?? [];
           setObsCount(obs.length);
-          setRecentObs(obs.slice(0, 5));
+          setRecentObs(obs.slice(0, 6));
         }),
-      fetch(`/api/streak?walletAddress=${encodeURIComponent(address)}`)
-        .then(r => r.json())
-        .then(d => setObsStreak(d.streak ?? 0)),
-    ]).then(results => {
-      if (results.every(r => r.status === 'rejected')) setAllApisFailed(true);
-      setProfileLoaded(true);
-    });
+    ]).then(() => setProfileLoaded(true));
   }, [address, retryKey]);
-
-  useEffect(() => {
-    if (!authenticated) return;
-    getAccessToken().then(token => {
-      if (!token) return;
-      fetch('/api/telescopes', { headers: { 'Authorization': `Bearer ${token}` } })
-        .then(r => r.json())
-        .then(d => { if (d.telescope) setTelescope(d.telescope); })
-        .catch(() => {});
-    }).catch(() => {});
-  }, [authenticated, getAccessToken]);
 
   const handleCopy = () => {
     if (!address) return;
@@ -89,396 +63,271 @@ export default function ProfilePage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSignOut = async () => {
-    await logout();
-  };
-
   if (!authenticated) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10 animate-page-enter flex flex-col gap-5">
-        <Card className="p-5 sm:p-6">
-          <div className="flex items-center gap-4">
-            <div
-              className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(255,209,102,0.08)', border: '1px solid rgba(255,209,102,0.15)' }}
-            >
-              <Telescope size={22} className="text-[#FFD166]" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h2 className="text-base font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>{t('signUpPrompt')}</h2>
-              <p className="text-slate-500 text-xs mt-0.5">{t('noDiscoveries')}</p>
-            </div>
-            <Button variant="brass" onClick={login} className="flex-shrink-0 !text-sm !px-4 !py-2">Sign In</Button>
+      <div style={{ maxWidth: 480, margin: '0 auto', padding: '32px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{
+          borderRadius: 20, padding: '28px 24px', textAlign: 'center',
+          background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+        }}>
+          <div style={{
+            width: 64, height: 64, borderRadius: '50%', margin: '0 auto 16px',
+            background: 'linear-gradient(135deg, #8B5CF6, #38F0FF)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Lock size={24} color="white" />
           </div>
-        </Card>
-
-        {/* Stats preview */}
-        <div className="rounded-2xl p-6 flex flex-col items-center gap-3 text-center" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          <Lock size={18} className="text-slate-500" />
-          <p className="text-slate-300 text-sm font-medium">Sign in to see your stats</p>
-          <p className="text-slate-600 text-xs">Missions completed, Stars earned, observation streak</p>
+          <p style={{ color: 'white', fontWeight: 700, fontSize: 17, margin: '0 0 6px' }}>Sign in to view your profile</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, margin: '0 0 20px' }}>Track missions, discoveries, and Stars earned</p>
+          <Button variant="brass" onClick={login}>Sign In</Button>
         </div>
       </div>
     );
   }
 
   const cluster = process.env.NEXT_PUBLIC_SOLANA_CLUSTER ?? 'devnet';
-
   const email =
     user?.email?.address ??
     (user?.linkedAccounts.find(a => a.type === 'email') as { address?: string } | undefined)?.address ??
     null;
-
   const displayName = email ? email.split('@')[0] : address ? `${address.slice(0, 4)}…${address.slice(-4)}` : 'Astronomer';
   const initial = displayName[0]?.toUpperCase() ?? '✦';
-  const addrShort = address ? `${address.slice(0, 6)}...${address.slice(-6)}` : null;
-  const joinDate = user?.createdAt ? new Date(user.createdAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) : null;
+  const addrShort = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : null;
 
   const completed = state.completedMissions.filter(m => m.status === 'completed');
   const totalStars = completed.reduce((sum, m) => sum + (m.stars ?? 0), 0);
   const starsDisplay = starsBalance || totalStars;
   const rank = getRank(completed.length);
 
-  const missionItems = completed.map(m => ({
+  const photoDiscoveries = completed.filter(m => m.photo).map(m => ({
     key: `m-${m.id}`,
-    type: 'mission' as const,
-    id: m.id,
-    label: m.name,
-    photo: m.photo,
-    stars: m.stars,
+    name: m.name,
+    photo: m.photo!,
     date: m.timestamp,
-    txId: m.txId,
+    txId: m.txId ?? null,
   }));
-  const obsItems = recentObs.map(o => ({
-    key: `o-${o.id}`,
-    type: 'observation' as const,
-    id: o.id,
-    label: o.target,
-    photo: null,
-    stars: o.stars,
-    date: o.created_at,
-    txId: null,
-  }));
-  const activityFeed = [...missionItems, ...obsItems]
-    .sort((a, b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime())
-    .slice(0, 6);
+
+  const shimmer = profileLoaded ? undefined : { animation: 'pulse 1.5s ease-in-out infinite', background: 'rgba(255,255,255,0.06)', borderRadius: 6 };
 
   return (
     <PageTransition>
-    <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10 flex flex-col gap-5">
-      <style>{`@keyframes nft-pulse { 0%,100% { opacity: 0.5 } 50% { opacity: 1 } }`}</style>
+      <style>{`@keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }`}</style>
 
-      {/* Photo lightbox modal */}
+      {/* Lightbox */}
       {selectedPhoto && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(7,11,20,0.92)' }}
+          style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(7,11,20,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
           onClick={() => setSelectedPhoto(null)}
         >
           <div
-            className="relative max-w-sm w-full rounded-2xl overflow-hidden"
-            style={{ border: '1px solid rgba(122,95,255,0.25)' }}
+            style={{ position: 'relative', maxWidth: 400, width: '100%', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(122,95,255,0.25)' }}
             onClick={e => e.stopPropagation()}
           >
-            <Image
-              src={selectedPhoto.photo}
-              alt={selectedPhoto.name}
-              width={480}
-              height={480}
-              className="w-full object-cover"
-              unoptimized
-            />
-            <div
-              className="absolute bottom-0 left-0 right-0 px-4 py-3 flex items-center justify-between"
-              style={{ background: 'linear-gradient(0deg, rgba(7,11,20,0.9) 0%, transparent 100%)' }}
-            >
-              <p className="text-white text-sm font-semibold">{selectedPhoto.name}</p>
+            <Image src={selectedPhoto.photo} alt={selectedPhoto.name} width={480} height={480} className="w-full object-cover" unoptimized />
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '12px 16px', background: 'linear-gradient(0deg,rgba(7,11,20,0.9),transparent)' }}>
+              <p style={{ color: 'white', fontWeight: 600, fontSize: 14, margin: 0 }}>{selectedPhoto.name}</p>
             </div>
             <button
               onClick={() => setSelectedPhoto(null)}
-              className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center transition-colors"
-              style={{ background: 'rgba(7,11,20,0.7)', border: '1px solid rgba(255,255,255,0.1)' }}
+              style={{ position: 'absolute', top: 12, right: 12, width: 28, height: 28, borderRadius: '50%', background: 'rgba(7,11,20,0.7)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
             >
-              <X size={13} className="text-slate-300" />
+              <X size={13} color="rgba(255,255,255,0.7)" />
             </button>
           </div>
         </div>
       )}
 
-      {/* 1 — IDENTITY HEADER (social-style) */}
-      <div className="flex flex-col gap-4">
-        <div className="flex items-start gap-4">
-          {/* Avatar with rank ring */}
-          <div style={{ position: 'relative', width: 64, height: 64, flexShrink: 0 }}>
+      <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 16px 40px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+
+        {/* — HEADER: Avatar + Name + Address — */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 24, gap: 10 }}>
+          {/* Avatar */}
+          <div style={{ position: 'relative', width: 72, height: 72 }}>
             <div style={{
-              position: 'absolute', inset: 0, borderRadius: '50%',
-              padding: 2,
+              position: 'absolute', inset: 0, borderRadius: '50%', padding: 2.5,
               background: rank.name === 'Celestial'
-                ? 'linear-gradient(135deg, #FFD166, #F59E0B)'
+                ? 'linear-gradient(135deg,#FFD166,#F59E0B)'
                 : rank.name === 'Pathfinder'
-                ? 'linear-gradient(135deg, #A855F7, #6366F1)'
-                : rank.name === 'Observer'
-                ? 'linear-gradient(135deg, #38F0FF, #0EA5E9)'
-                : 'rgba(255,255,255,0.08)',
+                ? 'linear-gradient(135deg,#A855F7,#6366F1)'
+                : 'linear-gradient(135deg,#38F0FF,#8B5CF6)',
             }}>
-              <div style={{
-                width: '100%', height: '100%', borderRadius: '50%',
-                background: 'var(--bg-surface)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 24, color: 'var(--text-primary)' }}>
-                  {initial}
-                </span>
+              <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#0F1623', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontWeight: 800, fontSize: 26, color: 'white', fontFamily: 'Georgia, serif' }}>{initial}</span>
               </div>
             </div>
           </div>
 
-          {/* Name + meta */}
-          <div className="flex-1 min-w-0 pt-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, color: 'var(--text-primary)', margin: 0, lineHeight: 1.2 }}>{displayName}</p>
-              <span
-                className="badge-pill badge-accent"
-                style={{ fontSize: 10, flexShrink: 0 }}
+          {/* Name */}
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ color: 'white', fontWeight: 700, fontSize: 19, margin: 0, lineHeight: 1.2 }}>{displayName}</p>
+            {addrShort && (
+              <button
+                onClick={handleCopy}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 5, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
               >
-                {rank.icon} {rank.name}
-              </span>
-            </div>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 13, margin: '4px 0 0' }}>
-              {joinDate ? `Joined ${joinDate}` : 'Astronomer'}
-            </p>
+                <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, fontFamily: 'monospace' }}>{addrShort}</span>
+                {copied
+                  ? <Check size={12} color="#34d399" />
+                  : <Copy size={12} color="rgba(255,255,255,0.3)" />
+                }
+                <a
+                  href={`https://explorer.solana.com/address/${address}?cluster=${cluster}`}
+                  target="_blank" rel="noopener noreferrer"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <ExternalLink size={12} color="rgba(255,255,255,0.3)" />
+                </a>
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-4 gap-2 text-center">
+        {/* — STATS ROW — */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 28 }}>
           {[
-            { value: String(completed.length), label: 'Missions', loading: false, color: 'var(--text-primary)' },
-            { value: String(obsCount), label: 'Obs', loading: !profileLoaded, color: 'var(--accent)' },
-            { value: `✦ ${starsDisplay}`, label: 'Stars', loading: !profileLoaded, color: 'var(--stars)' },
-            { value: obsStreak > 0 ? `${obsStreak}d` : '—', label: 'Streak', loading: !profileLoaded, color: 'var(--success)' },
+            { value: `★ ${starsDisplay.toLocaleString()}`, label: 'Stars Earned', color: '#FFD166' },
+            { value: String(completed.length), label: 'Missions Done', color: '#34d399' },
+            { value: String(obsCount), label: 'NFTs Minted', color: '#38F0FF' },
           ].map(s => (
-            <div key={s.label} className="card-base flex flex-col items-center gap-0.5 py-3">
-              {s.loading ? (
-                <div
-                  className="w-10 h-5 rounded-md"
-                  style={{ background: 'var(--border-default)', animation: 'nft-pulse 1.5s ease-in-out infinite' }}
-                />
+            <div key={s.label} style={{
+              borderRadius: 16, padding: '14px 10px', textAlign: 'center',
+              background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+            }}>
+              {!profileLoaded && s.label !== 'Missions Done' ? (
+                <div style={{ ...shimmer, height: 20, width: 48, margin: '0 auto 4px' }} />
               ) : (
-                <p style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 16, color: s.color, margin: 0, lineHeight: 1.2 }}>{s.value}</p>
+                <p style={{ color: s.color, fontWeight: 800, fontSize: 17, margin: '0 0 3px', fontFamily: 'monospace' }}>{s.value}</p>
               )}
-              <p style={{ color: 'var(--text-muted)', fontSize: 10, margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{s.label}</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 10, margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em', lineHeight: 1.3 }}>{s.label}</p>
             </div>
           ))}
         </div>
 
-        {allApisFailed && profileLoaded && (
-          <div
-            className="rounded-xl px-4 py-3 flex items-center justify-between gap-3"
-            style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)' }}
-          >
-            <p className="text-red-400 text-xs">Couldn&apos;t load your profile data.</p>
-            <button
-              onClick={() => setRetryKey(k => k + 1)}
-              className="text-xs text-red-300 hover:text-white transition-colors flex-shrink-0"
-            >
-              Try again
-            </button>
-          </div>
-        )}
-
-        {!allApisFailed && profileLoaded && starsBalance === 0 && (
-          <p className="text-slate-600 text-xs text-center -mt-2">
-            Complete a mission to earn your first Stars →
-          </p>
-        )}
-
-        {/* Rank progress bar */}
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-slate-400 text-xs">{rank.name}</span>
-            {rank.nextRank && <span className="text-slate-600 text-xs">{rank.nextRank}</span>}
-          </div>
-          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border-default)' }}>
-            <div
-              className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${Math.max(rank.progressPct, 4)}%`, background: 'var(--gradient-accent)' }}
-            />
-          </div>
-          {rank.nextRank && (() => {
-            const thresholds: Record<string, number> = { Observer: 1, Pathfinder: 3, Celestial: 5 };
-            const needed = (thresholds[rank.nextRank] ?? 0) - completed.length;
-            return needed > 0 ? (
-              <p className="text-xs text-slate-500 mt-1">{needed} mission{needed !== 1 ? 's' : ''} to {rank.nextRank}</p>
-            ) : null;
-          })()}
-        </div>
-
-        {/* Wallet row — subtle, secondary */}
-        {addrShort && (
-          <div
-            className="card-base flex items-center gap-2 px-3 py-2"
-          >
-            <Wallet size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-            <span style={{ color: 'var(--text-muted)', fontSize: 11, fontFamily: 'var(--font-mono)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{addrShort}</span>
-            <button
-              onClick={handleCopy}
-              style={{ color: 'var(--text-muted)', flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}
-              title="Copy address"
-            >
-              {copied ? <Check size={11} color="var(--success)" /> : <Copy size={11} />}
-            </button>
-            <a
-              href={`https://explorer.solana.com/address/${address}?cluster=${cluster}`}
-              target="_blank" rel="noopener noreferrer"
-              style={{ color: 'var(--text-muted)', flexShrink: 0 }}
-              title="View on explorer"
-            >
-              <ExternalLink size={11} />
-            </a>
-          </div>
-        )}
-      </div>
-
-      {/* 1.5 — TELESCOPE */}
-      <Link href="/club" style={{ textDecoration: 'none' }}>
-        <div
-          className="card-base flex items-center gap-3 px-4 py-3 transition-all"
-          style={{ cursor: 'pointer' }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(56,240,255,0.25)'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = ''; }}
-        >
-          <div
-            className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: 'rgba(56,240,255,0.07)', border: '1px solid rgba(56,240,255,0.15)' }}
-          >
-            <Telescope size={15} className="text-[#38F0FF]" />
-          </div>
-          {telescope ? (
-            <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-semibold truncate">{telescope.brand} {telescope.model}</p>
-              <p className="text-slate-500 text-xs">{telescope.aperture}{telescope.type ? ` · ${telescope.type}` : ''}</p>
-            </div>
-          ) : (
-            <div className="flex-1 min-w-0">
-              <p className="text-slate-400 text-sm">Register your telescope</p>
-              <p className="text-slate-600 text-xs">Earn 50 ✦ Stars</p>
-            </div>
-          )}
-          <ChevronRight size={13} className="text-slate-600 flex-shrink-0" />
-        </div>
-      </Link>
-
-      {/* 2 — DISCOVERIES */}
-      <Card className="!p-5">
-        <p className="text-white text-sm font-semibold mb-3">Discoveries</p>
-        {completed.length === 0 ? (
-          <Link href="/missions" className="flex items-center gap-2 text-sm text-slate-500 hover:text-[#38F0FF] transition-colors">
-            <Telescope size={15} className="flex-shrink-0" />
-            <span>Complete your first mission</span>
-            <ChevronRight size={13} />
-          </Link>
-        ) : (
-          <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
-            {completed.map(m => (
-              <button
-                key={m.id}
-                onClick={() => m.photo ? setSelectedPhoto({ photo: m.photo, name: m.name }) : undefined}
-                className="flex-shrink-0 flex flex-col items-center gap-1.5 rounded-xl px-3 py-2.5 min-w-[80px] transition-all active:scale-95"
-                style={{
-                  background: 'rgba(122,95,255,0.08)',
-                  border: '1px solid rgba(122,95,255,0.15)',
-                  cursor: m.photo ? 'pointer' : 'default',
-                }}
-              >
-                <div className="flex items-center justify-center" style={{ height: 40 }}>
-                  <MissionIcon id={m.id} size={36} animate />
-                </div>
-                <p className="text-white text-xs font-medium text-center leading-tight line-clamp-2 max-w-[72px]">{m.name}</p>
-                <span className="text-[#FFD166] text-[10px] font-semibold">+{m.stars} ✦</span>
-              </button>
-            ))}
-          </div>
-        )}
-      </Card>
-
-      {/* 3 — RECENT ACTIVITY */}
-      {activityFeed.length > 0 && (
-        <Card className="!p-5">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-white text-sm font-semibold">Recent Activity</p>
-            <Link href="/missions" className="text-xs text-[#38F0FF] hover:underline flex items-center gap-1">
-              View all <ChevronRight size={11} />
+        {/* — MY DISCOVERIES — */}
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <p style={{ color: 'white', fontWeight: 700, fontSize: 16, margin: 0 }}>My Discoveries</p>
+            <Link href="/missions" style={{ color: '#34d399', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
+              View all <ChevronRight size={13} />
             </Link>
           </div>
-          <div className="flex flex-col divide-y divide-white/5">
-            {activityFeed.map(item => (
-              <div
-                key={item.key}
-                className="flex items-center gap-3 py-2.5"
-                onClick={() => item.type === 'mission' && item.photo ? setSelectedPhoto({ photo: item.photo, name: item.label }) : undefined}
-                style={{ cursor: item.type === 'mission' && item.photo ? 'pointer' : 'default' }}
-              >
-                <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+
+          {photoDiscoveries.length === 0 ? (
+            <div style={{
+              borderRadius: 16, padding: '28px 20px', textAlign: 'center',
+              background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)',
+            }}>
+              <Telescope size={22} color="rgba(255,255,255,0.2)" style={{ marginBottom: 8 }} />
+              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, margin: 0 }}>Complete a mission with a photo to see your discoveries</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', gap: 12, overflowX: 'auto', scrollbarWidth: 'none', marginLeft: -2, paddingLeft: 2 }}>
+              {photoDiscoveries.map(d => (
+                <button
+                  key={d.key}
+                  onClick={() => setSelectedPhoto({ photo: d.photo, name: d.name })}
                   style={{
-                    background: item.type === 'mission' ? 'rgba(122,95,255,0.1)' : 'rgba(20,184,166,0.1)',
-                    border: `1px solid ${item.type === 'mission' ? 'rgba(122,95,255,0.2)' : 'rgba(20,184,166,0.2)'}`,
+                    flexShrink: 0, width: 160, borderRadius: 16, overflow: 'hidden',
+                    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+                    cursor: 'pointer', textAlign: 'left', padding: 0,
                   }}
                 >
-                  {item.type === 'mission'
-                    ? <MissionIcon id={item.id} size={16} animate />
-                    : <Camera size={12} className="text-[#14B8A6]" />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-slate-200 text-sm font-medium truncate">{item.label}</p>
-                  <p className="text-slate-600 text-xs">{new Date(item.date).toLocaleDateString()}</p>
-                </div>
-                <span className="text-[#FFD166] text-xs font-semibold flex-shrink-0">+{item.stars} ✦</span>
-                {item.txId && (
-                  <a
-                    href={`https://explorer.solana.com/tx/${item.txId}?cluster=${cluster}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="text-slate-700 hover:text-[#38F0FF] transition-colors flex-shrink-0"
-                    onClick={e => e.stopPropagation()}
-                  >
-                    <ExternalLink size={11} />
-                  </a>
-                )}
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
-
-      {/* 4 — STARS REDEMPTION */}
-      <StarsRedemption starsBalance={starsDisplay} walletAddress={address ?? undefined} />
-
-      {/* RESET + SIGN OUT */}
-      <div>
-        <div className="flex items-center gap-3 my-1">
-          <div className="flex-1 h-px bg-white/5" />
-          <span className="text-slate-700 text-xs tracking-widest">⋯</span>
-          <div className="flex-1 h-px bg-white/5" />
+                  <div style={{ position: 'relative', width: '100%', height: 110 }}>
+                    <Image src={d.photo} alt={d.name} fill style={{ objectFit: 'cover' }} unoptimized />
+                  </div>
+                  <div style={{ padding: '10px 12px 12px' }}>
+                    <p style={{ color: 'white', fontWeight: 600, fontSize: 13, margin: '0 0 3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.name}</p>
+                    <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, margin: '0 0 8px' }}>
+                      {new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
+                    {d.txId ? (
+                      <a
+                        href={`https://explorer.solana.com/tx/${d.txId}?cluster=${cluster}`}
+                        target="_blank" rel="noopener noreferrer"
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                          display: 'inline-block', padding: '3px 8px', borderRadius: 20,
+                          background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)',
+                          color: '#34d399', fontSize: 10, fontWeight: 600, textDecoration: 'none',
+                        }}
+                      >
+                        On-chain Proof
+                      </a>
+                    ) : (
+                      <span style={{
+                        display: 'inline-block', padding: '3px 8px', borderRadius: 20,
+                        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                        color: 'rgba(255,255,255,0.3)', fontSize: 10,
+                      }}>
+                        Local
+                      </span>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
+
+        {/* — SETTINGS — */}
+        <div style={{ marginBottom: 28 }}>
+          <p style={{ color: 'white', fontWeight: 700, fontSize: 16, margin: '0 0 14px' }}>Settings</p>
+          <div style={{ borderRadius: 18, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}>
+            {/* Language */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '15px 18px', borderBottom: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }}>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(56,240,255,0.08)', border: '1px solid rgba(56,240,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Globe size={16} color="#38F0FF" />
+              </div>
+              <p style={{ color: 'white', fontSize: 15, fontWeight: 500, margin: 0, flex: 1 }}>Language</p>
+              <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>EN / KA</span>
+              <ChevronRight size={15} color="rgba(255,255,255,0.2)" />
+            </div>
+            {/* Notifications */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '15px 18px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(255,209,102,0.08)', border: '1px solid rgba(255,209,102,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Bell size={16} color="#FFD166" />
+              </div>
+              <p style={{ color: 'white', fontSize: 15, fontWeight: 500, margin: 0, flex: 1 }}>Notifications</p>
+              <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>On</span>
+              <ChevronRight size={15} color="rgba(255,255,255,0.2)" />
+            </div>
+            {/* Dark Mode */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '15px 18px' }}>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Moon size={16} color="#8B5CF6" />
+              </div>
+              <p style={{ color: 'white', fontSize: 15, fontWeight: 500, margin: 0, flex: 1 }}>Dark Mode</p>
+              <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>Always On</span>
+            </div>
+          </div>
+        </div>
+
+        {/* — SIGN OUT — */}
         <button
-          onClick={() => { if (window.confirm('Reset all local missions and observations? This cannot be undone.')) reset(); }}
-          className="w-full py-2.5 rounded-xl text-sm border border-slate-700/50 text-slate-500 hover:text-slate-300 hover:bg-white/[0.03] transition-all mb-2"
+          onClick={confirmSignOut ? logout : () => setConfirmSignOut(true)}
+          style={{
+            width: '100%', padding: '13px', borderRadius: 14, fontSize: 14, fontWeight: 600,
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            background: confirmSignOut ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.03)',
+            border: `1px solid ${confirmSignOut ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.07)'}`,
+            color: confirmSignOut ? '#f87171' : 'rgba(255,255,255,0.4)',
+            transition: 'all 0.2s',
+          }}
         >
-          Reset observations
-        </button>
-        <button
-          onClick={confirmSignOut ? handleSignOut : () => setConfirmSignOut(true)}
-          className={`w-full py-2.5 rounded-xl text-sm border transition-all ${
-            confirmSignOut
-              ? 'text-red-300 bg-red-500/10 border-red-500/30 hover:bg-red-500/20'
-              : 'text-red-400 hover:text-red-300 hover:bg-red-500/5 border-red-500/10'
-          }`}
-        >
+          <LogOut size={15} />
           {confirmSignOut ? 'Confirm sign out?' : t('signOut')}
         </button>
+
+        {confirmSignOut && (
+          <button
+            onClick={() => setConfirmSignOut(false)}
+            style={{ marginTop: 8, width: '100%', padding: '10px', borderRadius: 12, fontSize: 13, color: 'rgba(255,255,255,0.3)', background: 'none', border: 'none', cursor: 'pointer' }}
+          >
+            Cancel
+          </button>
+        )}
+
       </div>
-    </div>
     </PageTransition>
   );
 }
