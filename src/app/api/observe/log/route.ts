@@ -148,6 +148,7 @@ export async function POST(req: NextRequest) {
       identifiedObject: body.identifiedObject ?? target ?? null,
       starsAwarded: starsToAward,
       oracleHash: body.oracleHash ?? null,
+      observedDate: new Date().toISOString().split('T')[0],
     })
 
     // Award tokens on-chain (non-blocking — log still succeeds even if this fails)
@@ -160,6 +161,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ logged: true, starsAwarded: starsToAward, starsMinted: true })
   } catch (err) {
     console.error('[observe/log]', err)
-    return NextResponse.json({ logged: false })
+    return NextResponse.json({ logged: false, error: 'An unexpected error occurred' }, { status: 500 })
   }
 }

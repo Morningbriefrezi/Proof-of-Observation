@@ -96,7 +96,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    console.log('[mint] Starting mint for wallet:', userAddress ? userAddress.slice(0, 8) + '...' : 'unknown', 'target:', target);
     const { txId } = await mintCompressedNFT({ userAddress, target, timestampMs, lat, lon, cloudCover, oracleHash, stars });
+    console.log('[mint] Success, txId:', txId.slice(0, 16) + '...');
 
     // Server-side log (non-blocking) — Stars are awarded by the client via /api/award-stars with idempotency
     if (db && userAddress) {
@@ -106,6 +108,7 @@ export async function POST(req: NextRequest) {
         stars,
         confidence: 'minted',
         mintTx: txId,
+        observedDate: new Date().toISOString().split('T')[0],
       }).catch(err => console.error('[mint] db.insert failed:', err));
     }
 

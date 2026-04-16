@@ -1,21 +1,4 @@
-import { pgTable, uuid, text, integer, timestamp, doublePrecision, boolean, uniqueIndex } from 'drizzle-orm/pg-core'
-// FIX-15: To prevent double-awards, run this once on the DB:
-// CREATE UNIQUE INDEX obs_daily_unique ON observation_log (wallet, target, DATE(created_at AT TIME ZONE 'UTC'));
-// Drizzle schema DSL cannot express DATE() function-based unique indexes; this must be applied manually.
-
-// Run once in Neon SQL editor to create the telescopes table:
-// CREATE TABLE IF NOT EXISTS public.telescopes (
-//   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-//   privy_id text NOT NULL,
-//   wallet_address text,
-//   brand text NOT NULL,
-//   model text NOT NULL,
-//   aperture text NOT NULL,
-//   type text,
-//   stars_awarded boolean DEFAULT false,
-//   created_at timestamptz DEFAULT now()
-// );
-// CREATE UNIQUE INDEX telescopes_privy_id_unique ON telescopes (privy_id);
+import { pgTable, uuid, text, integer, timestamp, doublePrecision, boolean, uniqueIndex, index, date } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -25,11 +8,14 @@ export const users = pgTable('users', {
   username: text('username'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
-})
+}, (table) => [
+  index('users_wallet_idx').on(table.walletAddress),
+  index('users_email_idx').on(table.email),
+])
 
 export const telescopes = pgTable('telescopes', {
   id: uuid('id').defaultRandom().primaryKey(),
-  privyId: text('privy_id').notNull(),
+  privyId: text('privy_id').unique().notNull(),
   walletAddress: text('wallet_address'),
   brand: text('brand').notNull(),
   model: text('model').notNull(),
@@ -37,7 +23,9 @@ export const telescopes = pgTable('telescopes', {
   type: text('type'),
   starsAwarded: boolean('stars_awarded').default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-})
+}, (table) => [
+  index('telescopes_wallet_idx').on(table.walletAddress),
+])
 
 export const observationLog = pgTable('observation_log', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -51,8 +39,17 @@ export const observationLog = pgTable('observation_log', {
   identifiedObject: text('identified_object'),
   starsAwarded: integer('stars_awarded'),
   oracleHash: text('oracle_hash'),
+  observedDate: date('observed_date'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 }, (table) => [
-  // NOTE: A migration must be run to apply this constraint to the existing table.
   uniqueIndex('observation_log_wallet_mint_tx_unique').on(table.wallet, table.mintTx),
+  uniqueIndex('obs_daily_unique').on(table.wallet, table.target, table.observedDate),
+  index('obs_log_created_at_idx').on(table.createdAt),
+  index('obs_log_target_idx').on(table.target),
 ])
+
+export const emailSubscribers = pgTable('email_subscribers', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: text('email').notNull().unique(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})

@@ -3,6 +3,7 @@ import { PrivyClient } from '@privy-io/server-auth';
 import { getDb } from '@/lib/db';
 import { telescopes } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
+import { isValidPublicKey } from '@/lib/validate';
 
 const privy = new PrivyClient(
   process.env.NEXT_PUBLIC_PRIVY_APP_ID!,
@@ -50,9 +51,22 @@ export async function POST(req: NextRequest) {
   }
 
   const { brand, model, aperture, type, walletAddress } = body;
-  if (typeof brand !== 'string' || !brand.trim()) return NextResponse.json({ error: 'brand required' }, { status: 400 });
-  if (typeof model !== 'string' || !model.trim()) return NextResponse.json({ error: 'model required' }, { status: 400 });
-  if (typeof aperture !== 'string' || !aperture.trim()) return NextResponse.json({ error: 'aperture required' }, { status: 400 });
+
+  const VALID_TYPES = ['refractor', 'reflector', 'cassegrain', 'dobsonian', 'goto', 'binoculars', 'other'];
+
+  if (typeof brand !== 'string' || !brand.trim()) return NextResponse.json({ error: 'Invalid telescope data', field: 'brand' }, { status: 400 });
+  if (typeof model !== 'string' || !model.trim()) return NextResponse.json({ error: 'Invalid telescope data', field: 'model' }, { status: 400 });
+  if (typeof aperture !== 'string' || !aperture.trim()) return NextResponse.json({ error: 'Invalid telescope data', field: 'aperture' }, { status: 400 });
+  if (type != null && (typeof type !== 'string' || !VALID_TYPES.includes(type))) {
+    return NextResponse.json({ error: 'Invalid telescope data', field: 'type' }, { status: 400 });
+  }
+  if (walletAddress != null && (typeof walletAddress !== 'string' || !isValidPublicKey(walletAddress))) {
+    return NextResponse.json({ error: 'Invalid telescope data', field: 'walletAddress' }, { status: 400 });
+  }
+
+  const cleanBrand = brand.trim().slice(0, 100);
+  const cleanModel = model.trim().slice(0, 200);
+  const cleanAperture = aperture.trim().slice(0, 50);
 
   const db = getDb();
   if (!db) return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
@@ -67,18 +81,18 @@ export async function POST(req: NextRequest) {
     .values({
       privyId,
       walletAddress: typeof walletAddress === 'string' ? walletAddress : null,
-      brand: brand.trim(),
-      model: model.trim(),
-      aperture: aperture.trim(),
+      brand: cleanBrand,
+      model: cleanModel,
+      aperture: cleanAperture,
       type: typeof type === 'string' ? type.trim() : null,
       starsAwarded: false,
     })
     .onConflictDoUpdate({
       target: telescopes.privyId,
       set: {
-        brand: brand.trim(),
-        model: model.trim(),
-        aperture: aperture.trim(),
+        brand: cleanBrand,
+        model: cleanModel,
+        aperture: cleanAperture,
         type: typeof type === 'string' ? type.trim() : null,
         walletAddress: typeof walletAddress === 'string' ? walletAddress : null,
       },
@@ -103,8 +117,8 @@ export async function POST(req: NextRequest) {
       db.update(telescopes)
         .set({ starsAwarded: true })
         .where(eq(telescopes.privyId, privyId))
-        .catch(() => {});
-    }).catch(() => {});
+        .catch((err) => console.error('[telescopes] starsAwarded update failed:', err));
+    }).catch((err) => console.error('[telescopes] award-stars request failed:', err));
   }
 
   return NextResponse.json({ telescope, starsAwarded: isFirst ? 50 : 0 });

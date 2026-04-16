@@ -116,6 +116,7 @@ export async function POST(req: NextRequest) {
       recipientPublicKey
     );
 
+    console.log('[award-stars] Awarding', amount, 'stars to:', (recipientAddress as string).slice(0, 8) + '...', 'reason:', reason);
     const signature = await mintTo(
       connection,
       feePayerKeypair,
@@ -124,6 +125,7 @@ export async function POST(req: NextRequest) {
       feePayerKeypair,
       BigInt(amount)
     );
+    console.log('[award-stars] Success, txId:', signature.slice(0, 16) + '...');
 
     // Record idempotency key so retries return the cached result
     if (typeof idempotencyKey === 'string' && idempotencyKey.length > 0) {
@@ -135,6 +137,7 @@ export async function POST(req: NextRequest) {
           stars: amount as number,
           confidence: 'mission',
           mintTx: idempotencyKey,
+          observedDate: new Date().toISOString().split('T')[0],
         }).catch(err => {
           if ((err as { code?: string })?.code === '23505') {
             // Unique constraint violation — idempotency key already recorded, expected for retries
@@ -152,6 +155,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
+    console.error('[award-stars]', err);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

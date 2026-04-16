@@ -13,6 +13,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { PrivyClient } from '@privy-io/server-auth'
 import { getDb } from '@/lib/db'
 import { users } from '@/lib/schema'
+import { isValidEmail, isValidPublicKey, sanitizeString } from '@/lib/validate'
 
 const privy = new PrivyClient(
   process.env.NEXT_PUBLIC_PRIVY_APP_ID!,
@@ -45,6 +46,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: 'privyId required' }, { status: 400 })
   }
 
+  // Validate and sanitize optional fields
+  let cleanEmail: string | null = null;
+  if (email != null) {
+    const trimmed = sanitizeString(String(email), 500);
+    if (!isValidEmail(trimmed)) {
+      return NextResponse.json({ success: false, error: 'Invalid email address' }, { status: 400 });
+    }
+    cleanEmail = trimmed;
+  }
+
+  let cleanWallet: string | null = null;
+  if (walletAddress != null) {
+    const trimmed = sanitizeString(String(walletAddress), 500);
+    if (!isValidPublicKey(trimmed)) {
+      return NextResponse.json({ success: false, error: 'Invalid wallet address' }, { status: 400 });
+    }
+    cleanWallet = trimmed;
+  }
+
   const db = getDb()
   if (!db) {
     return NextResponse.json({ success: false, error: 'no db' })
@@ -52,10 +72,10 @@ export async function POST(req: NextRequest) {
 
   const [user] = await db
     .insert(users)
-    .values({ privyId, email: email ?? null, walletAddress: walletAddress ?? null })
+    .values({ privyId, email: cleanEmail, walletAddress: cleanWallet })
     .onConflictDoUpdate({
       target: users.privyId,
-      set: { email: email ?? null, walletAddress: walletAddress ?? null, updatedAt: new Date() },
+      set: { email: cleanEmail, walletAddress: cleanWallet, updatedAt: new Date() },
     })
     .returning()
 
