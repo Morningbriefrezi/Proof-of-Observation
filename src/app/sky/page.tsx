@@ -10,7 +10,6 @@ import PlanetGrid from '@/components/sky/PlanetGrid';
 import EventBanner from '@/components/sky/EventBanner';
 import ObserveCTA from '@/components/sky/ObserveCTA';
 import BestTargets from '@/components/sky/BestTargets';
-import AstraQuickAsk from '@/components/AstraQuickAsk';
 
 export async function generateMetadata() {
   try {
@@ -122,8 +121,6 @@ export default async function SkyPage() {
       <Suspense fallback={null}>
         <EventBanner />
       </Suspense>
-
-      <AstraQuickAsk />
 
       {/* Ask ASTRA */}
       <Link

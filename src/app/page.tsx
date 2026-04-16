@@ -15,7 +15,6 @@ import LocationPicker from '@/components/LocationPicker';
 import { useLocation } from '@/lib/location';
 import PageTransition from '@/components/ui/PageTransition';
 import LoadingRing from '@/components/ui/LoadingRing';
-import AstraQuickAsk from '@/components/AstraQuickAsk';
 
 function EmailSubscribe() {
   const [email, setEmail] = useState('');
@@ -668,117 +667,140 @@ export default function HomePage() {
           `}</style>
 
           {/* LEFT — Active Missions */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <style>{`
+              @keyframes missionCardIn {
+                from { opacity: 0; transform: translateY(10px) scale(0.97); }
+                to   { opacity: 1; transform: translateY(0) scale(1); }
+              }
+              @keyframes missionGlow {
+                0%, 100% { opacity: 0.5; }
+                50% { opacity: 1; }
+              }
+              .mission-sq {
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                padding: 14px;
+                border-radius: 16px;
+                text-decoration: none;
+                overflow: hidden;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+                animation: missionCardIn 0.4s cubic-bezier(0.34,1.3,0.64,1) both;
+              }
+              .mission-sq:hover {
+                transform: translateY(-3px) scale(1.02);
+              }
+              .mission-sq::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: 16px;
+                opacity: 0;
+                transition: opacity 0.25s;
+                pointer-events: none;
+              }
+              .mission-sq:hover::before { opacity: 1; }
+            `}</style>
+
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <h2 style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>
                 Active Missions
               </h2>
               <Link href="/missions" style={{ color: 'var(--accent)', fontSize: 13, textDecoration: 'none', fontFamily: 'var(--font-display)', fontWeight: 500 }}>
-                View all missions →
+                View all →
               </Link>
             </div>
 
-            {/* Tonight's Sky card */}
-            <Link
-              href="/sky"
-              style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(52,211,153,0.2)',
-                borderRadius: 16,
-                padding: 16,
-                textDecoration: 'none',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 8,
-                transition: 'border-color 0.2s, transform 0.2s',
-              }}
-              onMouseOver={e => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = 'rgba(52,211,153,0.4)';
-                el.style.transform = 'translateY(-1px)';
-              }}
-              onMouseOut={e => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = 'rgba(52,211,153,0.2)';
-                el.style.transform = 'translateY(0)';
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(52,211,153,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <CloudSun size={18} color="#34d399" strokeWidth={1.5} />
-                </div>
-                <span style={{ color: 'white', fontWeight: 600, fontSize: 13, flex: 1 }}>Tonight&apos;s Sky</span>
-                <span style={{
-                  background: 'rgba(52,211,153,0.15)',
-                  color: '#34d399',
-                  fontSize: 10,
-                  fontWeight: 600,
-                  padding: '2px 8px',
-                  borderRadius: 999,
-                  whiteSpace: 'nowrap',
-                }}>
-                  Free · Always Available
-                </span>
-              </div>
-              <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, margin: 0 }}>
-                Check tonight&apos;s forecast, planet positions, and best observation windows.
-              </p>
-            </Link>
-
-            {/* Mission cards */}
-            {MISSIONS.slice(0, 4).map(m => {
-              const diffClass = m.difficulty === 'Beginner'
-                ? 'badge-pill badge-success'
-                : m.difficulty === 'Intermediate'
-                ? 'badge-pill badge-accent'
-                : m.difficulty === 'Hard'
-                ? 'badge-pill badge-warning'
-                : 'badge-pill badge-error';
-              const iconBg = m.difficulty === 'Beginner'
-                ? 'var(--success-dim)'
-                : m.difficulty === 'Intermediate'
-                ? 'var(--accent-dim)'
-                : m.difficulty === 'Hard'
-                ? 'var(--warning-dim)'
-                : 'var(--error-dim)';
-              return (
-                <Link
-                  key={m.id}
-                  href="/missions"
-                  className="card-base"
-                  style={{ padding: 16, textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 18 }}>
-                      {m.emoji}
+            {/* 2×2 square grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {MISSIONS.slice(0, 4).map((m, i) => {
+                const accent =
+                  m.difficulty === 'Beginner'    ? '#34d399' :
+                  m.difficulty === 'Intermediate' ? '#8B5CF6' :
+                  m.difficulty === 'Hard'         ? '#F59E0B' : '#EF4444';
+                const accentDim =
+                  m.difficulty === 'Beginner'    ? 'rgba(52,211,153,0.08)' :
+                  m.difficulty === 'Intermediate' ? 'rgba(139,92,246,0.08)' :
+                  m.difficulty === 'Hard'         ? 'rgba(245,158,11,0.08)' : 'rgba(239,68,68,0.08)';
+                const accentBorder =
+                  m.difficulty === 'Beginner'    ? 'rgba(52,211,153,0.2)' :
+                  m.difficulty === 'Intermediate' ? 'rgba(139,92,246,0.2)' :
+                  m.difficulty === 'Hard'         ? 'rgba(245,158,11,0.2)' : 'rgba(239,68,68,0.2)';
+                return (
+                  <Link
+                    key={m.id}
+                    href="/missions"
+                    className="mission-sq"
+                    style={{
+                      background: `linear-gradient(145deg, rgba(255,255,255,0.04), ${accentDim})`,
+                      border: `1.5px solid ${accentBorder}`,
+                      boxShadow: `0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)`,
+                      animationDelay: `${i * 0.07}s`,
+                      minHeight: 120,
+                    }}
+                    onMouseOver={e => {
+                      (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px ${accentBorder}, inset 0 1px 0 rgba(255,255,255,0.08)`;
+                    }}
+                    onMouseOut={e => {
+                      (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)`;
+                    }}
+                  >
+                    {/* Top row: emoji + difficulty dot */}
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <div style={{
+                        width: 40, height: 40, borderRadius: 12,
+                        background: `rgba(255,255,255,0.06)`,
+                        border: `1px solid ${accentBorder}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 20,
+                      }}>
+                        {m.emoji}
+                      </div>
+                      <div style={{
+                        width: 7, height: 7, borderRadius: '50%',
+                        background: accent,
+                        boxShadow: `0 0 6px ${accent}`,
+                        animation: 'missionGlow 2.5s ease-in-out infinite',
+                        animationDelay: `${i * 0.4}s`,
+                        marginTop: 4,
+                      }} />
                     </div>
-                    <span style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: 13, flex: 1, fontFamily: 'var(--font-display)' }}>{m.name}</span>
-                    <span className={diffClass} style={{ fontSize: 10, whiteSpace: 'nowrap' }}>{m.difficulty}</span>
-                  </div>
-                  <p style={{
-                    color: 'var(--text-muted)',
-                    fontSize: 11,
-                    margin: 0,
-                    lineHeight: 1.5,
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                  }}>
-                    {m.desc}
-                  </p>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span className="badge-pill badge-stars" style={{ fontSize: 12 }}>✦ +{m.stars}</span>
-                  </div>
-                </Link>
-              );
-            })}
 
-            {/* Motivator */}
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, textAlign: 'center', margin: 0 }}>
-              Complete all missions to unlock: Free Custom Star Map + 20% telescope discount
-            </p>
+                    {/* Name */}
+                    <p style={{
+                      color: 'rgba(255,255,255,0.92)',
+                      fontSize: 13,
+                      fontWeight: 700,
+                      margin: '0 0 4px',
+                      fontFamily: 'var(--font-display)',
+                      lineHeight: 1.2,
+                      letterSpacing: '-0.01em',
+                    }}>
+                      {m.name}
+                    </p>
+
+                    {/* Stars reward */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <span style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                        padding: '2px 8px',
+                        borderRadius: 999,
+                        background: 'rgba(251,191,36,0.1)',
+                        border: '1px solid rgba(251,191,36,0.2)',
+                        color: '#fbbf24',
+                        fontSize: 11,
+                        fontWeight: 700,
+                      }}>
+                        ✦ +{m.stars}
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
 
           {/* RIGHT — First Observer CTA */}
@@ -1252,7 +1274,6 @@ export default function HomePage() {
 
       </div>
       </PageTransition>
-      <AstraQuickAsk />
     </>
   );
 }

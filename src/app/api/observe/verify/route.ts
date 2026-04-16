@@ -184,7 +184,15 @@ Return ONLY valid JSON, no markdown, no preamble:
   "liveCaptureConfirmed": true
 }`;
 
-  userContent.push({ type: 'text', text: isDoubleCapture ? doubleImagePrompt : singleImagePrompt });
+  const targetParam = (formData.get('target') as string | null) ?? '';
+  const isHighValueTarget = ['saturn', 'jupiter', 'deep sky', 'nebula', 'galaxy', 'cluster']
+    .some(t => targetParam.toLowerCase().includes(t));
+
+  const strictnessNote = isHighValueTarget
+    ? `\nThis is a HIGH-VALUE observation target. Be MORE careful about authenticity. Require clear identifying features visible (rings for Saturn, cloud bands for Jupiter, etc.). If the image is too blurry to confirm the specific target, mark confidence as 'low' rather than 'medium'.`
+    : `\nBe generous with phone photos. A blurry phone photo is valid if the celestial object is recognizable.`;
+
+  userContent.push({ type: 'text', text: (isDoubleCapture ? doubleImagePrompt : singleImagePrompt) + strictnessNote });
 
   // Claude Vision call
   let analysis: ClaudeAnalysis;

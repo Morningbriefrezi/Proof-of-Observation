@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { MapPin, ChevronDown, Navigation, Check } from 'lucide-react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { MapPin, ChevronDown, Navigation, Check, X, Search } from 'lucide-react'
 import { useLocation, getRegionForCountry, type UserLocation, type Region } from '@/lib/location'
 
 const REGION_LABELS: Record<Region, string> = {
@@ -74,25 +74,24 @@ const CITY_PRESETS: { region: Region; label: string; cities: PresetCity[] }[] = 
 
 export default function LocationPicker({ compact = false }: { compact?: boolean }) {
   const { location, setLocation } = useLocation()
-  const [open, setOpen]           = useState(false)
+  const [open, setOpen] = useState(false)
   const [gpsLoading, setGpsLoading] = useState(false)
-  const [search, setSearch]         = useState('')
-  const ref = useRef<HTMLDivElement>(null)
+  const [search, setSearch] = useState('')
+  const searchRef = useRef<HTMLInputElement>(null)
 
+  // Lock body scroll when open on mobile
   useEffect(() => {
-    if (!open) return
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    if (open) {
+      document.body.style.overflow = 'hidden'
+      setTimeout(() => searchRef.current?.focus(), 100)
+    } else {
+      document.body.style.overflow = ''
+      setSearch('')
     }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
+    return () => { document.body.style.overflow = '' }
   }, [open])
 
-  useEffect(() => {
-    if (!open) setSearch('')
-  }, [open])
-
-  function handleGPS() {
+  const handleGPS = useCallback(() => {
     if (!navigator.geolocation || gpsLoading) return
     setGpsLoading(true)
     navigator.geolocation.getCurrentPosition(
@@ -111,7 +110,7 @@ export default function LocationPicker({ compact = false }: { compact?: boolean 
       () => { setGpsLoading(false); setOpen(false) },
       { timeout: 8000 }
     )
-  }
+  }, [gpsLoading, setLocation])
 
   function handlePreset(p: UserLocation) {
     setLocation(p)
@@ -132,200 +131,267 @@ export default function LocationPicker({ compact = false }: { compact?: boolean 
   const isActive = (p: UserLocation) => p.city === location.city && p.country === location.country
 
   return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
+    <>
       <style>{`
-        @keyframes locationGlow {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
-          50% { box-shadow: 0 0 10px 2px rgba(52,211,153,0.12), 0 0 0 1px rgba(52,211,153,0.2); }
+        @keyframes loc-ping {
+          0% { transform: scale(0.7); opacity: 0.6; }
+          100% { transform: scale(2.4); opacity: 0; }
         }
-        @keyframes pingRing {
-          0% { transform: scale(0.6); opacity: 0.7; }
-          100% { transform: scale(2.2); opacity: 0; }
+        @keyframes loc-panel-in {
+          from { opacity: 0; transform: translateY(16px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
         }
-        @keyframes dropdownEnter {
-          from { opacity: 0; transform: translateX(-50%) translateY(-6px) scale(0.97); }
-          to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+        @keyframes loc-overlay-in {
+          from { opacity: 0; }
+          to   { opacity: 1; }
         }
-        .location-pill {
-          animation: locationGlow 3s ease-in-out infinite;
+        .loc-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          border-radius: 9999px;
+          padding: ${compact ? '7px 14px' : '9px 16px'};
+          background: rgba(20, 184, 166, 0.08);
+          border: 1.5px solid rgba(20, 184, 166, 0.35);
+          cursor: pointer;
+          transition: background 0.2s, border-color 0.2s, transform 0.15s;
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
         }
-        .location-pill:hover {
-          background: rgba(52,211,153,0.1) !important;
-          border-color: rgba(52,211,153,0.4) !important;
+        .loc-pill:hover {
+          background: rgba(20, 184, 166, 0.14);
+          border-color: rgba(20, 184, 166, 0.6);
           transform: translateY(-1px);
         }
-        .location-search:focus {
-          outline: none;
-          border-color: rgba(20,184,166,0.5) !important;
+        .loc-pill:active { transform: translateY(0); }
+        .loc-city-btn {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 10px 12px;
+          background: transparent;
+          border: 1.5px solid transparent;
+          border-radius: 12px;
+          cursor: pointer;
+          width: 100%;
+          text-align: left;
+          transition: background 0.12s, border-color 0.12s;
         }
-        .city-list::-webkit-scrollbar { width: 4px; }
-        .city-list::-webkit-scrollbar-track { background: transparent; }
-        .city-list::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.2); border-radius: 2px; }
+        .loc-city-btn:hover { background: rgba(255,255,255,0.05); }
+        .loc-city-btn.active {
+          background: rgba(20, 184, 166, 0.1);
+          border-color: rgba(20, 184, 166, 0.3);
+        }
+        .loc-gps-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          width: 100%;
+          padding: 11px 16px;
+          background: rgba(20, 184, 166, 0.08);
+          border: 1.5px solid rgba(20, 184, 166, 0.3);
+          border-radius: 12px;
+          color: #14b8a6;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background 0.15s, border-color 0.15s;
+          letter-spacing: 0.01em;
+        }
+        .loc-gps-btn:hover:not(:disabled) {
+          background: rgba(20, 184, 166, 0.15);
+          border-color: rgba(20, 184, 166, 0.5);
+        }
+        .loc-gps-btn:disabled { opacity: 0.5; cursor: default; }
+        .loc-search-input {
+          width: 100%;
+          padding: 10px 14px 10px 38px;
+          background: rgba(255,255,255,0.05);
+          border: 1.5px solid rgba(255,255,255,0.1);
+          border-radius: 12px;
+          color: rgba(255,255,255,0.9);
+          font-size: 14px;
+          box-sizing: border-box;
+          outline: none;
+          transition: border-color 0.15s;
+        }
+        .loc-search-input:focus {
+          border-color: rgba(20, 184, 166, 0.5);
+        }
+        .loc-search-input::placeholder { color: rgba(255,255,255,0.3); }
+        .loc-city-list::-webkit-scrollbar { width: 4px; }
+        .loc-city-list::-webkit-scrollbar-track { background: transparent; }
+        .loc-city-list::-webkit-scrollbar-thumb { background: rgba(20,184,166,0.25); border-radius: 2px; }
+        @keyframes loc-spin { to { transform: rotate(360deg); } }
+        .loc-spinning { animation: loc-spin 0.8s linear infinite; }
       `}</style>
 
       {/* Trigger pill */}
-      <button
-        onClick={() => setOpen(v => !v)}
-        className="location-pill"
-        style={{
-          display: 'inline-flex', alignItems: 'center', gap: 7,
-          borderRadius: 9999,
-          padding: compact ? '6px 12px' : '7px 14px',
-          background: open ? 'rgba(52,211,153,0.1)' : 'rgba(255,255,255,0.05)',
-          border: `1px solid ${open ? 'rgba(52,211,153,0.4)' : 'rgba(52,211,153,0.18)'}`,
-          cursor: 'pointer',
-          transition: 'all 0.25s ease',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          animation: open ? 'none' : undefined,
-        }}
-      >
-        {/* MapPin with ping ring */}
-        <div style={{ position: 'relative', width: 14, height: 14, flexShrink: 0 }}>
-          {!open && (
-            <div style={{
-              position: 'absolute', inset: -3, borderRadius: '50%',
-              background: 'rgba(52,211,153,0.3)',
-              animation: 'pingRing 2.5s ease-out infinite',
-              pointerEvents: 'none',
-            }} />
-          )}
-          <MapPin size={14} color={location.source === 'gps' ? '#34d399' : 'rgba(52,211,153,0.7)'} style={{ position: 'relative', zIndex: 1 }} />
+      <button className="loc-pill" onClick={() => setOpen(true)}>
+        <div style={{ position: 'relative', width: 16, height: 16, flexShrink: 0 }}>
+          <div style={{
+            position: 'absolute', inset: -2, borderRadius: '50%',
+            background: 'rgba(20,184,166,0.35)',
+            animation: 'loc-ping 2.4s ease-out infinite',
+            pointerEvents: 'none',
+          }} />
+          <MapPin size={15} color={location.source === 'gps' ? '#14b8a6' : 'rgba(20,184,166,0.85)'} style={{ position: 'relative', zIndex: 1 }} />
         </div>
-        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.85)', fontWeight: 600, letterSpacing: '0.02em' }}>{label}</span>
-        <ChevronDown size={11} color="rgba(52,211,153,0.5)"
-          style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.25s ease' }} />
+        <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', fontWeight: 600, letterSpacing: '0.01em' }}>
+          {label}
+        </span>
+        <ChevronDown size={12} color="rgba(20,184,166,0.6)"
+          style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
       </button>
 
-      {/* Dropdown */}
+      {/* Full-screen overlay + panel */}
       {open && (
-        <div style={{
-          position: 'absolute',
-          top: 'calc(100% + 10px)',
-          left: '50%',
-          zIndex: 100,
-          minWidth: 280,
-          background: 'rgba(8,12,24,0.98)',
-          border: '1px solid rgba(52,211,153,0.2)',
-          borderRadius: 18,
-          padding: 16,
-          boxShadow: '0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(52,211,153,0.06), inset 0 1px 0 rgba(52,211,153,0.08)',
-          backdropFilter: 'blur(24px)',
-          WebkitBackdropFilter: 'blur(24px)',
-          animation: 'dropdownEnter 0.2s ease-out forwards',
-        }}>
-          {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <MapPin size={13} color="#34d399" />
-            </div>
-            <div>
-              <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: 13, fontWeight: 600, margin: 0 }}>Sky location</p>
-              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, margin: 0 }}>Affects sky data and marketplace</p>
-            </div>
-          </div>
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '16px',
+            animation: 'loc-overlay-in 0.18s ease-out forwards',
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setOpen(false) }}
+        >
+          {/* Backdrop blur */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'rgba(5, 8, 20, 0.75)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+          }} />
 
-          {/* Search input */}
-          <input
-            className="location-search"
-            type="text"
-            placeholder="Search city…"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '7px 10px',
-              marginBottom: 8,
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(52,211,153,0.18)',
-              borderRadius: 9,
-              color: 'rgba(255,255,255,0.85)',
-              fontSize: 12,
-              boxSizing: 'border-box',
-            }}
-          />
-
-          {/* City list — scrollable */}
+          {/* Panel */}
           <div
-            className="city-list"
-            style={{ maxHeight: 260, overflowY: 'auto', marginBottom: 10 }}
-          >
-            {filtered.length === 0 && (
-              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12, textAlign: 'center', padding: '12px 0', margin: 0 }}>No cities found</p>
-            )}
-            {filtered.map(group => (
-              <div key={group.label}>
-                <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '8px 2px 4px' }}>
-                  {group.label}
-                </p>
-                {group.cities.map(p => {
-                  const active = isActive(p)
-                  return (
-                    <button
-                      key={`${p.city}-${p.country}`}
-                      onClick={() => handlePreset(p)}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 10,
-                        padding: '7px 10px',
-                        background: active ? 'rgba(52,211,153,0.08)' : 'transparent',
-                        border: `1px solid ${active ? 'rgba(52,211,153,0.25)' : 'transparent'}`,
-                        borderRadius: 10,
-                        cursor: 'pointer',
-                        width: '100%',
-                        textAlign: 'left',
-                        transition: 'all 0.15s',
-                      }}
-                      onMouseEnter={e => {
-                        if (!active) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'
-                      }}
-                      onMouseLeave={e => {
-                        if (!active) (e.currentTarget as HTMLElement).style.background = 'transparent'
-                      }}
-                    >
-                      <span style={{ fontSize: 15, lineHeight: 1 }}>{p.flag}</span>
-                      <div style={{ flex: 1 }}>
-                        <span style={{ color: active ? '#34d399' : 'rgba(255,255,255,0.8)', fontSize: 13, fontWeight: 500 }}>
-                          {p.city}
-                        </span>
-                        <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, marginLeft: 6 }}>
-                          {p.country}
-                        </span>
-                      </div>
-                      {active && <Check size={13} color="#34d399" />}
-                    </button>
-                  )
-                })}
-              </div>
-            ))}
-          </div>
-
-          {/* GPS button */}
-          <button
-            onClick={handleGPS}
-            disabled={gpsLoading}
             style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-              width: '100%', padding: '8px 12px',
-              background: 'rgba(52,211,153,0.08)',
-              border: '1px solid rgba(52,211,153,0.2)',
-              borderRadius: 10,
-              color: gpsLoading ? 'rgba(52,211,153,0.5)' : '#34d399',
-              fontSize: 12, fontWeight: 600,
-              cursor: gpsLoading ? 'default' : 'pointer',
-              transition: 'all 0.15s',
-            }}
-            onMouseEnter={e => {
-              if (!gpsLoading) (e.currentTarget as HTMLElement).style.background = 'rgba(52,211,153,0.14)'
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.background = 'rgba(52,211,153,0.08)'
+              position: 'relative', zIndex: 1,
+              width: '100%', maxWidth: 400,
+              maxHeight: 'calc(100vh - 64px)',
+              background: 'linear-gradient(160deg, rgba(15,20,40,0.98) 0%, rgba(10,14,30,0.99) 100%)',
+              border: '1.5px solid rgba(20,184,166,0.25)',
+              borderRadius: 20,
+              boxShadow: '0 32px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(20,184,166,0.08), inset 0 1px 0 rgba(20,184,166,0.1)',
+              display: 'flex', flexDirection: 'column',
+              overflow: 'hidden',
+              animation: 'loc-panel-in 0.22s cubic-bezier(0.34,1.4,0.64,1) forwards',
             }}
           >
-            <Navigation size={13} style={{ animation: gpsLoading ? 'spin 1s linear infinite' : 'none' }} />
-            {gpsLoading ? 'Detecting…' : 'Use my location'}
-          </button>
+            {/* Header */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '18px 20px 14px',
+              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              flexShrink: 0,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{
+                  width: 34, height: 34, borderRadius: 10,
+                  background: 'rgba(20,184,166,0.12)',
+                  border: '1.5px solid rgba(20,184,166,0.25)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  <MapPin size={15} color="#14b8a6" />
+                </div>
+                <div>
+                  <p style={{ color: 'rgba(255,255,255,0.95)', fontSize: 15, fontWeight: 700, margin: 0, lineHeight: 1.2 }}>
+                    Sky location
+                  </p>
+                  <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, margin: 0, marginTop: 2 }}>
+                    Affects forecasts and marketplace
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setOpen(false)}
+                style={{
+                  width: 30, height: 30, borderRadius: 8,
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', flexShrink: 0,
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
+              >
+                <X size={14} color="rgba(255,255,255,0.5)" />
+              </button>
+            </div>
+
+            {/* Search */}
+            <div style={{ padding: '14px 16px 10px', flexShrink: 0 }}>
+              <div style={{ position: 'relative' }}>
+                <Search size={15} color="rgba(255,255,255,0.3)" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                <input
+                  ref={searchRef}
+                  className="loc-search-input"
+                  type="text"
+                  placeholder="Search city…"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* City list */}
+            <div className="loc-city-list" style={{ flex: 1, overflowY: 'auto', padding: '0 16px', minHeight: 0 }}>
+              {filtered.length === 0 ? (
+                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, textAlign: 'center', padding: '24px 0', margin: 0 }}>
+                  No cities found
+                </p>
+              ) : (
+                filtered.map(group => (
+                  <div key={group.label} style={{ marginBottom: 8 }}>
+                    <p style={{
+                      color: 'rgba(20,184,166,0.6)', fontSize: 10, fontWeight: 700,
+                      letterSpacing: '0.1em', textTransform: 'uppercase',
+                      margin: '12px 4px 4px',
+                    }}>
+                      {group.label}
+                    </p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      {group.cities.map(p => {
+                        const active = isActive(p)
+                        return (
+                          <button
+                            key={`${p.city}-${p.country}`}
+                            className={`loc-city-btn${active ? ' active' : ''}`}
+                            onClick={() => handlePreset(p)}
+                          >
+                            <span style={{ fontSize: 18, lineHeight: 1, flexShrink: 0 }}>{p.flag}</span>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <span style={{ color: active ? '#14b8a6' : 'rgba(255,255,255,0.85)', fontSize: 14, fontWeight: 500 }}>
+                                {p.city}
+                              </span>
+                              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12, marginLeft: 8 }}>
+                                {p.country}
+                              </span>
+                            </div>
+                            {active && <Check size={14} color="#14b8a6" style={{ flexShrink: 0 }} />}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))
+              )}
+              <div style={{ height: 8 }} />
+            </div>
+
+            {/* GPS button */}
+            <div style={{ padding: '10px 16px 18px', borderTop: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
+              <button className="loc-gps-btn" onClick={handleGPS} disabled={gpsLoading}>
+                <Navigation size={14} className={gpsLoading ? 'loc-spinning' : ''} />
+                {gpsLoading ? 'Detecting location…' : 'Use my GPS location'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
-    </div>
+    </>
   )
 }

@@ -21,7 +21,6 @@ import type { QuizDef } from '@/lib/quizzes';
 import PageTransition from '@/components/ui/PageTransition';
 import { MissionIcon } from '@/components/shared/PlanetIcons';
 import { TelescopeIcon, StarTokenIcon, DifficultyDots } from '@/components/icons/CelestialIcons';
-import AstraQuickAsk from '@/components/AstraQuickAsk';
 import DailyCheckIn from '@/components/dashboard/DailyCheckIn';
 import LocationPicker from '@/components/LocationPicker';
 
@@ -331,7 +330,6 @@ export default function MissionsPage() {
         <ObservationLog />
       </div>
       </>
-      <AstraQuickAsk />
     </PageTransition>
   );
 }

@@ -26,6 +26,7 @@ export default function ChatPage() {
   }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [streamingMsgIdx, setStreamingMsgIdx] = useState<number | null>(null);
   const [error, setError] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -58,6 +59,7 @@ export default function ChatPage() {
     const next: Msg[] = [...messages, { role: 'user', content: msg }];
     setMessages(next);
     setLoading(true);
+    setStreamingMsgIdx(next.length);
     try {
       const accessToken = await getAccessToken();
       if (!accessToken) { login(); return; }
@@ -86,7 +88,7 @@ export default function ChatPage() {
         for (const line of lines) {
           if (!line.startsWith('data: ')) continue;
           const payload = line.slice(6);
-          if (payload === '[DONE]') break;
+          if (payload === '[DONE]') { setStreamingMsgIdx(null); break; }
           if (payload === '[ERROR]') throw new Error('stream_interrupted');
           const decoded = payload.replace(/\u2028/g, '\n');
           setMessages(prev => {
@@ -97,8 +99,10 @@ export default function ChatPage() {
         }
       }
     } catch {
+      setStreamingMsgIdx(null);
       setError(locale === 'ka' ? 'კავშირი დაიკარგა. სცადე ისევ.' : 'Connection lost. Try again.');
     } finally {
+      setStreamingMsgIdx(null);
       setLoading(false);
     }
   };
@@ -191,7 +195,7 @@ export default function ChatPage() {
         )}
 
         {messages.map((m, i) => {
-          const isStreamingThis = loading && m.role === 'assistant' && i === messages.length - 1;
+          const isStreamingThis = streamingMsgIdx === i && m.role === 'assistant';
           if (m.role === 'user') {
             return (
               <div key={i} style={{ display: 'flex', justifyContent: 'flex-end' }}>
