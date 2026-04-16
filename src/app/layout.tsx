@@ -34,6 +34,7 @@ const notoGeorgian = Noto_Sans_Georgian({
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { SolanaWalletProvider } from '@/components/providers/PrivyProvider';
+import ThemeProvider from '@/components/providers/ThemeProvider';
 import { LocationProvider } from '@/lib/location';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { AppStateProvider } from '@/hooks/useAppState';
@@ -92,11 +93,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={locale} className={`${instrumentSerif.variable} ${dmSans.variable} ${jetbrains.variable} ${notoGeorgian.variable}`}>
       <head>
+        {/* Prevent theme flash — read localStorage before first paint */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('stellar_theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})()` }} />
       </head>
       <body className="bg-void text-slate-200 min-h-screen font-sans flex flex-col"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <ErrorBoundary>
           <NextIntlClientProvider locale={locale} messages={messages}>
+            <ThemeProvider>
             <SolanaWalletProvider>
               <LocationProvider>
               <AppStateProvider>
@@ -117,6 +121,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </AppStateProvider>
               </LocationProvider>
             </SolanaWalletProvider>
+            </ThemeProvider>
           </NextIntlClientProvider>
         </ErrorBoundary>
       </body>

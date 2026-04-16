@@ -3,7 +3,7 @@
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
-import { Copy, Check, ExternalLink, Telescope, Lock, ChevronRight, Globe, Bell, Moon, LogOut, X } from 'lucide-react';
+import { Copy, Check, ExternalLink, Telescope, Lock, ChevronRight, Globe, Bell, Moon, LogOut, X, Settings } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAppState } from '@/hooks/useAppState';
@@ -18,6 +18,7 @@ export default function ProfilePage() {
   const { state, reset } = useAppState();
 
   const [starsBalance, setStarsBalance] = useState<number>(0);
+  const [solPrice, setSolPrice] = useState<number>(0);
   const [copied, setCopied] = useState(false);
   const [confirmSignOut, setConfirmSignOut] = useState(false);
   const [obsCount, setObsCount] = useState<number>(0);
@@ -39,6 +40,10 @@ export default function ProfilePage() {
 
   const solanaWallet = wallets.find(w => (w as { chainType?: string }).chainType === 'solana');
   const address = solanaWallet?.address ?? state.walletAddress ?? null;
+
+  useEffect(() => {
+    fetch('/api/price/sol').then(r => r.json()).then(d => setSolPrice(d.solPrice ?? 0)).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!address) { setProfileLoaded(true); return; }
@@ -97,6 +102,8 @@ export default function ProfilePage() {
   const completed = state.completedMissions.filter(m => m.status === 'completed');
   const totalStars = completed.reduce((sum, m) => sum + (m.stars ?? 0), 0);
   const starsDisplay = starsBalance || totalStars;
+  const STARS_TO_GEL = 0.012;
+  const gelWorth = (starsDisplay * STARS_TO_GEL).toFixed(1);
   const rank = getRank(completed.length);
 
   const photoDiscoveries = completed.filter(m => m.photo).map(m => ({
@@ -187,7 +194,7 @@ export default function ProfilePage() {
           {[
             { value: `★ ${starsDisplay.toLocaleString()}`, label: 'Stars Earned', color: '#FFD166' },
             { value: String(completed.length), label: 'Missions Done', color: '#34d399' },
-            { value: String(obsCount), label: 'NFTs Minted', color: '#38F0FF' },
+            { value: starsDisplay > 0 ? `~${gelWorth}₾` : String(obsCount), label: starsDisplay > 0 ? 'Store Value' : 'NFTs Minted', color: '#38F0FF' },
           ].map(s => (
             <div key={s.label} style={{
               borderRadius: 16, padding: '14px 10px', textAlign: 'center',
@@ -271,34 +278,37 @@ export default function ProfilePage() {
 
         {/* — SETTINGS — */}
         <div style={{ marginBottom: 28 }}>
-          <p style={{ color: 'white', fontWeight: 700, fontSize: 16, margin: '0 0 14px' }}>Settings</p>
-          <div style={{ borderRadius: 18, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}>
-            {/* Language */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '15px 18px', borderBottom: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <p style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: 16, margin: 0 }}>Settings</p>
+            <Link href="/settings" style={{ color: 'var(--accent)', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3 }}>
+              <Settings size={13} /> All settings
+            </Link>
+          </div>
+          <div style={{ borderRadius: 18, overflow: 'hidden', border: '1px solid var(--border-default)', background: 'var(--bg-card)' }}>
+            <Link href="/settings#language" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 14, padding: '15px 18px', borderBottom: '1px solid var(--border-subtle)' }}>
               <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(56,240,255,0.08)', border: '1px solid rgba(56,240,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Globe size={16} color="#38F0FF" />
               </div>
-              <p style={{ color: 'white', fontSize: 15, fontWeight: 500, margin: 0, flex: 1 }}>Language</p>
-              <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>EN / KA</span>
-              <ChevronRight size={15} color="rgba(255,255,255,0.2)" />
-            </div>
-            {/* Notifications */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '15px 18px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <p style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 500, margin: 0, flex: 1 }}>Language</p>
+              <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>EN / KA</span>
+              <ChevronRight size={15} color="var(--text-muted)" />
+            </Link>
+            <Link href="/settings#notifications" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 14, padding: '15px 18px', borderBottom: '1px solid var(--border-subtle)' }}>
               <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(255,209,102,0.08)', border: '1px solid rgba(255,209,102,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Bell size={16} color="#FFD166" />
               </div>
-              <p style={{ color: 'white', fontSize: 15, fontWeight: 500, margin: 0, flex: 1 }}>Notifications</p>
-              <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>On</span>
-              <ChevronRight size={15} color="rgba(255,255,255,0.2)" />
-            </div>
-            {/* Dark Mode */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '15px 18px' }}>
+              <p style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 500, margin: 0, flex: 1 }}>Notifications</p>
+              <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>On</span>
+              <ChevronRight size={15} color="var(--text-muted)" />
+            </Link>
+            <Link href="/settings#appearance" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 14, padding: '15px 18px' }}>
               <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Moon size={16} color="#8B5CF6" />
               </div>
-              <p style={{ color: 'white', fontSize: 15, fontWeight: 500, margin: 0, flex: 1 }}>Dark Mode</p>
-              <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>Always On</span>
-            </div>
+              <p style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 500, margin: 0, flex: 1 }}>Appearance</p>
+              <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>Dark / Day</span>
+              <ChevronRight size={15} color="var(--text-muted)" />
+            </Link>
           </div>
         </div>
 
