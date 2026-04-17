@@ -32,6 +32,7 @@ import { MISSIONS } from '@/lib/constants';
 import type { Mission } from '@/lib/types';
 import type { QuizDef } from '@/lib/quizzes';
 import PageTransition from '@/components/ui/PageTransition';
+import PageContainer from '@/components/layout/PageContainer';
 import { MissionIcon } from '@/components/shared/PlanetIcons';
 import { TelescopeIcon, StarTokenIcon, DifficultyDots } from '@/components/icons/CelestialIcons';
 
@@ -76,7 +77,7 @@ export default function MissionsPage() {
 
   if (!authenticated) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-3 sm:py-6 animate-page-enter flex flex-col gap-4">
+      <PageContainer variant="wide" className="py-3 sm:py-6 animate-page-enter flex flex-col gap-4">
         {/* Sign-in card */}
         <div
           className="rounded-2xl p-5 sm:p-6"
@@ -178,7 +179,7 @@ export default function MissionsPage() {
             </div>
           )}
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -187,7 +188,7 @@ export default function MissionsPage() {
       <>
       {activeQuiz && <QuizActive quiz={activeQuiz} onClose={() => setActiveQuiz(null)} />}
 
-      <div className="max-w-2xl mx-auto px-4 py-2 flex flex-col gap-3" style={{ fontFamily: 'var(--font-display)' }}>
+      <PageContainer variant="wide" className="py-2 flex flex-col gap-3" style={{ fontFamily: 'var(--font-display)' }}>
         <BackButton />
 
         <ChartSection onStart={(m) => router.push(`/observe/${m.id}`)} />
@@ -251,7 +252,7 @@ export default function MissionsPage() {
 
         <RewardsSection />
         <ObservationLog />
-      </div>
+      </PageContainer>
       </>
     </PageTransition>
   );

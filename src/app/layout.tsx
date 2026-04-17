@@ -97,7 +97,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* Prevent theme flash — read localStorage before first paint */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('stellar_theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})()` }} />
       </head>
-      <body className="bg-void text-slate-200 min-h-screen font-sans flex flex-col"
+      <body className="bg-void text-slate-200 min-h-dvh w-full font-sans flex flex-col"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <ErrorBoundary>
           <NextIntlClientProvider locale={locale} messages={messages}>

@@ -450,8 +450,10 @@ export default function ObserveVerifyPage() {
 
   if (stage === 'mint-ready' && sky) {
     return (
-      <div className="max-w-xl mx-auto px-4 py-3 flex flex-col gap-3" style={{ minHeight: 'calc(100vh - 56px)' }}>
-        <div className="flex items-center justify-between">
+      <div
+        className="max-w-xl mx-auto w-full px-4 py-2 flex flex-col gap-2 h-[calc(100dvh-152px)] sm:h-[calc(100dvh-56px)]"
+      >
+        <div className="flex items-center justify-between flex-shrink-0">
           <BackButton />
           <button
             onClick={() => router.push('/missions')}

@@ -10,6 +10,7 @@ import EventBanner from '@/components/sky/EventBanner';
 import ObserveCTA from '@/components/sky/ObserveCTA';
 import BestTargets from '@/components/sky/BestTargets';
 import SkyAstraCta from '@/components/sky/SkyAstraCta';
+import PageContainer from '@/components/layout/PageContainer';
 
 export async function generateMetadata() {
   try {
@@ -35,7 +36,7 @@ export default async function SkyPage() {
   const t = await getTranslations('sky');
 
   return (
-    <div className="max-w-3xl mx-auto px-4 pt-4 pb-8 animate-page-enter flex flex-col gap-6">
+    <PageContainer variant="wide" className="pt-4 pb-8 animate-page-enter flex flex-col gap-6">
       <BackButton />
 
       {/* Summary card */}
@@ -122,6 +123,6 @@ export default async function SkyPage() {
 
       {/* Ask ASTRA */}
       <SkyAstraCta />
-    </div>
+    </PageContainer>
   );
 }

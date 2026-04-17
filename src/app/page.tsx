@@ -7,6 +7,7 @@ import Link from 'next/link';
 
 import { useTranslations } from 'next-intl';
 import HomeSkyPreview from '@/components/home/HomeSkyPreview';
+import PageContainer from '@/components/layout/PageContainer';
 import { usePrivy } from '@privy-io/react-auth';
 import { useAppState } from '@/hooks/useAppState';
 import { Telescope, Camera, Star, ShoppingBag, Moon, Lock, Orbit, MessageCircle } from 'lucide-react';
@@ -624,7 +625,7 @@ export default function HomePage() {
       </section>
 
       {/* Remaining sections */}
-      <div className="max-w-3xl lg:max-w-5xl w-full mx-auto px-4 lg:px-8 pt-4 pb-8 sm:pb-12 flex flex-col gap-4 animate-page-enter" style={{ overflowX: 'clip' }}>
+      <PageContainer variant="wide" className="pt-4 pb-8 sm:pb-12 flex flex-col gap-4 animate-page-enter">
 
         {/* Tonight's Sky Preview Strip */}
         <div style={{
@@ -1317,7 +1318,7 @@ export default function HomePage() {
           <EmailSubscribe />
         </div>
 
-      </div>
+      </PageContainer>
       </PageTransition>
     </>
   );
