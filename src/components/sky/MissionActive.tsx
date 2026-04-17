@@ -452,7 +452,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
         longitude: coords.lon,
         sky: sky!,
         status: txId.startsWith('sim') ? 'pending' : 'completed',
-        method: txId.startsWith('sim') ? 'simulated' : 'onchain',
+        method: mission.demo === true || txId.startsWith('sim') ? 'simulated' : 'onchain',
       });
 
       setStep('done');

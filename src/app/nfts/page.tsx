@@ -23,6 +23,7 @@ interface NftAttribute {
 interface NftAsset {
   id: string;
   photo?: string;
+  _method?: 'onchain' | 'simulated';
   content?: {
     metadata?: {
       name?: string;
@@ -47,6 +48,7 @@ function localToNftAsset(m: CompletedMission): NftAsset {
   return {
     id: m.txId,
     photo: m.photo,
+    _method: m.method ?? (m.txId.startsWith('sim') ? 'simulated' : 'onchain'),
     content: {
       metadata: {
         name: `Stellar: ${m.name}`,
@@ -94,41 +96,66 @@ function NftDetailOverlay({ nft, onClose, onRetryMint, retrying }: { nft: NftAss
     return () => { document.body.style.overflow = ''; };
   }, []);
 
+  const isSimulated = nft._method === 'simulated' || nft.id.startsWith('sim');
+
   return (
     <div
-      className="fixed inset-0 z-[60] flex flex-col bg-[#070B14]"
-      style={{ animation: 'slideUp 250ms ease-out' }}
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6"
+      style={{ background: 'rgba(3,6,14,0.75)', backdropFilter: 'blur(6px)', animation: 'fadeIn 180ms ease-out' }}
+      onClick={onClose}
     >
-      {/* Top bar */}
       <div
-        className="flex items-center justify-between px-4 py-3 flex-shrink-0"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+        onClick={e => e.stopPropagation()}
+        className="rounded-2xl overflow-hidden flex flex-col w-full"
+        style={{
+          maxWidth: 520,
+          maxHeight: '92vh',
+          background: '#0B0E17',
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
+          animation: 'slideUp 220ms ease-out',
+        }}
       >
-        <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, color: 'var(--text-primary)', fontSize: 14, margin: 0 }}>
-          {name}
-        </p>
-        <button
-          onClick={onClose}
-          className="w-9 h-9 rounded-full flex items-center justify-center text-slate-500 hover:text-white transition-colors"
-          style={{ background: 'rgba(255,255,255,0.05)', minWidth: 36, minHeight: 36 }}
+        {/* Top bar */}
+        <div
+          className="flex items-center justify-between px-4 py-3 flex-shrink-0"
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
         >
-          ✕
-        </button>
-      </div>
+          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, color: 'var(--text-primary)', fontSize: 14, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {name}
+          </p>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="w-9 h-9 rounded-full flex items-center justify-center text-slate-500 hover:text-white transition-colors flex-shrink-0 ml-2"
+            style={{ background: 'rgba(255,255,255,0.05)', minWidth: 36, minHeight: 36 }}
+          >
+            ✕
+          </button>
+        </div>
 
-      {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto px-4 py-5 flex flex-col gap-4 max-w-lg mx-auto w-full">
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4">
 
         {/* Observation photo — show actual captured image if available */}
         {nft.photo && (
-          <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div style={{ background: '#0a0e1a', display: 'flex', alignItems: 'center', justifyContent: 'center', maxHeight: 360 }}>
-              <img
-                src={nft.photo}
-                alt="Your observation"
-                style={{ maxWidth: '100%', maxHeight: 360, width: 'auto', height: 'auto', display: 'block', objectFit: 'contain' }}
-              />
-            </div>
+          <div
+            className="rounded-2xl overflow-hidden"
+            style={{
+              border: '1px solid rgba(255,255,255,0.08)',
+              background: '#0a0e1a',
+              width: '100%',
+              aspectRatio: '4 / 3',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <img
+              src={nft.photo}
+              alt="Your observation"
+              style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', display: 'block', objectFit: 'contain' }}
+            />
           </div>
         )}
 
@@ -196,7 +223,7 @@ function NftDetailOverlay({ nft, onClose, onRetryMint, retrying }: { nft: NftAss
           </button>
         </div>
 
-        {/* Solana Explorer link / retry */}
+        {/* Solana Explorer link / retry / local proof */}
         {nft.id.startsWith('sim') ? (
           <button
             onClick={onRetryMint}
@@ -214,6 +241,19 @@ function NftDetailOverlay({ nft, onClose, onRetryMint, retrying }: { nft: NftAss
           >
             {retrying ? 'Syncing to Solana…' : 'Seal on Solana →'}
           </button>
+        ) : isSimulated ? (
+          <div
+            className="flex items-center justify-center gap-2 rounded-xl text-sm w-full"
+            style={{
+              background: 'rgba(251,191,36,0.06)',
+              border: '1px solid rgba(251,191,36,0.18)',
+              color: 'var(--warning)',
+              padding: '12px 0',
+              minHeight: 44,
+            }}
+          >
+            Demo · local proof only
+          </div>
         ) : (
           <a
             href={buildExplorerUrl(nft.id)}
@@ -247,6 +287,7 @@ function NftDetailOverlay({ nft, onClose, onRetryMint, retrying }: { nft: NftAss
             </p>
           </div>
         )}
+        </div>
       </div>
     </div>
   );
