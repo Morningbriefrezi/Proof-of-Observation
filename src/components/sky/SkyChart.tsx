@@ -6,9 +6,6 @@ import {
   getChartStars,
   getChartPlanets,
   getChartDeepSky,
-  type ChartStar,
-  type ChartPlanet,
-  type ChartDeepSky,
 } from '@/lib/sky-chart';
 import JupiterNode from './chart-nodes/JupiterNode';
 import SaturnNode from './chart-nodes/SaturnNode';
@@ -21,269 +18,194 @@ import OrionNode from './chart-nodes/OrionNode';
 import AndromedaNode from './chart-nodes/AndromedaNode';
 import CrabNode from './chart-nodes/CrabNode';
 
-// Wider canvas than tall — the horizon circle stays centered; extra side area
-// fills with stars just below horizon for visual depth.
-const W = 600;
-const H = 420;
-const CX = 300;
-const CY = 200;
-const CHART_R = 180;
-
-const CONSTELLATION_LINES: { ids: string[] }[] = [
-  { ids: ['Betelgeuse','Bellatrix','Mintaka','Alnilam','Alnitak','Saiph','Rigel','Bellatrix'] },
-  { ids: ['Caph','Schedar','Tsih','Ruchbah'] },
-  { ids: ['Dubhe','Merak','Phecda','Megrez','Alioth','Mizar','Alkaid'] },
-];
+const W = 400;
+const H = 200;
+const CX = 200;
+const CY = 100;
+const CHART_RX = 190;
+const CHART_RY = 90;
 
 interface Props {
   lat: number;
   lon: number;
   date: Date;
   missions: Mission[];
-  completedIds: Set<string>;
   primeId: string | null;
   onSelect: (mission: Mission) => void;
 }
 
-interface PlottedMission {
-  mission: Mission;
-  x: number;
-  y: number;
-  aboveHorizon: boolean;
-  Node: React.ComponentType<{ size?: number }>;
-}
-
-const MISSION_NODE: Record<string, React.ComponentType<{ size?: number }>> = {
-  moon:       MoonNode,
-  jupiter:    JupiterNode,
-  saturn:     SaturnNode,
-  venus:      VenusNode,
-  mars:       MarsNode,
-  mercury:    MercuryNode,
-  pleiades:   PleiadesNode,
-  orion:      OrionNode,
-  andromeda:  AndromedaNode,
-  crab:       CrabNode,
+const NODE_MAP: Record<string, { comp: React.ComponentType<{ size?: number }>; size: number; primeSize: number }> = {
+  moon:       { comp: MoonNode,       size: 22, primeSize: 30 },
+  jupiter:    { comp: JupiterNode,    size: 28, primeSize: 36 },
+  saturn:     { comp: SaturnNode,     size: 28, primeSize: 36 },
+  venus:      { comp: VenusNode,      size: 18, primeSize: 24 },
+  mars:       { comp: MarsNode,       size: 20, primeSize: 26 },
+  mercury:    { comp: MercuryNode,    size: 16, primeSize: 22 },
+  pleiades:   { comp: PleiadesNode,   size: 22, primeSize: 28 },
+  orion:      { comp: OrionNode,      size: 22, primeSize: 28 },
+  andromeda:  { comp: AndromedaNode,  size: 24, primeSize: 30 },
+  crab:       { comp: CrabNode,       size: 18, primeSize: 22 },
 };
 
-export default function SkyChart({ lat, lon, date, missions, completedIds, primeId, onSelect }: Props) {
-  const stars: ChartStar[] = useMemo(
-    () => getChartStars(lat, lon, date, CX, CY, CHART_R, 3.6),
-    [lat, lon, date]
-  );
-  const planets: ChartPlanet[] = useMemo(
-    () => getChartPlanets(lat, lon, date, CX, CY, CHART_R),
-    [lat, lon, date]
-  );
-  const deepSky: ChartDeepSky[] = useMemo(
-    () => getChartDeepSky(lat, lon, date, CX, CY, CHART_R),
+function projectWide(altDeg: number, azDeg: number): { x: number; y: number; aboveHorizon: boolean } {
+  const altClamped = Math.max(-10, Math.min(90, altDeg));
+  const r = 1 - altClamped / 90;
+  const azRad = (azDeg * Math.PI) / 180;
+  return {
+    x: CX + r * CHART_RX * Math.sin(azRad),
+    y: CY - r * CHART_RY * Math.cos(azRad),
+    aboveHorizon: altDeg > 0,
+  };
+}
+
+export default function SkyChart({ lat, lon, date, missions, primeId, onSelect }: Props) {
+  const stars = useMemo(
+    () => getChartStars(lat, lon, date, CX, CY, 180, 3.0),
     [lat, lon, date]
   );
 
-  const starByName = useMemo(() => {
-    const m = new Map<string, ChartStar>();
-    for (const s of stars) if (s.name) m.set(s.name, s);
-    return m;
-  }, [stars]);
+  const plottedPlanets = useMemo(() => {
+    const raw = getChartPlanets(lat, lon, date, CX, CY, 180);
+    return raw.map(p => ({ ...p, ...projectWide(p.altitude, p.azimuth) }));
+  }, [lat, lon, date]);
 
-  const plotted: PlottedMission[] = useMemo(() => {
-    const planetByKey = new Map(planets.map(p => [p.key, p]));
-    const deepSkyByKey = new Map(deepSky.map(d => [d.id, d]));
-    const out: PlottedMission[] = [];
-    for (const m of missions) {
-      const Node = MISSION_NODE[m.id];
-      if (!Node) continue;
-      const planet = planetByKey.get(m.id);
-      const ds = deepSkyByKey.get(m.id);
-      const src = planet ?? ds;
-      if (!src) continue;
-      out.push({ mission: m, x: src.x, y: src.y, aboveHorizon: src.aboveHorizon, Node });
-    }
-    return out;
-  }, [missions, planets, deepSky]);
+  const plottedDeepSky = useMemo(() => {
+    const raw = getChartDeepSky(lat, lon, date, CX, CY, 180);
+    return raw.map(d => ({ ...d, ...projectWide(d.altitude, d.azimuth) }));
+  }, [lat, lon, date]);
+
+  const plottedMissions = useMemo(() => {
+    const planetByKey = new Map(plottedPlanets.map(p => [p.key, p]));
+    const deepByKey = new Map(plottedDeepSky.map(d => [d.id, d]));
+    return missions
+      .map(m => {
+        const src = planetByKey.get(m.id) ?? deepByKey.get(m.id);
+        const nodeSpec = NODE_MAP[m.id];
+        if (!src || !nodeSpec) return null;
+        return { mission: m, x: src.x, y: src.y, aboveHorizon: src.aboveHorizon, nodeSpec };
+      })
+      .filter(Boolean) as Array<{
+        mission: Mission;
+        x: number;
+        y: number;
+        aboveHorizon: boolean;
+        nodeSpec: typeof NODE_MAP[string];
+      }>;
+  }, [missions, plottedPlanets, plottedDeepSky]);
 
   return (
     <div
-      className="relative w-full overflow-hidden stl-chart-in stl-chart"
+      className="relative w-full overflow-hidden"
       style={{
-        fontFamily: 'var(--font-display)',
+        aspectRatio: '2 / 1',
+        borderRadius: 14,
+        border: '1px solid rgba(255,255,255,0.08)',
         background: [
-          'radial-gradient(ellipse 420px 320px at 75% 35%, rgba(132,101,203,0.18) 0%, transparent 55%)',
-          'radial-gradient(ellipse 360px 260px at 25% 65%, rgba(56,155,240,0.12) 0%, transparent 60%)',
-          'radial-gradient(ellipse 280px 220px at 50% 20%, rgba(255,143,184,0.08) 0%, transparent 60%)',
-          'radial-gradient(ellipse 500px 400px at 50% 100%, rgba(255,209,102,0.05) 0%, transparent 70%)',
-          'radial-gradient(ellipse at 50% 50%, #0A1428 0%, #050A1C 50%, #010206 100%)',
+          'radial-gradient(ellipse 320px 180px at 70% 40%, rgba(132,101,203,0.2) 0%, transparent 55%)',
+          'radial-gradient(ellipse 260px 160px at 25% 60%, rgba(56,155,240,0.14) 0%, transparent 60%)',
+          'radial-gradient(ellipse 200px 120px at 50% 15%, rgba(255,143,184,0.08) 0%, transparent 60%)',
+          'radial-gradient(ellipse 400px 200px at 50% 100%, rgba(255,209,102,0.05) 0%, transparent 70%)',
+          'radial-gradient(ellipse at 50% 50%, #0A1428 0%, #050A1C 60%, #010206 100%)',
         ].join(', '),
-        border: '1px solid var(--stl-border-regular)',
-        borderRadius: 'var(--stl-r-xl)',
       }}
     >
       <svg
         viewBox={`0 0 ${W} ${H}`}
-        preserveAspectRatio="xMidYMid meet"
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <radialGradient id="stl-mw-core" cx="0.5" cy="0.5" r="0.5">
-            <stop offset="0" stopColor="#FFE8C4" stopOpacity="0.12" />
-            <stop offset="0.3" stopColor="#B8C5FF" stopOpacity="0.08" />
+          <radialGradient id="stl-mw-wide" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stopColor="#FFE8C4" stopOpacity="0.14" />
+            <stop offset="0.4" stopColor="#B8C5FF" stopOpacity="0.08" />
             <stop offset="1" stopColor="transparent" />
           </radialGradient>
-          <linearGradient id="stl-dust-lane" x1="0" y1="0" x2="1" y2="0">
+          <linearGradient id="stl-dust-wide" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0" stopColor="#030612" stopOpacity="0" />
-            <stop offset="0.3" stopColor="#030612" stopOpacity="0.35" />
-            <stop offset="0.7" stopColor="#030612" stopOpacity="0.35" />
+            <stop offset="0.35" stopColor="#030612" stopOpacity="0.35" />
+            <stop offset="0.65" stopColor="#030612" stopOpacity="0.35" />
             <stop offset="1" stopColor="#030612" stopOpacity="0" />
           </linearGradient>
-          <radialGradient id="stl-nebula-purple" cx="0.5" cy="0.5" r="0.5">
-            <stop offset="0" stopColor="#A78BE8" stopOpacity="0.22" />
-            <stop offset="0.5" stopColor="#5B4191" stopOpacity="0.08" />
-            <stop offset="1" stopColor="transparent" />
-          </radialGradient>
-          <radialGradient id="stl-nebula-rose" cx="0.5" cy="0.5" r="0.5">
-            <stop offset="0" stopColor="#FF8FB8" stopOpacity="0.12" />
-            <stop offset="1" stopColor="transparent" />
-          </radialGradient>
         </defs>
 
-        {/* Layered nebula clouds inside SVG (amplify the CSS layers) */}
-        <ellipse cx={CX + 95} cy={CY - 70} rx="140" ry="100" fill="url(#stl-nebula-purple)" />
-        <ellipse cx={CX - 80} cy={CY + 50} rx="130" ry="110" fill="url(#stl-nebula-purple)" opacity="0.6" />
-        <ellipse cx={CX + 20} cy={CY - 130} rx="100" ry="70" fill="url(#stl-nebula-rose)" />
-
-        {/* Milky Way diagonal band with dust lane */}
-        <g transform={`rotate(-28 ${CX} ${CY})`}>
-          <ellipse cx={CX} cy={CY} rx="420" ry="60" fill="url(#stl-mw-core)" />
-          <ellipse cx={CX} cy={CY} rx="420" ry="14" fill="url(#stl-dust-lane)" opacity="0.8" />
+        <g transform={`rotate(-12 ${CX} ${CY})`}>
+          <ellipse cx={CX} cy={CY} rx="280" ry="38" fill="url(#stl-mw-wide)" />
+          <ellipse cx={CX} cy={CY} rx="280" ry="8" fill="url(#stl-dust-wide)" opacity="0.75" />
         </g>
-
-        {CONSTELLATION_LINES.map((c, i) => {
-          const pts = c.ids.map(id => starByName.get(id)).filter(Boolean) as ChartStar[];
-          if (pts.length < 2) return null;
-          const d = pts.map((p, idx) => `${idx === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-          return (
-            <path
-              key={i}
-              d={d}
-              fill="none"
-              stroke="rgba(184,212,255,0.55)"
-              strokeWidth="0.6"
-              strokeLinejoin="round"
-              className="stl-stroke-draw"
-              style={{ animationDelay: `${400 + i * 280}ms` }}
-            />
-          );
-        })}
 
         {stars.map((s, i) => {
-          const r = Math.max(0.4, (3.8 - s.mag) * 0.55);
-          const fill = s.tone === 'hot' ? 'var(--stl-star-hot)' : s.tone === 'warm' ? 'var(--stl-star-warm)' : 'var(--stl-star-cool)';
-          const op = s.aboveHorizon ? Math.min(1, 0.35 + (2.5 - s.mag) * 0.2) : 0.12;
-          return (
-            <circle
-              key={i}
-              cx={s.x}
-              cy={s.y}
-              r={r}
-              fill={fill}
-              className="stl-star-tw"
-              style={{
-                ['--stl-star-op' as string]: op,
-                animationDelay: `${(i % 12) * 320}ms`,
-              }}
-            />
-          );
+          const r = Math.max(0.3, (3.4 - s.mag) * 0.45);
+          const fill = s.mag < 1.2 ? '#FFF' : s.mag < 2.2 ? '#E8F0FF' : '#B8D4FF';
+          const opacity = s.aboveHorizon
+            ? Math.min(1, 0.4 + (3 - s.mag) * 0.22)
+            : 0.1;
+          const normX = (s.x - 200) / 180;
+          const normY = (s.y - 100) / 180;
+          const wideX = CX + normX * CHART_RX;
+          const wideY = CY + normY * CHART_RY;
+          if (wideX < 0 || wideX > W || wideY < 0 || wideY > H) return null;
+          return <circle key={i} cx={wideX} cy={wideY} r={r} fill={fill} opacity={opacity} />;
         })}
 
-        {/* Diffraction spikes — only for the brightest 6-8 stars */}
-        <g stroke="#fff" strokeWidth="0.3" opacity="0.4">
-          {stars
-            .filter(s => s.mag < 1.0 && s.aboveHorizon)
-            .slice(0, 8)
-            .map((s, i) => (
-              <g key={`spike-${i}`}>
-                <line x1={s.x} y1={s.y - 4} x2={s.x} y2={s.y + 4} />
-                <line x1={s.x - 4} y1={s.y} x2={s.x + 4} y2={s.y} />
-              </g>
-            ))}
-        </g>
-
-        {/* Amber galactic core stars — small accent for warmth */}
-        <g fill="#FFDDB8">
-          <circle cx={CX} cy={CY + 10} r="0.5" opacity="0.4" />
-          <circle cx={CX + 50} cy={CY} r="0.4" opacity="0.35" />
-          <circle cx={CX - 30} cy={CY + 30} r="0.5" opacity="0.4" />
-          <circle cx={CX + 90} cy={CY - 30} r="0.4" opacity="0.35" />
-        </g>
-
-        <g fontFamily="var(--font-mono)" fill="rgba(255,255,255,0.2)" fontSize="9" fontWeight="500">
-          <text x={CX} y={18} textAnchor="middle">N</text>
-          <text x={CX} y={H - 10} textAnchor="middle">S</text>
-          <text x={W - 8} y={CY + 4} textAnchor="end">E</text>
-          <text x={8} y={CY + 4}>W</text>
+        <g fontFamily="var(--font-mono)" fill="rgba(255,255,255,0.22)" fontSize="8" fontWeight="500">
+          <text x={CX} y="12" textAnchor="middle">N</text>
+          <text x={CX} y={H - 6} textAnchor="middle">S</text>
+          <text x={W - 8} y={CY + 3} textAnchor="end">E</text>
+          <text x={8} y={CY + 3}>W</text>
         </g>
       </svg>
 
-      {plotted.map(({ mission, x, y, aboveHorizon, Node }, i) => {
+      <div className="absolute top-2.5 left-3 flex items-center gap-1.5">
+        <div className="w-1.5 h-1.5 rounded-full stl-tw" style={{ background: 'var(--stl-gold)' }} />
+        <span
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 9,
+            color: 'rgba(255,255,255,0.4)',
+            letterSpacing: '0.22em',
+          }}
+        >
+          LIVE · {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </span>
+      </div>
+
+      {plottedMissions.map(({ mission, x, y, aboveHorizon, nodeSpec }) => {
         const isPrime = mission.id === primeId;
-        const isDone = completedIds.has(mission.id);
         const leftPct = (x / W) * 100;
         const topPct = (y / H) * 100;
+        const NodeComp = nodeSpec.comp;
+        const size = isPrime ? nodeSpec.primeSize : nodeSpec.size;
+
         return (
-          <div
+          <button
             key={mission.id}
-            className="absolute"
+            onClick={() => onSelect(mission)}
+            className="absolute transition-transform active:scale-95 hover:scale-110"
             style={{
               left: `${leftPct}%`,
               top: `${topPct}%`,
               transform: 'translate(-50%, -50%)',
+              opacity: aboveHorizon ? 1 : 0.35,
+              cursor: 'pointer',
               zIndex: isPrime ? 3 : 2,
             }}
+            aria-label={`Jump to ${mission.name}`}
           >
-            <button
-              onClick={() => onSelect(mission)}
-              className="stl-node-in flex flex-col items-center transition-transform duration-200 active:scale-95 hover:scale-110"
-              style={{
-                opacity: aboveHorizon ? (isDone ? 0.55 : 1) : 0.35,
-                cursor: 'pointer',
-                ['--stl-delay' as string]: `${700 + i * 90}ms`,
-              }}
-              aria-label={`Start ${mission.name} mission`}
-            >
-              <div className="relative">
-                {isPrime && aboveHorizon && <span className="stl-prime-ring" />}
-                <Node size={isPrime ? 38 : 30} />
-              </div>
-              <div className="mt-1 text-center whitespace-nowrap pointer-events-none">
-                <div
-                  className="stl-chart-label stl-node-name"
+            <div className="relative">
+              {isPrime && aboveHorizon && (
+                <span
+                  className="absolute pointer-events-none"
                   style={{
-                    fontFamily: 'var(--font-display)',
-                    fontWeight: 500,
-                    fontSize: 12,
-                    lineHeight: 1.15,
-                    letterSpacing: '-0.005em',
-                    color: aboveHorizon ? 'var(--stl-text-bright)' : 'var(--stl-text-dim)',
+                    inset: -3,
+                    borderRadius: '50%',
+                    border: '1.5px solid #FFD166',
+                    animation: 'stl-prime-pulse 2.4s ease-out infinite',
                   }}
-                >
-                  {mission.name}
-                </div>
-                <div
-                  className="stl-chart-label sm:mt-0.5"
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    fontWeight: 600,
-                    fontSize: 10,
-                    letterSpacing: '0.05em',
-                    color: aboveHorizon ? 'var(--stl-gold)' : 'rgba(255,209,102,0.4)',
-                  }}
-                >
-                  +{mission.stars} ✦
-                </div>
-              </div>
-            </button>
-          </div>
+                />
+              )}
+              <NodeComp size={size} />
+            </div>
+          </button>
         );
       })}
     </div>

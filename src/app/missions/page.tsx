@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, type ComponentType } from 'react';
 import { getActiveChallenge, getChallengeProgress, claimChallengeReward } from '@/lib/celestial-challenges';
 import { Lock } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
@@ -10,8 +10,18 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useLocation } from '@/lib/location';
 import StatsBar from '@/components/sky/StatsBar';
 import SkyChart from '@/components/sky/SkyChart';
-import PrimeTargetCard from '@/components/sky/PrimeTargetCard';
-import MissionRail from '@/components/sky/MissionRail';
+import PrimeHeroCard from '@/components/sky/PrimeHeroCard';
+import MissionListRow from '@/components/sky/MissionListRow';
+import JupiterNode from '@/components/sky/chart-nodes/JupiterNode';
+import SaturnNode from '@/components/sky/chart-nodes/SaturnNode';
+import MoonNode from '@/components/sky/chart-nodes/MoonNode';
+import VenusNode from '@/components/sky/chart-nodes/VenusNode';
+import MarsNode from '@/components/sky/chart-nodes/MarsNode';
+import MercuryNode from '@/components/sky/chart-nodes/MercuryNode';
+import PleiadesNode from '@/components/sky/chart-nodes/PleiadesNode';
+import OrionNode from '@/components/sky/chart-nodes/OrionNode';
+import AndromedaNode from '@/components/sky/chart-nodes/AndromedaNode';
+import CrabNode from '@/components/sky/chart-nodes/CrabNode';
 import MissionActive from '@/components/sky/MissionActive';
 import ObservationLog from '@/components/sky/ObservationLog';
 import RewardsSection from '@/components/sky/RewardsSection';
@@ -184,12 +194,7 @@ export default function MissionsPage() {
       <div className="max-w-2xl mx-auto px-4 py-2 flex flex-col gap-3" style={{ fontFamily: 'var(--font-display)' }}>
         <BackButton />
 
-        <ChartSection
-          onStart={setActiveMission}
-          skyStatus={skyConditions}
-          skyTimeout={skyTimeout}
-          isNight={isNight}
-        />
+        <ChartSection onStart={setActiveMission} />
 
         <StatsBar />
 
@@ -313,29 +318,42 @@ export default function MissionsPage() {
   );
 }
 
-const CHARTABLE_IDS = new Set(['moon','jupiter','saturn','venus','mars','mercury','pleiades','orion','andromeda','crab']);
+const CHARTABLE_IDS = ['moon','jupiter','saturn','venus','mars','mercury','pleiades','orion','andromeda','crab'];
 const PRIME_ORDER = ['jupiter','saturn','moon','venus','mars','andromeda','pleiades','orion','crab','mercury'];
-const PRIME_TAGLINES: Record<string, string> = {
-  jupiter:   'Four moons visible tonight',
+
+const NODE_MAP_FOR_LIST: Record<string, ComponentType<{ size?: number }>> = {
+  moon: MoonNode, jupiter: JupiterNode, saturn: SaturnNode,
+  venus: VenusNode, mars: MarsNode, mercury: MercuryNode,
+  pleiades: PleiadesNode, orion: OrionNode, andromeda: AndromedaNode, crab: CrabNode,
+};
+
+const TAGLINES: Record<string, string> = {
+  jupiter:   'Four Galilean moons visible',
   saturn:    'Rings at their widest tilt',
   moon:      'Terminator cuts sharp craters',
-  venus:     'The evening star, brightest object',
+  venus:     'Brightest object in the sky',
   mars:      'Rust-red and unmistakable',
   mercury:   'Low and fleeting — catch it fast',
   pleiades:  'Seven sisters, one glance',
-  orion:     'A stellar nursery, 1,344 ly out',
-  andromeda: 'A trillion suns, 2.5M ly away',
-  crab:      'The ghost of a 1054 AD supernova',
+  orion:     'Stellar nursery, 1,344 ly out',
+  andromeda: 'Trillion suns, 2.5M ly away',
+  crab:      'Ghost of a 1054 AD supernova',
 };
 
-interface ChartSectionProps {
-  onStart: (m: Mission) => void;
-  skyStatus: { cloudCover: number; visibility: string; verified: boolean } | null;
-  skyTimeout: boolean;
-  isNight: boolean;
-}
+const LIST_META: Record<string, string> = {
+  jupiter:   'SE · GAS GIANT · MAG −2.4',
+  saturn:    'SE · RINGS WIDE OPEN',
+  moon:      'WANING GIBBOUS · 73%',
+  venus:     'SW · EVENING STAR',
+  mars:      'E · RED PLANET',
+  mercury:   'LOW · MAG +0.4',
+  pleiades:  'M45 · SEVEN SISTERS',
+  orion:     'M42 · NEBULA',
+  andromeda: 'M31 · 2.5M LY AWAY',
+  crab:      'M1 · SUPERNOVA REMNANT',
+};
 
-function ChartSection({ onStart, skyStatus, skyTimeout, isNight }: ChartSectionProps) {
+function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
   const { state } = useAppState();
   const { location } = useLocation();
   const now = useMemo(() => new Date(), []);
@@ -348,31 +366,45 @@ function ChartSection({ onStart, skyStatus, skyTimeout, isNight }: ChartSectionP
   );
 
   const chartableMissions = useMemo(
-    () => MISSIONS.filter(m => CHARTABLE_IDS.has(m.id)),
+    () => MISSIONS.filter(m => CHARTABLE_IDS.includes(m.id)),
     []
   );
 
   const statusById = useMemo(() => {
-    const out: Record<string, { aboveHorizon: boolean; label: string; labelColor: string }> = {};
+    const out: Record<string, {
+      aboveHorizon: boolean;
+      altitude: number;
+      azDir: string;
+      peakTime: string | null;
+      metaLine: string;
+    }> = {};
     const planets = getVisiblePlanets(lat, lon, now);
     for (const p of planets) {
       const aboveHorizon = p.altitude > 0;
-      let label = aboveHorizon ? `ALT ${Math.round(p.altitude)}°` : 'BELOW HORIZON';
-      let labelColor: string = aboveHorizon ? '#86efac' : 'rgba(255,255,255,0.4)';
-      if (aboveHorizon && p.altitude < 15) { label = 'LOW · RISING'; labelColor = '#38F0FF'; }
-      if (!aboveHorizon && p.rise) {
-        const riseStr = p.rise instanceof Date ? p.rise.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-        label = `RISES ${riseStr}`;
-      }
-      out[p.key] = { aboveHorizon, label, labelColor };
+      const peakTime = p.transit
+        ? (p.transit instanceof Date ? p.transit : new Date(p.transit))
+            .toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        : null;
+      const riseStr = p.rise
+        ? (p.rise instanceof Date ? p.rise : new Date(p.rise))
+            .toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        : '';
+      const metaLine = aboveHorizon
+        ? `ALT ${Math.round(p.altitude)}° · ${p.azimuthDir}${peakTime ? ` · PEAKS ${peakTime}` : ''}`
+        : riseStr ? `RISES ${riseStr}` : 'BELOW HORIZON';
+      out[p.key] = { aboveHorizon, altitude: p.altitude, azDir: p.azimuthDir, peakTime, metaLine };
     }
-    const ds = getChartDeepSky(lat, lon, now, 200, 200, 180);
+    const ds = getChartDeepSky(lat, lon, now, 200, 100, 180);
     for (const d of ds) {
-      const aboveHorizon = d.aboveHorizon;
+      const metaLine = d.aboveHorizon
+        ? `ALT ${Math.round(d.altitude)}° · DEEP SKY`
+        : 'BELOW HORIZON';
       out[d.id] = {
-        aboveHorizon,
-        label: aboveHorizon ? `ALT ${Math.round(d.altitude)}°` : 'BELOW HORIZON',
-        labelColor: aboveHorizon ? '#86efac' : 'rgba(255,255,255,0.4)',
+        aboveHorizon: d.aboveHorizon,
+        altitude: d.altitude,
+        azDir: '',
+        peakTime: null,
+        metaLine,
       };
     }
     return out;
@@ -387,73 +419,142 @@ function ChartSection({ onStart, skyStatus, skyTimeout, isNight }: ChartSectionP
     return candidates[0];
   }, [chartableMissions, completedIds, statusById]);
 
-  const primePeak = useMemo(() => {
-    if (!primeMission) return null;
-    const planets = getVisiblePlanets(lat, lon, now);
-    const p = planets.find(x => x.key === primeMission.id);
-    if (!p?.transit) return null;
-    const d = p.transit instanceof Date ? p.transit : new Date(p.transit);
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }, [primeMission, lat, lon, now]);
-
-  const primeTagline = primeMission ? (PRIME_TAGLINES[primeMission.id] ?? primeMission.desc) : '';
+  const [filter, setFilter] = useState<'visible' | 'all'>('visible');
+  const sortedMissions = useMemo(() => {
+    let pool = chartableMissions.filter(m => m.id !== primeMission?.id);
+    if (filter === 'visible') {
+      pool = pool.filter(m => statusById[m.id]?.aboveHorizon);
+    }
+    pool.sort((a, b) => (statusById[b.id]?.altitude ?? -100) - (statusById[a.id]?.altitude ?? -100));
+    return primeMission ? [primeMission, ...pool] : pool;
+  }, [chartableMissions, primeMission, filter, statusById]);
 
   return (
-    <div className="flex flex-col gap-3">
-      {primeMission ? (
-        <PrimeTargetCard
-          mission={primeMission}
-          peakTime={primePeak}
-          tagline={primeTagline}
-          skyStatus={skyStatus}
-          onStart={() => onStart(primeMission)}
-        />
-      ) : (
-        <FallbackStatusLine skyStatus={skyStatus} skyTimeout={skyTimeout} isNight={isNight} />
+    <div className="flex flex-col gap-0">
+      {primeMission && (
+        <div className="mb-4">
+          <PrimeHeroCard
+            mission={primeMission}
+            altitude={statusById[primeMission.id]?.altitude ?? null}
+            peakTime={statusById[primeMission.id]?.peakTime ?? null}
+            tagline={TAGLINES[primeMission.id] ?? primeMission.desc}
+            onStart={() => onStart(primeMission)}
+          />
+        </div>
       )}
 
-      <SkyChart
-        lat={lat}
-        lon={lon}
-        date={now}
-        missions={chartableMissions}
-        completedIds={completedIds}
-        primeId={primeMission?.id ?? null}
-        onSelect={onStart}
+      <div className="mb-4">
+        <div className="flex items-baseline justify-between mb-2">
+          <h2
+            style={{
+              fontFamily: 'var(--font-serif)',
+              fontSize: 20,
+              color: '#F2F0EA',
+              fontWeight: 600,
+              margin: 0,
+            }}
+          >
+            Sky tonight
+          </h2>
+          <span
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 9,
+              color: 'rgba(255,255,255,0.4)',
+              letterSpacing: '0.15em',
+            }}
+          >
+            LIVE · TBILISI
+          </span>
+        </div>
+        <SkyChart
+          lat={lat}
+          lon={lon}
+          date={now}
+          missions={chartableMissions.filter(m => statusById[m.id]?.aboveHorizon)}
+          primeId={primeMission?.id ?? null}
+          onSelect={onStart}
+        />
+      </div>
+
+      <div
+        style={{
+          height: 1,
+          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)',
+          margin: '4px 0 16px',
+        }}
       />
 
-      <MissionRail
-        missions={chartableMissions}
-        statusById={statusById}
-        completedIds={completedIds}
-        onStart={onStart}
-      />
-    </div>
-  );
-}
+      <div>
+        <div className="flex items-baseline justify-between mb-3">
+          <h2
+            style={{
+              fontFamily: 'var(--font-serif)',
+              fontSize: 20,
+              color: '#F2F0EA',
+              fontWeight: 600,
+              margin: 0,
+            }}
+          >
+            Missions tonight
+          </h2>
+          <div
+            className="flex gap-0.5 p-0.5 rounded-md"
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.06)',
+            }}
+          >
+            {(['visible','all'] as const).map(f => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className="px-2.5 py-1 rounded transition-colors"
+                style={{
+                  fontSize: 10.5,
+                  fontWeight: 600,
+                  background: filter === f ? '#F2F0EA' : 'transparent',
+                  color: filter === f ? '#0a0a0a' : 'rgba(255,255,255,0.55)',
+                }}
+              >
+                {f === 'visible' ? 'Visible' : 'All'}
+              </button>
+            ))}
+          </div>
+        </div>
 
-function FallbackStatusLine({ skyStatus, skyTimeout, isNight }: {
-  skyStatus: { cloudCover: number; visibility: string; verified: boolean } | null;
-  skyTimeout: boolean;
-  isNight: boolean;
-}) {
-  let dotColor = 'var(--stl-text-whisper)';
-  let label: string;
-  if (skyStatus) {
-    dotColor = skyStatus.verified ? 'var(--stl-green)' : '#F59E0B';
-    label = skyStatus.verified
-      ? `Clear sky tonight · ${skyStatus.cloudCover}% cloud · ${skyStatus.visibility}`
-      : `Cloudy tonight · ${skyStatus.cloudCover}% cloud cover`;
-  } else if (skyTimeout) {
-    label = 'Sky conditions unavailable — showing all targets';
-  } else {
-    dotColor = isNight ? 'var(--stl-green)' : 'var(--stl-text-whisper)';
-    label = isNight ? 'Checking sky conditions…' : 'Daytime — come back after sunset';
-  }
-  return (
-    <div className="flex items-center gap-2 px-1">
-      <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: dotColor }} />
-      <span className="text-[11px]" style={{ color: 'var(--stl-text-muted)' }}>{label}</span>
+        <div className="flex flex-col">
+          {sortedMissions.map(m => {
+            const Art = NODE_MAP_FOR_LIST[m.id];
+            if (!Art) return null;
+            const status = statusById[m.id];
+            const isPrime = m.id === primeMission?.id;
+            const isDone = completedIds.has(m.id) && !m.repeatable;
+            const disabled = isDone || !status?.aboveHorizon;
+
+            const badge = isPrime
+              ? { label: 'PRIME', color: '#FFD166', bg: 'rgba(255,209,102,0.15)' }
+              : status && !status.aboveHorizon
+              ? { label: 'HIDDEN', color: 'rgba(255,255,255,0.5)', bg: 'rgba(255,255,255,0.06)' }
+              : status && status.altitude < 20
+              ? { label: 'LOW', color: '#38F0FF', bg: 'rgba(56,240,255,0.12)' }
+              : undefined;
+
+            return (
+              <MissionListRow
+                key={m.id}
+                mission={m}
+                Art={Art}
+                metaLine={LIST_META[m.id] ?? ''}
+                badge={badge}
+                isPrime={isPrime}
+                disabled={disabled}
+                onClick={() => onStart(m)}
+              />
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
