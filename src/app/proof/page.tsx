@@ -34,7 +34,7 @@ function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete:
 
   return (
     <div className={`glass-card rounded-xl overflow-hidden flex flex-col ${isPending ? '!border-amber-500/50' : ''}`} style={isPending ? { borderColor: 'rgba(245,158,11,0.5)' } : {}}>
-      <img src={isSafePhoto(mission.photo) ? mission.photo : '/placeholder-obs.jpg'} alt={mission.name} className="w-full aspect-[4/3] object-cover" />
+      <img src={isSafePhoto(mission.photo) ? mission.photo : '/images/placeholder-nft.svg'} alt={mission.name} className="w-full aspect-[4/3] object-cover" style={{ background: '#0a0e1a' }} />
       <div className="p-4 flex flex-col gap-2 flex-1">
         <div className="flex items-center gap-2">
           <span className="text-xl">{mission.emoji}</span>
@@ -78,18 +78,31 @@ function ProofCard({ mission, onDelete }: { mission: CompletedMission; onDelete:
               ↗ Share
             </button>
           )}
-          <button
-            onClick={() => openExplorer(mission)}
-            disabled={!isRealTx}
-            title={isRealTx ? 'View on Solana Explorer' : 'Transaction not yet confirmed on-chain'}
-            className={`flex-1 text-center text-xs px-2 py-1.5 border rounded transition-all flex items-center justify-center gap-1 ${
-              isRealTx
-                ? 'border-[rgba(99,102,241,0.12)] hover:border-[#818cf8] text-slate-400 hover:text-[#818cf8] btn-glow-cyan'
-                : 'border-[rgba(99,102,241,0.12)] text-slate-600 opacity-50 cursor-not-allowed'
-            }`}
-          >
-            <ExternalLink size={12} /> {isRealTx ? 'Explorer →' : 'Local only'}
-          </button>
+          {isRealTx ? (
+            <button
+              onClick={() => openExplorer(mission)}
+              title="View on Solana Explorer"
+              className="flex-1 text-center text-xs px-2 py-1.5 border border-[rgba(99,102,241,0.12)] hover:border-[#818cf8] text-slate-400 hover:text-[#818cf8] btn-glow-cyan rounded transition-all flex items-center justify-center gap-1"
+            >
+              <ExternalLink size={12} /> Explorer →
+            </button>
+          ) : isPending ? (
+            <button
+              disabled
+              title="Transaction is being confirmed on Solana"
+              className="flex-1 text-center text-xs px-2 py-1.5 border border-[rgba(99,102,241,0.12)] text-slate-600 opacity-50 cursor-not-allowed rounded transition-all flex items-center justify-center gap-1"
+            >
+              <ExternalLink size={12} /> Pending
+            </button>
+          ) : (
+            <button
+              disabled
+              title="Demo mission — no on-chain transaction"
+              className="flex-1 text-center text-xs px-2 py-1.5 border border-[rgba(251,191,36,0.2)] text-amber-400/70 opacity-70 cursor-not-allowed rounded transition-all flex items-center justify-center gap-1"
+            >
+              <ExternalLink size={12} /> Demo
+            </button>
+          )}
           {!confirming ? (
             <button
               onClick={() => setConfirming(true)}

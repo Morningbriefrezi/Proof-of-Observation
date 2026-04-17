@@ -437,7 +437,8 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
         url.startsWith('data:image/jpeg;base64,') ||
         url.startsWith('data:image/png;base64,') ||
         url.startsWith('data:image/webp;base64,') ||
-        url.startsWith('blob:');
+        url.startsWith('blob:') ||
+        url.startsWith('/images/');
 
       addMission({
         id: mission.id,
@@ -454,10 +455,11 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
         method: txId.startsWith('sim') ? 'simulated' : 'onchain',
       });
 
+      setStep('done');
       if (justUnlocked.length > 0) {
-        setNewRewards(justUnlocked.map(r => ({ icon: r.icon, name: r.name, description: r.description, code: r.code })));
-      } else {
-        setStep('done');
+        setTimeout(() => {
+          setNewRewards(justUnlocked.map(r => ({ icon: r.icon, name: r.name, description: r.description, code: r.code })));
+        }, 1800);
       }
     }, 1200);
   };
@@ -763,7 +765,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
             )}
 
             {/* Explorer link — bottom-left */}
-            {isOnChain && (
+            {isOnChain ? (
               <a
                 href={`https://explorer.solana.com/tx/${mintTxId}?cluster=${process.env.NEXT_PUBLIC_SOLANA_CLUSTER ?? 'devnet'}`}
                 target="_blank"
@@ -773,7 +775,14 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
               >
                 Explorer <ExternalLink size={9} />
               </a>
-            )}
+            ) : mission.demo ? (
+              <div
+                className="absolute bottom-3 left-3 flex items-center gap-1 text-[11px]"
+                style={{ color: 'rgba(251,191,36,0.85)', background: 'rgba(7,11,20,0.7)', borderRadius: 8, padding: '3px 7px', backdropFilter: 'blur(6px)', border: '1px solid rgba(251,191,36,0.2)' }}
+              >
+                Demo · local proof
+              </div>
+            ) : null}
           </div>
 
           {/* Share row */}
@@ -1052,17 +1061,17 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
       </div>
 
       {/* Content */}
-      <div className={`flex flex-col flex-1 min-h-0 overflow-hidden ${fullBleed ? '' : 'px-4 py-3 max-w-2xl mx-auto w-full'}`}>
+      <div className={`flex flex-col flex-1 min-h-0 overflow-y-auto ${fullBleed ? '' : 'px-4 py-4 max-w-xl mx-auto w-full'}`}>
 
         {step === 'observing' && (
-          <div className="flex flex-col gap-3 flex-1 min-h-0 justify-center">
+          <div className="flex flex-col gap-5 pt-4">
             <div
-              className="rounded-2xl p-5 text-center"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}
+              className="rounded-2xl p-6 text-center"
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}
             >
               <div
-                className="w-16 h-16 rounded-2xl overflow-hidden mx-auto mb-3"
-                style={{ border: '1px solid rgba(255,209,102,0.2)', boxShadow: '0 0 20px rgba(255,209,102,0.08)' }}
+                className="w-20 h-20 rounded-2xl overflow-hidden mx-auto mb-4"
+                style={{ border: '1px solid rgba(255,209,102,0.25)', boxShadow: '0 0 24px rgba(255,209,102,0.1)' }}
               >
                 <img
                   src={getMissionImage(mission.id)}
@@ -1071,16 +1080,39 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
                   style={{ display: 'block' }}
                 />
               </div>
-              <p className="text-white text-sm font-medium mb-1.5">
+              <p className="text-white text-base font-semibold mb-2">
                 Point your telescope at <span className="text-[#FFD166]">{mission.name}</span>
               </p>
-              <p className="text-slate-600 text-xs leading-snug overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' as const }}>
+              <p className="text-slate-400 text-sm leading-relaxed">
                 {mission.hint}
               </p>
+              {mission.demo && (
+                <p className="text-amber-400 text-xs mt-3 opacity-70">
+                  Demo mode — mints immediately without real photo
+                </p>
+              )}
             </div>
-            <Button variant="brass" onClick={() => { setMintError(''); if (mission.demo) { handleCapture(mission.demoPhoto ?? '/images/planets/saturn.jpg'); } else { setStep('camera'); } }} className="w-full flex-shrink-0">
+            <Button
+              variant="brass"
+              onClick={() => { setMintError(''); if (mission.demo) { handleCapture(mission.demoPhoto ?? '/images/planets/jupiter.jpg'); } else { setStep('camera'); } }}
+              className="w-full"
+            >
               Begin Observation →
             </Button>
+            <div className="grid grid-cols-3 gap-2 mt-2">
+              <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <p className="text-[10px] font-semibold tracking-[0.12em] text-slate-500 uppercase">Reward</p>
+                <p className="text-[#FFD166] font-bold text-sm mt-1">{mission.stars} ✦</p>
+              </div>
+              <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <p className="text-[10px] font-semibold tracking-[0.12em] text-slate-500 uppercase">Difficulty</p>
+                <p className="text-white font-semibold text-sm mt-1 capitalize">{mission.difficulty || 'Beginner'}</p>
+              </div>
+              <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <p className="text-[10px] font-semibold tracking-[0.12em] text-slate-500 uppercase">Target</p>
+                <p className="text-white font-semibold text-sm mt-1">{mission.target || mission.name}</p>
+              </div>
+            </div>
           </div>
         )}
 

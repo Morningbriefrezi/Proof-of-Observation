@@ -600,16 +600,25 @@ export default function NftsPage() {
                 }}
               >
                 {/* Star map image */}
-                <div style={{ position: 'relative', width: '100%', height: 160 }}>
-                  <Image
-                    src={nftImageUrl}
-                    alt={target}
-                    fill
-                    unoptimized
-                    style={{ objectFit: 'cover' }}
-                    loading="lazy"
-                    onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/placeholder-nft.svg'; }}
-                  />
+                <div style={{ position: 'relative', width: '100%', height: 160, background: '#0a0e1a' }}>
+                  {item.photo ? (
+                    <img
+                      src={item.photo}
+                      alt={target}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      onError={e => { (e.currentTarget as HTMLImageElement).src = nftImageUrl; }}
+                    />
+                  ) : (
+                    <Image
+                      src={nftImageUrl}
+                      alt={target}
+                      fill
+                      unoptimized
+                      style={{ objectFit: 'cover' }}
+                      loading="lazy"
+                      onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/placeholder-nft.svg'; }}
+                    />
+                  )}
                 </div>
 
                 {/* Card content */}
