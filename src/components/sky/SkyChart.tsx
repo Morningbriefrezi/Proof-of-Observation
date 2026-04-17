@@ -21,8 +21,11 @@ import OrionNode from './chart-nodes/OrionNode';
 import AndromedaNode from './chart-nodes/AndromedaNode';
 import CrabNode from './chart-nodes/CrabNode';
 
-const SIZE = 400;
-const CX = 200;
+// Wider canvas than tall — the horizon circle stays centered; extra side area
+// fills with stars just below horizon for visual depth.
+const W = 600;
+const H = 420;
+const CX = 300;
 const CY = 200;
 const CHART_R = 180;
 
@@ -65,7 +68,7 @@ const MISSION_NODE: Record<string, React.ComponentType<{ size?: number }>> = {
 
 export default function SkyChart({ lat, lon, date, missions, completedIds, primeId, onSelect }: Props) {
   const stars: ChartStar[] = useMemo(
-    () => getChartStars(lat, lon, date, CX, CY, CHART_R, 3.2),
+    () => getChartStars(lat, lon, date, CX, CY, CHART_R, 3.6),
     [lat, lon, date]
   );
   const planets: ChartPlanet[] = useMemo(
@@ -101,16 +104,20 @@ export default function SkyChart({ lat, lon, date, missions, completedIds, prime
 
   return (
     <div
-      className="relative w-full overflow-hidden mx-auto stl-chart-in"
+      className="relative w-full overflow-hidden stl-chart-in stl-chart"
       style={{
-        maxWidth: 'min(100%, 520px)',
-        aspectRatio: '1 / 1.05',
+        fontFamily: 'var(--font-display)',
         background: 'var(--stl-bg-chart)',
         border: '1px solid var(--stl-border-regular)',
         borderRadius: 'var(--stl-r-xl)',
       }}
     >
-      <svg viewBox={`0 0 ${SIZE} ${SIZE + 20}`} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} xmlns="http://www.w3.org/2000/svg">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        preserveAspectRatio="xMidYMid meet"
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+        xmlns="http://www.w3.org/2000/svg"
+      >
         <defs>
           <radialGradient id="stl-milky" cx="0.5" cy="0.5" r="0.5">
             <stop offset="0" stopColor="#B5C5FF" stopOpacity="0.08" />
@@ -118,7 +125,7 @@ export default function SkyChart({ lat, lon, date, missions, completedIds, prime
           </radialGradient>
         </defs>
 
-        <ellipse cx={CX} cy={CY} rx={360} ry={60} fill="url(#stl-milky)" transform={`rotate(-28 ${CX} ${CY})`} />
+        <ellipse cx={CX} cy={CY} rx={460} ry={70} fill="url(#stl-milky)" transform={`rotate(-22 ${CX} ${CY})`} />
 
         <circle cx={CX} cy={CY} r={CHART_R}        fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
         <circle cx={CX} cy={CY} r={CHART_R * 0.66} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" strokeDasharray="1 4" />
@@ -143,9 +150,9 @@ export default function SkyChart({ lat, lon, date, missions, completedIds, prime
         })}
 
         {stars.map((s, i) => {
-          const r = Math.max(0.4, (3.5 - s.mag) * 0.55);
+          const r = Math.max(0.4, (3.8 - s.mag) * 0.55);
           const fill = s.tone === 'hot' ? 'var(--stl-star-hot)' : s.tone === 'warm' ? 'var(--stl-star-warm)' : 'var(--stl-star-cool)';
-          const op = s.aboveHorizon ? Math.min(1, 0.35 + (2.5 - s.mag) * 0.2) : 0.15;
+          const op = s.aboveHorizon ? Math.min(1, 0.35 + (2.5 - s.mag) * 0.2) : 0.12;
           return (
             <circle
               key={i}
@@ -164,24 +171,17 @@ export default function SkyChart({ lat, lon, date, missions, completedIds, prime
 
         <circle cx={CX} cy={CY} r={CHART_R} fill="none" stroke="rgba(56,240,255,0.22)" strokeWidth="0.8" strokeDasharray="3 3" />
 
-        <text x={CX} y={CY - CHART_R - 6}  fill="rgba(255,255,255,0.45)" fontSize="10" fontFamily="var(--font-mono)" textAnchor="middle">N</text>
-        <text x={CX + CHART_R + 10} y={CY + 4} fill="rgba(255,255,255,0.45)" fontSize="10" fontFamily="var(--font-mono)">E</text>
-        <text x={CX - CHART_R - 10} y={CY + 4} fill="rgba(255,255,255,0.45)" fontSize="10" fontFamily="var(--font-mono)" textAnchor="end">W</text>
-        <text x={CX} y={CY + CHART_R + 16} fill="rgba(56,240,255,0.45)" fontSize="9" fontFamily="var(--font-mono)" textAnchor="middle" letterSpacing="2">S · HORIZON</text>
+        <text x={CX} y={CY - CHART_R - 6}  fill="rgba(255,255,255,0.55)" fontSize="11" fontFamily="var(--font-display)" fontWeight="600" textAnchor="middle" letterSpacing="0.2em">N</text>
+        <text x={CX + CHART_R + 10} y={CY + 4} fill="rgba(255,255,255,0.55)" fontSize="11" fontFamily="var(--font-display)" fontWeight="600" letterSpacing="0.2em">E</text>
+        <text x={CX - CHART_R - 10} y={CY + 4} fill="rgba(255,255,255,0.55)" fontSize="11" fontFamily="var(--font-display)" fontWeight="600" textAnchor="end" letterSpacing="0.2em">W</text>
+        <text x={CX} y={CY + CHART_R + 18} fill="rgba(56,240,255,0.55)" fontSize="10" fontFamily="var(--font-display)" fontWeight="500" textAnchor="middle" letterSpacing="0.25em">S · HORIZON</text>
       </svg>
-
-      <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-        <div className="w-1.5 h-1.5 rounded-full stl-tw" style={{ background: 'var(--stl-gold)' }} />
-        <span className="stl-mono-kicker" style={{ color: 'var(--stl-text-dim)' }}>
-          {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · TONIGHT
-        </span>
-      </div>
 
       {plotted.map(({ mission, x, y, aboveHorizon, Node }, i) => {
         const isPrime = mission.id === primeId;
         const isDone = completedIds.has(mission.id);
-        const leftPct = (x / SIZE) * 100;
-        const topPct = (y / (SIZE + 20)) * 100;
+        const leftPct = (x / W) * 100;
+        const topPct = (y / H) * 100;
         return (
           <div
             key={mission.id}
@@ -197,7 +197,7 @@ export default function SkyChart({ lat, lon, date, missions, completedIds, prime
               onClick={() => onSelect(mission)}
               className="stl-node-in flex flex-col items-center transition-transform duration-200 active:scale-95 hover:scale-110"
               style={{
-                opacity: aboveHorizon ? (isDone ? 0.55 : 1) : 0.3,
+                opacity: aboveHorizon ? (isDone ? 0.55 : 1) : 0.35,
                 cursor: 'pointer',
                 ['--stl-delay' as string]: `${700 + i * 90}ms`,
               }}
@@ -205,17 +205,17 @@ export default function SkyChart({ lat, lon, date, missions, completedIds, prime
             >
               <div className="relative">
                 {isPrime && aboveHorizon && <span className="stl-prime-ring" />}
-                <Node size={isPrime ? 32 : 24} />
+                <Node size={isPrime ? 34 : 26} />
               </div>
               <div className="mt-1 text-center whitespace-nowrap pointer-events-none">
                 <div
                   className="stl-chart-label"
                   style={{
-                    fontFamily: 'var(--font-serif)',
-                    fontStyle: 'italic',
-                    fontWeight: 400,
+                    fontFamily: 'var(--font-display)',
+                    fontWeight: 500,
                     fontSize: 12,
-                    lineHeight: 1.1,
+                    lineHeight: 1.15,
+                    letterSpacing: '-0.005em',
                     color: aboveHorizon ? 'var(--stl-text-bright)' : 'var(--stl-text-dim)',
                   }}
                 >
@@ -224,9 +224,10 @@ export default function SkyChart({ lat, lon, date, missions, completedIds, prime
                 <div
                   className="stl-chart-label mt-0.5"
                   style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 9,
-                    letterSpacing: '0.08em',
+                    fontFamily: 'var(--font-display)',
+                    fontWeight: 600,
+                    fontSize: 10,
+                    letterSpacing: '0.05em',
                     color: aboveHorizon ? 'var(--stl-gold)' : 'rgba(255,209,102,0.4)',
                   }}
                 >

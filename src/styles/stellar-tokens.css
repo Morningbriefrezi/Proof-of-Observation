@@ -145,6 +145,10 @@
   text-shadow: 0 1px 6px rgba(3, 6, 18, 0.85), 0 0 2px rgba(3, 6, 18, 0.9);
 }
 
+/* Chart container aspect — taller on mobile for legibility, wider on desktop */
+.stl-chart { aspect-ratio: 5 / 4; }
+@media (min-width: 640px) { .stl-chart { aspect-ratio: 600 / 420; } }
+
 @media (prefers-reduced-motion: reduce) {
   .stl-star-tw,
   .stl-chart-in,

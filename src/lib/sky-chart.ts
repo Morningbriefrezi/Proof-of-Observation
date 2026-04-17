@@ -20,9 +20,10 @@ export function projectAltAz(
   azDeg: number,
   cx: number,
   cy: number,
-  chartRadius: number
+  chartRadius: number,
+  minAlt: number = -30
 ): ChartPoint {
-  const altClamped = Math.max(-10, Math.min(90, altDeg));
+  const altClamped = Math.max(minAlt, Math.min(90, altDeg));
   const r = (1 - altClamped / 90) * chartRadius;
   const azRad = (azDeg * Math.PI) / 180;
   const x = cx + r * Math.sin(azRad);
@@ -53,7 +54,7 @@ export function getChartStars(
 
     try {
       const horiz = Horizon(date, observer, raHours, decDeg, 'normal');
-      if (horiz.altitude < -5) continue;
+      if (horiz.altitude < -25) continue;
       const p = projectAltAz(horiz.altitude, horiz.azimuth, cx, cy, chartRadius);
       out.push({
         ...p,
@@ -105,7 +106,7 @@ export function getChartPlanets(
     try {
       const eq = Equator(body, date, observer, true, true);
       const horiz = Horizon(date, observer, eq.ra, eq.dec, 'normal');
-      const p = projectAltAz(horiz.altitude, horiz.azimuth, cx, cy, chartRadius);
+      const p = projectAltAz(horiz.altitude, horiz.azimuth, cx, cy, chartRadius, -8);
       out.push({
         ...p,
         key,
@@ -147,7 +148,7 @@ export function getChartDeepSky(
   for (const [id, coord] of Object.entries(DEEP_SKY_TARGETS)) {
     try {
       const horiz = Horizon(date, observer, coord.raHours, coord.decDeg, 'normal');
-      const p = projectAltAz(horiz.altitude, horiz.azimuth, cx, cy, chartRadius);
+      const p = projectAltAz(horiz.altitude, horiz.azimuth, cx, cy, chartRadius, -8);
       out.push({ ...p, id, altitude: horiz.altitude, azimuth: horiz.azimuth });
     } catch { continue; }
   }

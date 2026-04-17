@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { getActiveChallenge, getChallengeProgress, claimChallengeReward } from '@/lib/celestial-challenges';
-import { Satellite, Lock } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 import { useAppState } from '@/hooks/useAppState';
 import { usePrivy } from '@privy-io/react-auth';
@@ -183,7 +183,7 @@ export default function MissionsPage() {
       {activeMission && <MissionActive mission={activeMission} onClose={() => { setActiveMission(null); setChProgress(getChallengeProgress()); }} />}
       {activeQuiz && <QuizActive quiz={activeQuiz} onClose={() => setActiveQuiz(null)} />}
 
-      <div className="max-w-2xl mx-auto px-4 py-2 flex flex-col gap-2">
+      <div className="max-w-2xl mx-auto px-4 py-2 flex flex-col gap-3" style={{ fontFamily: 'var(--font-display)' }}>
         <BackButton />
         <div className="flex items-center gap-2">
           <div className="flex-shrink-0">
@@ -193,111 +193,84 @@ export default function MissionsPage() {
             <DailyCheckIn lat={location.lat ?? 41.6941} lon={location.lon ?? 44.8337} />
           </div>
         </div>
-        <section>
-          <div className="flex items-center gap-2 mb-1.5">
-            <Satellite size={16} strokeWidth={1.5} className="text-[#818cf8]" />
-            <h1 className="text-lg sm:text-xl font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
-              {t('title')}
-            </h1>
-          </div>
 
-          <div className="flex items-center gap-2 mb-2">
-            {skyConditions ? (
-              <>
-                <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${skyConditions.verified ? 'bg-[#34d399] animate-pulse' : 'bg-amber-400'}`} />
-                <span className="text-[11px] text-slate-500">
-                  {skyConditions.verified
-                    ? `Clear sky tonight · ${skyConditions.cloudCover}% cloud · ${skyConditions.visibility}`
-                    : `Cloudy tonight · ${skyConditions.cloudCover}% cloud cover`}
-                </span>
-              </>
-            ) : skyTimeout ? (
-              <>
-                <div className="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-slate-700" />
-                <span className="text-[11px] text-slate-500">Sky conditions unavailable — showing all missions</span>
-              </>
+        <ChartSection
+          onStart={setActiveMission}
+          skyStatus={skyConditions}
+          skyTimeout={skyTimeout}
+          isNight={isNight}
+        />
+
+        <StatsBar />
+
+        {/* Weekly challenge strip */}
+        <button
+          onClick={() => {
+            if (chProgress.completed && !chProgress.claimed) {
+              const bonus = claimChallengeReward();
+              if (bonus > 0 && state.walletAddress) {
+                fetch('/api/award-stars', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ recipientAddress: state.walletAddress, amount: bonus, reason: 'weekly_challenge' }),
+                }).catch(() => {});
+              }
+              setChProgress(getChallengeProgress());
+            }
+          }}
+          disabled={!(chProgress.completed && !chProgress.claimed)}
+          className={`w-full text-left rounded-xl flex items-center gap-3 px-3.5 py-3 ${chProgress.completed && !chProgress.claimed ? 'animate-challenge-pulse cursor-pointer' : ''}`}
+          style={{
+            background: chProgress.claimed
+              ? 'rgba(52,211,153,0.04)'
+              : 'linear-gradient(90deg, rgba(255,209,102,0.06), rgba(255,209,102,0.015))',
+            border: chProgress.claimed
+              ? '1px solid rgba(52,211,153,0.15)'
+              : '1px solid var(--stl-border-gold)',
+            borderLeft: `3px solid ${chProgress.claimed ? 'var(--stl-green)' : 'var(--stl-gold)'}`,
+          }}
+        >
+          <span style={{ fontSize: 18, color: chProgress.claimed ? 'var(--stl-green)' : 'var(--stl-gold)' }}>
+            {chProgress.claimed ? '✓' : activeChallenge.glyph}
+          </span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] uppercase tracking-widest font-semibold" style={{ color: chProgress.claimed ? 'var(--stl-green)' : 'var(--stl-gold)' }}>
+                This Week
+              </span>
+              <span className="text-xs font-semibold truncate" style={{ color: 'var(--stl-text-bright)' }}>{activeChallenge.name}</span>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min(100, (chProgress.progress / activeChallenge.goal) * 100)}%`,
+                    background: chProgress.completed ? 'var(--stl-green)' : 'linear-gradient(90deg, var(--stl-gold), var(--stl-gold-dim))',
+                  }}
+                />
+              </div>
+              <span className="text-[10px] flex-shrink-0" style={{ color: chProgress.completed ? 'var(--stl-green)' : 'var(--stl-text-dim)' }}>
+                {chProgress.progress}/{activeChallenge.goal}
+              </span>
+            </div>
+          </div>
+          <div className="flex-shrink-0 text-right">
+            {chProgress.completed && !chProgress.claimed ? (
+              <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: 'linear-gradient(135deg, var(--stl-gold), var(--stl-gold-dim))', color: '#0a0a0a' }}>
+                Claim +{activeChallenge.bonusStars}
+              </span>
+            ) : chProgress.claimed ? (
+              <span className="text-[10px]" style={{ color: 'var(--stl-green)' }}>Claimed</span>
             ) : (
-              <>
-                <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isNight ? 'bg-[#34d399] animate-pulse' : 'bg-slate-700'}`} />
-                <span className="text-[11px] text-slate-600">
-                  {isNight ? 'Checking sky conditions…' : 'Daytime — come back after sunset'}
-                </span>
-              </>
+              <span className="text-[10px]" style={{ color: 'var(--stl-text-dim)' }}>+{activeChallenge.bonusStars} ✦</span>
             )}
           </div>
-
-          <ChartSection onStart={setActiveMission} />
-
-          {/* Weekly challenge strip */}
-          <button
-            onClick={() => {
-              if (chProgress.completed && !chProgress.claimed) {
-                const bonus = claimChallengeReward();
-                if (bonus > 0 && state.walletAddress) {
-                  fetch('/api/award-stars', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ recipientAddress: state.walletAddress, amount: bonus, reason: 'weekly_challenge' }),
-                  }).catch(() => {});
-                }
-                setChProgress(getChallengeProgress());
-              }
-            }}
-            disabled={!(chProgress.completed && !chProgress.claimed)}
-            className={`w-full text-left rounded-xl flex items-center gap-3 px-3.5 py-3 mb-3 ${chProgress.completed && !chProgress.claimed ? 'animate-challenge-pulse cursor-pointer' : ''}`}
-            style={{
-              background: chProgress.claimed
-                ? 'rgba(52,211,153,0.04)'
-                : 'linear-gradient(90deg, rgba(168,85,247,0.08) 0%, rgba(168,85,247,0.02) 100%)',
-              border: chProgress.claimed
-                ? '1px solid rgba(52,211,153,0.15)'
-                : '1px solid rgba(168,85,247,0.2)',
-              borderLeft: `3px solid ${chProgress.claimed ? '#34d399' : '#A855F7'}`,
-            }}
-          >
-            <span style={{ fontSize: 18, color: chProgress.claimed ? '#34d399' : '#A855F7' }}>
-              {chProgress.claimed ? '✓' : activeChallenge.glyph}
-            </span>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="text-[9px] uppercase tracking-widest font-semibold" style={{ color: chProgress.claimed ? '#34d399' : '#A855F7' }}>
-                  This Week
-                </span>
-                <span className="text-xs font-semibold text-white truncate">{activeChallenge.name}</span>
-              </div>
-              <div className="flex items-center gap-2 mt-1">
-                <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${Math.min(100, (chProgress.progress / activeChallenge.goal) * 100)}%`,
-                      background: chProgress.completed ? '#34d399' : 'linear-gradient(90deg, #A855F7, #FFD166)',
-                    }}
-                  />
-                </div>
-                <span className="text-[10px] font-mono flex-shrink-0" style={{ color: chProgress.completed ? '#34d399' : 'rgba(255,255,255,0.4)' }}>
-                  {chProgress.progress}/{activeChallenge.goal}
-                </span>
-              </div>
-            </div>
-            <div className="flex-shrink-0 text-right">
-              {chProgress.completed && !chProgress.claimed ? (
-                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: 'linear-gradient(135deg, #FFD166, #CC9A33)', color: '#0a0a0a' }}>
-                  Claim +{activeChallenge.bonusStars}
-                </span>
-              ) : chProgress.claimed ? (
-                <span className="text-[10px] text-[#34d399]">Claimed</span>
-              ) : (
-                <span className="text-[10px] text-slate-500">+{activeChallenge.bonusStars} ✦</span>
-              )}
-            </div>
-          </button>
-          <StatsBar />
-        </section>
+        </button>
 
         {/* Quiz Missions */}
         <section>
-          <h2 className="text-[11px] uppercase tracking-widest mb-2 mt-3" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-secondary)' }}>{t('knowledgeQuizzes')}</h2>
+          <h2 className="text-[11px] uppercase tracking-widest mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--stl-text-muted)' }}>{t('knowledgeQuizzes')}</h2>
           <div className="flex flex-col gap-2.5">
             {QUIZZES.map(quiz => {
               const bestResult = [...(state.completedQuizzes ?? [])]
@@ -365,7 +338,14 @@ const PRIME_TAGLINES: Record<string, string> = {
   crab:      'The ghost of a 1054 AD supernova',
 };
 
-function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
+interface ChartSectionProps {
+  onStart: (m: Mission) => void;
+  skyStatus: { cloudCover: number; visibility: string; verified: boolean } | null;
+  skyTimeout: boolean;
+  isNight: boolean;
+}
+
+function ChartSection({ onStart, skyStatus, skyTimeout, isNight }: ChartSectionProps) {
   const { state } = useAppState();
   const { location } = useLocation();
   const now = useMemo(() => new Date(), []);
@@ -429,26 +409,28 @@ function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
   const primeTagline = primeMission ? (PRIME_TAGLINES[primeMission.id] ?? primeMission.desc) : '';
 
   return (
-    <div className="relative">
-      <div className="relative">
-        <SkyChart
-          lat={lat}
-          lon={lon}
-          date={now}
-          missions={chartableMissions}
-          completedIds={completedIds}
-          primeId={primeMission?.id ?? null}
-          onSelect={onStart}
+    <div className="flex flex-col gap-3">
+      {primeMission ? (
+        <PrimeTargetCard
+          mission={primeMission}
+          peakTime={primePeak}
+          tagline={primeTagline}
+          skyStatus={skyStatus}
+          onStart={() => onStart(primeMission)}
         />
-        {primeMission && (
-          <PrimeTargetCard
-            mission={primeMission}
-            peakTime={primePeak}
-            tagline={primeTagline}
-            onStart={() => onStart(primeMission)}
-          />
-        )}
-      </div>
+      ) : (
+        <FallbackStatusLine skyStatus={skyStatus} skyTimeout={skyTimeout} isNight={isNight} />
+      )}
+
+      <SkyChart
+        lat={lat}
+        lon={lon}
+        date={now}
+        missions={chartableMissions}
+        completedIds={completedIds}
+        primeId={primeMission?.id ?? null}
+        onSelect={onStart}
+      />
 
       <MissionRail
         missions={chartableMissions}
@@ -456,6 +438,32 @@ function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
         completedIds={completedIds}
         onStart={onStart}
       />
+    </div>
+  );
+}
+
+function FallbackStatusLine({ skyStatus, skyTimeout, isNight }: {
+  skyStatus: { cloudCover: number; visibility: string; verified: boolean } | null;
+  skyTimeout: boolean;
+  isNight: boolean;
+}) {
+  let dotColor = 'var(--stl-text-whisper)';
+  let label: string;
+  if (skyStatus) {
+    dotColor = skyStatus.verified ? 'var(--stl-green)' : '#F59E0B';
+    label = skyStatus.verified
+      ? `Clear sky tonight · ${skyStatus.cloudCover}% cloud · ${skyStatus.visibility}`
+      : `Cloudy tonight · ${skyStatus.cloudCover}% cloud cover`;
+  } else if (skyTimeout) {
+    label = 'Sky conditions unavailable — showing all targets';
+  } else {
+    dotColor = isNight ? 'var(--stl-green)' : 'var(--stl-text-whisper)';
+    label = isNight ? 'Checking sky conditions…' : 'Daytime — come back after sunset';
+  }
+  return (
+    <div className="flex items-center gap-2 px-1">
+      <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: dotColor }} />
+      <span className="text-[11px]" style={{ color: 'var(--stl-text-muted)' }}>{label}</span>
     </div>
   );
 }
