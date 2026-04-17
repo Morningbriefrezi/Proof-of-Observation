@@ -205,11 +205,11 @@ export default function SkyChart({ lat, lon, date, missions, completedIds, prime
             >
               <div className="relative">
                 {isPrime && aboveHorizon && <span className="stl-prime-ring" />}
-                <Node size={isPrime ? 34 : 26} />
+                <Node size={isPrime ? 38 : 30} />
               </div>
               <div className="mt-1 text-center whitespace-nowrap pointer-events-none">
                 <div
-                  className="stl-chart-label"
+                  className="stl-chart-label stl-node-name"
                   style={{
                     fontFamily: 'var(--font-display)',
                     fontWeight: 500,
@@ -222,7 +222,7 @@ export default function SkyChart({ lat, lon, date, missions, completedIds, prime
                   {mission.name}
                 </div>
                 <div
-                  className="stl-chart-label mt-0.5"
+                  className="stl-chart-label sm:mt-0.5"
                   style={{
                     fontFamily: 'var(--font-display)',
                     fontWeight: 600,

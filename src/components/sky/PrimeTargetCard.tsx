@@ -13,19 +13,19 @@ interface Props {
 export default function PrimeTargetCard({ mission, peakTime, tagline, skyStatus, onStart }: Props) {
   return (
     <div
-      className="px-4 py-3.5 sm:px-5 sm:py-4"
+      className="px-3.5 py-2.5 sm:px-4 sm:py-3"
       style={{
         fontFamily: 'var(--font-display)',
-        background: 'linear-gradient(135deg, rgba(255,209,102,0.06), rgba(6,9,18,0.78))',
+        background: 'linear-gradient(135deg, rgba(255,209,102,0.05), rgba(6,9,18,0.7))',
         border: '1px solid var(--stl-border-gold)',
-        borderRadius: 'var(--stl-r-lg)',
+        borderRadius: 'var(--stl-r-md)',
       }}
     >
-      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+      <div className="flex items-center gap-2 mb-1 flex-wrap">
         <div className="flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full stl-tw" style={{ background: 'var(--stl-gold)' }} />
+          <div className="w-1 h-1 rounded-full stl-tw" style={{ background: 'var(--stl-gold)' }} />
           <span
-            className="text-[10px] font-semibold uppercase"
+            className="text-[9px] font-semibold uppercase"
             style={{ letterSpacing: '0.18em', color: 'var(--stl-gold)' }}
           >
             Prime Target{peakTime ? ` · Peaks ${peakTime}` : ''}
@@ -33,14 +33,14 @@ export default function PrimeTargetCard({ mission, peakTime, tagline, skyStatus,
         </div>
         {skyStatus && (
           <span
-            className="text-[10px] font-medium px-2 py-0.5 rounded-full"
+            className="text-[9px] font-medium px-1.5 py-0.5 rounded-full"
             style={{
               background: skyStatus.verified ? 'rgba(52,211,153,0.08)' : 'rgba(245,158,11,0.08)',
               border: skyStatus.verified ? '1px solid rgba(52,211,153,0.25)' : '1px solid rgba(245,158,11,0.25)',
               color: skyStatus.verified ? 'var(--stl-green)' : '#F59E0B',
             }}
           >
-            {skyStatus.verified ? `Clear · ${skyStatus.cloudCover}% cloud` : `Cloudy · ${skyStatus.cloudCover}%`}
+            {skyStatus.verified ? `Clear · ${skyStatus.cloudCover}%` : `Cloudy · ${skyStatus.cloudCover}%`}
           </span>
         )}
       </div>
@@ -51,8 +51,8 @@ export default function PrimeTargetCard({ mission, peakTime, tagline, skyStatus,
             style={{
               fontFamily: 'var(--font-display)',
               fontWeight: 600,
-              fontSize: 'clamp(22px, 4vw, 30px)',
-              lineHeight: 1.1,
+              fontSize: 'clamp(17px, 3vw, 21px)',
+              lineHeight: 1.15,
               letterSpacing: '-0.01em',
               color: 'var(--stl-text-bright)',
             }}
@@ -61,19 +61,19 @@ export default function PrimeTargetCard({ mission, peakTime, tagline, skyStatus,
           </div>
           <div
             className="mt-0.5 truncate"
-            style={{ fontSize: 13, color: 'var(--stl-text-muted)' }}
+            style={{ fontSize: 12, color: 'var(--stl-text-muted)' }}
           >
             {tagline}
           </div>
         </div>
         <button
           onClick={onStart}
-          className="flex-shrink-0 py-2.5 px-4 rounded-[10px] font-semibold transition-all active:scale-[0.97] hover:brightness-110"
+          className="flex-shrink-0 py-1.5 px-3 rounded-lg font-semibold transition-all active:scale-[0.97] hover:brightness-110"
           style={{
             fontFamily: 'var(--font-display)',
             background: 'linear-gradient(135deg, var(--stl-gold), var(--stl-gold-dim))',
             color: '#0a0a0a',
-            fontSize: 13,
+            fontSize: 12,
           }}
         >
           Begin · +{mission.stars} ✦

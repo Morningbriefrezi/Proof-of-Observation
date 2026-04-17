@@ -25,8 +25,6 @@ import type { QuizDef } from '@/lib/quizzes';
 import PageTransition from '@/components/ui/PageTransition';
 import { MissionIcon } from '@/components/shared/PlanetIcons';
 import { TelescopeIcon, StarTokenIcon, DifficultyDots } from '@/components/icons/CelestialIcons';
-import DailyCheckIn from '@/components/dashboard/DailyCheckIn';
-import LocationPicker from '@/components/LocationPicker';
 
 export default function MissionsPage() {
   const { state } = useAppState();
@@ -185,14 +183,6 @@ export default function MissionsPage() {
 
       <div className="max-w-2xl mx-auto px-4 py-2 flex flex-col gap-3" style={{ fontFamily: 'var(--font-display)' }}>
         <BackButton />
-        <div className="flex items-center gap-2">
-          <div className="flex-shrink-0">
-            <LocationPicker compact />
-          </div>
-          <div className="flex-1 min-w-0">
-            <DailyCheckIn lat={location.lat ?? 41.6941} lon={location.lon ?? 44.8337} />
-          </div>
-        </div>
 
         <ChartSection
           onStart={setActiveMission}

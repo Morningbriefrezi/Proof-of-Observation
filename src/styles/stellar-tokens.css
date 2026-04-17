@@ -145,9 +145,14 @@
   text-shadow: 0 1px 6px rgba(3, 6, 18, 0.85), 0 0 2px rgba(3, 6, 18, 0.9);
 }
 
-/* Chart container aspect — taller on mobile for legibility, wider on desktop */
-.stl-chart { aspect-ratio: 5 / 4; }
+/* Chart container aspect — square-ish on mobile for breathing room, wider on desktop */
+.stl-chart { aspect-ratio: 1 / 1; }
 @media (min-width: 640px) { .stl-chart { aspect-ratio: 600 / 420; } }
+
+/* Mission node name — hidden on mobile to prevent label collisions in crowded areas.
+   The star count (+N ✦) stays visible so taps still feel purposeful. */
+.stl-node-name { display: none; }
+@media (min-width: 640px) { .stl-node-name { display: block; } }
 
 @media (prefers-reduced-motion: reduce) {
   .stl-star-tw,
