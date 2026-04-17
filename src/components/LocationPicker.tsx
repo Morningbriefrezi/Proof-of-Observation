@@ -84,7 +84,14 @@ export default function LocationPicker({ compact = false }: { compact?: boolean 
 
   const updateAnchor = useCallback(() => {
     const r = btnRef.current?.getBoundingClientRect()
-    if (r) setAnchor({ top: r.bottom + 6, left: r.left + r.width / 2 })
+    if (!r) return
+    const panelWidth = Math.min(280, window.innerWidth - 32)
+    const pad = 16
+    const center = r.left + r.width / 2
+    let left = center
+    if (center - panelWidth / 2 < pad) left = pad + panelWidth / 2
+    else if (center + panelWidth / 2 > window.innerWidth - pad) left = window.innerWidth - pad - panelWidth / 2
+    setAnchor({ top: r.bottom + 6, left })
   }, [])
 
   useEffect(() => {

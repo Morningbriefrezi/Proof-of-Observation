@@ -179,7 +179,7 @@ export default function MissionsPage() {
       {activeMission && <MissionActive mission={activeMission} onClose={() => { setActiveMission(null); setChProgress(getChallengeProgress()); }} />}
       {activeQuiz && <QuizActive quiz={activeQuiz} onClose={() => setActiveQuiz(null)} />}
 
-      <div className="max-w-2xl mx-auto px-4 py-3 sm:py-6 flex flex-col gap-3">
+      <div className="max-w-2xl mx-auto px-4 py-2 flex flex-col gap-2">
         <BackButton />
         <div className="flex items-center gap-2">
           <div className="flex-shrink-0">
@@ -190,14 +190,14 @@ export default function MissionsPage() {
           </div>
         </div>
         <section>
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-1.5">
             <Satellite size={16} strokeWidth={1.5} className="text-[#818cf8]" />
-            <h1 className="text-xl sm:text-2xl font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
+            <h1 className="text-lg sm:text-xl font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
               {t('title')}
             </h1>
           </div>
 
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-2">
             {skyConditions ? (
               <>
                 <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${skyConditions.verified ? 'bg-[#34d399] animate-pulse' : 'bg-amber-400'}`} />
@@ -293,7 +293,7 @@ export default function MissionsPage() {
 
         {/* Quiz Missions */}
         <section>
-          <h2 className="text-[11px] uppercase tracking-widest mb-3 mt-6" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-secondary)' }}>{t('knowledgeQuizzes')}</h2>
+          <h2 className="text-[11px] uppercase tracking-widest mb-2 mt-3" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-secondary)' }}>{t('knowledgeQuizzes')}</h2>
           <div className="flex flex-col gap-2.5">
             {QUIZZES.map(quiz => {
               const bestResult = [...(state.completedQuizzes ?? [])]
