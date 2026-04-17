@@ -2,14 +2,17 @@
 
 import Link from 'next/link';
 import { useAppState } from '@/hooks/useAppState';
+import { usePrivy } from '@privy-io/react-auth';
 import { Clock, Trash2 } from 'lucide-react';
 
 export default function ObservationLog() {
   const { state, removeMission } = useAppState();
+  const { authenticated } = usePrivy();
   const all = [...state.completedMissions].reverse();
   const missions = all.slice(0, 3);
 
   if (missions.length === 0) {
+    if (!authenticated) return null;
     return (
       <div className="flex flex-col gap-3 mt-2">
         <div className="flex items-center gap-3 mb-1">

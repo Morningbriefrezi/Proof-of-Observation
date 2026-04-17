@@ -3,16 +3,17 @@
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
-import { Copy, Check, ExternalLink, Telescope, ChevronRight, Globe, Bell, Moon, LogOut, X, Settings } from 'lucide-react';
+import { Copy, Check, ExternalLink, Telescope, Lock, ChevronRight, Globe, Bell, Moon, LogOut, X, Settings } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAppState } from '@/hooks/useAppState';
 import { getRank } from '@/lib/rewards';
+import Button from '@/components/shared/Button';
 import PageTransition from '@/components/ui/PageTransition';
 
 export default function ProfilePage() {
   const t = useTranslations('profile');
-  const { authenticated, user, logout, getAccessToken } = usePrivy();
+  const { authenticated, user, login, logout, getAccessToken } = usePrivy();
   const { wallets } = useWallets();
   const { state, reset } = useAppState();
 
@@ -66,6 +67,28 @@ export default function ProfilePage() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  if (!authenticated) {
+    return (
+      <div style={{ maxWidth: 480, margin: '0 auto', padding: '32px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{
+          borderRadius: 20, padding: '28px 24px', textAlign: 'center',
+          background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+        }}>
+          <div style={{
+            width: 64, height: 64, borderRadius: '50%', margin: '0 auto 16px',
+            background: 'linear-gradient(135deg, #8B5CF6, #818cf8)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Lock size={24} color="white" />
+          </div>
+          <p style={{ color: 'white', fontWeight: 700, fontSize: 17, margin: '0 0 6px' }}>Sign in to view your profile</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, margin: '0 0 20px' }}>Track missions, discoveries, and Stars earned</p>
+          <Button variant="brass" onClick={login}>Sign In</Button>
+        </div>
+      </div>
+    );
+  }
 
   const cluster = process.env.NEXT_PUBLIC_SOLANA_CLUSTER ?? 'devnet';
   const email =

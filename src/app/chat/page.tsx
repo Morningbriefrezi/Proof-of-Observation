@@ -14,7 +14,7 @@ const DEMO_MESSAGES: Msg[] = [
 ];
 
 export default function ChatPage() {
-  const { authenticated, getAccessToken } = usePrivy();
+  const { authenticated, login, getAccessToken } = usePrivy();
   const rawLocale = useLocale();
   const locale = rawLocale === 'ka' ? 'ka' : 'en';
   const { location } = useLocation();
@@ -305,7 +305,7 @@ export default function ChatPage() {
             {([ts('page_1'), ts('page_2'), ts('page_3'), ts('page_4')] as string[]).map(s => (
               <button
                 key={s}
-                onClick={() => send(s)}
+                onClick={() => authenticated ? send(s) : login()}
                 className="btn-ghost"
                 style={{ fontSize: 11, padding: '6px 12px', minHeight: 'auto' }}
               >
@@ -333,6 +333,21 @@ export default function ChatPage() {
 
       {/* Input bar */}
       <div style={{ position: 'relative' }}>
+      {!authenticated && (
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 10,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+          background: 'rgba(7,11,20,0.95)',
+          backdropFilter: 'blur(12px)',
+          borderTop: '1px solid var(--border-subtle)',
+          padding: '12px 16px',
+        }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 13, margin: 0, flex: 1 }}>Sign in to chat with ASTRA</p>
+          <button onClick={() => login()} className="btn-primary" style={{ padding: '8px 20px', fontSize: 13, minHeight: 40, flexShrink: 0 }}>
+            Sign In →
+          </button>
+        </div>
+      )}
       <div style={{
         flexShrink: 0,
         padding: '12px 16px',
@@ -355,6 +370,7 @@ export default function ChatPage() {
             }}
             placeholder={locale === 'ka' ? 'ჰკითხე ASTRA-ს ნებისმიერი რამ…' : 'Ask ASTRA anything about the sky…'}
             aria-label={locale === 'ka' ? 'შეტყობინება ASTRA-სთვის' : 'Message ASTRA'}
+            disabled={!authenticated}
             rows={1}
             style={{
               flex: 1,
@@ -370,25 +386,26 @@ export default function ChatPage() {
               maxHeight: 160,
               outline: 'none',
               transition: 'border-color 0.15s',
+              opacity: !authenticated ? 0.4 : 1,
             }}
             onFocus={e => (e.currentTarget.style.borderColor = 'var(--accent-border)')}
             onBlur={e => (e.currentTarget.style.borderColor = 'var(--border-default)')}
           />
           <button
             onClick={() => send()}
-            disabled={!input.trim() || loading}
+            disabled={!input.trim() || loading || !authenticated}
             aria-label={locale === 'ka' ? 'გაგზავნა' : 'Send message'}
             style={{
               width: 40, height: 40, borderRadius: 12, flexShrink: 0,
-              background: input.trim() && !loading ? 'var(--gradient-accent)' : 'rgba(255,255,255,0.04)',
+              background: input.trim() && !loading && authenticated ? 'var(--gradient-accent)' : 'rgba(255,255,255,0.04)',
               border: 'none',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: input.trim() && !loading ? 'pointer' : 'not-allowed',
-              opacity: !input.trim() || loading ? 0.35 : 1,
+              cursor: input.trim() && !loading && authenticated ? 'pointer' : 'not-allowed',
+              opacity: !input.trim() || loading || !authenticated ? 0.35 : 1,
               transition: 'background 0.15s, opacity 0.15s',
             }}
           >
-            <ArrowUp size={18} color={input.trim() && !loading ? '#0a0a0a' : 'var(--text-muted)'} />
+            <ArrowUp size={18} color={input.trim() && !loading && authenticated ? '#0a0a0a' : 'var(--text-muted)'} />
           </button>
         </div>
       </div>

@@ -20,7 +20,7 @@ interface TelescopeRecord {
 }
 
 export default function ClubPage() {
-  const { authenticated, user, getAccessToken } = usePrivy();
+  const { authenticated, login, user, getAccessToken } = usePrivy();
   const { wallets } = useWallets();
   const solanaWallet = wallets.find(w => (w as { chainType?: string }).chainType === 'solana');
 
@@ -96,6 +96,24 @@ export default function ClubPage() {
       setLoading(false);
     }
   };
+
+  if (!authenticated) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-8">
+        <BackButton />
+        <Card className="p-6 mt-4 flex flex-col items-center gap-4 text-center">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.15)' }}>
+            <Telescope size={26} className="text-[#818cf8]" />
+          </div>
+          <div>
+            <h2 className="text-white font-bold text-lg mb-1">Register Your Telescope</h2>
+            <p className="text-slate-400 text-sm">Sign in to register your telescope and earn 50 ✦ Stars.</p>
+          </div>
+          <Button variant="cyan" onClick={login} className="w-full">Sign In to Continue</Button>
+        </Card>
+      </div>
+    );
+  }
 
   if (fetching) {
     return (
