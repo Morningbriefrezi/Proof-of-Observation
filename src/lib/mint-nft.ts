@@ -69,7 +69,7 @@ export async function mintCompressedNFT(params: ObservationMintParams): Promise<
       collection: { key: toPublicKey(COLLECTION_MINT_ADDRESS), verified: false },
       creators: [],
     },
-  }).sendAndConfirm(umi, { confirm: { commitment: 'processed' } });
+  }).sendAndConfirm(umi, { send: { skipPreflight: true }, confirm: { commitment: 'processed' } });
 
   const timeoutPromise = new Promise<never>((_, reject) =>
     setTimeout(() => reject(new Error(`Mint timeout after ${TIMEOUT_MS}ms`)), TIMEOUT_MS)

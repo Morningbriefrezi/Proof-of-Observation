@@ -764,7 +764,14 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
             )}
 
             {/* Explorer link — bottom-left */}
-            {isOnChain ? (
+            {mission.demo ? (
+              <div
+                className="absolute bottom-3 left-3 flex items-center gap-1 text-[11px]"
+                style={{ color: 'rgba(251,191,36,0.85)', background: 'rgba(7,11,20,0.7)', borderRadius: 8, padding: '3px 7px', backdropFilter: 'blur(6px)', border: '1px solid rgba(251,191,36,0.2)' }}
+              >
+                Demo · local proof
+              </div>
+            ) : isOnChain ? (
               <a
                 href={`https://explorer.solana.com/tx/${mintTxId}?cluster=${process.env.NEXT_PUBLIC_SOLANA_CLUSTER ?? 'devnet'}`}
                 target="_blank"
@@ -774,13 +781,6 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
               >
                 Explorer <ExternalLink size={9} />
               </a>
-            ) : mission.demo ? (
-              <div
-                className="absolute bottom-3 left-3 flex items-center gap-1 text-[11px]"
-                style={{ color: 'rgba(251,191,36,0.85)', background: 'rgba(7,11,20,0.7)', borderRadius: 8, padding: '3px 7px', backdropFilter: 'blur(6px)', border: '1px solid rgba(251,191,36,0.2)' }}
-              >
-                Demo · local proof
-              </div>
             ) : null}
           </div>
 
