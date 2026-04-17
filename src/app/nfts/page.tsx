@@ -122,7 +122,13 @@ function NftDetailOverlay({ nft, onClose, onRetryMint, retrying }: { nft: NftAss
         {/* Observation photo — show actual captured image if available */}
         {nft.photo && (
           <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
-            <img src={nft.photo} alt="Your observation" style={{ width: '100%', height: 'auto', display: 'block', maxHeight: 320, objectFit: 'cover' }} />
+            <div style={{ background: '#0a0e1a', display: 'flex', alignItems: 'center', justifyContent: 'center', maxHeight: 360 }}>
+              <img
+                src={nft.photo}
+                alt="Your observation"
+                style={{ maxWidth: '100%', maxHeight: 360, width: 'auto', height: 'auto', display: 'block', objectFit: 'contain' }}
+              />
+            </div>
           </div>
         )}
 
@@ -616,7 +622,7 @@ export default function NftsPage() {
                     <img
                       src={item.photo}
                       alt={target}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#0a0e1a', display: 'block' }}
                       onError={e => { (e.currentTarget as HTMLImageElement).src = nftImageUrl; }}
                     />
                   ) : (
@@ -625,7 +631,7 @@ export default function NftsPage() {
                       alt={target}
                       fill
                       unoptimized
-                      style={{ objectFit: 'cover' }}
+                      style={{ objectFit: 'contain' }}
                       loading="lazy"
                       onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/placeholder-nft.svg'; }}
                     />

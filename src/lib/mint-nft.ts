@@ -4,6 +4,7 @@ import {
   keypairIdentity,
   publicKey as toPublicKey,
 } from '@metaplex-foundation/umi';
+import { base58 } from '@metaplex-foundation/umi/serializers';
 import { mintV1, mplBubblegum } from '@metaplex-foundation/mpl-bubblegum';
 import { mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata';
 
@@ -77,6 +78,6 @@ export async function mintCompressedNFT(params: ObservationMintParams): Promise<
 
   const { signature } = await Promise.race([mintPromise, timeoutPromise]);
 
-  const txId = bs58.encode(Buffer.from(signature));
+  const txId = base58.deserialize(signature)[0];
   return { txId };
 }
