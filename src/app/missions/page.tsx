@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getActiveChallenge, getChallengeProgress, claimChallengeReward } from '@/lib/celestial-challenges';
 import { Satellite, Lock } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
@@ -9,22 +9,18 @@ import { usePrivy } from '@privy-io/react-auth';
 import { useLocale, useTranslations } from 'next-intl';
 import { useLocation } from '@/lib/location';
 import StatsBar from '@/components/sky/StatsBar';
-import MissionsHero from '@/components/sky/MissionsHero';
-import SecondaryMissionsRail from '@/components/sky/SecondaryMissionsRail';
+import SkyChart from '@/components/sky/SkyChart';
+import PrimeTargetCard from '@/components/sky/PrimeTargetCard';
+import MissionRail from '@/components/sky/MissionRail';
 import MissionActive from '@/components/sky/MissionActive';
 import ObservationLog from '@/components/sky/ObservationLog';
 import RewardsSection from '@/components/sky/RewardsSection';
 import QuizActive from '@/components/sky/QuizActive';
+import { getChartDeepSky } from '@/lib/sky-chart';
+import { getVisiblePlanets } from '@/lib/planets';
 import { QUIZZES } from '@/lib/quizzes';
 import { MISSIONS } from '@/lib/constants';
-import type { Mission, CompletedMission } from '@/lib/types';
-
-function getHeroId(completed: CompletedMission[]): string {
-  const completedIds = new Set(completed.filter(m => m.status === 'completed').map(m => m.id));
-  const incomplete = MISSIONS.filter(m => m.repeatable || !completedIds.has(m.id));
-  const demo = incomplete.find(m => m.demo && m.id !== 'free-observation');
-  return (demo ?? incomplete[0] ?? MISSIONS[0]).id;
-}
+import type { Mission } from '@/lib/types';
 import type { QuizDef } from '@/lib/quizzes';
 import PageTransition from '@/components/ui/PageTransition';
 import { MissionIcon } from '@/components/shared/PlanetIcons';
@@ -230,11 +226,7 @@ export default function MissionsPage() {
             )}
           </div>
 
-          <MissionsHero onStart={setActiveMission} />
-          <SecondaryMissionsRail
-            heroId={getHeroId(state.completedMissions)}
-            onStart={setActiveMission}
-          />
+          <ChartSection onStart={setActiveMission} />
 
           {/* Weekly challenge strip */}
           <button
@@ -355,5 +347,115 @@ export default function MissionsPage() {
       </div>
       </>
     </PageTransition>
+  );
+}
+
+const CHARTABLE_IDS = new Set(['moon','jupiter','saturn','venus','mars','mercury','pleiades','orion','andromeda','crab']);
+const PRIME_ORDER = ['jupiter','saturn','moon','venus','mars','andromeda','pleiades','orion','crab','mercury'];
+const PRIME_TAGLINES: Record<string, string> = {
+  jupiter:   'Four moons visible tonight',
+  saturn:    'Rings at their widest tilt',
+  moon:      'Terminator cuts sharp craters',
+  venus:     'The evening star, brightest object',
+  mars:      'Rust-red and unmistakable',
+  mercury:   'Low and fleeting — catch it fast',
+  pleiades:  'Seven sisters, one glance',
+  orion:     'A stellar nursery, 1,344 ly out',
+  andromeda: 'A trillion suns, 2.5M ly away',
+  crab:      'The ghost of a 1054 AD supernova',
+};
+
+function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
+  const { state } = useAppState();
+  const { location } = useLocation();
+  const now = useMemo(() => new Date(), []);
+  const lat = location.lat ?? 41.7151;
+  const lon = location.lon ?? 44.8271;
+
+  const completedIds = useMemo(
+    () => new Set(state.completedMissions.filter(m => m.status === 'completed').map(m => m.id)),
+    [state.completedMissions]
+  );
+
+  const chartableMissions = useMemo(
+    () => MISSIONS.filter(m => CHARTABLE_IDS.has(m.id)),
+    []
+  );
+
+  const statusById = useMemo(() => {
+    const out: Record<string, { aboveHorizon: boolean; label: string; labelColor: string }> = {};
+    const planets = getVisiblePlanets(lat, lon, now);
+    for (const p of planets) {
+      const aboveHorizon = p.altitude > 0;
+      let label = aboveHorizon ? `ALT ${Math.round(p.altitude)}°` : 'BELOW HORIZON';
+      let labelColor: string = aboveHorizon ? '#86efac' : 'rgba(255,255,255,0.4)';
+      if (aboveHorizon && p.altitude < 15) { label = 'LOW · RISING'; labelColor = '#38F0FF'; }
+      if (!aboveHorizon && p.rise) {
+        const riseStr = p.rise instanceof Date ? p.rise.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+        label = `RISES ${riseStr}`;
+      }
+      out[p.key] = { aboveHorizon, label, labelColor };
+    }
+    const ds = getChartDeepSky(lat, lon, now, 200, 200, 180);
+    for (const d of ds) {
+      const aboveHorizon = d.aboveHorizon;
+      out[d.id] = {
+        aboveHorizon,
+        label: aboveHorizon ? `ALT ${Math.round(d.altitude)}°` : 'BELOW HORIZON',
+        labelColor: aboveHorizon ? '#86efac' : 'rgba(255,255,255,0.4)',
+      };
+    }
+    return out;
+  }, [lat, lon, now]);
+
+  const primeMission = useMemo(() => {
+    const candidates = chartableMissions
+      .filter(m => !completedIds.has(m.id) || m.repeatable)
+      .filter(m => statusById[m.id]?.aboveHorizon);
+    if (candidates.length === 0) return null;
+    candidates.sort((a, b) => PRIME_ORDER.indexOf(a.id) - PRIME_ORDER.indexOf(b.id));
+    return candidates[0];
+  }, [chartableMissions, completedIds, statusById]);
+
+  const primePeak = useMemo(() => {
+    if (!primeMission) return null;
+    const planets = getVisiblePlanets(lat, lon, now);
+    const p = planets.find(x => x.key === primeMission.id);
+    if (!p?.transit) return null;
+    const d = p.transit instanceof Date ? p.transit : new Date(p.transit);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }, [primeMission, lat, lon, now]);
+
+  const primeTagline = primeMission ? (PRIME_TAGLINES[primeMission.id] ?? primeMission.desc) : '';
+
+  return (
+    <div className="relative">
+      <div className="relative">
+        <SkyChart
+          lat={lat}
+          lon={lon}
+          date={now}
+          missions={chartableMissions}
+          completedIds={completedIds}
+          primeId={primeMission?.id ?? null}
+          onSelect={onStart}
+        />
+        {primeMission && (
+          <PrimeTargetCard
+            mission={primeMission}
+            peakTime={primePeak}
+            tagline={primeTagline}
+            onStart={() => onStart(primeMission)}
+          />
+        )}
+      </div>
+
+      <MissionRail
+        missions={chartableMissions}
+        statusById={statusById}
+        completedIds={completedIds}
+        onStart={onStart}
+      />
+    </div>
   );
 }

@@ -1,0 +1,106 @@
+/* STELLAR DESIGN SYSTEM v2
+   The canvas: deep space, charts over chrome, minimal mono, maximal serif.
+   Imported once in layout.tsx, inherited app-wide. */
+
+:root {
+  /* Surfaces */
+  --stl-bg-deep:      #030612;
+  --stl-bg-base:      #050810;
+  --stl-bg-surface:   rgba(255,255,255,0.03);
+  --stl-bg-elevated:  rgba(255,255,255,0.05);
+  --stl-bg-chart:     radial-gradient(ellipse at 50% 40%, #0E1A35 0%, #070B1C 45%, #030612 100%);
+
+  /* Borders */
+  --stl-border-soft:    rgba(255,255,255,0.06);
+  --stl-border-regular: rgba(255,255,255,0.08);
+  --stl-border-strong:  rgba(255,255,255,0.14);
+  --stl-border-gold:    rgba(255,209,102,0.22);
+  --stl-border-teal:    rgba(56,240,255,0.18);
+  --stl-border-green:   rgba(52,211,153,0.18);
+
+  /* Text */
+  --stl-text-bright:    #F2F0EA;
+  --stl-text-primary:   #E8ECF4;
+  --stl-text-muted:     rgba(255,255,255,0.55);
+  --stl-text-dim:       rgba(255,255,255,0.35);
+  --stl-text-whisper:   rgba(255,255,255,0.18);
+
+  /* Accents */
+  --stl-gold:     #FFD166;
+  --stl-gold-dim: #CC9A33;
+  --stl-teal:     #38F0FF;
+  --stl-green:    #34d399;
+  --stl-lilac:    #8465CB;
+  --stl-rose:     #FF8FB8;
+
+  /* Star classification colors (matched to real stellar types) */
+  --stl-star-hot:    #E8F0FF;
+  --stl-star-warm:   #FFF3D6;
+  --stl-star-cool:   #FFDDB8;
+
+  /* Radii */
+  --stl-r-sm: 8px;
+  --stl-r-md: 12px;
+  --stl-r-lg: 16px;
+  --stl-r-xl: 20px;
+  --stl-r-pill: 999px;
+
+  /* Shadows (used sparingly) */
+  --stl-glow-gold: 0 0 16px rgba(255,209,102,0.35);
+}
+
+/* Type scale — read this once, use everywhere */
+.stl-display-xl { font-family: var(--font-serif); font-weight: 300; font-size: clamp(32px, 9vw, 56px); line-height: 0.95; letter-spacing: -0.02em; }
+.stl-display-lg { font-family: var(--font-serif); font-weight: 400; font-size: clamp(24px, 5vw, 32px); line-height: 1.05; letter-spacing: -0.01em; }
+.stl-display-md { font-family: var(--font-serif); font-weight: 400; font-size: 22px; line-height: 1.1; letter-spacing: -0.005em; }
+.stl-display-sm { font-family: var(--font-serif); font-weight: 400; font-size: 16px; line-height: 1.15; }
+.stl-display-italic { font-family: var(--font-serif); font-style: italic; font-weight: 300; }
+
+.stl-body       { font-family: var(--font-display); font-weight: 400; font-size: 14px; line-height: 1.45; }
+.stl-body-sm    { font-family: var(--font-display); font-weight: 400; font-size: 12px; line-height: 1.4; }
+.stl-label      { font-family: var(--font-display); font-weight: 500; font-size: 13px; line-height: 1.3; letter-spacing: 0.005em; }
+
+/* Mono is RARE — only for timestamps, coordinates, and one-off kickers. Max ONE per visible region. */
+.stl-mono-kicker { font-family: var(--font-mono); font-weight: 400; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; }
+.stl-mono-data   { font-family: var(--font-mono); font-weight: 400; font-size: 11px; letter-spacing: 0.05em; }
+
+/* Reusable surfaces */
+.stl-card {
+  background: var(--stl-bg-surface);
+  border: 1px solid var(--stl-border-regular);
+  border-radius: var(--stl-r-lg);
+}
+.stl-card-glass {
+  background: rgba(6,9,18,0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--stl-border-gold);
+  border-radius: var(--stl-r-lg);
+}
+.stl-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px;
+  background: var(--stl-bg-surface);
+  border: 1px solid var(--stl-border-regular);
+  border-radius: var(--stl-r-pill);
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: var(--stl-text-muted);
+}
+
+/* Star twinkling animation — reused for pulsing nodes, live indicators */
+@keyframes stl-tw { 0%,100% { opacity: 0.3 } 50% { opacity: 0.95 } }
+.stl-tw { animation: stl-tw 3.5s ease-in-out infinite; }
+
+/* Prime target pulse ring */
+@keyframes stl-prime-pulse {
+  0%   { transform: scale(1);    opacity: 0.65 }
+  100% { transform: scale(2.6);  opacity: 0 }
+}
+.stl-prime-ring {
+  position: absolute; inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--stl-gold);
+  animation: stl-prime-pulse 2.4s ease-out infinite;
+  pointer-events: none;
+}

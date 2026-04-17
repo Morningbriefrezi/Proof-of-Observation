@@ -98,9 +98,9 @@
   --radius-full: 9999px;
 
   /* Typography */
-  --font-display:  'DM Sans', system-ui, sans-serif;
-  --font-body:     'DM Sans', system-ui, sans-serif;
-  --font-serif:    'Instrument Serif', Georgia, serif;
+  --font-display:  'Geist', system-ui, sans-serif;
+  --font-body:     'Geist', system-ui, sans-serif;
+  --font-serif:    'Fraunces', Georgia, serif;
   --font-mono:     'JetBrains Mono', ui-monospace, monospace;
   --font-georgian: 'Noto Sans Georgian', system-ui, sans-serif;
 
@@ -211,9 +211,9 @@
   --color-success: #34D399;
   --color-warning: #FBBF24;
   --color-error: #F87171;
-  --font-display:  var(--font-display, 'DM Sans', system-ui, sans-serif);
-  --font-body:     var(--font-body, 'DM Sans', system-ui, sans-serif);
-  --font-serif:    var(--font-serif, 'Instrument Serif', Georgia, serif);
+  --font-display:  var(--font-display, 'Geist', system-ui, sans-serif);
+  --font-body:     var(--font-body, 'Geist', system-ui, sans-serif);
+  --font-serif:    var(--font-serif, 'Fraunces', Georgia, serif);
   --font-mono:     var(--font-mono, 'JetBrains Mono', ui-monospace, monospace);
   --font-georgian: var(--font-georgian, 'Noto Sans Georgian', system-ui, sans-serif);
 }

@@ -1,18 +1,20 @@
 import type { Metadata } from 'next';
 import type { Viewport } from 'next';
-import { Instrument_Serif, DM_Sans, JetBrains_Mono, Noto_Sans_Georgian } from 'next/font/google';
+import { Fraunces, Geist, JetBrains_Mono, Noto_Sans_Georgian } from 'next/font/google';
 import './globals.css';
 import '../styles/design-tokens.css';
+import '../styles/stellar-tokens.css';
 import '../styles/animations.css';
 
-const instrumentSerif = Instrument_Serif({
+const fraunces = Fraunces({
   subsets: ['latin'],
   variable: '--font-serif',
-  weight: '400',
+  weight: 'variable',
   style: ['normal', 'italic'],
+  axes: ['SOFT', 'opsz'],
   display: 'swap',
 });
-const dmSans = DM_Sans({
+const geist = Geist({
   subsets: ['latin'],
   variable: '--font-display',
   weight: ['400', '500', '600', '700'],
@@ -91,7 +93,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${instrumentSerif.variable} ${dmSans.variable} ${jetbrains.variable} ${notoGeorgian.variable}`}>
+    <html lang={locale} className={`${fraunces.variable} ${geist.variable} ${jetbrains.variable} ${notoGeorgian.variable}`}>
       <head>
         {/* Prevent theme flash — read localStorage before first paint */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('stellar_theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})()` }} />
