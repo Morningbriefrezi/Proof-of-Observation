@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, AlertTriangle, Wind, Thermometer, Droplets, Eye, Cloud } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, Wind, Thermometer, Droplets, Eye, Cloud, ShieldCheck } from 'lucide-react';
 import type { SkyVerification } from '@/lib/types';
 import { calculateSkyScore, visibilityToMeters } from '@/lib/sky-score';
 import ScoreRing from '@/components/ui/ScoreRing';
@@ -106,11 +106,14 @@ export default function Verification({ photo, sky, stars, timestamp, latitude, l
                 )}
               </div>
             ))}
-            {/* Hash cell */}
+            {/* Signature cell */}
             <div className="rounded-lg px-2 py-1.5 flex flex-col gap-0.5"
               style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <span className="text-[9px] text-slate-600">Hash</span>
-              <p className="text-[#FFD166]/60 text-[10px] font-mono truncate">
+              <div className="flex items-center gap-1" style={{ color: 'rgba(255,209,102,0.55)' }}>
+                <ShieldCheck size={12} />
+                <span className="text-[9px] text-slate-600 truncate">Signature</span>
+              </div>
+              <p className="text-[#FFD166]/80 text-[10px] font-mono truncate">
                 {sky.oracleHash.slice(0, 6)}…{sky.oracleHash.slice(-4)}
               </p>
             </div>
@@ -139,7 +142,7 @@ export default function Verification({ photo, sky, stars, timestamp, latitude, l
             boxShadow: stars > 0 ? '0 0 24px rgba(255,209,102,0.2)' : '0 0 16px rgba(99,102,241,0.08)',
           }}
         >
-          {stars > 0 ? `Seal on Solana  +${stars} Stars` : 'Log Cloudy Observation'}
+          {stars > 0 ? `Create NFT  +${stars} Stars` : 'Log Cloudy Observation'}
         </button>
       </div>
     </div>
