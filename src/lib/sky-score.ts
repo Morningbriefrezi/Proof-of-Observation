@@ -107,20 +107,20 @@ export function calculateSkyScore(input: SkyScoreInput): SkyScoreResult {
   let emoji: string
   let color: string
 
-  if (score >= 88) { grade = 'Exceptional'; emoji = '✨'; color = 'var(--success)' }
-  else if (score >= 72) { grade = 'Excellent'; emoji = '⭐'; color = 'var(--success)' }
-  else if (score >= 52) { grade = 'Good'; emoji = '👍'; color = 'var(--accent)' }
-  else if (score >= 32) { grade = 'Fair'; emoji = '🌤️'; color = 'var(--warning)' }
+  if (score >= 90) { grade = 'Exceptional'; emoji = '✨'; color = 'var(--success)' }
+  else if (score >= 70) { grade = 'Excellent'; emoji = '⭐'; color = 'var(--success)' }
+  else if (score >= 50) { grade = 'Good'; emoji = '👍'; color = 'var(--accent)' }
+  else if (score >= 30) { grade = 'Fair'; emoji = '🌤️'; color = 'var(--warning)' }
   else { grade = 'Poor'; emoji = '☁️'; color = 'var(--error)' }
 
   return { score, grade, emoji, color, factors }
 }
 
 export function skyScoreGrade(score: number): SkyScoreResult['grade'] {
-  if (score >= 88) return 'Exceptional'
-  if (score >= 72) return 'Excellent'
-  if (score >= 52) return 'Good'
-  if (score >= 32) return 'Fair'
+  if (score >= 90) return 'Exceptional'
+  if (score >= 70) return 'Excellent'
+  if (score >= 50) return 'Good'
+  if (score >= 30) return 'Fair'
   return 'Poor'
 }
 

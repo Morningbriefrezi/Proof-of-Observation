@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStarsBalance } from '@/lib/solana';
 import { redeemRateLimit, checkRateLimit } from '@/lib/rate-limit';
+import { PrivyClient } from '@privy-io/server-auth';
+
+const privy = new PrivyClient(
+  process.env.NEXT_PUBLIC_PRIVY_APP_ID!,
+  process.env.PRIVY_APP_SECRET!,
+);
 
 const TIER_CODES: Record<string, { minStars: number; code: string | undefined }> = {
   'Free Moon Lamp': { minStars: 250, code: process.env.REWARD_CODE_MOONLAMP },
@@ -9,6 +15,18 @@ const TIER_CODES: Record<string, { minStars: number; code: string | undefined }>
 };
 
 export async function POST(req: NextRequest) {
+  // Require authenticated user
+  const authHeader = req.headers.get('authorization');
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!token) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  try {
+    await privy.verifyAuthToken(token);
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   let body: { tier?: unknown; walletAddress?: unknown };
   try {
     body = await req.json();

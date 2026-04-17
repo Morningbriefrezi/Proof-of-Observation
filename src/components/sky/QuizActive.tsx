@@ -27,7 +27,8 @@ export default function QuizActive({ quiz, onClose }: Props) {
 
   const q = quiz.questions[idx];
   const total = quiz.questions.length;
-  const stars = score === total ? 50 : score >= 7 ? 25 : 0;
+  const passThreshold = Math.ceil(total * 0.7);
+  const stars = score >= passThreshold ? score * quiz.starsPerCorrect : 0;
 
   const awardQuizStarsOnChain = async (earnedStars: number) => {
     if (earnedStars <= 0 || !solanaWallet?.address) return;
@@ -67,7 +68,8 @@ export default function QuizActive({ quiz, onClose }: Props) {
       } else {
         setPhase('result');
         const finalScore = correct ? score + 1 : score;
-        const earnedStars = finalScore === total ? 50 : finalScore >= 7 ? 25 : 0;
+        const pass = Math.ceil(total * 0.7);
+        const earnedStars = finalScore >= pass ? finalScore * quiz.starsPerCorrect : 0;
         awardQuizStarsOnChain(earnedStars);
       }
     }, 2500);
@@ -75,7 +77,7 @@ export default function QuizActive({ quiz, onClose }: Props) {
 
   const handleClose = () => {
     if (phase === 'result' && !saved) {
-      const earnedStars = score === total ? 50 : score >= 7 ? 25 : 0;
+      const earnedStars = score >= passThreshold ? score * quiz.starsPerCorrect : 0;
       addQuizResult({ quizId: quiz.id, score, total, stars: earnedStars, timestamp: new Date().toISOString() });
       setSaved(true);
     }
@@ -84,7 +86,7 @@ export default function QuizActive({ quiz, onClose }: Props) {
 
   const restart = () => {
     if (!saved && phase === 'result') {
-      const earnedStars = score === total ? 50 : score >= 7 ? 25 : 0;
+      const earnedStars = score >= passThreshold ? score * quiz.starsPerCorrect : 0;
       addQuizResult({ quizId: quiz.id, score, total, stars: earnedStars, timestamp: new Date().toISOString() });
       setSaved(true);
     }

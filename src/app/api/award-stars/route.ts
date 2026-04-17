@@ -69,27 +69,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'reason must be a non-empty string' }, { status: 400 });
   }
 
-  // Idempotency check
+  // Idempotency: claim slot BEFORE the Solana TX to prevent concurrent double-mints
   if (typeof idempotencyKey === 'string' && idempotencyKey.length > 0) {
     const db = getDb();
     if (db) {
       try {
-        const existing = await db
-          .select({ id: observationLog.id, mintTx: observationLog.mintTx })
-          .from(observationLog)
-          .where(
-            and(
-              eq(observationLog.wallet, recipientAddress as string),
-              eq(observationLog.mintTx, idempotencyKey)
-            )
-          )
-          .limit(1);
-
-        if (existing.length > 0) {
+        await db.insert(observationLog).values({
+          wallet: recipientAddress as string,
+          target: reason as string,
+          stars: amount as number,
+          confidence: 'pending',
+          mintTx: idempotencyKey,
+          observedDate: new Date().toISOString().split('T')[0],
+        });
+      } catch (err) {
+        if ((err as { code?: string })?.code === '23505') {
+          // Unique constraint — already awarded (or in-flight), return cached
           return NextResponse.json({ success: true, txId: 'already_awarded', cached: true });
         }
-      } catch {
-        // DB check failure is non-fatal — proceed with award
+        // Other DB error — proceed without idempotency guarantee
       }
     }
   }
@@ -127,31 +125,10 @@ export async function POST(req: NextRequest) {
     );
     console.log('[award-stars] Success, txId:', signature.slice(0, 16) + '...');
 
-    // Record idempotency key so retries return the cached result
-    if (typeof idempotencyKey === 'string' && idempotencyKey.length > 0) {
-      const db = getDb();
-      if (db) {
-        db.insert(observationLog).values({
-          wallet: recipientAddress as string,
-          target: reason as string,
-          stars: amount as number,
-          confidence: 'mission',
-          mintTx: idempotencyKey,
-          observedDate: new Date().toISOString().split('T')[0],
-        }).catch(err => {
-          if ((err as { code?: string })?.code === '23505') {
-            // Unique constraint violation — idempotency key already recorded, expected for retries
-            return { success: true, txId: 'already_awarded', cached: true };
-          }
-          console.error('[award-stars] idempotency insert failed:', err);
-        });
-      }
-    }
-
     return NextResponse.json({
       success: true,
       txId: signature,
-      explorerUrl: `https://explorer.solana.com/tx/${signature}?cluster=devnet`,
+      explorerUrl: `https://explorer.solana.com/tx/${signature}?cluster=${process.env.NEXT_PUBLIC_SOLANA_CLUSTER ?? 'devnet'}`,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

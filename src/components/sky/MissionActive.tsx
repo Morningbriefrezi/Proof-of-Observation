@@ -186,6 +186,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
       // Demo missions skip photo verification — go straight to mint
       if (!mission.demo) {
         try {
+          const verifyToken = await getAccessToken().catch(() => null);
           const blob = await (await fetch(p)).blob();
           const mimeType = blob.type || 'image/jpeg';
           const ext = mimeType.split('/')[1]?.replace('jpeg', 'jpg') ?? 'jpg';
@@ -195,7 +196,11 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
           fd.append('lat', String(lat));
           fd.append('lon', String(lon));
           fd.append('capturedAt', ts);
-          const pvRes = await fetch('/api/observe/verify', { method: 'POST', body: fd });
+          const pvRes = await fetch('/api/observe/verify', {
+            method: 'POST',
+            body: fd,
+            headers: verifyToken ? { 'Authorization': `Bearer ${verifyToken}` } : {},
+          });
           if (pvRes.ok) {
             const pv: PhotoVerificationResult = await pvRes.json();
             setPhotoVerification(pv);
@@ -760,7 +765,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
             {/* Explorer link — bottom-left */}
             {isOnChain && (
               <a
-                href={`https://explorer.solana.com/tx/${mintTxId}?cluster=devnet`}
+                href={`https://explorer.solana.com/tx/${mintTxId}?cluster=${process.env.NEXT_PUBLIC_SOLANA_CLUSTER ?? 'devnet'}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="absolute bottom-3 left-3 flex items-center gap-1 text-[11px]"

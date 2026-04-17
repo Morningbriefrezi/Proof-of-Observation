@@ -5,6 +5,7 @@ import { and, eq, gte, sum } from 'drizzle-orm'
 import { PublicKey } from '@solana/web3.js'
 import { awardStarsOnChain, DAILY_STARS_CAP } from '@/lib/stars'
 import { createHmac } from 'crypto'
+import { verifyRateLimit, checkRateLimit } from '@/lib/rate-limit'
 
 // Server-side stars calculation — mirrors REWARD_TABLE in observe/verify
 const STARS_BY_CONFIDENCE: Record<string, { base: number; rare_bonus: number }> = {
@@ -16,6 +17,14 @@ const STARS_BY_CONFIDENCE: Record<string, { base: number; rare_bonus: number }> 
 const RARE_OBJECTS = ['saturn', 'jupiter', 'mars', 'venus', 'mercury', 'deep_sky']
 
 export async function POST(req: NextRequest) {
+  // Rate-limit by wallet (parsed from body after validation below)
+  // Initial coarse limit by IP to prevent unauthenticated spam
+  const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown';
+  const { success: ipOk } = await checkRateLimit(verifyRateLimit, `log:${ip}`);
+  if (!ipOk) {
+    return NextResponse.json({ logged: false, error: 'Too many requests' }, { status: 429 });
+  }
+
   let body: {
     wallet?: string
     target?: string

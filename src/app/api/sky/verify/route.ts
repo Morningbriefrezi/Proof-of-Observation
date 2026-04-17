@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
     const oracleHash = '0x' + Array.from(new Uint8Array(hashBuffer)).slice(0, 20).map(b => b.toString(16).padStart(2, '0')).join('');
 
     const result: SkyVerification = {
-      verified: cloudCover < 60,
+      verified: cloudCover < 70,
       cloudCover,
       visibility,
       conditions,
@@ -58,7 +58,9 @@ export async function GET(req: NextRequest) {
       verifiedAt: new Date().toISOString(),
     };
 
-    return NextResponse.json(result);
+    return NextResponse.json(result, {
+      headers: { 'Cache-Control': 's-maxage=300, stale-while-revalidate=60' },
+    });
   } catch {
     return NextResponse.json(
       { error: 'Weather service unavailable — please try again in a moment' },

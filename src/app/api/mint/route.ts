@@ -70,7 +70,11 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // DB rate limit: one NFT per wallet+target per hour
+  // Validate rarity
+  const VALID_RARITIES = ['Common', 'Stellar', 'Astral', 'Celestial'] as const;
+  const rarityVal = VALID_RARITIES.includes(rarity as typeof VALID_RARITIES[number]) ? (rarity as string) : 'Common';
+
+  // DB rate limit: one NFT per wallet+target per hour — fail closed if DB unavailable
   const db = getDb();
   if (db && userAddress) {
     try {
@@ -90,8 +94,9 @@ export async function POST(req: NextRequest) {
       if (recent.length > 0) {
         return NextResponse.json({ error: 'Already minted this target recently' }, { status: 429 });
       }
-    } catch {
-      // DB check failure is non-fatal — allow the mint to proceed
+    } catch (err) {
+      console.error('[mint] DB rate-limit check failed:', err);
+      return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
     }
   }
 
@@ -100,12 +105,12 @@ export async function POST(req: NextRequest) {
     const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz';
     const mockTxId = Array.from({ length: 87 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
     console.log('[mint] No wallet + demo — returning sim txId');
-    return NextResponse.json({ txId: mockTxId, explorerUrl: `https://explorer.solana.com/tx/${mockTxId}?cluster=devnet` });
+    return NextResponse.json({ txId: mockTxId, explorerUrl: `https://explorer.solana.com/tx/${mockTxId}?cluster=${process.env.NEXT_PUBLIC_SOLANA_CLUSTER ?? 'devnet'}` });
   }
 
   try {
     console.log('[mint] Starting mint for wallet:', userAddress ? userAddress.slice(0, 8) + '...' : 'unknown', 'target:', target);
-    const { txId } = await mintCompressedNFT({ userAddress, target, timestampMs, lat, lon, cloudCover, oracleHash, stars, rarity: typeof rarity === 'string' ? rarity : 'Common' });
+    const { txId } = await mintCompressedNFT({ userAddress, target, timestampMs, lat, lon, cloudCover, oracleHash, stars, rarity: rarityVal });
     console.log('[mint] Success, txId:', txId.slice(0, 16) + '...');
 
     // Server-side log (non-blocking) — Stars are awarded by the client via /api/award-stars with idempotency
@@ -121,7 +126,7 @@ export async function POST(req: NextRequest) {
       }).catch(err => console.error('[mint] db.insert failed:', err));
     }
 
-    return NextResponse.json({ txId, explorerUrl: `https://explorer.solana.com/tx/${txId}?cluster=devnet` });
+    return NextResponse.json({ txId, explorerUrl: `https://explorer.solana.com/tx/${txId}?cluster=${process.env.NEXT_PUBLIC_SOLANA_CLUSTER ?? 'devnet'}` });
   } catch (err) {
     console.error('[mint] Bubblegum mint failed:', err);
     return NextResponse.json({ error: 'NFT minting failed — check server logs', txId: null }, { status: 500 });

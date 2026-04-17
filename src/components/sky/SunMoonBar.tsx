@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
+import { useLocation } from '@/lib/location';
 
 interface SunMoonData {
   sunRise: string | null;
@@ -85,16 +86,18 @@ function NowMarker({ percent }: { percent: number }) {
 
 export default function SunMoonBar() {
   const locale = useLocale();
+  const { location } = useLocation();
+  const { lat, lon: lng } = location;
   const [data, setData] = useState<SunMoonData | null>(null);
   const [now, setNow] = useState(nowPercent);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    fetch('/api/sky/sun-moon')
+    fetch(`/api/sky/sun-moon?lat=${lat}&lng=${lng}`)
       .then(r => r.json())
       .then(setData)
       .catch(() => setError(true));
-  }, []);
+  }, [lat, lng]);
 
   // Update "now" marker every minute
   useEffect(() => {

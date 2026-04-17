@@ -48,8 +48,14 @@ function parseClaudeResponse(text: string): { analysis: ClaudeAnalysis; isFallba
 }
 
 export async function POST(req: NextRequest) {
+  // Use auth token as rate-limit key when present (prevents IP spoofing)
+  const authHeader = req.headers.get('authorization');
+  const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
   const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown';
-  const { success, remaining } = await checkRateLimit(verifyRateLimit, ip);
+  const rateLimitKey = bearerToken
+    ? createHash('sha256').update(bearerToken).digest('hex').slice(0, 16)
+    : ip;
+  const { success, remaining } = await checkRateLimit(verifyRateLimit, rateLimitKey);
   if (!success) {
     return NextResponse.json(
       { error: 'Too many requests. Please wait before trying again.' },

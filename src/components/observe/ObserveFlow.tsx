@@ -272,7 +272,7 @@ export default function ObserveFlow({ onClose, walletAddress }: ObserveFlowProps
 
   // --- done ---
   if (step === 'done' && verification) {
-    const explorerUrl = mintTxId ? `https://explorer.solana.com/tx/${mintTxId}?cluster=devnet` : null;
+    const explorerUrl = mintTxId ? `https://explorer.solana.com/tx/${mintTxId}?cluster=${process.env.NEXT_PUBLIC_SOLANA_CLUSTER ?? 'devnet'}` : null;
     const shareText = mintTxId
       ? `Just sealed my observation of ${verification.identifiedObject} on Solana ✦ +${verification.starsEstimate} Stars earned on @stellarrclub\n${explorerUrl}`
       : `Just observed ${verification.identifiedObject} and earned +${verification.starsEstimate} Stars on @stellarrclub ✦`;

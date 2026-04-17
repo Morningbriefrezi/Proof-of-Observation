@@ -199,7 +199,7 @@ function NftDetailOverlay({ nft, onClose, onRetryMint, retrying }: { nft: NftAss
           </button>
         ) : (
           <a
-            href={`https://explorer.solana.com/address/${nft.id}?cluster=devnet`}
+            href={`https://explorer.solana.com/address/${nft.id}?cluster=${process.env.NEXT_PUBLIC_SOLANA_CLUSTER ?? 'devnet'}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 rounded-xl text-sm"
@@ -677,7 +677,7 @@ export default function NftsPage() {
                     </span>
                   ) : (
                     <a
-                      href={`https://explorer.solana.com/address/${item.id}?cluster=devnet`}
+                      href={`https://explorer.solana.com/address/${item.id}?cluster=${process.env.NEXT_PUBLIC_SOLANA_CLUSTER ?? 'devnet'}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={e => e.stopPropagation()}

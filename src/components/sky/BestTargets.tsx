@@ -8,7 +8,8 @@ import type { TargetResult } from '@/app/api/sky/targets/route';
 export default function BestTargets() {
   const { location, loading: locationLoading } = useLocation();
   const { lat, lon: lng, source } = location;
-  const ready = !locationLoading && source !== 'default';
+  const isDefault = source === 'default';
+  const ready = !locationLoading;
   const [targets, setTargets] = useState<TargetResult[] | null>(null);
   const [error, setError] = useState(false);
 
@@ -48,7 +49,7 @@ export default function BestTargets() {
           Best targets tonight
         </h2>
         <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
-          Based on your location and current sky conditions
+          {isDefault ? 'Showing Tbilisi — change location above' : 'Based on your location and current sky conditions'}
         </p>
       </div>
 
