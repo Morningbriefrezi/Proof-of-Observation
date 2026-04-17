@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { getActiveChallenge, getChallengeProgress, claimChallengeReward } from '@/lib/celestial-challenges';
-import { Satellite, Lock } from 'lucide-react';
+import { Satellite } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 import { useAppState } from '@/hooks/useAppState';
-import { usePrivy } from '@privy-io/react-auth';
 import { useLocale, useTranslations } from 'next-intl';
 import { useLocation } from '@/lib/location';
 import StatsBar from '@/components/sky/StatsBar';
@@ -15,18 +14,14 @@ import ObservationLog from '@/components/sky/ObservationLog';
 import RewardsSection from '@/components/sky/RewardsSection';
 import QuizActive from '@/components/sky/QuizActive';
 import { QUIZZES } from '@/lib/quizzes';
-import { MISSIONS } from '@/lib/constants';
 import type { Mission } from '@/lib/types';
 import type { QuizDef } from '@/lib/quizzes';
 import PageTransition from '@/components/ui/PageTransition';
-import { MissionIcon } from '@/components/shared/PlanetIcons';
-import { TelescopeIcon, StarTokenIcon, DifficultyDots } from '@/components/icons/CelestialIcons';
 import DailyCheckIn from '@/components/dashboard/DailyCheckIn';
 import LocationPicker from '@/components/LocationPicker';
 
 export default function MissionsPage() {
   const { state } = useAppState();
-  const { authenticated, login } = usePrivy();
   const locale = useLocale() === 'ka' ? 'ka' : 'en';
   const t = useTranslations('missions');
   const { location } = useLocation();
@@ -44,12 +39,12 @@ export default function MissionsPage() {
   }, []);
 
   useEffect(() => {
-    if (!authenticated || !state.walletAddress) return;
+    if (!state.walletAddress) return;
     fetch(`/api/streak?walletAddress=${encodeURIComponent(state.walletAddress)}`)
       .then(r => r.json())
       .then(d => setStreak(d.streak ?? 0))
       .catch(() => {});
-  }, [authenticated, state.walletAddress]);
+  }, [state.walletAddress]);
 
   useEffect(() => {
     const timer = setTimeout(() => setSkyTimeout(true), 10000);
@@ -64,114 +59,6 @@ export default function MissionsPage() {
       .finally(() => clearTimeout(timer));
     return () => clearTimeout(timer);
   }, [location.lat, location.lon]);
-
-  if (!authenticated) {
-    return (
-      <div className="max-w-2xl mx-auto px-4 py-3 sm:py-6 animate-page-enter flex flex-col gap-4">
-        {/* Sign-in card */}
-        <div
-          className="rounded-2xl p-5 sm:p-6"
-          style={{
-            background: 'linear-gradient(135deg, rgba(99,102,241,0.05), rgba(15,31,61,0.5))',
-            border: '1px solid rgba(99,102,241,0.1)',
-          }}
-        >
-          <div className="flex items-center gap-4">
-            <div
-              className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 relative"
-              style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.15)' }}
-            >
-              <TelescopeIcon size={28} animate />
-              <span
-                className="absolute -top-1 -right-1 text-[10px] leading-none"
-                style={{ color: '#FFD166', textShadow: '0 0 6px rgba(255,209,102,0.6)' }}
-              >✦</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <h2 className="text-base font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>{t('title')}</h2>
-              <p className="text-slate-500 text-xs mt-0.5">{t('subtitle')}</p>
-            </div>
-            <button
-              onClick={login}
-              className="flex-shrink-0 px-4 py-2 rounded-xl font-bold text-xs transition-all hover:opacity-90"
-              style={{ background: 'linear-gradient(135deg, #FFD166, #CC9A33)', color: '#0a0a0a' }}
-            >
-              {t('signIn')}
-            </button>
-          </div>
-        </div>
-
-        {/* Preview mission list */}
-        <div>
-          <p className="text-slate-600 text-[11px] uppercase tracking-widest mb-3">{t('availableMissions')}</p>
-          <div className="flex flex-col gap-2.5">
-            {MISSIONS.map(mission => (
-              <div
-                key={mission.id}
-                className="relative flex items-center gap-4 rounded-2xl px-4 py-3.5 overflow-hidden"
-                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
-              >
-                <div className="absolute inset-0 bg-[#070B14]/40 backdrop-blur-[1px] z-10 flex items-center justify-end pr-4">
-                  <Lock size={13} className="text-slate-600" />
-                </div>
-                <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <MissionIcon id={mission.id} size={28}/>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-slate-400 text-sm font-semibold">{mission.name}</p>
-                  <p className="text-slate-600 text-xs mt-0.5 line-clamp-1">{mission.desc}</p>
-                  <div className="mt-1.5">
-                    <DifficultyDots level={
-                      mission.difficulty === 'Beginner' ? 1
-                      : mission.difficulty === 'Intermediate' ? 2
-                      : mission.difficulty === 'Expert' ? 4
-                      : 3
-                    }/>
-                  </div>
-                </div>
-                <span className="text-[#FFD166]/40 text-xs font-bold flex-shrink-0 flex items-center gap-0.5"
-                  style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  +{mission.stars}<StarTokenIcon size={11}/>
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Tonight's sky */}
-        <div
-          className="rounded-2xl p-4"
-          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
-        >
-          <p className="text-slate-600 text-[11px] uppercase tracking-widest mb-3">{t('tonightsSky')}</p>
-          {skyConditions ? (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${skyConditions.verified ? 'bg-[#34d399] animate-pulse' : 'bg-amber-400'}`} />
-                <span className="text-white text-sm font-medium">
-                  {skyConditions.verified ? t('goodConditions') : t('cloudyTonight')}
-                </span>
-              </div>
-              <div className="flex gap-3 text-xs text-slate-500 flex-shrink-0">
-                <span>{skyConditions.cloudCover}% cloud</span>
-                <span>{skyConditions.visibility}</span>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isNight ? 'bg-[#34d399] animate-pulse' : 'bg-slate-700'}`} />
-              {isNight ? (
-                <span className="loading-dots"><span></span><span></span><span></span></span>
-              ) : (
-                <span className="text-slate-500 text-sm">Come back after sunset to observe</span>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <PageTransition>

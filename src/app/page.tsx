@@ -221,7 +221,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const addr = walletAddress ?? state.walletAddress;
-    if (!authenticated || !addr) { setHomeStarsLoaded(true); return; }
+    if (!addr) { setHomeStarsLoaded(true); return; }
     fetch(`/api/stars-balance?address=${encodeURIComponent(addr)}`)
       .then(r => r.json())
       .then(d => setHomeStars(d.balance ?? 0))

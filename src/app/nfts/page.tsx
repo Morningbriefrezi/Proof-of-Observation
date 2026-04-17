@@ -324,7 +324,7 @@ export default function NftsPage() {
     return [...nfts, ...localAssets];
   }, [nfts, state.completedMissions]);
 
-  if (!ready || !authenticated) {
+  if (!ready) {
     const demoNfts = [
       { name: 'Stellar Observation #001', target: 'Moon', date: 'Apr 9, 2026', cloudCover: '12', stars: '50' },
       { name: 'Stellar Observation #002', target: 'Jupiter', date: 'Apr 8, 2026', cloudCover: '24', stars: '75' },

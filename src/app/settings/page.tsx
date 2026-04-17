@@ -151,15 +151,6 @@ export default function SettingsPage() {
   const phone = (user?.linkedAccounts.find(a => a.type === 'phone') as { number?: string } | undefined)?.number;
   const hasGoogle = user?.linkedAccounts.some(a => a.type === 'google_oauth');
 
-  if (!authenticated) {
-    return (
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '32px 16px', textAlign: 'center' }}>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 15 }}>Sign in to access settings.</p>
-        <Link href="/profile" style={{ color: 'var(--accent)', fontSize: 14, marginTop: 12, display: 'inline-block' }}>← Back to Profile</Link>
-      </div>
-    );
-  }
-
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 16px 48px' }}>
 
