@@ -36,6 +36,13 @@ function getAttr(attrs: NftAttribute[] | undefined, key: string): string {
   return String(attrs?.find(a => a.trait_type === key)?.value ?? '');
 }
 
+function buildExplorerUrl(id: string): string {
+  const cluster = process.env.NEXT_PUBLIC_SOLANA_CLUSTER ?? 'devnet';
+  // Transaction signatures are 64–88 base58 chars; addresses are 32–44
+  const path = id.length > 50 ? 'tx' : 'address';
+  return `https://explorer.solana.com/${path}/${id}?cluster=${cluster}`;
+}
+
 function localToNftAsset(m: CompletedMission): NftAsset {
   return {
     id: m.txId,
@@ -77,6 +84,8 @@ function NftDetailOverlay({ nft, onClose, onRetryMint, retrying }: { nft: NftAss
   const twitterText = encodeURIComponent(`I observed ${target} and sealed it on Solana with @StellarClub26 ✦ #Astronomy #Solana`);
   const farcasterText = encodeURIComponent(`Observed ${target} and sealed it on Solana with @StellarClub26 ✦`);
 
+  const isDemoNft = target.toLowerCase().includes('demo') || (getAttr(attrs, 'Mission-ID') || '').startsWith('quick-') || (getAttr(attrs, 'Mission-ID') || '') === 'demo';
+
   const missionMatch = MISSIONS.find(m => m.name.toLowerCase() === target.toLowerCase());
   const rewardHint = missionMatch ? MISSION_REWARD_HINTS[missionMatch.id] : null;
 
@@ -117,17 +126,19 @@ function NftDetailOverlay({ nft, onClose, onRetryMint, retrying }: { nft: NftAss
           </div>
         )}
 
-        {/* NFT certificate art */}
-        <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,209,102,0.12)' }}>
-          <Image
-            src={nftImageUrl}
-            alt={target}
-            width={600}
-            height={600}
-            unoptimized
-            style={{ width: '100%', height: 'auto', display: 'block' }}
-          />
-        </div>
+        {/* NFT certificate art — fallback only when no observation photo */}
+        {!nft.photo && (
+          <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,209,102,0.12)' }}>
+            <Image
+              src={nftImageUrl}
+              alt={target}
+              width={600}
+              height={600}
+              unoptimized
+              style={{ width: '100%', height: 'auto', display: 'block' }}
+            />
+          </div>
+        )}
 
         {/* Attributes grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
@@ -136,8 +147,8 @@ function NftDetailOverlay({ nft, onClose, onRetryMint, retrying }: { nft: NftAss
             { label: 'Date', value: date || 'Unknown' },
             {
               label: 'Cloud Cover',
-              value: cloudCover || '—',
-              color: ccNum < 30 ? 'var(--success)' : ccNum < 60 ? 'var(--warning)' : 'var(--error)',
+              value: isDemoNft ? '—' : cloudCover || '—',
+              color: isDemoNft ? 'rgba(255,255,255,0.6)' : ccNum < 30 ? 'var(--success)' : ccNum < 60 ? 'var(--warning)' : 'var(--error)',
             },
             { label: 'Stars Earned', value: starCount ? `✦ ${starCount}` : '—', color: 'var(--stars)' },
             { label: 'Location', value: loc },
@@ -199,7 +210,7 @@ function NftDetailOverlay({ nft, onClose, onRetryMint, retrying }: { nft: NftAss
           </button>
         ) : (
           <a
-            href={`https://explorer.solana.com/address/${nft.id}?cluster=${process.env.NEXT_PUBLIC_SOLANA_CLUSTER ?? 'devnet'}`}
+            href={buildExplorerUrl(nft.id)}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 rounded-xl text-sm"
@@ -674,7 +685,7 @@ export default function NftsPage() {
                   {/* Explorer link — only shown when on-chain */}
                   {!item.id.startsWith('sim') && (
                     <a
-                      href={`https://explorer.solana.com/address/${item.id}?cluster=${process.env.NEXT_PUBLIC_SOLANA_CLUSTER ?? 'devnet'}`}
+                      href={buildExplorerUrl(item.id)}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={e => e.stopPropagation()}
