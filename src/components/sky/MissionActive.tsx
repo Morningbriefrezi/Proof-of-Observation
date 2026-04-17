@@ -609,62 +609,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
           />
         ))}
 
-        {/* Cosmic bonus overlay */}
-        {cosmicBonus?.triggered && (
-          <div
-            className="fixed top-16 left-1/2 -translate-x-1/2 z-20 animate-cosmic-reveal"
-            style={{
-              pointerEvents: 'none',
-              opacity: overlayVisible ? 1 : 0,
-              transition: 'opacity 400ms ease',
-            }}
-          >
-            <div
-              className="flex items-center gap-3 px-5 py-3 rounded-2xl"
-              style={{
-                background: 'linear-gradient(135deg, rgba(168,85,247,0.95) 0%, rgba(99,102,241,0.95) 100%)',
-                border: '1px solid rgba(255,255,255,0.25)',
-                boxShadow: '0 16px 40px rgba(168,85,247,0.5)',
-                backdropFilter: 'blur(12px)',
-              }}
-            >
-              <span style={{ fontSize: 22, filter: 'drop-shadow(0 0 8px white)' }}>✦</span>
-              <div>
-                <p className="text-[9px] font-bold tracking-[0.2em] text-white/80 m-0" style={{ textTransform: 'uppercase' }}>Cosmic Bonus</p>
-                <p className="text-xl font-black text-white m-0 leading-tight">+{cosmicBonus.amount} ✦</p>
-                <p className="text-[10px] text-white/85 m-0 italic mt-0.5">{cosmicBonus.message}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Weekly challenge complete */}
-        {challengeCompleted && (
-          <div
-            className="fixed bottom-32 left-1/2 -translate-x-1/2 z-20 animate-cosmic-reveal"
-            style={{
-              pointerEvents: 'none',
-              opacity: challengeVisible ? 1 : 0,
-              transition: 'opacity 400ms ease',
-            }}
-          >
-            <div
-              className="flex items-center gap-3 px-4 py-2.5 rounded-xl"
-              style={{
-                background: 'linear-gradient(135deg, rgba(52,211,153,0.95) 0%, rgba(16,185,129,0.95) 100%)',
-                border: '1px solid rgba(255,255,255,0.25)',
-                boxShadow: '0 12px 32px rgba(52,211,153,0.4)',
-                backdropFilter: 'blur(8px)',
-              }}
-            >
-              <span style={{ fontSize: 16 }}>✓</span>
-              <div>
-                <p className="text-[9px] font-bold tracking-[0.2em] text-white/90 m-0" style={{ textTransform: 'uppercase' }}>Weekly Challenge</p>
-                <p className="text-sm font-bold text-white m-0">+{getActiveChallenge().bonusStars} ✦ Claimed</p>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Overlays moved inline below so they don't cover the Stars hero */}
 
         {/* Layout — single column, top-aligned, always scrollable */}
         <div className="relative z-10 flex flex-col gap-2 px-4 pt-3 pb-8 max-w-sm mx-auto w-full overflow-y-auto">
@@ -706,6 +651,42 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
               </div>
             </div>
           </div>
+
+          {/* Cosmic bonus — inline banner */}
+          {cosmicBonus?.triggered && (
+            <div
+              className="flex items-center gap-3 px-4 py-2 rounded-xl animate-cosmic-reveal flex-shrink-0"
+              style={{
+                background: 'linear-gradient(135deg, rgba(168,85,247,0.95) 0%, rgba(99,102,241,0.95) 100%)',
+                border: '1px solid rgba(255,255,255,0.25)',
+                boxShadow: '0 12px 28px rgba(168,85,247,0.35)',
+              }}
+            >
+              <span style={{ fontSize: 20, filter: 'drop-shadow(0 0 6px white)' }}>✦</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-[9px] font-bold tracking-[0.2em] text-white/80 m-0 uppercase">Cosmic Bonus</p>
+                <p className="text-base font-black text-white m-0 leading-tight">+{cosmicBonus.amount} ✦ <span className="text-[10px] font-normal text-white/85 italic">{cosmicBonus.message}</span></p>
+              </div>
+            </div>
+          )}
+
+          {/* Weekly challenge — inline banner */}
+          {challengeCompleted && (
+            <div
+              className="flex items-center gap-3 px-4 py-2 rounded-xl animate-cosmic-reveal flex-shrink-0"
+              style={{
+                background: 'linear-gradient(135deg, rgba(52,211,153,0.95) 0%, rgba(16,185,129,0.95) 100%)',
+                border: '1px solid rgba(255,255,255,0.25)',
+                boxShadow: '0 12px 28px rgba(52,211,153,0.3)',
+              }}
+            >
+              <span style={{ fontSize: 16 }}>✓</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-[9px] font-bold tracking-[0.2em] text-white/90 m-0 uppercase">Weekly Challenge</p>
+                <p className="text-sm font-bold text-white m-0">+{getActiveChallenge().bonusStars} ✦ Claimed</p>
+              </div>
+            </div>
+          )}
 
           {/* Stars hero */}
           <div
