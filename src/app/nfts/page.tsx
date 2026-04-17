@@ -45,10 +45,15 @@ function buildExplorerUrl(id: string): string {
 }
 
 function localToNftAsset(m: CompletedMission): NftAsset {
+  // Demo missions always produce a mock txId that Solana Explorer won't resolve —
+  // detect them from the MISSIONS catalog so older completions (saved before the
+  // method flag was tracked) are still treated as simulated.
+  const isDemoMission = MISSIONS.find(mi => mi.id === m.id)?.demo === true;
+  const fallbackMethod = m.method ?? (m.txId.startsWith('sim') ? 'simulated' : 'onchain');
   return {
     id: m.txId,
     photo: m.photo,
-    _method: m.method ?? (m.txId.startsWith('sim') ? 'simulated' : 'onchain'),
+    _method: isDemoMission ? 'simulated' : fallbackMethod,
     content: {
       metadata: {
         name: `Stellar: ${m.name}`,
@@ -728,7 +733,7 @@ export default function NftsPage() {
                   </div>
 
                   {/* Explorer link — only shown when on-chain */}
-                  {!item.id.startsWith('sim') && (
+                  {!item.id.startsWith('sim') && item._method !== 'simulated' && (
                     <a
                       href={buildExplorerUrl(item.id)}
                       target="_blank"
