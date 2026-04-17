@@ -13,14 +13,12 @@ function UserSyncWrapper({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-// Privy Dashboard steps required after deploying:
-// 1. Login Methods → Email → enable "Require password on sign-up"
-// 2. Login Methods → Google → toggle ON
-// 3. Login Methods → SMS → toggle ON
+const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID!.trim();
+
 export function SolanaWalletProvider({ children }: { children: ReactNode }) {
   return (
     <PrivyProvider
-      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
+      appId={PRIVY_APP_ID}
       config={{
         loginMethods: ['email', 'sms', 'google'],
         appearance: {
@@ -31,8 +29,8 @@ export function SolanaWalletProvider({ children }: { children: ReactNode }) {
           showWalletLoginFirst: false,
         },
         embeddedWallets: {
+          ethereum: { createOnLogin: 'off' },
           solana: { createOnLogin: 'users-without-wallets' },
-          showWalletUIs: false,
         },
       }}
     >
