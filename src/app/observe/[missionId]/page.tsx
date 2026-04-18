@@ -8,6 +8,7 @@ import Button from '@/components/shared/Button';
 import { MISSIONS } from '@/lib/constants';
 import { getMissionImage } from '@/lib/mission-icons';
 import { useObserveFlow } from './ObserveFlowContext';
+import PageContainer from '@/components/layout/PageContainer';
 
 export default function ObserveBriefPage() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function ObserveBriefPage() {
 
   if (!mission) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-6 flex flex-col gap-4">
+      <PageContainer variant="content" className="py-6 flex flex-col gap-4">
         <BackButton />
         <div
           className="rounded-2xl p-6 text-center"
@@ -39,12 +40,13 @@ export default function ObserveBriefPage() {
             Back to missions
           </Link>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-3 flex flex-col gap-4">
+    <PageContainer variant="fullscreen" className="py-3 flex flex-col gap-4 items-stretch">
+      <div className="w-full max-w-xl mx-auto flex flex-col gap-4">
       <BackButton />
 
       <div className="relative flex flex-col items-center px-2 py-6 text-center gap-3">
@@ -148,6 +150,7 @@ export default function ObserveBriefPage() {
           </p>
         )}
       </div>
-    </div>
+      </div>
+    </PageContainer>
   );
 }

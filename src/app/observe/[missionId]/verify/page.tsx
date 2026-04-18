@@ -19,8 +19,8 @@ import type { PhotoVerificationResult, SkyVerification } from '@/lib/types';
 import BackButton from '@/components/shared/BackButton';
 import Verification from '@/components/sky/Verification';
 import MintAnimation from '@/components/shared/MintAnimation';
-import LoadingRing from '@/components/ui/LoadingRing';
 import { useObserveFlow } from '../ObserveFlowContext';
+import PageContainer from '@/components/layout/PageContainer';
 
 type Stage = 'verifying-sky' | 'verifying-photo' | 'mint-ready' | 'minting' | 'gallery-saved' | 'done';
 
@@ -375,7 +375,7 @@ export default function ObserveVerifyPage() {
 
   if (!mission) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-6 flex flex-col gap-4">
+      <PageContainer variant="content" className="py-6 flex flex-col gap-4">
         <BackButton />
         <div
           className="rounded-2xl p-6 text-center"
@@ -390,13 +390,14 @@ export default function ObserveVerifyPage() {
             Back to missions
           </Link>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   if (stage === 'gallery-saved') {
     return (
-      <div className="max-w-sm mx-auto px-4 py-3 flex flex-col gap-4">
+      <PageContainer variant="fullscreen" className="py-3 flex flex-col gap-4">
+        <div className="w-full max-w-md mx-auto flex flex-col gap-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
             <img src={getMissionImage(mission.id)} alt={mission.name} className="w-full h-full object-cover" />
@@ -440,7 +441,8 @@ export default function ObserveVerifyPage() {
             Done
           </button>
         </div>
-      </div>
+        </div>
+      </PageContainer>
     );
   }
 
@@ -450,9 +452,8 @@ export default function ObserveVerifyPage() {
 
   if (stage === 'mint-ready' && sky) {
     return (
-      <div
-        className="max-w-xl mx-auto w-full px-4 py-2 flex flex-col gap-2 h-[calc(100dvh-152px)] sm:h-[calc(100dvh-56px)]"
-      >
+      <PageContainer variant="fullscreen" className="py-2 flex flex-col gap-2 h-[calc(100dvh-152px)] sm:h-[calc(100dvh-56px)]">
+        <div className="w-full max-w-2xl mx-auto flex flex-col gap-2 flex-1 min-h-0">
         <div className="flex items-center justify-between flex-shrink-0">
           <BackButton />
           <button
@@ -497,26 +498,25 @@ export default function ObserveVerifyPage() {
             </div>
           )}
         </div>
-      </div>
+        </div>
+      </PageContainer>
     );
   }
 
   // verifying-sky | verifying-photo | done (transient before navigation)
-  const stageMessage =
-    stage === 'verifying-photo' ? 'Verifying photo…'
-    : stage === 'done' ? 'Finishing up…'
-    : 'Analyzing sky…';
+  const title =
+    stage === 'verifying-photo' ? 'Verifying Photo'
+    : stage === 'done' ? 'Finishing Up'
+    : 'Analyzing Sky';
+  const subtitle =
+    stage === 'verifying-photo' ? 'Checking with AI oracle'
+    : stage === 'done' ? 'Almost there'
+    : 'Reading tonight’s conditions';
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-3 flex flex-col gap-3">
-      <BackButton />
-      <div
-        className="rounded-2xl p-8 flex flex-col items-center gap-4"
-        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}
-      >
-        <LoadingRing size={72} message={stageMessage} />
-        <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>This may take a moment</p>
-      </div>
-    </div>
+    <MintAnimation
+      title={title}
+      subtitle={subtitle}
+    />
   );
 }

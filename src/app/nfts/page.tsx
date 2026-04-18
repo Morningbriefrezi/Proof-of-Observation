@@ -13,6 +13,7 @@ import { REWARDS, MISSION_REWARD_HINTS } from '@/lib/rewards';
 import { MISSIONS } from '@/lib/constants';
 import { useAppState } from '@/hooks/useAppState';
 import type { CompletedMission } from '@/lib/types';
+import PageContainer from '@/components/layout/PageContainer';
 import { getRarityInfo } from '@/lib/nft-rarity';
 
 interface NftAttribute {
@@ -391,7 +392,7 @@ export default function NftsPage() {
     ];
 
     return (
-      <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10 animate-page-enter flex flex-col gap-6">
+      <PageContainer variant="wide" className="py-6 sm:py-10 animate-page-enter flex flex-col gap-6">
         <div className="card-base p-5 sm:p-6">
           <div className="flex items-center gap-4">
             <div style={{ width: 48, height: 48, borderRadius: 16, background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -428,7 +429,7 @@ export default function NftsPage() {
             ))}
           </div>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -455,7 +456,7 @@ export default function NftsPage() {
     <>
     {selectedNft && <NftDetailOverlay nft={selectedNft} onClose={() => setSelectedNft(null)} onRetryMint={(selectedNft.id.startsWith('sim') || state.completedMissions.some(m => m.txId === selectedNft.id && m.status !== 'gallery')) ? handleRetryMint : undefined} retrying={retrying} />}
     <PageTransition>
-    <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10 flex flex-col gap-6">
+    <PageContainer variant="wide" className="py-6 sm:py-10 flex flex-col gap-6">
       <BackButton />
 
       {/* Header */}
@@ -764,7 +765,7 @@ export default function NftsPage() {
           Total balance: ✦ {starsBalance} Stars
         </p>
       )}
-    </div>
+    </PageContainer>
     </PageTransition>
     </>
   );

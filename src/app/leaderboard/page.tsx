@@ -7,6 +7,7 @@ import { Telescope } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import PageContainer from '@/components/layout/PageContainer';
 
 const RANK_LABELS: Record<string, { label: string; color: string }> = {
   Celestial:  { label: 'Celestial',  color: '#FFD166' },
@@ -188,7 +189,7 @@ export default function LeaderboardPage() {
   ];
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 sm:py-10 animate-page-enter flex flex-col gap-5">
+    <PageContainer variant="content" className="py-6 sm:py-10 animate-page-enter flex flex-col gap-5">
       <BackButton />
 
       {/* Header */}
@@ -476,6 +477,6 @@ export default function LeaderboardPage() {
           Start Observing →
         </Link>
       </div>
-    </div>
+    </PageContainer>
   );
 }

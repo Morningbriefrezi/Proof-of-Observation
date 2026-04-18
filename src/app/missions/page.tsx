@@ -35,6 +35,27 @@ import PageTransition from '@/components/ui/PageTransition';
 import PageContainer from '@/components/layout/PageContainer';
 import { MissionIcon } from '@/components/shared/PlanetIcons';
 import { TelescopeIcon, StarTokenIcon, DifficultyDots } from '@/components/icons/CelestialIcons';
+import QuizCard, { type QuizTheme } from '@/components/sky/QuizCard';
+import SolarSystemIcon from '@/components/sky/quiz-icons/SolarSystemIcon';
+import ConstellationsIcon from '@/components/sky/quiz-icons/ConstellationsIcon';
+import TelescopeIconArt from '@/components/sky/quiz-icons/TelescopeIcon';
+import CosmologyIcon from '@/components/sky/quiz-icons/CosmologyIcon';
+import ExplorationIcon from '@/components/sky/quiz-icons/ExplorationIcon';
+
+interface QuizSpec {
+  theme: QuizTheme;
+  Icon: React.ComponentType<{ size?: number }>;
+  reward: number;
+  badge?: 'new' | 'hard';
+}
+
+const QUIZ_SPECS: Record<string, QuizSpec> = {
+  'solar-system':     { theme: 'solar',       Icon: SolarSystemIcon,   reward: 100 },
+  'constellations':   { theme: 'stars',       Icon: ConstellationsIcon, reward: 100 },
+  'telescopes':       { theme: 'telescope',   Icon: TelescopeIconArt,   reward: 100, badge: 'new' },
+  'universe':         { theme: 'cosmos',      Icon: CosmologyIcon,      reward: 100, badge: 'hard' },
+  'space-exploration':{ theme: 'exploration', Icon: ExplorationIcon,    reward: 100 },
+};
 
 export default function MissionsPage() {
   const router = useRouter();
@@ -48,6 +69,10 @@ export default function MissionsPage() {
   const [streak, setStreak] = useState<number>(0);
   const [isNight, setIsNight] = useState(false);
   const [skyTimeout, setSkyTimeout] = useState(false);
+  const quizStarsEarned = useMemo(
+    () => (state.completedQuizzes ?? []).reduce((sum, r) => sum + (r.stars ?? 0), 0),
+    [state.completedQuizzes]
+  );
   useEffect(() => {
     const h = new Date().getHours();
     setIsNight(h >= 18 || h < 5);
@@ -196,55 +221,84 @@ export default function MissionsPage() {
         <StatsBar />
 
         {/* Quiz Missions */}
-        <section>
-          <h2 className="text-[11px] uppercase tracking-widest mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--stl-text-muted)' }}>{t('knowledgeQuizzes')}</h2>
+        <section className="mt-4">
+          <div className="flex items-baseline justify-between mb-4 px-0.5">
+            <div>
+              <div className="flex items-baseline gap-2.5">
+                <h2
+                  style={{
+                    fontFamily: 'var(--font-serif)',
+                    fontSize: 24,
+                    color: '#F2F0EA',
+                    fontWeight: 600,
+                    margin: 0,
+                    letterSpacing: '-0.01em',
+                  }}
+                >
+                  {t('knowledgeQuizzes')}
+                </h2>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 10,
+                    color: 'rgba(255,255,255,0.35)',
+                    letterSpacing: '0.14em',
+                  }}
+                >
+                  {String(QUIZZES.length).padStart(2, '0')} QUIZZES
+                </span>
+              </div>
+              <div
+                style={{
+                  fontFamily: 'var(--font-serif)',
+                  fontSize: 13,
+                  color: 'rgba(255,255,255,0.55)',
+                  fontStyle: 'italic',
+                  fontWeight: 400,
+                  marginTop: 2,
+                }}
+              >
+                Earn stars while you wait for clear skies
+              </div>
+            </div>
+            <div
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full"
+              style={{ background: 'rgba(255,209,102,0.08)', border: '1px solid rgba(255,209,102,0.2)' }}
+            >
+              <span style={{ fontSize: 11, color: '#FFD166', fontWeight: 600 }}>
+                ✦ {quizStarsEarned}
+              </span>
+            </div>
+          </div>
+
           <div className="flex flex-col gap-2.5">
             {QUIZZES.map(quiz => {
+              const spec = QUIZ_SPECS[quiz.id];
+              if (!spec) return null;
               const bestResult = [...(state.completedQuizzes ?? [])]
                 .filter(r => r.quizId === quiz.id)
                 .sort((a, b) => b.score - a.score)[0];
-              const pct = bestResult ? Math.round((bestResult.score / bestResult.total) * 100) : null;
+              const bestPct = bestResult ? Math.round((bestResult.score / bestResult.total) * 100) : null;
+              const badges: Array<{ label: string; variant: 'new' | 'hard' | 'done' }> = [];
+              if (bestPct !== null && bestPct >= 90) badges.push({ label: `✓ ${bestPct}%`, variant: 'done' });
+              if (spec.badge === 'new' && bestPct === null) badges.push({ label: 'NEW', variant: 'new' });
+              if (spec.badge === 'hard') badges.push({ label: 'HARD', variant: 'hard' });
 
               return (
-                <div
+                <QuizCard
                   key={quiz.id}
-                  className="flex items-center gap-4 rounded-2xl px-4 py-3.5"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(255,209,102,0.04), rgba(15,20,31,0.5) 60%, rgba(15,20,31,0.2))',
-                    border: '1px solid rgba(255,209,102,0.12)',
-                  }}
-                >
-                  <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{
-                      background: 'radial-gradient(circle at 30% 30%, rgba(255,209,102,0.18), rgba(255,209,102,0.04) 60%, transparent)',
-                      border: '1px solid rgba(255,209,102,0.22)',
-                    }}
-                  >
-                    <span className="text-xl">{quiz.emoji}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p style={{ fontFamily: 'var(--font-serif)', fontSize: 16, color: '#F2F0EA', fontWeight: 600, lineHeight: 1.15 }}>{quiz.title[locale]}</p>
-                    <p className="text-slate-500 text-xs mt-0.5 leading-snug line-clamp-1">{quiz.description[locale]}</p>
-                    {bestResult && (
-                      <p className="text-[#FFD166] text-[11px] font-bold mt-1">
-                        Best: {bestResult.score}/{bestResult.total} · +{bestResult.stars} ✦
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                    {pct !== null && (
-                      <span className="text-[10px] text-slate-500">{pct}%</span>
-                    )}
-                    <button
-                      onClick={() => setActiveQuiz(quiz)}
-                      className="px-3.5 py-2 min-h-[44px] rounded-xl text-[12px] font-bold transition-all active:scale-95 hover:opacity-90"
-                      style={{ background: 'linear-gradient(135deg, #FFD166, #CC9A33)', color: '#0a0a0a' }}
-                    >
-                      {bestResult ? 'Retry' : 'Start'}
-                    </button>
-                  </div>
-                </div>
+                  quiz={quiz}
+                  theme={spec.theme}
+                  Icon={spec.Icon}
+                  titleEn={quiz.title[locale] ?? quiz.title.en}
+                  descEn={quiz.description[locale] ?? quiz.description.en}
+                  totalQuestions={quiz.questions?.length ?? 10}
+                  bestPct={bestPct}
+                  starsEarned={bestResult?.stars}
+                  badges={badges}
+                  reward={spec.reward}
+                  onStart={() => setActiveQuiz(quiz)}
+                />
               );
             })}
           </div>

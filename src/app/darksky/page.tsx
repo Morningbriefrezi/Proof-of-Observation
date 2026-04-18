@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import BackButton from '@/components/shared/BackButton';
 import { Eye } from 'lucide-react';
 import { LOCATIONS } from '@/lib/darksky-locations';
+import PageContainer from '@/components/layout/PageContainer';
 
 const DarkSkyMap = dynamic(
   () => import('@/components/darksky/DarkSkyMap'),
@@ -45,10 +46,10 @@ export default function DarkSkyPage() {
 
   return (
     <div
-      className="px-4 py-4 sm:py-6"
+      className="py-4 sm:py-6"
       style={{ background: '#0a0a0a', fontFamily: 'Georgia, serif' }}
     >
-      <div className="max-w-3xl mx-auto flex flex-col gap-6">
+      <PageContainer variant="fullscreen" className="flex flex-col gap-6">
         <BackButton />
         {/* Header */}
         <div className="text-center">
@@ -167,7 +168,7 @@ export default function DarkSkyPage() {
           </Link>
         </div>
 
-      </div>
+      </PageContainer>
     </div>
   );
 }

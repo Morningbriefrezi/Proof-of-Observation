@@ -11,6 +11,7 @@ import type { Product } from '@/lib/dealers';
 import StarsRedemption from '@/components/shared/StarsRedemption';
 import BackButton from '@/components/shared/BackButton';
 import ProductCard from '@/components/marketplace/ProductCard';
+import PageContainer from '@/components/layout/PageContainer';
 import { useEffect } from 'react';
 
 type CategoryFilter = 'all' | 'telescope' | 'eyepiece' | 'binocular' | 'accessory';
@@ -62,7 +63,7 @@ export default function MarketplacePage() {
   const isTelescopeView = filter === 'all' || filter === 'telescope';
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 animate-page-enter">
+    <PageContainer variant="wide" className="py-6 animate-page-enter">
       <BackButton />
 
       {/* Header */}
@@ -263,6 +264,6 @@ export default function MarketplacePage() {
           Contact us →
         </a>
       </div>
-    </div>
+    </PageContainer>
   );
 }

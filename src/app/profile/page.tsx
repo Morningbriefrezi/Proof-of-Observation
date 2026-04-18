@@ -10,6 +10,7 @@ import { useAppState } from '@/hooks/useAppState';
 import { getRank } from '@/lib/rewards';
 import Button from '@/components/shared/Button';
 import PageTransition from '@/components/ui/PageTransition';
+import PageContainer from '@/components/layout/PageContainer';
 
 export default function ProfilePage() {
   const t = useTranslations('profile');
@@ -70,7 +71,7 @@ export default function ProfilePage() {
 
   if (!authenticated) {
     return (
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '32px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <PageContainer variant="content" className="py-8 flex flex-col gap-4">
         <div style={{
           borderRadius: 20, padding: '28px 24px', textAlign: 'center',
           background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
@@ -86,7 +87,7 @@ export default function ProfilePage() {
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, margin: '0 0 20px' }}>Track missions, discoveries, and Stars earned</p>
           <Button variant="brass" onClick={login}>Sign In</Button>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -144,7 +145,7 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 16px 40px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+      <PageContainer variant="content" className="py-6 pb-10 flex flex-col gap-0">
 
         {/* — HEADER: Avatar + Name + Address — */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 24, gap: 10 }}>
@@ -337,7 +338,7 @@ export default function ProfilePage() {
           </button>
         )}
 
-      </div>
+      </PageContainer>
     </PageTransition>
   );
 }

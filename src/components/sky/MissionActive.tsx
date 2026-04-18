@@ -585,7 +585,10 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
       <div
         id="mission-done-overlay"
         className="fixed inset-0 z-[58] overflow-hidden flex flex-col"
-        style={{ background: 'radial-gradient(ellipse at 50% -10%, rgba(99,102,241,0.07) 0%, transparent 55%), var(--bg-base)' }}
+        style={{
+          background: 'radial-gradient(ellipse at 50% -10%, rgba(99,102,241,0.07) 0%, transparent 55%), var(--bg-base)',
+          height: '100dvh',
+        }}
       >
         {/* Confetti burst */}
         {Array.from({ length: 16 }).map((_, i) => (
@@ -611,8 +614,8 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
 
         {/* Overlays moved inline below so they don't cover the Stars hero */}
 
-        {/* Layout — single column, top-aligned, always scrollable */}
-        <div className="relative z-10 flex flex-col gap-2 px-4 pt-3 pb-8 max-w-sm mx-auto w-full overflow-y-auto">
+        {/* Layout — fullscreen on lg becomes 2-col (image left, meta right). Inner card scrolls only if content overflows. */}
+        <div className="relative z-10 flex flex-col gap-3 px-4 sm:px-6 lg:px-8 pt-3 pb-8 max-w-5xl mx-auto w-full overflow-y-auto flex-1 min-h-0">
 
           {/* Close button — top-right, inside content column */}
           <button
@@ -651,6 +654,12 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
               </div>
             </div>
           </div>
+
+          {/* Two-column body on lg: photo left | banners+stars (top right) | share+actions+name (bottom right) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:gap-x-6 gap-3 items-start">
+
+          {/* META top — banners + stars hero */}
+          <div className="flex flex-col gap-3 lg:col-start-2 lg:row-start-1">
 
           {/* Cosmic bonus — inline banner */}
           {cosmicBonus?.triggered && (
@@ -723,9 +732,12 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
             )}
           </div>
 
-          {/* Photo card */}
+          </div>{/* /META top */}
+
+          {/* Photo card — left col on lg, spans both rows */}
+          <div className="lg:col-start-1 lg:row-start-1 lg:row-span-2 lg:h-full">
           <div
-            className={`relative rounded-2xl overflow-hidden animate-fade-in ${mintRarity?.rarity === 'Celestial' ? 'animate-rarity-pulse' : ''}`}
+            className={`relative rounded-2xl overflow-hidden animate-fade-in lg:h-full ${mintRarity?.rarity === 'Celestial' ? 'animate-rarity-pulse' : ''}`}
             style={{
               border: `2px solid ${mintRarity?.color ?? 'rgba(99,102,241,0.15)'}`,
               boxShadow: mintRarity?.rarity === 'Celestial'
@@ -734,7 +746,7 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
                   ? `0 0 24px ${mintRarity.color}40`
                   : '0 0 20px rgba(99,102,241,0.08)',
               background: '#0a0e1a',
-              height: 220,
+              minHeight: 220,
             }}
           >
             <img
@@ -776,6 +788,10 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
               </a>
             )}
           </div>
+          </div>{/* /Photo column */}
+
+          {/* META bottom — share + actions + name star */}
+          <div className="flex flex-col gap-3 lg:col-start-2 lg:row-start-2">
 
           {/* Share row */}
           <div className="grid grid-cols-2 gap-2 animate-fade-in">
@@ -920,6 +936,8 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
               )}
             </div>
           )}
+          </div>{/* /META bottom */}
+          </div>{/* /grid */}
         </div>
       </div>
     );

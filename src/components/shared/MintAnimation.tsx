@@ -1,13 +1,32 @@
 'use client';
 
 interface MintAnimationProps {
-  done: boolean;
+  done?: boolean;
   slowMsg?: boolean;
+  title?: string;
+  subtitle?: string;
+  doneTitle?: string;
+  doneSubtitle?: string;
 }
 
-export default function MintAnimation({ done, slowMsg }: MintAnimationProps) {
+export default function MintAnimation({
+  done = false,
+  slowMsg,
+  title = 'Sealing Observation',
+  subtitle = 'Writing to Solana devnet',
+  doneTitle = 'Sealed on Solana ✦',
+  doneSubtitle = 'Proof recorded on-chain',
+}: MintAnimationProps) {
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-8 px-6 text-center" style={{ background: 'rgba(7,11,20,0.96)', backdropFilter: 'blur(12px)' }}>
+    <div
+      className="fixed left-0 right-0 z-[60] flex flex-col items-center justify-center gap-8 px-6 text-center"
+      style={{
+        top: 56,
+        bottom: 'calc(96px + env(safe-area-inset-bottom))',
+        background: 'rgba(7,11,20,0.96)',
+        backdropFilter: 'blur(12px)',
+      }}
+    >
 
       {/* Ring stack */}
       <div className="relative flex items-center justify-center" style={{ width: 160, height: 160 }}>
@@ -108,10 +127,10 @@ export default function MintAnimation({ done, slowMsg }: MintAnimationProps) {
       {/* Text */}
       <div className="flex flex-col items-center gap-2">
         <p className="text-white font-semibold text-lg tracking-wide" style={{ fontFamily: 'Georgia, serif' }}>
-          {done ? 'Sealed on Solana ✦' : 'Sealing Observation'}
+          {done ? doneTitle : title}
         </p>
         <p className="text-slate-500 text-[11px] tracking-widest uppercase">
-          {done ? 'Proof recorded on-chain' : 'Writing to Solana devnet'}
+          {done ? doneSubtitle : subtitle}
         </p>
         {!done && (
           <div className="flex justify-center gap-1.5 mt-1">

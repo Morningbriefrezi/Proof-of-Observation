@@ -7,6 +7,7 @@ import CameraCapture from '@/components/sky/CameraCapture';
 import { MISSIONS } from '@/lib/constants';
 import { getMissionImage } from '@/lib/mission-icons';
 import { useObserveFlow, type UploadSource } from '../ObserveFlowContext';
+import PageContainer from '@/components/layout/PageContainer';
 
 export default function ObserveCapturePage() {
   const router = useRouter();
@@ -17,7 +18,7 @@ export default function ObserveCapturePage() {
 
   if (!mission) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-6 flex flex-col gap-4">
+      <PageContainer variant="content" className="py-6 flex flex-col gap-4">
         <BackButton />
         <div
           className="rounded-2xl p-6 text-center"
@@ -32,7 +33,7 @@ export default function ObserveCapturePage() {
             Back to missions
           </Link>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -61,7 +62,8 @@ export default function ObserveCapturePage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-3 flex flex-col gap-3">
+    <PageContainer variant="fullscreen" className="py-3 flex flex-col gap-3">
+      <div className="w-full max-w-3xl mx-auto flex flex-col gap-3">
       <BackButton />
 
       <div className="flex items-center gap-3 px-1">
@@ -86,6 +88,7 @@ export default function ObserveCapturePage() {
         onCapture={(p) => handleCapture(p, 'camera')}
         onUpload={(p) => handleCapture(p, 'upload')}
       />
-    </div>
+      </div>
+    </PageContainer>
   );
 }

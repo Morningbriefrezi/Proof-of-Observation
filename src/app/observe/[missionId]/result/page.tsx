@@ -15,6 +15,7 @@ import MoonPhase from '@/components/shared/MoonPhase';
 import RewardIcon from '@/components/shared/RewardIcon';
 import ScoreRing from '@/components/ui/ScoreRing';
 import { useObserveFlow } from '../ObserveFlowContext';
+import PageContainer from '@/components/layout/PageContainer';
 
 const NASA_FALLBACKS: Record<string, string> = {
   moon: '/images/planets/moon.jpg',
@@ -137,7 +138,7 @@ export default function ObserveResultPage() {
 
   if (!mission) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-6 flex flex-col gap-4">
+      <PageContainer variant="content" className="py-6 flex flex-col gap-4">
         <BackButton />
         <div
           className="rounded-2xl p-6 text-center"
@@ -152,7 +153,7 @@ export default function ObserveResultPage() {
             Back to missions
           </Link>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -189,9 +190,10 @@ export default function ObserveResultPage() {
         />
       ))}
 
-      <div className="relative z-10 flex flex-col gap-2 px-4 pt-3 pb-8 max-w-sm mx-auto w-full">
+      <PageContainer variant="fullscreen" className="relative z-10 pt-3 pb-8">
+      <div className="w-full max-w-5xl mx-auto flex flex-col gap-3">
 
-        {/* Header row */}
+        {/* Header row — full width */}
         <div className="flex items-center gap-3 animate-slide-up flex-shrink-0">
           <div
             className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center"
@@ -218,6 +220,13 @@ export default function ObserveResultPage() {
             </div>
           </div>
         </div>
+
+        {/* Two-column body on lg: photo (left, spans rows) | banners+stars (right top) | share+actions+name (right bottom).
+            Mobile: stacks linearly; photo appears between meta groups. */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:gap-x-6 gap-3 items-start">
+
+        {/* META top — banners + stars hero (right col, row 1) */}
+        <div className="flex flex-col gap-3 lg:col-start-2 lg:row-start-1">
 
         {/* Cosmic bonus — inline banner */}
         {cosmicBonus?.triggered && (
@@ -290,9 +299,12 @@ export default function ObserveResultPage() {
           )}
         </div>
 
-        {/* Photo card */}
+        </div>{/* /META top */}
+
+        {/* Photo card — left col on lg, spans both rows */}
+        <div className="lg:col-start-1 lg:row-start-1 lg:row-span-2 lg:h-full">
         <div
-          className={`relative rounded-2xl overflow-hidden animate-fade-in ${mintRarity?.rarity === 'Celestial' ? 'animate-rarity-pulse' : ''}`}
+          className={`relative rounded-2xl overflow-hidden animate-fade-in aspect-[16/9] max-h-[26vh] lg:h-full lg:max-h-none lg:aspect-auto ${mintRarity?.rarity === 'Celestial' ? 'animate-rarity-pulse' : ''}`}
           style={{
             border: `2px solid ${mintRarity?.color ?? 'rgba(99,102,241,0.15)'}`,
             boxShadow: mintRarity?.rarity === 'Celestial'
@@ -301,7 +313,6 @@ export default function ObserveResultPage() {
                 ? `0 0 24px ${mintRarity.color}40`
                 : '0 0 20px rgba(99,102,241,0.08)',
             background: '#0a0e1a',
-            height: 220,
           }}
         >
           <img
@@ -339,6 +350,10 @@ export default function ObserveResultPage() {
             </a>
           )}
         </div>
+        </div>{/* /Photo card column */}
+
+        {/* META bottom — share + actions + name star (right col, row 2) */}
+        <div className="flex flex-col gap-3 lg:col-start-2 lg:row-start-2">
 
         {/* Share row */}
         <div className="grid grid-cols-2 gap-2 animate-fade-in">
@@ -377,23 +392,13 @@ export default function ObserveResultPage() {
         </div>
 
         {/* Name a Star */}
-        {!mission.demo && !mintTxId.startsWith('sim') && !starSkipped && (
+        {!mission.demo && !mintTxId.startsWith('sim') && !starSkipped && (starClaimed || nearestStar) && (
           <div
             className="flex-shrink-0 pt-5"
             style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 4 }}
           >
             {!starClaimed ? (
-              nearestStar === null ? (
-                <div className="flex items-center justify-center gap-2 py-2">
-                  <div
-                    className="w-3 h-3 rounded-full border-2 border-t-transparent animate-spin"
-                    style={{ borderColor: 'rgba(148,163,184,0.4)', borderTopColor: 'transparent' }}
-                  />
-                  <span className="text-xs" style={{ color: 'rgba(148,163,184,0.5)' }}>
-                    Finding your star...
-                  </span>
-                </div>
-              ) : (
+              nearestStar && (
                 <div>
                   <div className="flex items-center gap-1.5">
                     <span style={{ fontSize: 14, color: '#FFD166', lineHeight: 1 }}>★</span>
@@ -483,7 +488,10 @@ export default function ObserveResultPage() {
             )}
           </div>
         )}
-      </div>
+        </div>{/* /META bottom */}
+        </div>{/* /grid */}
+      </div>{/* /max-w-5xl content wrapper */}
+      </PageContainer>
 
       {/* Rewards unlock modal */}
       {rewardsModalOpen && newRewards.length > 0 && (

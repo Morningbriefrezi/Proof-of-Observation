@@ -140,6 +140,13 @@
   pointer-events: none;
 }
 
+/* Quiz card NEW badge pulse */
+@keyframes stl-badge-pulse {
+  0%,100% { opacity: 0.6 }
+  50%     { opacity: 1 }
+}
+.stl-badge-pulse { animation: stl-badge-pulse 2.4s ease-in-out infinite; }
+
 /* Text shadow for legibility over chart starfield */
 .stl-chart-label {
   text-shadow: 0 1px 6px rgba(3, 6, 18, 0.85), 0 0 2px rgba(3, 6, 18, 0.9);
