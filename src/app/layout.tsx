@@ -111,7 +111,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <OfflineBanner />
                 <PullToRefresh />
                 <SwipeBack>
-                  <main className="relative z-10 flex-1 pt-14 pb-24 sm:pb-0">
+                  <main className="relative z-10 flex-1 pt-14 pb-[88px]">
                     <PageTransition>{children}</PageTransition>
                   </main>
                 </SwipeBack>

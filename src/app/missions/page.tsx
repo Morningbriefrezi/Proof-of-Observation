@@ -508,7 +508,6 @@ function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
           <PrimeHeroCard
             mission={primeMission}
             altitude={statusById[primeMission.id]?.altitude ?? null}
-            peakTime={statusById[primeMission.id]?.peakTime ?? null}
             tagline={TAGLINES[primeMission.id] ?? primeMission.desc}
             onStart={() => onStart(primeMission)}
           />

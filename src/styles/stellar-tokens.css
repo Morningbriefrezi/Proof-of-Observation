@@ -227,3 +227,35 @@
   .stl-check-path,
   .stl-shoot { animation: none !important; }
 }
+
+/* ===== Nav / Header ornaments ===== */
+@keyframes stl-nav-glow { 0%,100% { opacity: 0.4 } 50% { opacity: 1 } }
+.stl-nav-glow-dot { animation: stl-nav-glow 2.8s ease-in-out infinite; }
+
+@keyframes stl-shimmer {
+  0%   { transform: translateX(-100%) }
+  100% { transform: translateX(200%) }
+}
+.stl-sheen { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; }
+.stl-sheen::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  animation: stl-shimmer 6s ease-in-out infinite;
+}
+
+/* Cosmic accent line — used under header and selective dividers */
+.stl-cosmic-line {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(132,101,203,0.35) 20%,
+    rgba(56,240,255,0.6) 50%,
+    rgba(255,209,102,0.35) 80%,
+    transparent 100%);
+  box-shadow: 0 0 8px rgba(56,240,255,0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stl-nav-glow-dot,
+  .stl-sheen::after { animation: none !important; }
+}
