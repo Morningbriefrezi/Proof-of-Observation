@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, type ComponentType } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { Lock } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
@@ -22,9 +23,10 @@ import PleiadesNode from '@/components/sky/chart-nodes/PleiadesNode';
 import OrionNode from '@/components/sky/chart-nodes/OrionNode';
 import AndromedaNode from '@/components/sky/chart-nodes/AndromedaNode';
 import CrabNode from '@/components/sky/chart-nodes/CrabNode';
-import ObservationLog from '@/components/sky/ObservationLog';
-import RewardsSection from '@/components/sky/RewardsSection';
-import QuizActive from '@/components/sky/QuizActive';
+
+const ObservationLog = dynamic(() => import('@/components/sky/ObservationLog'), { ssr: false });
+const RewardsSection = dynamic(() => import('@/components/sky/RewardsSection'), { ssr: false });
+const QuizActive = dynamic(() => import('@/components/sky/QuizActive'), { ssr: false });
 import { getChartDeepSky } from '@/lib/sky-chart';
 import { getVisiblePlanets } from '@/lib/planets';
 import { QUIZZES } from '@/lib/quizzes';
