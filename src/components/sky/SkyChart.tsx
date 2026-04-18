@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { Mission } from '@/lib/types';
 import {
   getChartStars,
@@ -31,20 +31,21 @@ interface Props {
   date: Date;
   missions: Mission[];
   primeId: string | null;
+  city?: string;
   onSelect: (mission: Mission) => void;
 }
 
 const NODE_MAP: Record<string, { comp: React.ComponentType<{ size?: number }>; size: number; primeSize: number }> = {
-  moon:       { comp: MoonNode,       size: 22, primeSize: 30 },
-  jupiter:    { comp: JupiterNode,    size: 28, primeSize: 36 },
-  saturn:     { comp: SaturnNode,     size: 28, primeSize: 36 },
-  venus:      { comp: VenusNode,      size: 18, primeSize: 24 },
-  mars:       { comp: MarsNode,       size: 20, primeSize: 26 },
-  mercury:    { comp: MercuryNode,    size: 16, primeSize: 22 },
-  pleiades:   { comp: PleiadesNode,   size: 22, primeSize: 28 },
-  orion:      { comp: OrionNode,      size: 22, primeSize: 28 },
-  andromeda:  { comp: AndromedaNode,  size: 24, primeSize: 30 },
-  crab:       { comp: CrabNode,       size: 18, primeSize: 22 },
+  moon:       { comp: MoonNode,       size: 26, primeSize: 34 },
+  jupiter:    { comp: JupiterNode,    size: 32, primeSize: 40 },
+  saturn:     { comp: SaturnNode,     size: 32, primeSize: 40 },
+  venus:      { comp: VenusNode,      size: 22, primeSize: 28 },
+  mars:       { comp: MarsNode,       size: 24, primeSize: 30 },
+  mercury:    { comp: MercuryNode,    size: 20, primeSize: 26 },
+  pleiades:   { comp: PleiadesNode,   size: 26, primeSize: 32 },
+  orion:      { comp: OrionNode,      size: 26, primeSize: 32 },
+  andromeda:  { comp: AndromedaNode,  size: 28, primeSize: 34 },
+  crab:       { comp: CrabNode,       size: 22, primeSize: 26 },
 };
 
 function projectWide(altDeg: number, azDeg: number): { x: number; y: number; aboveHorizon: boolean } {
@@ -58,9 +59,11 @@ function projectWide(altDeg: number, azDeg: number): { x: number; y: number; abo
   };
 }
 
-export default function SkyChart({ lat, lon, date, missions, primeId, onSelect }: Props) {
+export default function SkyChart({ lat, lon, date, missions, primeId, city, onSelect }: Props) {
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+
   const stars = useMemo(
-    () => getChartStars(lat, lon, date, CX, CY, 180, 3.0),
+    () => getChartStars(lat, lon, date, CX, CY, 180, 4.6),
     [lat, lon, date]
   );
 
@@ -79,10 +82,13 @@ export default function SkyChart({ lat, lon, date, missions, primeId, onSelect }
     const deepByKey = new Map(plottedDeepSky.map(d => [d.id, d]));
     return missions
       .map(m => {
-        const src = planetByKey.get(m.id) ?? deepByKey.get(m.id);
+        const planet = planetByKey.get(m.id);
+        const deep = deepByKey.get(m.id);
+        const src = planet ?? deep;
         const nodeSpec = NODE_MAP[m.id];
         if (!src || !nodeSpec) return null;
-        return { mission: m, x: src.x, y: src.y, aboveHorizon: src.aboveHorizon, nodeSpec };
+        const magnitude = planet?.magnitude ?? deep?.magnitude ?? 99;
+        return { mission: m, x: src.x, y: src.y, aboveHorizon: src.aboveHorizon, nodeSpec, magnitude };
       })
       .filter(Boolean) as Array<{
         mission: Mission;
@@ -90,8 +96,21 @@ export default function SkyChart({ lat, lon, date, missions, primeId, onSelect }
         y: number;
         aboveHorizon: boolean;
         nodeSpec: typeof NODE_MAP[string];
+        magnitude: number;
       }>;
   }, [missions, plottedPlanets, plottedDeepSky]);
+
+  const brightestId = useMemo(() => {
+    const visible = plottedMissions.filter(p => p.aboveHorizon);
+    if (!visible.length) return null;
+    let best = visible[0];
+    for (const p of visible) if (p.magnitude < best.magnitude) best = p;
+    return best.mission.id;
+  }, [plottedMissions]);
+
+  const liveTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const liveDate = date.toLocaleDateString([], { month: 'short', day: 'numeric' }).toUpperCase();
+  const cityTag = (city ?? '').toUpperCase();
 
   return (
     <div
@@ -101,11 +120,12 @@ export default function SkyChart({ lat, lon, date, missions, primeId, onSelect }
         borderRadius: 14,
         border: '1px solid rgba(255,255,255,0.08)',
         background: [
-          'radial-gradient(ellipse 320px 180px at 70% 40%, rgba(132,101,203,0.2) 0%, transparent 55%)',
-          'radial-gradient(ellipse 260px 160px at 25% 60%, rgba(56,155,240,0.14) 0%, transparent 60%)',
-          'radial-gradient(ellipse 200px 120px at 50% 15%, rgba(255,143,184,0.08) 0%, transparent 60%)',
-          'radial-gradient(ellipse 400px 200px at 50% 100%, rgba(255,209,102,0.05) 0%, transparent 70%)',
-          'radial-gradient(ellipse at 50% 50%, #0A1428 0%, #050A1C 60%, #010206 100%)',
+          'radial-gradient(ellipse 340px 180px at 72% 38%, rgba(168,132,255,0.28) 0%, transparent 55%)',
+          'radial-gradient(ellipse 280px 170px at 22% 62%, rgba(72,170,255,0.18) 0%, transparent 62%)',
+          'radial-gradient(ellipse 220px 130px at 52% 14%, rgba(255,150,200,0.11) 0%, transparent 60%)',
+          'radial-gradient(ellipse 140px 80px at 15% 20%, rgba(255,209,102,0.06) 0%, transparent 70%)',
+          'radial-gradient(ellipse 420px 220px at 50% 100%, rgba(255,209,102,0.06) 0%, transparent 70%)',
+          'radial-gradient(ellipse at 50% 50%, #081126 0%, #030718 55%, #01020A 100%)',
         ].join(', '),
       }}
     >
@@ -116,44 +136,97 @@ export default function SkyChart({ lat, lon, date, missions, primeId, onSelect }
       >
         <defs>
           <radialGradient id="stl-mw-wide" cx="0.5" cy="0.5" r="0.5">
-            <stop offset="0" stopColor="#FFE8C4" stopOpacity="0.14" />
-            <stop offset="0.4" stopColor="#B8C5FF" stopOpacity="0.08" />
+            <stop offset="0" stopColor="#FFE8C4" stopOpacity="0.18" />
+            <stop offset="0.45" stopColor="#B8C5FF" stopOpacity="0.09" />
             <stop offset="1" stopColor="transparent" />
           </radialGradient>
-          <linearGradient id="stl-dust-wide" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="#030612" stopOpacity="0" />
-            <stop offset="0.35" stopColor="#030612" stopOpacity="0.35" />
-            <stop offset="0.65" stopColor="#030612" stopOpacity="0.35" />
-            <stop offset="1" stopColor="#030612" stopOpacity="0" />
-          </linearGradient>
+          <radialGradient id="stl-neb-a" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stopColor="#B18CFF" stopOpacity="0.18" />
+            <stop offset="0.6" stopColor="#5A3DA0" stopOpacity="0.05" />
+            <stop offset="1" stopColor="transparent" />
+          </radialGradient>
+          <radialGradient id="stl-neb-b" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stopColor="#3FB7F5" stopOpacity="0.14" />
+            <stop offset="1" stopColor="transparent" />
+          </radialGradient>
         </defs>
 
-        <g transform={`rotate(-12 ${CX} ${CY})`}>
-          <ellipse cx={CX} cy={CY} rx="280" ry="38" fill="url(#stl-mw-wide)" />
-          <ellipse cx={CX} cy={CY} rx="280" ry="8" fill="url(#stl-dust-wide)" opacity="0.75" />
+        <g transform={`rotate(-14 ${CX} ${CY})`}>
+          <ellipse cx={CX} cy={CY} rx="300" ry="46" fill="url(#stl-mw-wide)" />
+          <ellipse cx={CX - 70} cy={CY - 6} rx="90" ry="28" fill="url(#stl-neb-a)" opacity="0.9" />
+          <ellipse cx={CX + 90} cy={CY + 8} rx="75" ry="22" fill="url(#stl-neb-b)" opacity="0.9" />
         </g>
 
         {stars.map((s, i) => {
-          const r = Math.max(0.3, (3.4 - s.mag) * 0.45);
-          const fill = s.mag < 1.2 ? '#FFF' : s.mag < 2.2 ? '#E8F0FF' : '#B8D4FF';
+          const r = Math.max(0.35, (4.6 - s.mag) * 0.55);
+          const fill = s.mag < 1.0 ? '#FFFFFF' : s.mag < 2.2 ? '#F0F5FF' : s.mag < 3.2 ? '#D8E4FF' : '#A8BEF0';
           const opacity = s.aboveHorizon
-            ? Math.min(1, 0.4 + (3 - s.mag) * 0.22)
-            : 0.1;
+            ? Math.min(1, 0.55 + (4 - s.mag) * 0.18)
+            : 0.12;
           const normX = (s.x - 200) / 180;
           const normY = (s.y - 100) / 180;
           const wideX = CX + normX * CHART_RX;
           const wideY = CY + normY * CHART_RY;
           if (wideX < 0 || wideX > W || wideY < 0 || wideY > H) return null;
-          return <circle key={i} cx={wideX} cy={wideY} r={r} fill={fill} opacity={opacity} />;
+          return (
+            <circle key={i} cx={wideX} cy={wideY} r={r} fill={fill} opacity={opacity}>
+              {s.mag < 2 && s.aboveHorizon && (
+                <animate attributeName="opacity" values={`${opacity};${Math.min(1, opacity + 0.18)};${opacity}`} dur={`${3 + (i % 5) * 0.4}s`} repeatCount="indefinite" />
+              )}
+            </circle>
+          );
         })}
-
-        <g fontFamily="var(--font-mono)" fill="rgba(255,255,255,0.22)" fontSize="8" fontWeight="500">
-          <text x={CX} y="12" textAnchor="middle">N</text>
-          <text x={CX} y={H - 6} textAnchor="middle">S</text>
-          <text x={W - 8} y={CY + 3} textAnchor="end">E</text>
-          <text x={8} y={CY + 3}>W</text>
-        </g>
       </svg>
+
+      {/* Cardinal markers outside visible center band */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          top: 6,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          fontFamily: 'var(--font-mono)',
+          fontSize: 9,
+          color: 'rgba(255,255,255,0.35)',
+          letterSpacing: '0.2em',
+        }}
+      >N</div>
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          bottom: 6,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          fontFamily: 'var(--font-mono)',
+          fontSize: 9,
+          color: 'rgba(255,255,255,0.35)',
+          letterSpacing: '0.2em',
+        }}
+      >S</div>
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          left: 8,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          fontFamily: 'var(--font-mono)',
+          fontSize: 9,
+          color: 'rgba(255,255,255,0.35)',
+          letterSpacing: '0.2em',
+        }}
+      >W</div>
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          right: 8,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          fontFamily: 'var(--font-mono)',
+          fontSize: 9,
+          color: 'rgba(255,255,255,0.35)',
+          letterSpacing: '0.2em',
+        }}
+      >E</div>
 
       <div className="absolute top-2.5 left-3 flex items-center gap-1.5">
         <div className="w-1.5 h-1.5 rounded-full stl-tw" style={{ background: 'var(--stl-gold)' }} />
@@ -161,33 +234,52 @@ export default function SkyChart({ lat, lon, date, missions, primeId, onSelect }
           style={{
             fontFamily: 'var(--font-mono)',
             fontSize: 9,
-            color: 'rgba(255,255,255,0.4)',
+            color: 'rgba(255,255,255,0.45)',
             letterSpacing: '0.22em',
           }}
         >
-          LIVE · {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          LIVE · {liveTime}
+        </span>
+      </div>
+      <div className="absolute top-2.5 right-3 flex items-center gap-1.5">
+        <span
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 9,
+            color: 'rgba(255,255,255,0.45)',
+            letterSpacing: '0.22em',
+          }}
+        >
+          {liveDate}{cityTag ? ` · ${cityTag}` : ''}
         </span>
       </div>
 
-      {plottedMissions.map(({ mission, x, y, aboveHorizon, nodeSpec }) => {
+      {plottedMissions.map(({ mission, x, y, aboveHorizon, nodeSpec, magnitude }) => {
         const isPrime = mission.id === primeId;
+        const isBrightest = mission.id === brightestId;
+        const isHovered = hoveredId === mission.id;
         const leftPct = (x / W) * 100;
         const topPct = (y / H) * 100;
         const NodeComp = nodeSpec.comp;
-        const size = isPrime ? nodeSpec.primeSize : nodeSpec.size;
+        const baseSize = isPrime ? nodeSpec.primeSize : nodeSpec.size;
+        const size = isHovered ? Math.round(baseSize * 1.35) : baseSize;
+        const nearTop = topPct < 28;
 
         return (
           <button
             key={mission.id}
             onClick={() => onSelect(mission)}
-            className="absolute transition-transform active:scale-95 hover:scale-110"
+            onMouseEnter={() => setHoveredId(mission.id)}
+            onMouseLeave={() => setHoveredId(prev => (prev === mission.id ? null : prev))}
+            className="absolute transition-all duration-200 ease-out active:scale-95"
             style={{
               left: `${leftPct}%`,
               top: `${topPct}%`,
               transform: 'translate(-50%, -50%)',
               opacity: aboveHorizon ? 1 : 0.35,
               cursor: 'pointer',
-              zIndex: isPrime ? 3 : 2,
+              zIndex: isHovered ? 10 : isPrime ? 4 : isBrightest ? 3 : 2,
+              filter: aboveHorizon ? 'drop-shadow(0 0 8px rgba(255,255,255,0.18))' : 'none',
             }}
             aria-label={`Jump to ${mission.name}`}
           >
@@ -203,7 +295,43 @@ export default function SkyChart({ lat, lon, date, missions, primeId, onSelect }
                   }}
                 />
               )}
+              {isBrightest && !isPrime && aboveHorizon && (
+                <span
+                  className="absolute pointer-events-none"
+                  style={{
+                    inset: -3,
+                    borderRadius: '50%',
+                    border: '1.5px solid rgba(255,255,255,0.7)',
+                    animation: 'stl-prime-pulse 2.8s ease-out infinite',
+                  }}
+                />
+              )}
               <NodeComp size={size} />
+
+              {isHovered && (
+                <div
+                  className="absolute left-1/2 pointer-events-none"
+                  style={{
+                    [nearTop ? 'top' : 'bottom']: `calc(100% + 6px)` as never,
+                    transform: 'translateX(-50%)',
+                    background: 'rgba(7,11,20,0.92)',
+                    border: '1px solid rgba(255,255,255,0.14)',
+                    borderRadius: 6,
+                    padding: '4px 8px',
+                    whiteSpace: 'nowrap',
+                    backdropFilter: 'blur(6px)',
+                  }}
+                >
+                  <div style={{ fontFamily: 'var(--font-serif)', fontSize: 12, color: '#F2F0EA', fontWeight: 600, lineHeight: 1 }}>
+                    {mission.name}
+                  </div>
+                  {magnitude < 50 && (
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', marginTop: 2 }}>
+                      MAG {magnitude > 0 ? '+' : ''}{magnitude.toFixed(1)}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </button>
         );

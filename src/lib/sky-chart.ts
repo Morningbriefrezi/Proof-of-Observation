@@ -1,4 +1,4 @@
-import { Body, Equator, Horizon, Observer } from 'astronomy-engine';
+import { Body, Equator, Horizon, Illumination, Observer } from 'astronomy-engine';
 import { STARS } from './star-catalog';
 
 /**
@@ -107,6 +107,8 @@ export function getChartPlanets(
       const eq = Equator(body, date, observer, true, true);
       const horiz = Horizon(date, observer, eq.ra, eq.dec, 'normal');
       const p = projectAltAz(horiz.altitude, horiz.azimuth, cx, cy, chartRadius, -8);
+      let magnitude = 99;
+      try { magnitude = Illumination(body, date).mag; } catch { /* ignore */ }
       out.push({
         ...p,
         key,
@@ -115,7 +117,7 @@ export function getChartPlanets(
         rise: null,
         transit: null,
         set: null,
-        magnitude: 0,
+        magnitude,
       });
     } catch { continue; }
   }
@@ -133,7 +135,15 @@ export interface ChartDeepSky extends ChartPoint {
   id: string;
   altitude: number;
   azimuth: number;
+  magnitude?: number;
 }
+
+const DEEP_SKY_MAG: Record<string, number> = {
+  pleiades:  1.6,
+  orion:     4.0,
+  andromeda: 3.4,
+  crab:      8.4,
+};
 
 export function getChartDeepSky(
   lat: number,
@@ -149,7 +159,7 @@ export function getChartDeepSky(
     try {
       const horiz = Horizon(date, observer, coord.raHours, coord.decDeg, 'normal');
       const p = projectAltAz(horiz.altitude, horiz.azimuth, cx, cy, chartRadius, -8);
-      out.push({ ...p, id, altitude: horiz.altitude, azimuth: horiz.azimuth });
+      out.push({ ...p, id, altitude: horiz.altitude, azimuth: horiz.azimuth, magnitude: DEEP_SKY_MAG[id] });
     } catch { continue; }
   }
   return out;
