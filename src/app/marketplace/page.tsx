@@ -180,8 +180,8 @@ export default function MarketplacePage() {
                 <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>First telescope · Easy setup</p>
               </div>
               <div className="grid gap-3 grid-cols-2">
-                {telescopesByTier.beginner.map(p => (
-                  <ProductCard key={p.id} product={p} showDealer={showDealer} dealerName={getDealerName(p.dealerId)} />
+                {telescopesByTier.beginner.map((p, i) => (
+                  <ProductCard key={p.id} product={p} showDealer={showDealer} dealerName={getDealerName(p.dealerId)} priority={i === 0} />
                 ))}
               </div>
             </div>
@@ -233,12 +233,13 @@ export default function MarketplacePage() {
         </div>
       ) : (
         <div className="grid gap-3 grid-cols-2">
-          {products.map(p => (
+          {products.map((p, i) => (
             <ProductCard
               key={p.id}
               product={p}
               showDealer={showDealer}
               dealerName={getDealerName(p.dealerId)}
+              priority={i === 0}
             />
           ))}
         </div>

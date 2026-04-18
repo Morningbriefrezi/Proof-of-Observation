@@ -8,6 +8,7 @@ interface Props {
   product: Product;
   showDealer: boolean;
   dealerName: string;
+  priority?: boolean;
 }
 
 const BADGE_STYLES: Record<string, { bg: string; color: string }> = {
@@ -29,7 +30,7 @@ const CATEGORY_FALLBACK: Record<string, { icon: string; label: string; bg: strin
   accessory: { icon: '🔧', label: 'Accessory', bg: 'rgba(245,158,11,0.07)' },
 };
 
-export default function ProductCard({ product, showDealer, dealerName }: Props) {
+export default function ProductCard({ product, showDealer, dealerName, priority }: Props) {
   const [imgError, setImgError] = useState(false);
   const badgeStyle = product.badge ? BADGE_STYLES[product.badge] : null;
   const fallback = CATEGORY_FALLBACK[product.category] ?? CATEGORY_FALLBACK.telescope;
@@ -57,6 +58,7 @@ export default function ProductCard({ product, showDealer, dealerName }: Props) 
             sizes="(max-width: 768px) 50vw, 300px"
             style={{ objectFit: 'contain', padding: '12px' }}
             unoptimized
+            priority={priority}
             onError={() => setImgError(true)}
           />
         ) : (

@@ -1,8 +1,11 @@
 'use client';
 
 import { PrivyProvider } from '@privy-io/react-auth';
+import { toSolanaWalletConnectors } from '@privy-io/react-auth/solana';
 import type { ReactNode } from 'react';
 import { useUserSync } from '@/hooks/useUserSync';
+
+const solanaConnectors = toSolanaWalletConnectors({ shouldAutoConnect: false });
 
 if (!process.env.NEXT_PUBLIC_PRIVY_APP_ID) {
   throw new Error('NEXT_PUBLIC_PRIVY_APP_ID is not set');
@@ -31,6 +34,9 @@ export function SolanaWalletProvider({ children }: { children: ReactNode }) {
         embeddedWallets: {
           ethereum: { createOnLogin: 'off' },
           solana: { createOnLogin: 'users-without-wallets' },
+        },
+        externalWallets: {
+          solana: { connectors: solanaConnectors },
         },
       }}
     >

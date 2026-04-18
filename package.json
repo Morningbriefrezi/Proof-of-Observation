@@ -22,6 +22,7 @@
     "@neondatabase/serverless": "^1.0.2",
     "@privy-io/react-auth": "^3.19.0",
     "@privy-io/server-auth": "^1.32.5",
+    "@solana-program/memo": "^0.11.0",
     "@solana/pay": "^0.2.6",
     "@solana/spl-token": "^0.4.14",
     "@solana/web3.js": "^1.98.4",

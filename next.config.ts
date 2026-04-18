@@ -19,6 +19,16 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     root: __dirname,
+    resolveAlias: {
+      '@farcaster/mini-app-solana': { browser: './src/lib/empty-module.ts' },
+    },
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...(config.resolve.alias ?? {}),
+      '@farcaster/mini-app-solana': false,
+    };
+    return config;
   },
   async headers() {
     const csp = [
