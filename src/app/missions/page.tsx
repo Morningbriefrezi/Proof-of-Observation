@@ -1,112 +1,148 @@
 'use client';
 
-import { useState, useEffect, useMemo, type ComponentType } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { Lock } from 'lucide-react';
+import { ChevronLeft, Lock } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 import { useAppState } from '@/hooks/useAppState';
 import { usePrivy } from '@privy-io/react-auth';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useLocation } from '@/lib/location';
-import StatsBar from '@/components/sky/StatsBar';
-import SkyChart from '@/components/sky/SkyChart';
-import PrimeHeroCard from '@/components/sky/PrimeHeroCard';
-import MissionListRow from '@/components/sky/MissionListRow';
-import JupiterNode from '@/components/sky/chart-nodes/JupiterNode';
-import SaturnNode from '@/components/sky/chart-nodes/SaturnNode';
-import MoonNode from '@/components/sky/chart-nodes/MoonNode';
-import VenusNode from '@/components/sky/chart-nodes/VenusNode';
-import MarsNode from '@/components/sky/chart-nodes/MarsNode';
-import MercuryNode from '@/components/sky/chart-nodes/MercuryNode';
-import PleiadesNode from '@/components/sky/chart-nodes/PleiadesNode';
-import OrionNode from '@/components/sky/chart-nodes/OrionNode';
-import AndromedaNode from '@/components/sky/chart-nodes/AndromedaNode';
-import CrabNode from '@/components/sky/chart-nodes/CrabNode';
-
-const ObservationLog = dynamic(() => import('@/components/sky/ObservationLog'), { ssr: false });
-const RewardsSection = dynamic(() => import('@/components/sky/RewardsSection'), { ssr: false });
-const QuizActive = dynamic(() => import('@/components/sky/QuizActive'), { ssr: false });
-import { getChartDeepSky } from '@/lib/sky-chart';
-import { getVisiblePlanets } from '@/lib/planets';
-import { QUIZZES } from '@/lib/quizzes';
-import { MISSIONS } from '@/lib/constants';
-import type { Mission } from '@/lib/types';
-import type { QuizDef } from '@/lib/quizzes';
+import { SKY_MISSIONS, computeMissionStates } from '@/lib/mission-catalog';
+import MissionSkymap from '@/components/sky/MissionSkymap';
+import PrimeMissionHero from '@/components/sky/PrimeMissionHero';
+import MissionRosterRow from '@/components/sky/MissionRosterRow';
+import QuizStrip from '@/components/sky/QuizStrip';
 import PageTransition from '@/components/ui/PageTransition';
 import PageContainer from '@/components/layout/PageContainer';
 import { MissionIcon } from '@/components/shared/PlanetIcons';
 import { TelescopeIcon, StarTokenIcon, DifficultyDots } from '@/components/icons/CelestialIcons';
-import QuizCard, { type QuizTheme } from '@/components/sky/QuizCard';
-import SolarSystemIcon from '@/components/sky/quiz-icons/SolarSystemIcon';
-import ConstellationsIcon from '@/components/sky/quiz-icons/ConstellationsIcon';
-import TelescopeIconArt from '@/components/sky/quiz-icons/TelescopeIcon';
-import CosmologyIcon from '@/components/sky/quiz-icons/CosmologyIcon';
-import ExplorationIcon from '@/components/sky/quiz-icons/ExplorationIcon';
-import MissionsWebDesktop from '@/components/sky/MissionsWebDesktop';
+import { MISSIONS } from '@/lib/constants';
+import { QUIZZES, type QuizDef } from '@/lib/quizzes';
 
-interface QuizSpec {
-  theme: QuizTheme;
-  Icon: React.ComponentType<{ size?: number }>;
-  reward: number;
-  badge?: 'new' | 'hard';
+const ObservationLog = dynamic(() => import('@/components/sky/ObservationLog'), { ssr: false });
+const RewardsSection = dynamic(() => import('@/components/sky/RewardsSection'), { ssr: false });
+const QuizActive = dynamic(() => import('@/components/sky/QuizActive'), { ssr: false });
+
+const SKY_TO_OBSERVE_ID: Record<string, string> = {
+  jupiter: 'jupiter',
+  moon: 'moon',
+  saturn: 'saturn',
+  pleiades: 'pleiades',
+  orion_nebula: 'orion',
+  andromeda: 'andromeda',
+  double_cluster: 'free-observation',
+  mars: 'free-observation',
+  ring_nebula: 'free-observation',
+  crab_nebula: 'crab',
+};
+
+const OBSERVE_TO_SKY_ID: Record<string, string> = {
+  jupiter: 'jupiter',
+  moon: 'moon',
+  saturn: 'saturn',
+  pleiades: 'pleiades',
+  orion: 'orion_nebula',
+  andromeda: 'andromeda',
+  crab: 'crab_nebula',
+};
+
+function useIsMobile() {
+  const [m, setM] = useState(false);
+  useEffect(() => {
+    const check = () => setM(window.innerWidth < 1024);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+  return m;
 }
 
-const QUIZ_SPECS: Record<string, QuizSpec> = {
-  'solar-system':     { theme: 'solar',       Icon: SolarSystemIcon,   reward: 100 },
-  'constellations':   { theme: 'stars',       Icon: ConstellationsIcon, reward: 100 },
-  'telescopes':       { theme: 'telescope',   Icon: TelescopeIconArt,   reward: 100, badge: 'new' },
-  'universe':         { theme: 'cosmos',      Icon: CosmologyIcon,      reward: 100, badge: 'hard' },
-  'space-exploration':{ theme: 'exploration', Icon: ExplorationIcon,    reward: 100 },
-};
+function formatTime(d: Date) {
+  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
 
 export default function MissionsPage() {
   const router = useRouter();
   const { state } = useAppState();
   const { authenticated, login } = usePrivy();
-  const locale = useLocale() === 'ka' ? 'ka' : 'en';
   const t = useTranslations('missions');
   const { location } = useLocation();
+
   const [activeQuiz, setActiveQuiz] = useState<QuizDef | null>(null);
+  const [cloudCoverPct, setCloudCoverPct] = useState(12);
+  const [now, setNow] = useState(new Date());
   const [skyConditions, setSkyConditions] = useState<{ cloudCover: number; visibility: string; verified: boolean } | null>(null);
-  const [streak, setStreak] = useState<number>(0);
   const [isNight, setIsNight] = useState(false);
-  const [skyTimeout, setSkyTimeout] = useState(false);
-  const quizStarsEarned = useMemo(
-    () => (state.completedQuizzes ?? []).reduce((sum, r) => sum + (r.stars ?? 0), 0),
-    [state.completedQuizzes]
-  );
+  const isMobile = useIsMobile();
+
   useEffect(() => {
     const h = new Date().getHours();
     setIsNight(h >= 18 || h < 5);
   }, []);
 
   useEffect(() => {
-    if (!authenticated || !state.walletAddress) return;
-    fetch(`/api/streak?walletAddress=${encodeURIComponent(state.walletAddress)}`)
-      .then(r => r.json())
-      .then(d => setStreak(d.streak ?? 0))
-      .catch(() => {});
-  }, [authenticated, state.walletAddress]);
+    const t = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => setSkyTimeout(true), 10000);
     fetch(`/api/sky/verify?lat=${location.lat}&lon=${location.lon}`)
-      .then(r => r.json())
-      .then(d => {
-        setSkyConditions({ cloudCover: d.cloudCover, visibility: d.visibility, verified: d.verified });
-        // If verified, we know it's actually night — override the rough time check
-        if (d.verified) setIsNight(true);
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.cloudCover != null) {
+          setCloudCoverPct(d.cloudCover);
+          setSkyConditions({ cloudCover: d.cloudCover, visibility: d.visibility, verified: d.verified });
+          if (d.verified) setIsNight(true);
+        }
       })
-      .catch(() => {})
-      .finally(() => clearTimeout(timer));
-    return () => clearTimeout(timer);
+      .catch(() => {});
   }, [location.lat, location.lon]);
+
+  const completedIds = useMemo(() => {
+    const done = state.completedMissions.filter((m) => m.status === 'completed').map((m) => m.id);
+    return done.map((id) => OBSERVE_TO_SKY_ID[id] ?? id);
+  }, [state.completedMissions]);
+
+  const missionStates = useMemo(
+    () => computeMissionStates(SKY_MISSIONS, { completedIds, cloudCoverPct }),
+    [completedIds, cloudCoverPct]
+  );
+
+  const primeState = missionStates.find((m) => m.isPrime);
+  const primeMission = primeState
+    ? SKY_MISSIONS.find((m) => m.id === primeState.id)!
+    : SKY_MISSIONS[0];
+
+  const doneCount = missionStates.filter((m) => m.isDone).length;
+  const readyCount = missionStates.filter((m) => !m.isDone && !m.isCloudy).length;
+  const cloudyCount = missionStates.filter((m) => m.isCloudy).length;
+
+  const handleStart = (missionId: string) => {
+    if (!authenticated) {
+      login();
+      return;
+    }
+    const observeId = SKY_TO_OBSERVE_ID[missionId] ?? missionId;
+    router.push(`/observe/${observeId}`);
+  };
+
+  const handlePlayQuiz = () => {
+    if (!authenticated) {
+      login();
+      return;
+    }
+    const q = QUIZZES.find((q) => q.id === 'solar-system') ?? QUIZZES[0];
+    if (q) setActiveQuiz(q);
+  };
+
+  const cityLabel = location.city || (location.country === 'GE' ? 'Tbilisi' : location.country || 'Earth');
+  const condLabel = cloudCoverPct < 30 ? 'CLEAR' : cloudCoverPct < 60 ? 'PARTIAL' : 'CLOUDY';
 
   if (!authenticated) {
     return (
       <PageContainer variant="wide" className="py-3 sm:py-6 animate-page-enter flex flex-col gap-4">
-        {/* Sign-in card */}
         <div
           className="rounded-2xl p-5 sm:p-6"
           style={{
@@ -123,10 +159,14 @@ export default function MissionsPage() {
               <span
                 className="absolute -top-1 -right-1 text-[10px] leading-none"
                 style={{ color: '#FFD166', textShadow: '0 0 6px rgba(255,209,102,0.6)' }}
-              >✦</span>
+              >
+                ✦
+              </span>
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-base font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>{t('title')}</h2>
+              <h2 className="text-base font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>
+                {t('title')}
+              </h2>
               <p className="text-slate-500 text-xs mt-0.5">{t('subtitle')}</p>
             </div>
             <button
@@ -139,11 +179,12 @@ export default function MissionsPage() {
           </div>
         </div>
 
-        {/* Preview mission list */}
         <div>
-          <p className="text-slate-600 text-[11px] uppercase tracking-widest mb-3">{t('availableMissions')}</p>
+          <p className="text-slate-600 text-[11px] uppercase tracking-widest mb-3">
+            {t('availableMissions')}
+          </p>
           <div className="flex flex-col gap-2.5">
-            {MISSIONS.map(mission => (
+            {MISSIONS.map((mission) => (
               <div
                 key={mission.id}
                 className="relative flex items-center gap-4 rounded-2xl px-4 py-3.5 overflow-hidden"
@@ -152,32 +193,41 @@ export default function MissionsPage() {
                 <div className="absolute inset-0 bg-[#070B14]/40 backdrop-blur-[1px] z-10 flex items-center justify-end pr-4">
                   <Lock size={13} className="text-slate-600" />
                 </div>
-                <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <MissionIcon id={mission.id} size={28}/>
+                <div
+                  className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                >
+                  <MissionIcon id={mission.id} size={28} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-slate-400 text-sm font-semibold">{mission.name}</p>
                   <p className="text-slate-600 text-xs mt-0.5 line-clamp-1">{mission.desc}</p>
                   <div className="mt-1.5">
-                    <DifficultyDots level={
-                      mission.difficulty === 'Beginner' ? 1
-                      : mission.difficulty === 'Intermediate' ? 2
-                      : mission.difficulty === 'Expert' ? 4
-                      : 3
-                    }/>
+                    <DifficultyDots
+                      level={
+                        mission.difficulty === 'Beginner'
+                          ? 1
+                          : mission.difficulty === 'Intermediate'
+                          ? 2
+                          : mission.difficulty === 'Expert'
+                          ? 4
+                          : 3
+                      }
+                    />
                   </div>
                 </div>
-                <span className="text-[#FFD166]/40 text-xs font-bold flex-shrink-0 flex items-center gap-0.5"
-                  style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  +{mission.stars}<StarTokenIcon size={11}/>
+                <span
+                  className="text-[#FFD166]/40 text-xs font-bold flex-shrink-0 flex items-center gap-0.5"
+                  style={{ fontVariantNumeric: 'tabular-nums' }}
+                >
+                  +{mission.stars}
+                  <StarTokenIcon size={11} />
                 </span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Tonight's sky */}
         <div
           className="rounded-2xl p-4"
           style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
@@ -200,7 +250,11 @@ export default function MissionsPage() {
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isNight ? 'bg-[#34d399] animate-pulse' : 'bg-slate-700'}`} />
               {isNight ? (
-                <span className="loading-dots"><span></span><span></span><span></span></span>
+                <span className="loading-dots">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </span>
               ) : (
                 <span className="text-slate-500 text-sm">Come back after sunset to observe</span>
               )}
@@ -214,472 +268,145 @@ export default function MissionsPage() {
   return (
     <PageTransition>
       <>
-      {activeQuiz && <QuizActive quiz={activeQuiz} onClose={() => setActiveQuiz(null)} />}
+        {activeQuiz && <QuizActive quiz={activeQuiz} onClose={() => setActiveQuiz(null)} />}
 
-      <PageContainer variant="wide" className="py-2 flex flex-col gap-3" style={{ fontFamily: 'var(--font-display)' }}>
-        <BackButton />
+        <PageContainer variant="wide" className="py-2 flex flex-col gap-3" style={{ fontFamily: 'var(--font-display)' }}>
+          <BackButton />
 
-        <ChartSection
-          onStart={(m) => router.push(`/observe/${m.id}`)}
-          skyConditions={skyConditions}
-          streak={streak}
-          onStartQuiz={(q) => setActiveQuiz(q)}
-          completedQuizIds={new Set((state.completedQuizzes ?? []).map(r => r.quizId))}
-        />
-
-        <StatsBar />
-
-        {/* Quiz Missions */}
-        <section className="mt-4">
-          <div className="flex items-baseline justify-between mb-4 px-0.5">
-            <div>
-              <div className="flex items-baseline gap-2.5">
-                <h2
-                  style={{
-                    fontFamily: 'var(--font-serif)',
-                    fontSize: 24,
-                    color: '#F2F0EA',
-                    fontWeight: 600,
-                    margin: 0,
-                    letterSpacing: '-0.01em',
-                  }}
-                >
-                  {t('knowledgeQuizzes')}
-                </h2>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 10,
-                    color: 'rgba(255,255,255,0.35)',
-                    letterSpacing: '0.14em',
-                  }}
-                >
-                  {String(QUIZZES.length).padStart(2, '0')} QUIZZES
-                </span>
-              </div>
-              <div
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: 13,
-                  color: 'rgba(255,255,255,0.55)',
-                  fontStyle: 'italic',
-                  fontWeight: 400,
-                  marginTop: 2,
-                }}
-              >
-                Earn stars while you wait for clear skies
+          <div className="missions-v3">
+            {/* header */}
+            <div className="header-row">
+              <h1 className="h1">Missions tonight</h1>
+              <div className="kicker">
+                LIVE · {formatTime(now)} · <span className="brass">{condLabel}</span> · {cityLabel.toUpperCase()}
               </div>
             </div>
-            <div
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full"
-              style={{ background: 'rgba(255,209,102,0.08)', border: '1px solid rgba(255,209,102,0.2)' }}
-            >
-              <span style={{ fontSize: 11, color: '#FFD166', fontWeight: 600 }}>
-                ✦ {quizStarsEarned}
-              </span>
-            </div>
-          </div>
 
-          <div className="flex flex-col gap-2.5">
-            {QUIZZES.map(quiz => {
-              const spec = QUIZ_SPECS[quiz.id];
-              if (!spec) return null;
-              const bestResult = [...(state.completedQuizzes ?? [])]
-                .filter(r => r.quizId === quiz.id)
-                .sort((a, b) => b.score - a.score)[0];
-              const bestPct = bestResult ? Math.round((bestResult.score / bestResult.total) * 100) : null;
-              const badges: Array<{ label: string; variant: 'new' | 'hard' | 'done' }> = [];
-              if (bestPct !== null && bestPct >= 90) badges.push({ label: `✓ ${bestPct}%`, variant: 'done' });
-              if (spec.badge === 'new' && bestPct === null) badges.push({ label: 'NEW', variant: 'new' });
-              if (spec.badge === 'hard') badges.push({ label: 'HARD', variant: 'hard' });
+            {/* prime hero */}
+            <PrimeMissionHero
+              mission={primeMission}
+              bestViewingTime="22:14"
+              elevation="64° SE"
+              onStart={() => handleStart(primeMission.id)}
+              variant={isMobile ? 'mobile' : 'desktop'}
+            />
 
-              return (
-                <QuizCard
-                  key={quiz.id}
-                  quiz={quiz}
-                  theme={spec.theme}
-                  Icon={spec.Icon}
-                  titleEn={quiz.title[locale] ?? quiz.title.en}
-                  descEn={quiz.description[locale] ?? quiz.description.en}
-                  totalQuestions={quiz.questions?.length ?? 10}
-                  bestPct={bestPct}
-                  starsEarned={bestResult?.stars}
-                  badges={badges}
-                  reward={spec.reward}
-                  onStart={() => setActiveQuiz(quiz)}
+            {/* two-column section */}
+            <div className="desktop-grid">
+              <div className="col">
+                <div className="col-section-head">
+                  <div className="col-title">Live sky</div>
+                  <div className="kicker">Bortle 6 · Moon 62%</div>
+                </div>
+                <MissionSkymap
+                  missions={missionStates}
+                  skyMissions={SKY_MISSIONS}
+                  location={{ lat: location.lat, lon: location.lon, label: cityLabel }}
+                  currentTime={now}
+                  cloudCoverPct={cloudCoverPct}
+                  onMissionClick={handleStart}
+                  variant={isMobile ? 'mobile' : 'desktop'}
                 />
-              );
-            })}
+              </div>
+              <div className="col">
+                <div className="col-section-head">
+                  <div className="col-title">All 10 missions</div>
+                  <div className="kicker">
+                    <span className="green">{doneCount} DONE</span> ·{' '}
+                    <span className="brass">{readyCount} READY</span> · {cloudyCount} CLOUDED
+                  </div>
+                </div>
+                <div className="roster">
+                  {missionStates.map((mstate) => {
+                    const mission = SKY_MISSIONS.find((m) => m.id === mstate.id)!;
+                    return (
+                      <MissionRosterRow
+                        key={mstate.id}
+                        mission={mission}
+                        state={mstate}
+                        onClick={() => handleStart(mstate.id)}
+                        compact={isMobile}
+                      />
+                    );
+                  })}
+                </div>
+                <QuizStrip
+                  question="How many Galilean moons does Jupiter have?"
+                  rewardStars={10}
+                  onPlay={handlePlayQuiz}
+                  compact={isMobile}
+                />
+              </div>
+            </div>
           </div>
-        </section>
 
-        <RewardsSection />
-        <ObservationLog />
-      </PageContainer>
+          <RewardsSection />
+          <ObservationLog />
+        </PageContainer>
+
+        <style jsx>{`
+          .missions-v3 {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+          }
+          .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            flex-wrap: wrap;
+          }
+          .h1 {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-weight: 500;
+            font-size: 36px;
+            line-height: 1;
+            color: #F5F1E8;
+            margin: 0;
+          }
+          .kicker {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: #7A7868;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+          }
+          .kicker .brass { color: #FFD166; }
+          .kicker .green { color: #34D399; }
+
+          .desktop-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 22px;
+          }
+          .col { min-width: 0; }
+          .col-section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 12px;
+            gap: 12px;
+          }
+          .col-title {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-weight: 500;
+            font-size: 20px;
+            color: #F5F1E8;
+          }
+          .roster {
+            display: flex;
+            flex-direction: column;
+          }
+
+          @media (max-width: 1023px) {
+            .desktop-grid { grid-template-columns: 1fr; gap: 18px; }
+            .h1 { font-size: 32px; }
+          }
+        `}</style>
       </>
     </PageTransition>
   );
 }
-
-const CHARTABLE_IDS = ['moon','jupiter','saturn','venus','mars','mercury','pleiades','orion','andromeda','crab'];
-const PRIME_ORDER = ['jupiter','saturn','moon','venus','mars','andromeda','pleiades','orion','crab','mercury'];
-
-const NODE_MAP_FOR_LIST: Record<string, ComponentType<{ size?: number }>> = {
-  moon: MoonNode, jupiter: JupiterNode, saturn: SaturnNode,
-  venus: VenusNode, mars: MarsNode, mercury: MercuryNode,
-  pleiades: PleiadesNode, orion: OrionNode, andromeda: AndromedaNode, crab: CrabNode,
-};
-
-const TAGLINES: Record<string, string> = {
-  jupiter:   'Four Galilean moons visible',
-  saturn:    'Rings at their widest tilt',
-  moon:      'Terminator cuts sharp craters',
-  venus:     'Brightest object in the sky',
-  mars:      'Rust-red and unmistakable',
-  mercury:   'Low and fleeting — catch it fast',
-  pleiades:  'Seven sisters, one glance',
-  orion:     'Stellar nursery, 1,344 ly out',
-  andromeda: 'Trillion suns, 2.5M ly away',
-  crab:      'Ghost of a 1054 AD supernova',
-};
-
-const LIST_META: Record<string, string> = {
-  jupiter:   'Gas giant · Naked eye',
-  saturn:    'Rings wide open · Telescope',
-  moon:      'Easy — look up',
-  venus:     'Evening star · Naked eye',
-  mars:      'Red planet · Naked eye',
-  mercury:   'Tricky — twilight only',
-  pleiades:  'Naked eye',
-  orion:     'Naked eye',
-  andromeda: 'Binoculars help',
-  crab:      'Telescope needed',
-};
-
-const DIR_NAMES: Record<string, string> = {
-  N: 'north', NE: 'northeast', E: 'east', SE: 'southeast',
-  S: 'south', SW: 'southwest', W: 'west', NW: 'northwest',
-};
-const AZ_DIR_LIST = ['N','NE','E','SE','S','SW','W','NW'] as const;
-function azToDirName(az: number): string {
-  return DIR_NAMES[AZ_DIR_LIST[Math.round(az / 45) % 8]] ?? '';
-}
-
-function friendlyMeta({
-  aboveHorizon, altitude, dirName, peakDate, riseDate, now, hint,
-}: {
-  aboveHorizon: boolean;
-  altitude: number;
-  dirName: string;
-  peakDate: Date | null;
-  riseDate: Date | null;
-  now: Date;
-  hint?: string;
-}): string {
-  if (!aboveHorizon) {
-    if (riseDate) {
-      const diffH = (riseDate.getTime() - now.getTime()) / 3_600_000;
-      const riseStr = riseDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-      if (diffH > 0 && diffH < 8) return `Rises at ${riseStr}`;
-      return 'Back tomorrow night';
-    }
-    return 'Below horizon';
-  }
-  let where: string;
-  if (altitude >= 60) where = 'High overhead';
-  else if (altitude >= 30) where = dirName ? `High in the ${dirName}` : 'Well placed';
-  else if (altitude >= 10) where = dirName ? `Low in the ${dirName}` : 'Low on horizon';
-  else where = dirName ? `Skimming the ${dirName} horizon` : 'Barely up';
-
-  const tail: string[] = [];
-  if (peakDate && peakDate.getTime() > now.getTime()) {
-    const peakStr = peakDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-    tail.push(`Best at ${peakStr}`);
-  } else if (hint) {
-    tail.push(hint);
-  }
-  return [where, ...tail].join(' · ');
-}
-
-function ChartSection({
-  onStart,
-  skyConditions,
-  streak,
-  onStartQuiz,
-  completedQuizIds,
-}: {
-  onStart: (m: Mission) => void;
-  skyConditions: { cloudCover: number; visibility: string; verified: boolean } | null;
-  streak: number;
-  onStartQuiz: (q: QuizDef) => void;
-  completedQuizIds: Set<string>;
-}) {
-  const { state } = useAppState();
-  const { location } = useLocation();
-  const [now, setNow] = useState<Date>(() => new Date());
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 60_000);
-    return () => clearInterval(id);
-  }, []);
-  const lat = location.lat ?? 41.7151;
-  const lon = location.lon ?? 44.8271;
-  const cityLabel = location.city || (location.country === 'GE' ? 'Tbilisi' : location.country);
-  const liveTimeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const liveDateStr = now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase();
-
-  const completedIds = useMemo(
-    () => new Set(state.completedMissions.filter(m => m.status === 'completed').map(m => m.id)),
-    [state.completedMissions]
-  );
-
-  const chartableMissions = useMemo(
-    () => MISSIONS.filter(m => CHARTABLE_IDS.includes(m.id)),
-    []
-  );
-
-  const statusById = useMemo(() => {
-    const out: Record<string, {
-      aboveHorizon: boolean;
-      altitude: number;
-      azDir: string;
-      azDeg?: number;
-      peakTime: string | null;
-      metaLine: string;
-      riseTime?: string | null;
-      setTime?: string | null;
-      magnitude?: number | null;
-    }> = {};
-    const fmt = (d: Date | null) => d ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : null;
-    const planets = getVisiblePlanets(lat, lon, now);
-    for (const p of planets) {
-      const aboveHorizon = p.altitude > 0;
-      const peakDate = p.transit ? (p.transit instanceof Date ? p.transit : new Date(p.transit)) : null;
-      const riseDate = p.rise    ? (p.rise    instanceof Date ? p.rise    : new Date(p.rise))    : null;
-      const setDate  = p.set     ? (p.set     instanceof Date ? p.set     : new Date(p.set))     : null;
-      const dirName = DIR_NAMES[p.azimuthDir] ?? '';
-      const metaLine = friendlyMeta({
-        aboveHorizon,
-        altitude: p.altitude,
-        dirName,
-        peakDate,
-        riseDate,
-        now,
-        hint: LIST_META[p.key],
-      });
-      out[p.key] = {
-        aboveHorizon,
-        altitude: p.altitude,
-        azDir: p.azimuthDir,
-        azDeg: p.azimuth,
-        peakTime: fmt(peakDate),
-        riseTime: fmt(riseDate),
-        setTime:  fmt(setDate),
-        magnitude: p.magnitude,
-        metaLine,
-      };
-    }
-    const ds = getChartDeepSky(lat, lon, now, 200, 100, 180);
-    for (const d of ds) {
-      const dirName = azToDirName(d.azimuth);
-      const metaLine = friendlyMeta({
-        aboveHorizon: d.aboveHorizon,
-        altitude: d.altitude,
-        dirName,
-        peakDate: null,
-        riseDate: null,
-        now,
-        hint: LIST_META[d.id],
-      });
-      out[d.id] = {
-        aboveHorizon: d.aboveHorizon,
-        altitude: d.altitude,
-        azDir: '',
-        azDeg: d.azimuth,
-        peakTime: null,
-        metaLine,
-      };
-    }
-    return out;
-  }, [lat, lon, now]);
-
-  const primeMission = useMemo(() => {
-    const candidates = chartableMissions
-      .filter(m => !completedIds.has(m.id) || m.repeatable)
-      .filter(m => statusById[m.id]?.aboveHorizon);
-    if (candidates.length === 0) return null;
-    candidates.sort((a, b) => PRIME_ORDER.indexOf(a.id) - PRIME_ORDER.indexOf(b.id));
-    return candidates[0];
-  }, [chartableMissions, completedIds, statusById]);
-
-  const [filter, setFilter] = useState<'visible' | 'all'>('visible');
-  const visibleCount = useMemo(
-    () => chartableMissions.filter(m => statusById[m.id]?.aboveHorizon).length,
-    [chartableMissions, statusById]
-  );
-  const sortedMissions = useMemo(() => {
-    let pool = chartableMissions.filter(m => m.id !== primeMission?.id);
-    if (filter === 'visible') {
-      pool = pool.filter(m => statusById[m.id]?.aboveHorizon);
-    }
-    pool.sort((a, b) => (statusById[b.id]?.altitude ?? -100) - (statusById[a.id]?.altitude ?? -100));
-    return primeMission ? [primeMission, ...pool] : pool;
-  }, [chartableMissions, primeMission, filter, statusById]);
-
-  return (
-    <div className="flex flex-col gap-0">
-      {/* Desktop observatory layout (lg+) */}
-      <MissionsWebDesktop
-        lat={lat}
-        lon={lon}
-        now={now}
-        city={cityLabel}
-        chartableMissions={chartableMissions}
-        primeMission={primeMission ?? null}
-        statusById={statusById}
-        completedIds={completedIds}
-        onStart={onStart}
-        skyConditions={skyConditions}
-        streak={streak}
-        quizzes={QUIZZES}
-        onStartQuiz={onStartQuiz}
-        completedQuizIds={completedQuizIds}
-      />
-
-      {/* Mobile layout */}
-      <div className="lg:hidden">
-        <div className="mb-4 grid grid-cols-1">
-          {primeMission && (
-            <PrimeHeroCard
-              mission={primeMission}
-              altitude={statusById[primeMission.id]?.altitude ?? null}
-              tagline={TAGLINES[primeMission.id] ?? primeMission.desc}
-              riseSetLabel={statusById[primeMission.id]?.peakTime ? `BEST ${statusById[primeMission.id]?.peakTime}` : null}
-              onStart={() => onStart(primeMission)}
-            />
-          )}
-        </div>
-
-        <div className="mb-4">
-          <div className="flex items-baseline justify-between mb-2">
-            <h2
-              style={{
-                fontFamily: 'var(--font-serif)',
-                fontSize: 20,
-                color: '#F2F0EA',
-                fontWeight: 600,
-                margin: 0,
-              }}
-            >
-              Sky tonight
-            </h2>
-            <span
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 9,
-                color: 'rgba(255,255,255,0.4)',
-                letterSpacing: '0.15em',
-              }}
-            >
-              LIVE · {liveTimeStr} · {liveDateStr} · {cityLabel.toUpperCase()}
-            </span>
-          </div>
-          <SkyChart
-            lat={lat}
-            lon={lon}
-            date={now}
-            missions={chartableMissions.filter(m => statusById[m.id]?.aboveHorizon)}
-            primeId={primeMission?.id ?? null}
-            city={cityLabel}
-            onSelect={onStart}
-          />
-        </div>
-      </div>
-
-      {/* Missions list — mobile only; desktop uses mini-rail above */}
-      <div className="lg:hidden">
-        <div className="flex items-baseline justify-between mb-3">
-          <h2
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: 20,
-              color: '#F2F0EA',
-              fontWeight: 600,
-              margin: 0,
-            }}
-          >
-            Missions tonight
-          </h2>
-          <div
-            className="flex gap-0.5 p-0.5 rounded-md"
-            style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.06)',
-            }}
-          >
-            {(['visible','all'] as const).map(f => {
-              const count = f === 'visible' ? visibleCount : chartableMissions.length;
-              return (
-                <button
-                  key={f}
-                  onClick={() => setFilter(f)}
-                  className="px-2.5 py-1 rounded transition-colors flex items-center gap-1"
-                  style={{
-                    fontSize: 10.5,
-                    fontWeight: 600,
-                    background: filter === f ? '#F2F0EA' : 'transparent',
-                    color: filter === f ? '#0a0a0a' : 'rgba(255,255,255,0.55)',
-                  }}
-                >
-                  <span>{f === 'visible' ? 'Up now' : 'All'}</span>
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 9,
-                      opacity: 0.6,
-                      fontWeight: 500,
-                    }}
-                  >
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="flex flex-col">
-          {sortedMissions.map(m => {
-            const Art = NODE_MAP_FOR_LIST[m.id];
-            if (!Art) return null;
-            const status = statusById[m.id];
-            const isPrime = m.id === primeMission?.id;
-            const isDone = completedIds.has(m.id) && !m.repeatable;
-            const disabled = isDone || !status?.aboveHorizon;
-
-            const badge = isPrime
-              ? { label: 'PRIME', color: '#FFD166', bg: 'rgba(255,209,102,0.15)' }
-              : status && !status.aboveHorizon
-              ? { label: 'HIDDEN', color: 'rgba(255,255,255,0.5)', bg: 'rgba(255,255,255,0.06)' }
-              : status && status.altitude < 20
-              ? { label: 'LOW', color: '#38F0FF', bg: 'rgba(56,240,255,0.12)' }
-              : undefined;
-
-            return (
-              <MissionListRow
-                key={m.id}
-                mission={m}
-                Art={Art}
-                metaLine={statusById[m.id]?.metaLine ?? LIST_META[m.id] ?? ''}
-                badge={badge}
-                isPrime={isPrime}
-                disabled={disabled}
-                onClick={() => onStart(m)}
-              />
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
-
