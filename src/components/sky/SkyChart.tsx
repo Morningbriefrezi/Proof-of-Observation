@@ -63,7 +63,7 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const stars = useMemo(
-    () => getChartStars(lat, lon, date, CX, CY, 180, 4.6),
+    () => getChartStars(lat, lon, date, CX, CY, 180, 3.8),
     [lat, lon, date]
   );
 
@@ -100,14 +100,6 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
       }>;
   }, [missions, plottedPlanets, plottedDeepSky]);
 
-  const brightestId = useMemo(() => {
-    const visible = plottedMissions.filter(p => p.aboveHorizon);
-    if (!visible.length) return null;
-    let best = visible[0];
-    for (const p of visible) if (p.magnitude < best.magnitude) best = p;
-    return best.mission.id;
-  }, [plottedMissions]);
-
   const liveTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const liveDate = date.toLocaleDateString([], { month: 'short', day: 'numeric' }).toUpperCase();
   const cityTag = (city ?? '').toUpperCase();
@@ -117,15 +109,16 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
       className="relative w-full overflow-hidden"
       style={{
         aspectRatio: '2 / 1',
+        height: '100%',
         borderRadius: 14,
         border: '1px solid rgba(255,255,255,0.08)',
         background: [
-          'radial-gradient(ellipse 340px 180px at 72% 38%, rgba(168,132,255,0.28) 0%, transparent 55%)',
-          'radial-gradient(ellipse 280px 170px at 22% 62%, rgba(72,170,255,0.18) 0%, transparent 62%)',
-          'radial-gradient(ellipse 220px 130px at 52% 14%, rgba(255,150,200,0.11) 0%, transparent 60%)',
-          'radial-gradient(ellipse 140px 80px at 15% 20%, rgba(255,209,102,0.06) 0%, transparent 70%)',
-          'radial-gradient(ellipse 420px 220px at 50% 100%, rgba(255,209,102,0.06) 0%, transparent 70%)',
-          'radial-gradient(ellipse at 50% 50%, #081126 0%, #030718 55%, #01020A 100%)',
+          // subtle city-light glow from the south horizon
+          'linear-gradient(to top, rgba(150,90,50,0.16) 0%, rgba(80,48,28,0.04) 18%, transparent 40%)',
+          // gentle atmospheric lift near zenith
+          'radial-gradient(ellipse 360px 180px at 50% 30%, rgba(140,130,200,0.10) 0%, transparent 65%)',
+          // base sky dome
+          'radial-gradient(ellipse at 50% 40%, #0c1224 0%, #05080f 55%, #02030a 100%)',
         ].join(', '),
       }}
     >
@@ -151,10 +144,12 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
           </radialGradient>
         </defs>
 
-        <g transform={`rotate(-14 ${CX} ${CY})`}>
-          <ellipse cx={CX} cy={CY} rx="300" ry="46" fill="url(#stl-mw-wide)" />
-          <ellipse cx={CX - 70} cy={CY - 6} rx="90" ry="28" fill="url(#stl-neb-a)" opacity="0.9" />
-          <ellipse cx={CX + 90} cy={CY + 8} rx="75" ry="22" fill="url(#stl-neb-b)" opacity="0.9" />
+        {/* Galactic ridge — single subtle band, no rainbow nebulas */}
+        <g transform={`rotate(-12 ${CX} ${CY})`} opacity="0.85">
+          <ellipse cx={CX} cy={CY} rx="300" ry="40" fill="url(#stl-mw-wide)" />
+          {/* dark dust lane through the ridge */}
+          <path d={`M 0 ${CY + 4} Q ${CX * 0.5} ${CY - 10} ${CX} ${CY - 4} T ${W} ${CY - 16}`}
+                stroke="rgba(3,7,24,0.75)" strokeWidth="9" fill="none" opacity="0.55" />
         </g>
 
         {stars.map((s, i) => {
@@ -256,7 +251,6 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
 
       {plottedMissions.map(({ mission, x, y, aboveHorizon, nodeSpec, magnitude }) => {
         const isPrime = mission.id === primeId;
-        const isBrightest = mission.id === brightestId;
         const isHovered = hoveredId === mission.id;
         const leftPct = (x / W) * 100;
         const topPct = (y / H) * 100;
@@ -278,34 +272,13 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
               transform: 'translate(-50%, -50%)',
               opacity: aboveHorizon ? 1 : 0.35,
               cursor: 'pointer',
-              zIndex: isHovered ? 10 : isPrime ? 4 : isBrightest ? 3 : 2,
+              zIndex: isHovered ? 10 : isPrime ? 4 : 2,
               filter: aboveHorizon ? 'drop-shadow(0 0 8px rgba(255,255,255,0.18))' : 'none',
             }}
             aria-label={`Jump to ${mission.name}`}
           >
             <div className="relative">
-              {isPrime && aboveHorizon && (
-                <span
-                  className="absolute pointer-events-none"
-                  style={{
-                    inset: -3,
-                    borderRadius: '50%',
-                    border: '1.5px solid #FFD166',
-                    animation: 'stl-prime-pulse 2.4s ease-out infinite',
-                  }}
-                />
-              )}
-              {isBrightest && !isPrime && aboveHorizon && (
-                <span
-                  className="absolute pointer-events-none"
-                  style={{
-                    inset: -3,
-                    borderRadius: '50%',
-                    border: '1.5px solid rgba(255,255,255,0.7)',
-                    animation: 'stl-prime-pulse 2.8s ease-out infinite',
-                  }}
-                />
-              )}
+              {isPrime && aboveHorizon && <span className="stl-prime-ring" style={{ inset: -3, borderWidth: 1.5 }} />}
               <NodeComp size={size} />
 
               {isHovered && (

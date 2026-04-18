@@ -503,12 +503,13 @@ function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
   return (
     <div className="flex flex-col gap-0">
       {/* Top area: prime card + missions mini-rail (desktop) */}
-      <div className="mb-4 grid grid-cols-1 lg:grid-cols-2 lg:gap-4">
+      <div className="mb-4 lg:mb-2 grid grid-cols-1 lg:grid-cols-[minmax(360px,0.9fr)_minmax(640px,1.9fr)] lg:gap-3 lg:items-start">
         {primeMission && (
           <PrimeHeroCard
             mission={primeMission}
             altitude={statusById[primeMission.id]?.altitude ?? null}
             tagline={TAGLINES[primeMission.id] ?? primeMission.desc}
+            riseSetLabel={statusById[primeMission.id]?.peakTime ? `BEST ${statusById[primeMission.id]?.peakTime}` : null}
             onStart={() => onStart(primeMission)}
           />
         )}
@@ -521,7 +522,7 @@ function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
         </div>
       </div>
 
-      <div className="mb-4">
+      <div className="mb-4 lg:mb-0">
         <div className="flex items-baseline justify-between mb-2">
           <h2
             style={{
@@ -545,15 +546,17 @@ function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
             LIVE · {liveTimeStr} · {liveDateStr} · {cityLabel.toUpperCase()}
           </span>
         </div>
-        <SkyChart
-          lat={lat}
-          lon={lon}
-          date={now}
-          missions={chartableMissions.filter(m => statusById[m.id]?.aboveHorizon)}
-          primeId={primeMission?.id ?? null}
-          city={cityLabel}
-          onSelect={onStart}
-        />
+        <div className="lg:h-[460px]">
+          <SkyChart
+            lat={lat}
+            lon={lon}
+            date={now}
+            missions={chartableMissions.filter(m => statusById[m.id]?.aboveHorizon)}
+            primeId={primeMission?.id ?? null}
+            city={cityLabel}
+            onSelect={onStart}
+          />
+        </div>
       </div>
 
       {/* Missions list — mobile only; desktop uses mini-rail above */}
@@ -653,9 +656,10 @@ function MissionMiniRail({
   statusById: Record<string, { aboveHorizon: boolean; altitude: number; azDir: string; peakTime: string | null; metaLine: string }>;
   onSelect: (m: Mission) => void;
 }) {
+  const visibleCount = missions.filter(m => statusById[m.id]?.aboveHorizon).length;
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex items-baseline justify-between mb-2">
+    <div className="flex flex-col gap-2">
+      <div className="flex items-baseline justify-between">
         <h2
           style={{
             fontFamily: 'var(--font-serif)',
@@ -663,6 +667,7 @@ function MissionMiniRail({
             color: '#F2F0EA',
             fontWeight: 600,
             margin: 0,
+            letterSpacing: '-0.005em',
           }}
         >
           Missions tonight
@@ -670,15 +675,19 @@ function MissionMiniRail({
         <span
           style={{
             fontFamily: 'var(--font-mono)',
-            fontSize: 9,
-            color: 'rgba(255,255,255,0.4)',
-            letterSpacing: '0.15em',
+            fontSize: 10,
+            color: 'rgba(255,255,255,0.55)',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
           }}
         >
-          {String(missions.length).padStart(2, '0')} VISIBLE
+          <b style={{ color: '#F2F0EA', fontWeight: 600, marginRight: 4 }}>
+            {String(visibleCount).padStart(2, '0')}
+          </b>
+          visible
         </span>
       </div>
-      <div className="grid grid-cols-3 gap-2 flex-1">
+      <div className="grid grid-cols-6 gap-2">
         {missions.map(m => {
           const Art = NODE_MAP_FOR_LIST[m.id];
           if (!Art) return null;
@@ -702,53 +711,56 @@ function MiniCard({
   onClick: () => void;
 }) {
   const [hover, setHover] = useState(false);
+  const altLabel = meta?.aboveHorizon ? `${Math.round(meta.altitude)}°` : '—';
   return (
     <button
       onClick={onClick}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      className="relative overflow-hidden rounded-xl transition-all duration-200 ease-out"
+      className="relative overflow-hidden rounded-xl transition-all duration-200 ease-out text-left"
       style={{
-        background: hover ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
-        border: `1px solid ${hover ? 'rgba(255,209,102,0.35)' : 'rgba(255,255,255,0.08)'}`,
-        transform: hover ? 'translateY(-2px) scale(1.04)' : 'none',
-        boxShadow: hover ? '0 8px 24px rgba(0,0,0,0.35)' : 'none',
-        padding: '10px 8px',
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+        border: `1px solid ${hover ? 'rgba(255,255,255,0.32)' : 'rgba(255,255,255,0.14)'}`,
+        transform: hover ? 'translateY(-1px)' : 'none',
+        boxShadow: hover ? '0 6px 18px rgba(0,0,0,0.35)' : 'none',
+        padding: '8px 10px 9px',
         cursor: 'pointer',
-        minHeight: 86,
+        display: 'grid',
+        gridTemplateRows: '1fr auto auto',
+        gap: 2,
+        minHeight: 108,
       }}
     >
-      <div className="flex items-center justify-center" style={{ height: 40 }}>
-        <Art size={hover ? 44 : 38} />
+      <div className="flex items-center justify-center" style={{ minHeight: 38 }}>
+        <Art size={hover ? 36 : 32} />
       </div>
       <div
-        className="mt-1 text-center"
         style={{
           fontFamily: 'var(--font-serif)',
-          fontSize: 12,
+          fontSize: 14,
           color: '#F2F0EA',
-          fontWeight: 600,
-          lineHeight: 1.1,
-          opacity: hover ? 1 : 0,
-          transform: hover ? 'translateY(0)' : 'translateY(3px)',
-          transition: 'opacity 180ms ease-out, transform 180ms ease-out',
+          fontWeight: 500,
+          lineHeight: 1,
         }}
       >
         {mission.name}
       </div>
       <div
-        className="text-center"
         style={{
           fontFamily: 'var(--font-mono)',
-          fontSize: 8.5,
-          color: 'rgba(255,255,255,0.45)',
-          letterSpacing: '0.1em',
-          marginTop: 2,
-          opacity: hover ? 1 : 0,
-          transition: 'opacity 180ms ease-out',
+          fontSize: 9,
+          color: 'rgba(255,255,255,0.55)',
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
         }}
       >
-        {meta?.aboveHorizon ? `ALT ${Math.round(meta.altitude)}°` : 'HIDDEN'}
+        <span>{LIST_META[mission.id]?.split('·')[0]?.trim() ?? ''}</span>
+        <span style={{ color: meta?.aboveHorizon ? '#FFD166' : 'rgba(255,255,255,0.3)', fontWeight: 600 }}>
+          {altLabel}
+        </span>
       </div>
     </button>
   );

@@ -23,14 +23,17 @@ interface Props {
   altitude: number | null;
   tagline: string;
   onStart: () => void;
+  magnitude?: number | null;
+  azimuth?: number | null;
+  riseSetLabel?: string | null;
 }
 
-export default function PrimeHeroCard({ mission, altitude, tagline, onStart }: Props) {
+export default function PrimeHeroCard({ mission, altitude, tagline, onStart, magnitude, azimuth, riseSetLabel }: Props) {
   const Node = NODE[mission.id] ?? JupiterNode;
 
   return (
     <div
-      className="relative flex items-center gap-3 p-3 overflow-hidden"
+      className="relative flex items-center gap-3 p-3 lg:p-3.5 overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, rgba(255,209,102,0.08), rgba(255,209,102,0.01) 60%, transparent)',
         border: '1px solid rgba(255,209,102,0.28)',
@@ -46,44 +49,52 @@ export default function PrimeHeroCard({ mission, altitude, tagline, onStart }: P
         style={{ width: 58, height: 58 }}
       >
         <div className="relative" style={{ width: 50, height: 50, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span
-            className="absolute pointer-events-none"
-            style={{
-              inset: -3,
-              borderRadius: '50%',
-              border: '1.5px solid #FFD166',
-              animation: 'stl-prime-pulse 2.4s ease-out infinite',
-            }}
-          />
+          <span className="stl-prime-ring" style={{ borderWidth: 1.5 }} />
           <Node size={48} />
         </div>
       </div>
 
       {/* Text block */}
       <div className="flex-1 min-w-0 relative">
-        <div className="flex items-center gap-1.5 mb-0.5">
-          <div className="stl-tw" style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--stl-gold)' }} />
-          <span
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 8,
-              color: 'var(--stl-gold)',
-              letterSpacing: '0.22em',
-              fontWeight: 500,
-            }}
-          >
-            PRIME · TONIGHT
-          </span>
-          {altitude != null && (
+        <div className="flex items-center justify-between gap-1.5 mb-0.5">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <div className="stl-tw" style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--stl-gold)' }} />
             <span
               style={{
                 fontFamily: 'var(--font-mono)',
                 fontSize: 8,
-                color: 'rgba(255,255,255,0.3)',
-                letterSpacing: '0.1em',
+                color: 'var(--stl-gold)',
+                letterSpacing: '0.22em',
+                fontWeight: 500,
               }}
             >
-              · ALT {Math.round(altitude)}°
+              PRIME · TONIGHT
+            </span>
+            {altitude != null && (
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 8,
+                  color: 'rgba(255,255,255,0.3)',
+                  letterSpacing: '0.1em',
+                }}
+              >
+                · ALT {Math.round(altitude)}°
+              </span>
+            )}
+          </div>
+          {riseSetLabel && (
+            <span
+              className="hidden lg:inline"
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 8,
+                color: 'rgba(255,255,255,0.3)',
+                letterSpacing: '0.14em',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {riseSetLabel}
             </span>
           )}
         </div>
@@ -113,6 +124,36 @@ export default function PrimeHeroCard({ mission, altitude, tagline, onStart }: P
         >
           {tagline}
         </div>
+        {/* Desktop-only compact stats row */}
+        {(magnitude != null || azimuth != null) && (
+          <div
+            className="hidden lg:flex items-center gap-3 mt-1.5"
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 9,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: 'rgba(255,255,255,0.55)',
+            }}
+          >
+            {magnitude != null && (
+              <span>
+                <span style={{ color: 'rgba(255,255,255,0.35)', marginRight: 4 }}>MAG</span>
+                <span style={{ color: '#F2F0EA', fontWeight: 600 }}>
+                  {magnitude > 0 ? '+' : ''}{magnitude.toFixed(1)}
+                </span>
+              </span>
+            )}
+            {azimuth != null && (
+              <span>
+                <span style={{ color: 'rgba(255,255,255,0.35)', marginRight: 4 }}>AZ</span>
+                <span style={{ color: '#F2F0EA', fontWeight: 600 }}>
+                  {Math.round(azimuth)}°
+                </span>
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Observe button */}

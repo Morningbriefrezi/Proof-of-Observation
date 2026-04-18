@@ -127,16 +127,16 @@
   animation-delay: var(--stl-delay, 0ms);
 }
 
-/* Prime target pulse ring */
+/* Prime target pulse ring — slow breathing, not blinking */
 @keyframes stl-prime-pulse {
-  0%   { transform: scale(1);    opacity: 0.65 }
-  100% { transform: scale(2.6);  opacity: 0 }
+  0%   { transform: scale(1);    opacity: 0.55 }
+  100% { transform: scale(2.4);  opacity: 0 }
 }
 .stl-prime-ring {
   position: absolute; inset: -4px;
   border-radius: 50%;
   border: 2px solid var(--stl-gold);
-  animation: stl-prime-pulse 2.4s ease-out infinite;
+  animation: stl-prime-pulse 5.2s ease-out infinite;
   pointer-events: none;
 }
 
