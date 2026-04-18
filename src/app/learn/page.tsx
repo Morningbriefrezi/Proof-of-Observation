@@ -940,8 +940,8 @@ export default function LearnPage() {
             background: 'linear-gradient(155deg, #0c1122 0%, #080b1a 55%, #0b0a1f 100%)',
             border: '1px solid rgba(255,255,255,0.06)',
             boxShadow: '0 0 0 1px rgba(124,58,237,0.07), 0 24px 56px rgba(0,0,0,0.7)',
-            minHeight: '192px',
-            padding: '20px 20px 28px',
+            minHeight: '96px',
+            padding: '12px 20px 14px',
           }}
         >
           {/* Top shimmer seam */}
@@ -993,38 +993,12 @@ export default function LearnPage() {
             }} />
           ))}
 
-          {/* Kids mode toggle */}
-          <button
-            onClick={() => {
-              const next = !kidsMode;
-              setKidsMode(next);
-              localStorage.setItem('stellar_kids_mode', String(next));
-            }}
-            className="absolute right-4 top-4 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-medium transition-all"
-            style={{
-              background: kidsMode ? 'rgba(255,209,102,0.12)' : 'rgba(255,255,255,0.05)',
-              border: `1px solid ${kidsMode ? 'rgba(255,209,102,0.35)' : 'rgba(255,255,255,0.1)'}`,
-              color: kidsMode ? '#FFD166' : '#4b5563',
-              zIndex: 2,
-            }}
-          >
-            {kidsMode ? <Star size={11} /> : <Moon size={11} />}
-            <span className="sm:hidden">
-              {locale === 'ka' ? 'ბ' : 'Kids'}
-            </span>
-            <span className="hidden sm:inline">
-              {kidsMode
-                ? (locale === 'ka' ? 'ბავშვების რეჟიმი' : 'Kids Mode ON')
-                : (locale === 'ka' ? 'ბავშვების რეჟიმი' : 'Kids Mode')}
-            </span>
-          </button>
-
           {/* Main content */}
-          <div className="relative flex flex-col items-center text-center" style={{ zIndex: 1, paddingTop: '2px' }}>
+          <div className="relative flex flex-col items-center text-center" style={{ zIndex: 1, paddingTop: '0px' }}>
             {/* Eyebrow pill */}
             <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: '7px',
-              padding: '3px 13px', borderRadius: '999px', marginBottom: '14px',
+              display: 'inline-flex', alignItems: 'center', gap: '6px',
+              padding: '2px 10px', borderRadius: '999px', marginBottom: '6px',
               background: 'rgba(99,102,241,0.07)',
               border: '1px solid rgba(99,102,241,0.18)',
               animation: 'hIn0 0.5s cubic-bezier(0.16,1,0.3,1) both',
@@ -1045,7 +1019,7 @@ export default function LearnPage() {
 
             {/* Title */}
             <h1 style={{
-              fontSize: 'clamp(2.1rem, 9vw, 2.75rem)',
+              fontSize: 'clamp(1.5rem, 6vw, 1.9rem)',
               fontWeight: 800,
               fontFamily: 'Georgia, serif',
               background: 'linear-gradient(135deg, #ffffff 15%, #c4b5fd 52%, #818cf8 100%)',
@@ -1053,7 +1027,7 @@ export default function LearnPage() {
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
               lineHeight: 1.05,
-              marginBottom: '9px',
+              marginBottom: '4px',
               letterSpacing: '-0.01em',
               animation: 'hIn1 0.55s cubic-bezier(0.16,1,0.3,1) 0.07s both',
             }}>
@@ -1063,8 +1037,8 @@ export default function LearnPage() {
             {/* Subtitle */}
             <p style={{
               color: '#3f4f66',
-              fontSize: '13px',
-              lineHeight: 1.5,
+              fontSize: '12px',
+              lineHeight: 1.4,
               animation: 'hIn2 0.6s cubic-bezier(0.16,1,0.3,1) 0.15s both',
             }}>
               {locale === 'ka' ? 'ასტრონომია, ქვიზები, ASTRA AI.' : 'Astronomy guides, quizzes, and AI assistant.'}
