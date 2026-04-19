@@ -61,7 +61,7 @@ export default function MissionListRow({ mission, Art, metaLine, badge, isPrime,
           {badge && (
             <span
               style={{
-                fontFamily: 'var(--font-mono)',
+                fontFamily: 'var(--font-serif)',
                 fontSize: 8,
                 color: badge.color,
                 letterSpacing: '0.15em',
@@ -78,7 +78,7 @@ export default function MissionListRow({ mission, Art, metaLine, badge, isPrime,
         <div
           className="mt-1"
           style={{
-            fontFamily: 'var(--font-mono)',
+            fontFamily: 'var(--font-serif)',
             fontSize: 10,
             color: 'rgba(255,255,255,0.45)',
             letterSpacing: '0.05em',
@@ -91,7 +91,7 @@ export default function MissionListRow({ mission, Art, metaLine, badge, isPrime,
       <div className="flex flex-col items-end gap-1.5">
         <span
           style={{
-            fontFamily: 'var(--font-display)',
+            fontFamily: 'var(--font-serif)',
             fontSize: 14,
             color: 'var(--stl-gold)',
             fontWeight: 700,

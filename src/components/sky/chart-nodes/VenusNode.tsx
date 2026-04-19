@@ -1,13 +1,22 @@
-export default function VenusNode({ size = 26 }: { size?: number }) {
+export default function VenusNode({ size = 28 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <svg width={size} height={size} viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <radialGradient id="vn" cx="0.4" cy="0.4" r="0.6">
-          <stop offset="0" stopColor="#FFF3D6" />
-          <stop offset="1" stopColor="#C49A4A" />
+        <radialGradient id="vn-halo" cx="0.5" cy="0.5" r="0.55">
+          <stop offset="0.45" stopColor="#FFF3D6" stopOpacity="0" />
+          <stop offset="0.7" stopColor="#FFEAB5" stopOpacity="0.35" />
+          <stop offset="1" stopColor="#FFD88A" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="vn-body" cx="0.35" cy="0.32" r="0.72">
+          <stop offset="0" stopColor="#FFFBEA" />
+          <stop offset="0.5" stopColor="#F5D78A" />
+          <stop offset="1" stopColor="#8C5E22" />
         </radialGradient>
       </defs>
-      <circle cx="12" cy="12" r="10" fill="url(#vn)" />
+      <circle cx="14" cy="14" r="13" fill="url(#vn-halo)" />
+      <circle cx="14" cy="14" r="10" fill="url(#vn-body)" />
+      <ellipse cx="11.5" cy="11" rx="3.5" ry="1.6" fill="#FFFAE0" opacity="0.45" />
+      <circle cx="14" cy="14" r="10" fill="none" stroke="rgba(0,0,0,0.28)" strokeWidth="0.4" />
     </svg>
   );
 }

@@ -58,7 +58,7 @@ export default function PrimeHeroCard({ mission, altitude, tagline, onStart, mag
             <div style={{ width: 3.5, height: 3.5, borderRadius: '50%', background: 'var(--stl-gold)' }} />
             <span
               style={{
-                fontFamily: 'var(--font-mono)',
+                fontFamily: 'var(--font-serif)',
                 fontSize: 8,
                 color: 'var(--stl-gold)',
                 letterSpacing: '0.22em',
@@ -70,7 +70,7 @@ export default function PrimeHeroCard({ mission, altitude, tagline, onStart, mag
             {altitude != null && (
               <span
                 style={{
-                  fontFamily: 'var(--font-mono)',
+                  fontFamily: 'var(--font-serif)',
                   fontSize: 8,
                   color: 'rgba(255,255,255,0.3)',
                   letterSpacing: '0.1em',
@@ -84,7 +84,7 @@ export default function PrimeHeroCard({ mission, altitude, tagline, onStart, mag
             <span
               className="hidden lg:inline"
               style={{
-                fontFamily: 'var(--font-mono)',
+                fontFamily: 'var(--font-serif)',
                 fontSize: 8,
                 color: 'rgba(255,255,255,0.3)',
                 letterSpacing: '0.14em',
@@ -126,7 +126,7 @@ export default function PrimeHeroCard({ mission, altitude, tagline, onStart, mag
           <div
             className="hidden lg:flex items-center gap-3 mt-1.5"
             style={{
-              fontFamily: 'var(--font-mono)',
+              fontFamily: 'var(--font-serif)',
               fontSize: 9,
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
@@ -165,7 +165,7 @@ export default function PrimeHeroCard({ mission, altitude, tagline, onStart, mag
           borderRadius: 9,
           fontSize: 11,
           fontWeight: 600,
-          fontFamily: 'var(--font-display)',
+          fontFamily: 'var(--font-serif)',
           whiteSpace: 'nowrap',
           cursor: 'pointer',
         }}

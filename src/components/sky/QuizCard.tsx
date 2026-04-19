@@ -89,16 +89,16 @@ export default function QuizCard({
       className="w-full grid items-center text-left transition-all hover:-translate-y-0.5 active:scale-[0.99]"
       style={{
         gridTemplateColumns: 'auto 1fr auto',
-        gap: 11,
-        padding: 12,
+        gap: 10,
+        padding: 10,
         background: t.background,
         border: `1px solid ${t.border}`,
-        borderRadius: 14,
+        borderRadius: 12,
         cursor: 'pointer',
       }}
     >
-      <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
-        <Icon size={40} />
+      <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
+        <Icon size={32} />
       </div>
 
       <div className="min-w-0">
@@ -106,7 +106,7 @@ export default function QuizCard({
           <h3
             style={{
               fontFamily: 'var(--font-serif)',
-              fontSize: 16,
+              fontSize: 14,
               color: '#F2F0EA',
               fontWeight: 600,
               margin: 0,
@@ -120,7 +120,7 @@ export default function QuizCard({
               key={i}
               className={b.variant === 'new' ? 'stl-badge-pulse' : ''}
               style={{
-                fontFamily: 'var(--font-mono)',
+                fontFamily: 'var(--font-serif)',
                 fontSize: 8,
                 color: b.variant === 'new' ? '#38F0FF'
                      : b.variant === 'done' ? '#86efac'
@@ -140,11 +140,11 @@ export default function QuizCard({
         </div>
         <div
           style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 11,
+            fontFamily: 'var(--font-serif)',
+            fontSize: 10.5,
             color: 'rgba(255,255,255,0.48)',
             lineHeight: 1.35,
-            marginTop: 2,
+            marginTop: 1,
           }}
         >
           {descEn}
@@ -171,13 +171,13 @@ export default function QuizCard({
                 }}
               />
             </div>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5, color: `${t.accent}b0`, letterSpacing: '0.05em' }}>
+            <span style={{ fontFamily: 'var(--font-serif)', fontSize: 9.5, color: `${t.accent}b0`, letterSpacing: '0.05em' }}>
               {progressQ}/{totalQuestions} · CONTINUE
             </span>
           </div>
         ) : isCompleted ? (
           <div className="flex items-center gap-2.5 mt-2">
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.05em' }}>
+            <span style={{ fontFamily: 'var(--font-serif)', fontSize: 9.5, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.05em' }}>
               {totalQuestions} Q · BEST {Math.round((bestPct! / 100) * totalQuestions)}/{totalQuestions}
             </span>
             <span style={{ fontSize: 10, color: '#FFD166', fontWeight: 600 }}>
@@ -186,7 +186,7 @@ export default function QuizCard({
           </div>
         ) : (
           <div className="flex items-center gap-2.5 mt-2">
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.05em' }}>
+            <span style={{ fontFamily: 'var(--font-serif)', fontSize: 9.5, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.05em' }}>
               {totalQuestions} QUESTIONS
             </span>
             <span style={{ fontSize: 10, color: '#FFD166', fontWeight: 600 }}>
@@ -199,16 +199,16 @@ export default function QuizCard({
       <div
         className="flex-shrink-0 flex items-center justify-center"
         style={{
-          width: 32,
-          height: 32,
+          width: 28,
+          height: 28,
           background: isCompleted ? 'rgba(255,255,255,0.04)' : t.buttonBg,
           border: `1px solid ${isCompleted ? 'rgba(255,255,255,0.1)' : t.buttonBorder}`,
-          borderRadius: 10,
+          borderRadius: 9,
         }}
       >
         {isCompleted
-          ? <RotateCw size={12} color="rgba(255,255,255,0.6)" />
-          : <Play size={12} fill={t.buttonFill} color={t.buttonFill} />}
+          ? <RotateCw size={11} color="rgba(255,255,255,0.6)" />
+          : <Play size={11} fill={t.buttonFill} color={t.buttonFill} />}
       </div>
     </button>
   );

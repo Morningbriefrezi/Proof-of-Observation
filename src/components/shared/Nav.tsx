@@ -96,7 +96,7 @@ export default function Nav() {
         .nav-login-btn:hover { background: rgba(124,58,237,0.2) !important; border-color: rgba(124,58,237,0.6) !important; }
         .dd-link { transition: background 0.15s ease, transform 0.15s ease; }
         .dd-link:hover { background: rgba(99,102,241,0.07) !important; }
-        .hamburger-vline { display: block; width: 1.5px; border-radius: 2px; background: #FFFFFF; transition: all 0.22s cubic-bezier(0.22,1,0.36,1); transform-origin: center; }
+        .hamburger-hline { display: block; height: 1.5px; width: 18px; border-radius: 2px; background: #FFFFFF; transition: all 0.22s cubic-bezier(0.22,1,0.36,1); transform-origin: center; }
         .nav-search-pill:hover { background: rgba(255,255,255,0.08) !important; border-color: rgba(255,255,255,0.14) !important; }
       `}</style>
 
@@ -184,20 +184,16 @@ export default function Nav() {
               style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
               aria-label={dropdownOpen ? 'Close navigation' : 'Open navigation'}
             >
-              <div style={{ display: 'flex', flexDirection: 'row', gap: 3.5, alignItems: 'center', justifyContent: 'center', height: 16 }}>
-                <span className="hamburger-vline" style={{
-                  height: 16,
-                  opacity: dropdownOpen ? 0 : 1,
-                  transform: dropdownOpen ? 'rotate(45deg) translateX(3px)' : 'none',
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', justifyContent: 'center', width: 18 }}>
+                <span className="hamburger-hline" style={{
+                  opacity: dropdownOpen ? 1 : 1,
+                  transform: dropdownOpen ? 'translateY(5.5px) rotate(45deg)' : 'none',
                 }} />
-                <span className="hamburger-vline" style={{
-                  height: 16,
+                <span className="hamburger-hline" style={{
                   opacity: dropdownOpen ? 0 : 0.85,
                 }} />
-                <span className="hamburger-vline" style={{
-                  height: 16,
-                  opacity: dropdownOpen ? 0 : 1,
-                  transform: dropdownOpen ? 'rotate(-45deg) translateX(-3px)' : 'none',
+                <span className="hamburger-hline" style={{
+                  transform: dropdownOpen ? 'translateY(-5.5px) rotate(-45deg)' : 'none',
                 }} />
               </div>
             </button>

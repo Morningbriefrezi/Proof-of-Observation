@@ -113,12 +113,16 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
         borderRadius: 14,
         border: '1px solid rgba(255,255,255,0.08)',
         background: [
+          // warm nebula patch — east
+          'radial-gradient(ellipse 180px 90px at 82% 58%, rgba(255,150,110,0.1) 0%, transparent 70%)',
+          // cool nebula patch — west
+          'radial-gradient(ellipse 220px 120px at 18% 42%, rgba(90,140,255,0.11) 0%, transparent 72%)',
+          // violet veil — center zenith
+          'radial-gradient(ellipse 320px 170px at 50% 32%, rgba(155,120,220,0.12) 0%, transparent 70%)',
           // subtle city-light glow from the south horizon
-          'linear-gradient(to top, rgba(150,90,50,0.16) 0%, rgba(80,48,28,0.04) 18%, transparent 40%)',
-          // gentle atmospheric lift near zenith
-          'radial-gradient(ellipse 360px 180px at 50% 30%, rgba(140,130,200,0.10) 0%, transparent 65%)',
-          // base sky dome
-          'radial-gradient(ellipse at 50% 40%, #0c1224 0%, #05080f 55%, #02030a 100%)',
+          'linear-gradient(to top, rgba(140,80,46,0.18) 0%, rgba(70,42,24,0.05) 20%, transparent 42%)',
+          // base cosmic dome — deeper
+          'radial-gradient(ellipse at 50% 45%, #0b1026 0%, #04060f 58%, #010209 100%)',
         ].join(', '),
       }}
     >
@@ -180,7 +184,7 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
           top: 6,
           left: '50%',
           transform: 'translateX(-50%)',
-          fontFamily: 'var(--font-mono)',
+          fontFamily: 'var(--font-serif)',
           fontSize: 9,
           color: 'rgba(255,255,255,0.35)',
           letterSpacing: '0.2em',
@@ -192,7 +196,7 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
           bottom: 6,
           left: '50%',
           transform: 'translateX(-50%)',
-          fontFamily: 'var(--font-mono)',
+          fontFamily: 'var(--font-serif)',
           fontSize: 9,
           color: 'rgba(255,255,255,0.35)',
           letterSpacing: '0.2em',
@@ -204,7 +208,7 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
           left: 8,
           top: '50%',
           transform: 'translateY(-50%)',
-          fontFamily: 'var(--font-mono)',
+          fontFamily: 'var(--font-serif)',
           fontSize: 9,
           color: 'rgba(255,255,255,0.35)',
           letterSpacing: '0.2em',
@@ -216,7 +220,7 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
           right: 8,
           top: '50%',
           transform: 'translateY(-50%)',
-          fontFamily: 'var(--font-mono)',
+          fontFamily: 'var(--font-serif)',
           fontSize: 9,
           color: 'rgba(255,255,255,0.35)',
           letterSpacing: '0.2em',
@@ -227,7 +231,7 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
         <div className="w-1.5 h-1.5 rounded-full stl-tw" style={{ background: 'var(--stl-gold)' }} />
         <span
           style={{
-            fontFamily: 'var(--font-mono)',
+            fontFamily: 'var(--font-serif)',
             fontSize: 9,
             color: 'rgba(255,255,255,0.45)',
             letterSpacing: '0.22em',
@@ -239,7 +243,7 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
       <div className="absolute top-2.5 right-3 flex items-center gap-1.5">
         <span
           style={{
-            fontFamily: 'var(--font-mono)',
+            fontFamily: 'var(--font-serif)',
             fontSize: 9,
             color: 'rgba(255,255,255,0.45)',
             letterSpacing: '0.22em',
@@ -277,8 +281,29 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
             }}
             aria-label={`Jump to ${mission.name}`}
           >
-            <div className="relative">
-              {isPrime && aboveHorizon && <span className="stl-prime-ring" style={{ inset: -3, borderWidth: 1.5 }} />}
+            <div className="relative" style={{ width: size, height: size }}>
+              {/* soft highlight halo so missions read against the starfield */}
+              {aboveHorizon && (
+                <span
+                  aria-hidden
+                  style={{
+                    position: 'absolute',
+                    inset: -Math.round(size * 0.6),
+                    borderRadius: '50%',
+                    background: isPrime
+                      ? 'radial-gradient(circle, rgba(255,209,102,0.28) 0%, rgba(255,209,102,0.06) 40%, transparent 70%)'
+                      : 'radial-gradient(circle, rgba(184,212,255,0.14) 0%, rgba(184,212,255,0.04) 40%, transparent 70%)',
+                    filter: 'blur(4px)',
+                    pointerEvents: 'none',
+                  }}
+                />
+              )}
+              {isPrime && aboveHorizon && (
+                <>
+                  <span className="stl-prime-ring" style={{ inset: -6, borderWidth: 2 }} />
+                  <span className="stl-prime-ring" style={{ inset: -6, borderWidth: 1.2, animationDelay: '1.8s' }} />
+                </>
+              )}
               <NodeComp size={size} />
 
               {isHovered && (
@@ -299,7 +324,7 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
                     {mission.name}
                   </div>
                   {magnitude < 50 && (
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', marginTop: 2 }}>
+                    <div style={{ fontFamily: 'var(--font-serif)', fontSize: 9, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', marginTop: 2 }}>
                       MAG {magnitude > 0 ? '+' : ''}{magnitude.toFixed(1)}
                     </div>
                   )}
