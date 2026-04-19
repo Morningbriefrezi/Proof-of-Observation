@@ -76,7 +76,7 @@ export default function PrimeHeroCard({ mission, altitude, tagline, onStart, mag
                   letterSpacing: '0.1em',
                 }}
               >
-                · ALT {Math.round(altitude)}°
+                · ALT <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 500 }}>{Math.round(altitude)}°</span>
               </span>
             )}
           </div>
@@ -170,7 +170,7 @@ export default function PrimeHeroCard({ mission, altitude, tagline, onStart, mag
           cursor: 'pointer',
         }}
       >
-        Observe · +{mission.stars}
+        Observe · <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>+{mission.stars}</span>
       </button>
     </div>
   );

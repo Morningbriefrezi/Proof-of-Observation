@@ -412,8 +412,6 @@ function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
       .catch(() => {});
   }, [lat, lon]);
   const cityLabel = location.city || (location.country === 'GE' ? 'Tbilisi' : location.country);
-  const liveTimeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const liveDateStr = now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase();
 
   const completedIds = useMemo(
     () => new Set(state.completedMissions.filter(m => m.status === 'completed').map(m => m.id)),
@@ -533,29 +531,6 @@ function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
       </div>
 
       <div className="mb-4">
-        <div className="flex items-baseline justify-between mb-2">
-          <h2
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: 20,
-              color: '#F2F0EA',
-              fontWeight: 600,
-              margin: 0,
-            }}
-          >
-            Sky tonight
-          </h2>
-          <span
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: 9,
-              color: 'rgba(255,255,255,0.4)',
-              letterSpacing: '0.15em',
-            }}
-          >
-            LIVE · {liveTimeStr} · {liveDateStr} · {cityLabel.toUpperCase()}
-          </span>
-        </div>
         <SkyChart
           lat={lat}
           lon={lon}
@@ -581,38 +556,62 @@ function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
           >
             Missions tonight
           </h2>
-          <div
-            className="flex gap-0.5 p-0.5 rounded-md"
-            style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.06)',
-            }}
-          >
+          <div className="flex items-center gap-4">
             {(['visible','all'] as const).map(f => {
               const count = f === 'visible' ? visibleCount : chartableMissions.length;
+              const active = filter === f;
               return (
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
-                  className="px-2.5 py-1 rounded transition-colors flex items-center gap-1"
+                  className="relative flex items-baseline gap-1 pb-1"
                   style={{
-                    fontSize: 10.5,
-                    fontWeight: 600,
-                    background: filter === f ? '#F2F0EA' : 'transparent',
-                    color: filter === f ? '#0a0a0a' : 'rgba(255,255,255,0.55)',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: 0,
                   }}
                 >
-                  <span>{f === 'visible' ? 'Up now' : 'All'}</span>
                   <span
                     style={{
                       fontFamily: 'var(--font-serif)',
-                      fontSize: 9,
-                      opacity: 0.6,
+                      fontSize: 13,
+                      fontWeight: active ? 600 : 400,
+                      fontStyle: active ? 'normal' : 'italic',
+                      color: active ? '#F2F0EA' : 'rgba(255,255,255,0.5)',
+                      letterSpacing: '0.005em',
+                      transition: 'color 0.2s ease',
+                    }}
+                  >
+                    {f === 'visible' ? 'Up now' : 'All'}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 10,
                       fontWeight: 500,
+                      color: active ? '#FFD166' : 'rgba(255,255,255,0.35)',
+                      letterSpacing: '0.02em',
+                      transition: 'color 0.2s ease',
                     }}
                   >
                     {count}
                   </span>
+                  {active && (
+                    <span
+                      aria-hidden
+                      style={{
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        height: 1.5,
+                        borderRadius: 1,
+                        background: 'linear-gradient(to right, transparent, #FFD166 30%, #FFD166 70%, transparent)',
+                        boxShadow: '0 0 8px rgba(255,209,102,0.55)',
+                      }}
+                    />
+                  )}
                 </button>
               );
             })}
@@ -753,16 +752,22 @@ function MissionGridCard({
 
         {/* Stars pill */}
         <span
-          className="flex-shrink-0"
+          className="flex-shrink-0 flex items-baseline gap-0.5"
           style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: 12,
             color: 'var(--stl-gold)',
-            fontWeight: 700,
-            letterSpacing: '0.01em',
           }}
         >
-          +{mission.stars} ✦
+          <span
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: '0.01em',
+            }}
+          >
+            +{mission.stars}
+          </span>
+          <span style={{ fontSize: 11, fontWeight: 700, lineHeight: 1 }}>✦</span>
         </span>
       </div>
     </button>
