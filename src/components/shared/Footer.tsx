@@ -8,6 +8,7 @@ const columns = [
     title: 'Explore',
     links: [
       { label: 'Sky Forecast',   href: '/sky' },
+      { label: 'Markets',        href: '/markets' },
       { label: 'Missions',       href: '/missions' },
       { label: 'Dark Sky Map',   href: '/darksky' },
       { label: 'ASTRA AI',       href: '/chat' },

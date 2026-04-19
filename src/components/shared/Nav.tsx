@@ -7,7 +7,7 @@ import { useAppState } from '@/hooks/useAppState';
 import { useState, useEffect, useRef } from 'react';
 import {
   CloudSun, ShoppingBag, Satellite, User, Search, BookOpen,
-  Trophy, Map, MessageCircle, Telescope, LogOut, Settings, Gem,
+  Trophy, Map, MessageCircle, Telescope, LogOut, Settings, Gem, TrendingUp,
 } from 'lucide-react';
 import AstroLogo from './AstroLogo';
 import { useTranslations } from 'next-intl';
@@ -18,6 +18,7 @@ const SECTIONS = [
     label: 'Explore',
     links: [
       { href: '/sky',         label: 'Sky Forecast',  desc: "Tonight's conditions",     icon: CloudSun },
+      { href: '/markets',     label: 'Markets',        desc: 'Predict tonight\'s sky',   icon: TrendingUp },
       { href: '/missions',    label: 'Missions',       desc: 'Observe & earn Stars',     icon: Satellite },
       { href: '/learn',       label: 'Learning',       desc: 'Planets, quizzes & more',  icon: BookOpen },
       { href: '/darksky',     label: 'Dark Sky Map',   desc: 'Find dark sky sites',      icon: Map },
@@ -42,10 +43,10 @@ const SECTIONS = [
 
 const QUICK_TABS = [
   { href: '/sky',         label: 'Sky',       icon: CloudSun },
+  { href: '/markets',     label: 'Markets',   icon: TrendingUp },
   { href: '/missions',    label: 'Missions',  icon: Satellite },
   { href: '/learn',       label: 'Learning',  icon: BookOpen },
   { href: '/marketplace', label: 'Shop',      icon: ShoppingBag },
-  { href: '/nfts',        label: 'Gallery',   icon: Gem },
 ];
 
 export default function Nav() {
