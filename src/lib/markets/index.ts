@@ -6,16 +6,21 @@ export {
   getReadOnlyProgram,
   type StellarMarketsProgram,
   type AnchorWalletLike,
+  type PrivySigner,
+  type PrivySignAndSendResult,
 } from "./client";
 export {
   initialize,
   createMarket,
   placeBet,
+  placeBetFromUI,
+  buildPlaceBetTx,
   resolveMarket,
   cancelMarket,
   claimWinnings,
   type CreateMarketParams,
   type CreateMarketResult,
+  type PlaceBetFromUIResult,
 } from "./instructions";
 export {
   getConfig,

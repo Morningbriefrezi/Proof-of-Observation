@@ -21,6 +21,17 @@ export interface AnchorWalletLike {
   signAllTransactions<T extends Transaction>(txs: T[]): Promise<T[]>;
 }
 
+export interface PrivySignAndSendResult {
+  signature: string;
+  path: "A" | "B";
+}
+
+export interface PrivySigner {
+  publicKey: PublicKey | null;
+  isReady: boolean;
+  signAndSend(tx: Transaction): Promise<PrivySignAndSendResult>;
+}
+
 export function getProgram(
   wallet: AnchorWalletLike,
   connection: Connection,

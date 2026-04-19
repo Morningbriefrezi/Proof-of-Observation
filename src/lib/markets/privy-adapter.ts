@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { useWallets } from '@privy-io/react-auth/solana';
+import bs58 from 'bs58';
 import {
   Connection,
   PublicKey,
@@ -12,11 +13,22 @@ import {
   getProgram,
   getReadOnlyProgram,
   type AnchorWalletLike,
+  type PrivySigner,
   type StellarMarketsProgram,
 } from './client';
 
 const RPC_URL =
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL ?? 'https://api.devnet.solana.com';
+  process.env.NEXT_PUBLIC_SOLANA_RPC_URL ??
+  process.env.NEXT_PUBLIC_HELIUS_RPC_URL ??
+  'https://api.devnet.solana.com';
+
+function chainFromRpc(url: string): 'solana:devnet' | 'solana:testnet' | 'solana:mainnet' {
+  if (url.includes('devnet')) return 'solana:devnet';
+  if (url.includes('testnet')) return 'solana:testnet';
+  return 'solana:mainnet';
+}
+
+const CHAIN = chainFromRpc(RPC_URL);
 
 let _connection: Connection | null = null;
 function getConnection(): Connection {
@@ -24,11 +36,18 @@ function getConnection(): Connection {
   return _connection;
 }
 
+export function getSharedConnection(): Connection {
+  return getConnection();
+}
+
 interface PrivySolanaWalletLike {
   address: string;
   signTransaction: (
     input: { transaction: Uint8Array; chain?: string },
   ) => Promise<{ signedTransaction: Uint8Array }>;
+  signAndSendTransaction?: (
+    input: { transaction: Uint8Array; chain: string },
+  ) => Promise<{ signature: Uint8Array }>;
 }
 
 type SignableTx = Transaction | VersionedTransaction;
@@ -46,6 +65,7 @@ async function signOne<T extends SignableTx>(
       });
   const { signedTransaction } = await wallet.signTransaction({
     transaction: serialized as Uint8Array,
+    chain: CHAIN,
   });
   return (
     isVersioned
@@ -91,4 +111,76 @@ export function useProgramWithPrivy(): StellarMarketsProgram | null {
 
 export function useReadOnlyProgram(): StellarMarketsProgram {
   return useMemo(() => getReadOnlyProgram(getConnection()), []);
+}
+
+export function usePrivySigner(): PrivySigner {
+  const { wallets, ready } = useWallets();
+  return useMemo<PrivySigner>(() => {
+    const wallet = wallets[0] as unknown as PrivySolanaWalletLike | undefined;
+    const publicKey = wallet?.address ? new PublicKey(wallet.address) : null;
+    const isReady = !!(ready && wallet?.address);
+
+    return {
+      publicKey,
+      isReady,
+      async signAndSend(tx: Transaction): Promise<{ signature: string; path: 'A' | 'B' }> {
+        if (!wallet?.address || !publicKey) {
+          throw new Error('Wallet not connected');
+        }
+        const connection = getConnection();
+        if (!tx.recentBlockhash) {
+          const { blockhash } = await connection.getLatestBlockhash('confirmed');
+          tx.recentBlockhash = blockhash;
+        }
+        if (!tx.feePayer) tx.feePayer = publicKey;
+
+        const serialized = tx.serialize({
+          requireAllSignatures: false,
+          verifySignatures: false,
+        });
+
+        let signatureBase58: string | null = null;
+        let usedPath: 'A' | 'B' = 'A';
+
+        if (typeof wallet.signAndSendTransaction === 'function') {
+          try {
+            const { signature } = await wallet.signAndSendTransaction({
+              transaction: serialized as Uint8Array,
+              chain: CHAIN,
+            });
+            signatureBase58 = bs58.encode(signature);
+            usedPath = 'A';
+          } catch (err) {
+            console.warn('[privy signAndSend] Path A failed, falling back to Path B', err);
+            signatureBase58 = null;
+          }
+        }
+
+        if (!signatureBase58) {
+          const { signedTransaction } = await wallet.signTransaction({
+            transaction: serialized as Uint8Array,
+            chain: CHAIN,
+          });
+          const sig = await connection.sendRawTransaction(signedTransaction, {
+            skipPreflight: false,
+            preflightCommitment: 'confirmed',
+          });
+          signatureBase58 = sig;
+          usedPath = 'B';
+        }
+
+        const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
+        await connection.confirmTransaction(
+          {
+            signature: signatureBase58,
+            blockhash,
+            lastValidBlockHeight,
+          },
+          'confirmed',
+        );
+
+        return { signature: signatureBase58, path: usedPath };
+      },
+    };
+  }, [wallets, ready]);
 }

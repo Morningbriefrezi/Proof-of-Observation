@@ -10,7 +10,7 @@ import {
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
 import { configPDA, marketPDA, vaultPDA, positionPDA } from "./pdas";
-import type { StellarMarketsProgram } from "./client";
+import type { PrivySigner, StellarMarketsProgram } from "./client";
 import { PROGRAM_ID } from "./client";
 import type { MarketSide } from "./types";
 
@@ -116,6 +116,91 @@ export async function placeBet(
       systemProgram: SystemProgram.programId,
     })
     .rpc();
+}
+
+export interface PlaceBetFromUIResult {
+  txSignature: string;
+  confirmationStatus: "confirmed";
+  path: "A" | "B";
+}
+
+export async function placeBetFromUI(
+  program: StellarMarketsProgram,
+  signer: PrivySigner,
+  mint: PublicKey,
+  marketId: number,
+  side: MarketSide,
+  amount: number,
+): Promise<PlaceBetFromUIResult> {
+  if (!signer.isReady || !signer.publicKey) {
+    throw new Error("Wallet not connected");
+  }
+  const user = signer.publicKey;
+  const [config] = configPDA(PROGRAM_ID);
+  const [market] = marketPDA(PROGRAM_ID, marketId);
+  const [vault] = vaultPDA(PROGRAM_ID, marketId);
+  const [position] = positionPDA(PROGRAM_ID, marketId, user);
+  const userAta = await getAssociatedTokenAddress(mint, user, false);
+
+  const tx = await program.methods
+    .placeBet(new BN(marketId), sideEnum(side), new BN(amount))
+    .accountsStrict({
+      bettor: user,
+      config,
+      market,
+      marketVault: vault,
+      userPosition: position,
+      bettorTokenAccount: userAta,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      systemProgram: SystemProgram.programId,
+    })
+    .transaction();
+
+  tx.feePayer = user;
+  const { blockhash } = await program.provider.connection.getLatestBlockhash(
+    "confirmed",
+  );
+  tx.recentBlockhash = blockhash;
+
+  const { signature, path } = await signer.signAndSend(tx);
+
+  return { txSignature: signature, confirmationStatus: "confirmed", path };
+}
+
+export async function buildPlaceBetTx(
+  program: StellarMarketsProgram,
+  mint: PublicKey,
+  user: PublicKey,
+  marketId: number,
+  side: MarketSide,
+  amount: number,
+) {
+  const [config] = configPDA(PROGRAM_ID);
+  const [market] = marketPDA(PROGRAM_ID, marketId);
+  const [vault] = vaultPDA(PROGRAM_ID, marketId);
+  const [position] = positionPDA(PROGRAM_ID, marketId, user);
+  const userAta = await getAssociatedTokenAddress(mint, user, false);
+
+  const tx = await program.methods
+    .placeBet(new BN(marketId), sideEnum(side), new BN(amount))
+    .accountsStrict({
+      bettor: user,
+      config,
+      market,
+      marketVault: vault,
+      userPosition: position,
+      bettorTokenAccount: userAta,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      systemProgram: SystemProgram.programId,
+    })
+    .transaction();
+
+  tx.feePayer = user;
+  const { blockhash } = await program.provider.connection.getLatestBlockhash(
+    "confirmed",
+  );
+  tx.recentBlockhash = blockhash;
+  return tx;
 }
 
 export async function resolveMarket(

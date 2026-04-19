@@ -145,7 +145,8 @@ export async function getStarsBalance(walletAddress: string): Promise<number> {
     const connection = getConnection();
     const ata = await getAssociatedTokenAddress(
       new PublicKey(process.env.STARS_TOKEN_MINT),
-      new PublicKey(walletAddress)
+      new PublicKey(walletAddress),
+      true,
     );
     const account = await getAccount(connection, ata);
     return Number(account.amount);
