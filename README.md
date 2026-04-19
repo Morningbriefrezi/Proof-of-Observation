@@ -1,38 +1,51 @@
 # Stellar ✦
 
-**The night sky app — observe, earn, collect.**
+**Prediction markets for sky, weather, and natural events.**
 
-Stellar turns every clear night into a verified discovery. Check tonight's sky score, complete observation missions, earn Stars tokens, and collect compressed NFT proofs — all powered by invisible Solana infrastructure.
+Bet on what the sky will do next. Stellar is the prediction market protocol for the events mass-market platforms won't list — meteor shower peaks, cloud-cover windows, aurora outlooks, storm formations, solar flares — settled by domain oracles on Solana.
 
 🔗 **Live:** [stellarrclub.vercel.app](https://stellarrclub.vercel.app)
 🏗️ **Hackathon:** Colosseum Frontier 2026 · Consumer Track
 👤 **Builder:** Rezi ([@StellarClub26](https://x.com/StellarClub26)) — Founder of [Astroman.ge](https://astroman.ge), Georgia's first astronomy e-commerce store
 
+📄 **Full spec:** [STELLAR_INFO.md](STELLAR_INFO.md)
+
 ---
 
 ## What It Does
 
-Stellar answers one universal question: **"What can I see in the sky tonight?"**
+Stellar lets users stake **Stars tokens** on binary outcomes of upcoming sky, weather, and natural events — from tomorrow's cloud cover to the Lyrid meteor shower peak to a SpaceX launch window. Markets resolve automatically through a stack of domain oracles: a deterministic Sky Oracle, Claude Vision photo verification, and live feeds from NOAA, Open-Meteo, NASA, and astronomy-engine.
 
-Users get a real-time Sky Score (0–100), tonight's visible planets and highlights, 7-day forecast, and AI-powered guidance from ASTRA. When conditions are right, users complete observation missions — photograph celestial objects, get AI-verified, and earn:
+Three event verticals, one protocol:
 
-- **Compressed NFTs** (Metaplex Bubblegum) — proof of each observation, ~$0.000005/mint
-- **Stars tokens** (SPL) — redeemable for real telescope equipment at Astroman.ge
+- **Sky** — meteor showers, lunar events, planet visibility, deep-sky observing windows
+- **Weather** — cloud cover, storms, snow, hail, wind, fog
+- **Natural phenomena** — auroras, Kp-index spikes, solar flares, wildfire smoke, launches
 
-No wallets. No seed phrases. No gas fees. Sign up with email. The blockchain is invisible.
+Users earn Stars through sky observation missions, daily check-ins, and knowledge quizzes — then stake them on markets. No real-money deposits. No wallets to manage. No seed phrases. No gas fees. Sign up with email. The blockchain is invisible.
 
 ---
 
 ## Why Blockchain?
 
-| Without Solana | With Solana |
-|---|---|
-| Points in localStorage — lost if you clear your browser | Stars as SPL tokens — permanent, verifiable, tradeable |
-| "Trust me, I observed Jupiter" | Compressed NFT with oracle hash, coordinates, timestamp — verifiable on Explorer |
-| Discount codes emailed | Token-gated redemption — balance checked on-chain |
-| App shuts down, history gone | NFTs and tokens persist in your wallet forever |
+Stellar passes the structural-necessity test cleanly. Three gates can't be solved off-chain:
 
-Compressed NFTs cost ~$0.000005 each. We can mint millions. The fee payer covers all gas — users never need SOL.
+1. **Trustless settlement between strangers.** Two users on opposing sides of a market need payouts to flow automatically on resolution — without trusting an operator.
+2. **Programmable conditional payouts.** "Cloud cover below 30% at coordinates X on date Y" needs code — not customer service — to decide who wins.
+3. **Open participation, no gatekeeping.** A storm chaser in Oklahoma, an astronomer in Georgia, and an aurora hunter in Finland trade in the same market without permission.
+
+Remove the chain and the product collapses.
+
+---
+
+## Why Devnet + Stars-Only for the MVP
+
+Deliberate scope, not a dodge:
+
+- **Zero regulatory exposure** — no real-money stakes means no "is this gambling?" overhang
+- **Zero cold-start liquidity** — new signups already hold 100 Stars earned through app engagement
+- **End-to-end on-chain** — markets, positions, resolution, payouts all produce real Solana signatures
+- **Trivial mainnet path** — same contract deploys with USDC in v2, no protocol changes
 
 ---
 
@@ -41,39 +54,34 @@ Compressed NFTs cost ~$0.000005 each. We can mint millions. The fee payer covers
 Stellar isn't starting from zero. [Astroman.ge](https://astroman.ge) is Georgia's first astronomy e-commerce store with:
 - 60K+ social media followers
 - Physical retail in Tbilisi
-- Active telescope customer base
-- Real products in the Stellar marketplace
-
-Stars tokens earned in-app are redeemable for real discounts at the physical store.
+- Active telescope customer base — highest-intent prediction market users
+- Real product inventory for optional Stars redemption
 
 ---
 
 ## Tech Stack
 
-**Frontend:** Next.js 15, React 19, TypeScript, Tailwind CSS 4  
-**Auth:** Privy (embedded Solana wallets, email/Google login)  
-**Blockchain:** Metaplex Bubblegum (cNFTs), SPL Token (Stars), Helius DAS API  
-**AI:** Claude API with tool calling (ASTRA), Claude Vision (photo verification)  
-**Data:** Open-Meteo (weather), astronomy-engine (planet positions)  
-**Database:** Neon (Postgres) via Drizzle ORM  
-**Deploy:** Vercel
-
-Built with: Metaplex Bubblegum · Helius · Privy · Open-Meteo · Claude API
+**Frontend:** Next.js 15, React 19, TypeScript, Tailwind CSS 4
+**Auth:** Privy (embedded Solana wallets, email/Google login)
+**On-chain:** Anchor prediction-market program, Metaplex Bubblegum (position cNFTs), SPL Token (Stars), Helius DAS API
+**AI:** Claude API with tool calling (ASTRA market analyst), Claude Vision (photo verification)
+**Oracles:** Sky Oracle (internal), Open-Meteo, NOAA Kp, astronomy-engine, NASA, IMO
+**Database:** Neon (Postgres) via Drizzle ORM
+**Deploy:** Vercel · Solana devnet
 
 ---
 
-## Features
+## Core Features
 
-- **Sky Score** — 0–100 rating for tonight's sky quality
-- **Tonight's Highlights** — visible planets, moon phase, best viewing window
-- **7-Day Forecast** — daily sky quality rated Go/Maybe/Skip
-- **Planet Tracker** — rise/set/transit times for Mercury through Saturn
-- **ASTRA AI** — floating chat widget with live sky tool calling (accessible from every page)
-- **Observation Missions** — 7 targets from Moon (naked eye) to Orion Nebula (telescope)
-- **Knowledge Quizzes** — Solar System, Constellations, Telescopes (EN + Georgian)
-- **NFT Gallery** — compressed observation NFTs fetched via Helius DAS
-- **Marketplace** — real Astroman.ge products, Stars token redemption
+- **Live Markets** — grid of active markets across Sky, Weather, Natural-phenomenon verticals, live odds, total Stars locked
+- **Market Detail** — pool sizes, price chart, position entry, active positions, resolution countdown, "Research with ASTRA" button
+- **ASTRA AI Analyst** — Claude-powered research tool that pulls live weather, historical base rates, celestial positions, implied vs estimated probability
+- **Resolution Engine** — hourly cron, three pathways: automated oracle, Claude Vision photo verification, trusted manual source
+- **Sky Missions** — existing observation missions now feed Stars into the market loop
+- **Position Portfolio** — cNFT-backed positions (active + resolved) via Helius DAS
+- **Sky Score + Tonight's Highlights + Events Calendar** — context layer driving market discoverability
 - **Bilingual** — English + Georgian (next-intl)
+- **Astroman Redemption** — bonus layer, large Stars balances redeem for telescope gear
 
 ---
 
@@ -94,17 +102,20 @@ Required env vars: see `.env.example`
 ## On-Chain Setup (devnet)
 
 ```bash
-# 1. Fund your fee payer wallet
+# 1. Fund the fee payer wallet
 solana airdrop 5 <FEE_PAYER_ADDRESS> --url devnet
 
-# 2. Create Bubblegum merkle tree + NFT collection
+# 2. Deploy Stellar Markets Anchor program
+npm run deploy:markets
+
+# 3. Create Bubblegum merkle tree for position cNFTs
 npm run setup:bubblegum
 
-# 3. Deploy Stars SPL token
+# 4. Deploy Stars SPL token
 npm run setup:token
 
-# 4. Seed demo observations for judges
-npm run seed:demo
+# 5. Seed demo markets for judges
+npm run seed:markets
 ```
 
 ---
@@ -113,17 +124,27 @@ npm run seed:demo
 
 ```
 User (email login via Privy)
-  → Tonight's Sky Score + Highlights (Open-Meteo + astronomy-engine)
-  → Ask ASTRA (Claude with live tool calling — planet positions, sky conditions)
-  → Start Mission → Camera → Claude Vision photo verification
-  → Sky Oracle hash (deterministic per location/hour)
-  → POST /api/mint → Metaplex Bubblegum cNFT on devnet
-  → POST /api/observe/log → SPL token mintTo (Stars)
-  → NFT Gallery (Helius DAS: getAssetsByOwner)
-  → Marketplace → Stars redemption → Astroman.ge
+  → Earns Stars via sky missions, check-ins, quizzes
+  → Browses Live Markets (Sky / Weather / Natural)
+  → Opens Market Detail → Research with ASTRA (live oracle data + base rates)
+  → Stakes Stars YES/NO → Position cNFT minted (Bubblegum)
+  → Pool updates in PDA-controlled vault
+  → Resolution cron hits market close
+  → Oracle resolves (Sky Oracle / Open-Meteo / NOAA / Claude Vision / manual)
+  → on-chain resolve_market → parimutuel payout distribution
+  → Winners see Stars credited, Position Portfolio updates
+  → Optional: Stars redeemed at Astroman.ge
 ```
 
 All transactions use a server-side fee payer. Users never interact with wallets directly.
+
+---
+
+## Roadmap
+
+**Weeks 1-4 post-hackathon** — Whitelisted community market creation, Astroman email campaign to seed first 500 users
+**Months 2-6** — Mainnet deployment with USDC + Stars dual currency, Pyth/Switchboard integration, mobile PWA, second vertical (storm chasing or birdwatching)
+**Months 6-12** — Third vertical, paid market creation for creators, tokenized liquidity provision
 
 ---
 
