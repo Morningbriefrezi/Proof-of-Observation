@@ -4,8 +4,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PageContainer from '@/components/layout/PageContainer';
 import PageTransition from '@/components/ui/PageTransition';
-import SkyMapHeader from '@/components/markets/SkyMapHeader';
-import RecentlyResolved from '@/components/markets/RecentlyResolved';
 import { useReadOnlyProgram } from '@/lib/markets/privy-adapter';
 import { useAppState } from '@/hooks/useAppState';
 import {
@@ -245,26 +243,35 @@ export default function MarketsPage() {
     return markets;
   }, [markets, tab]);
 
-  // Group by category preserving CATEGORY_ORDER
+  // Group open/locked markets by category (resolved gets its own section below)
   const grouped = useMemo(() => {
+    const activeOnly = visible.filter(
+      (m) => m.status === 'open' || m.status === 'locked',
+    );
     const out: { def: CategoryDef; items: Market[] }[] = [];
     for (const def of CATEGORY_ORDER) {
-      const items = visible.filter((m) => m.metadata.category === def.key);
+      const items = activeOnly.filter((m) => m.metadata.category === def.key);
       if (items.length === 0) continue;
-      // Sort: open first (by close time asc), then locked, then resolved (by resolution desc)
       items.sort((a, b) => {
-        const aOpen = a.status === 'open' ? 0 : a.status === 'locked' ? 1 : 2;
-        const bOpen = b.status === 'open' ? 0 : b.status === 'locked' ? 1 : 2;
+        const aOpen = a.status === 'open' ? 0 : 1;
+        const bOpen = b.status === 'open' ? 0 : 1;
         if (aOpen !== bOpen) return aOpen - bOpen;
-        if (aOpen === 2) {
-          return b.metadata.resolutionTime.getTime() - a.metadata.resolutionTime.getTime();
-        }
         return a.metadata.closeTime.getTime() - b.metadata.closeTime.getTime();
       });
       out.push({ def, items });
     }
     return out;
   }, [visible]);
+
+  // Resolved + cancelled — dedicated bottom section
+  const resolvedItems = useMemo(() => {
+    return markets
+      .filter((m) => m.status === 'resolved' || m.status === 'cancelled')
+      .sort(
+        (a, b) =>
+          b.metadata.resolutionTime.getTime() - a.metadata.resolutionTime.getTime(),
+      );
+  }, [markets]);
 
   const summary = useMemo(() => {
     let open = 0;
@@ -292,7 +299,7 @@ export default function MarketsPage() {
         {/* Header */}
         <header className="flex flex-col gap-1.5">
           <h1 className="stl-display-lg" style={{ margin: 0, color: 'var(--stl-text-bright)' }}>
-            Observatory Logbook
+            Sky Markets
           </h1>
           <p className="stl-mono-kicker" style={{ color: 'var(--stl-text-muted)', margin: 0 }}>
             {loading
@@ -300,11 +307,6 @@ export default function MarketsPage() {
               : `${summary.open} open · ${summary.resolved} resolved · ${formatStat(summary.staked)} ✦ staked`}
           </p>
         </header>
-
-        {/* Sky map header (kept from Day 7) */}
-        {!loading && markets.length > 0 && (
-          <SkyMapHeader markets={markets} advantageByMarketId={advantageByMarketId} />
-        )}
 
         {/* Summary stat grid */}
         {!loading && markets.length > 0 && (
@@ -346,11 +348,6 @@ export default function MarketsPage() {
               ))}
             </div>
           </section>
-        )}
-
-        {/* Recently resolved strip */}
-        {!loading && markets.length > 0 && (
-          <RecentlyResolved markets={markets} />
         )}
 
         {/* Tab bar */}
@@ -438,15 +435,15 @@ export default function MarketsPage() {
             </p>
           </div>
         ) : (
-          <div className="flex flex-col" id="markets-table">
+          <div className="flex flex-col gap-2" id="markets-table">
             {grouped.map(({ def, items }) => (
               <section key={def.key} style={{ display: 'flex', flexDirection: 'column' }}>
                 <header className="stl-cat-header">
-                  <span style={{ fontSize: 13, opacity: 0.7, width: 20, display: 'inline-block' }}>{def.emoji}</span>
+                  <span style={{ fontSize: 13, opacity: 0.85, width: 20, display: 'inline-block' }}>{def.emoji}</span>
                   <span className="stl-cat-name">{def.label}</span>
                   <span className="stl-cat-count">({items.length})</span>
                 </header>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <div className="stl-bet-list">
                   {items.map((m) => (
                     <MarketRow
                       key={m.onChain.marketId}
@@ -459,6 +456,25 @@ export default function MarketsPage() {
               </section>
             ))}
           </div>
+        )}
+
+        {/* Dedicated Resolved section — always at bottom */}
+        {!loading && resolvedItems.length > 0 && (
+          <section className="stl-resolved-section">
+            <header className="stl-resolved-header">
+              <span className="stl-resolved-title">Resolved</span>
+              <span className="stl-resolved-count">{resolvedItems.length} settled</span>
+            </header>
+            <div className="stl-resolved-list">
+              {resolvedItems.map((m) => (
+                <ResolvedRow
+                  key={m.onChain.marketId}
+                  market={m}
+                  onClick={() => router.push(`/markets/${m.onChain.marketId}`)}
+                />
+              ))}
+            </div>
+          </section>
         )}
       </PageContainer>
     </PageTransition>
@@ -528,24 +544,22 @@ interface RowProps {
 }
 
 function MarketRow({ market, advantage, onClick }: RowProps) {
-  const resolved = market.status === 'resolved';
-  const cancelled = market.status === 'cancelled';
   const emoji = market.metadata.emoji ?? '✦';
   const yesPct = Math.round(market.impliedYesOdds * 100);
+  const noPct = 100 - yesPct;
+  const yesMult = market.impliedYesOdds > 0.001 ? 1 / market.impliedYesOdds : 999;
+  const noMult = market.impliedYesOdds < 0.999 ? 1 / (1 - market.impliedYesOdds) : 999;
   const volume = market.onChain.totalStaked;
-  const now = Date.now();
-  const msToClose = market.metadata.closeTime.getTime() - now;
+  const msToClose = market.metadata.closeTime.getTime() - Date.now();
   const countdown = formatCountdown(msToClose);
-  const colors = oddsColorClass(yesPct);
   const urgency = urgencyLevel(msToClose);
   const oracle = oracleBadge(market.metadata.resolutionSource);
+  const locked = market.status === 'locked';
 
-  const isResolvedYes = resolved && market.onChain.outcome === 'yes';
-  const isResolvedNo = resolved && market.onChain.outcome === 'no';
-
-  const timeClass = [
-    'stl-row-obs-time',
-    urgency === 'urgent' ? 'urgent' : urgency === 'distant' ? 'distant' : '',
+  const countdownClass = [
+    'stl-bet-countdown',
+    urgency === 'urgent' ? 'urgent' : urgency === 'hot' ? 'hot' : '',
+    locked ? 'locked' : '',
   ].filter(Boolean).join(' ');
 
   return (
@@ -559,49 +573,82 @@ function MarketRow({ market, advantage, onClick }: RowProps) {
           onClick();
         }
       }}
-      className={`stl-row-obs ${resolved || cancelled ? 'stl-row-obs-resolved' : ''}`}
+      className="stl-bet-row"
       id={`market-${market.onChain.marketId}`}
     >
-      <span className="stl-row-obs-emoji" aria-hidden>{emoji}</span>
-      <span className="stl-row-obs-title-wrap">
-        <span className="stl-row-obs-title">{market.metadata.title}</span>
-        {!resolved && !cancelled && (oracle || advantage) && (
-          <span className="stl-row-obs-meta">
-            {oracle && <span className="stl-oracle-src">{oracle}</span>}
-            {advantage && <span className="stl-row-adv">🔭 1.5×</span>}
-          </span>
-        )}
-      </span>
-      <span className="stl-row-obs-right">
-        {resolved ? (
-          <>
-            <span
-              className={`stl-resolved-tag ${isResolvedYes ? 'stl-resolved-yes' : isResolvedNo ? 'stl-resolved-no' : ''}`}
-            >
-              {isResolvedYes ? '✓ YES' : isResolvedNo ? '✗ NO' : '⟳'}
-            </span>
-            <span
-              className="stl-row-obs-time"
-              style={{ color: isResolvedYes ? 'rgba(52,211,153,0.55)' : 'rgba(244,114,182,0.55)' }}
-            >
-              done
-            </span>
-          </>
-        ) : cancelled ? (
-          <span className="stl-resolved-tag" style={{ color: 'var(--stl-text-dim)' }}>
-            ⟳ CANCELLED
-          </span>
-        ) : (
-          <>
-            <span className={`stl-row-obs-odds ${colors.odds}`}>{yesPct}%</span>
-            <div className="stl-prob-bar" aria-hidden>
-              <div className={`stl-prob-fill ${colors.fill}`} style={{ width: `${yesPct}%` }} />
-            </div>
-            <span className="stl-row-obs-vol">{formatVolume(volume)} ✦</span>
-            <span className={timeClass}>{countdown}</span>
-          </>
-        )}
-      </span>
+      <div className="stl-bet-head">
+        <span className="stl-bet-emoji" aria-hidden>{emoji}</span>
+        <span className="stl-bet-title">{market.metadata.title}</span>
+        <span className={countdownClass}>
+          {locked ? 'locked' : countdown}
+        </span>
+      </div>
+      <div className="stl-bet-sides">
+        <div className="stl-bet-side stl-bet-yes">
+          <div className="stl-bet-side-head">
+            <span className="stl-bet-side-label">YES</span>
+            <span className="stl-bet-side-pct">{yesPct}%</span>
+          </div>
+          <span className="stl-bet-side-mult">pays {yesMult.toFixed(2)}×</span>
+        </div>
+        <div className="stl-bet-side stl-bet-no">
+          <div className="stl-bet-side-head">
+            <span className="stl-bet-side-label">NO</span>
+            <span className="stl-bet-side-pct">{noPct}%</span>
+          </div>
+          <span className="stl-bet-side-mult">pays {noMult.toFixed(2)}×</span>
+        </div>
+      </div>
+      <div className="stl-bet-foot">
+        {oracle && <span className="stl-bet-oracle">{oracle}</span>}
+        {advantage && <span className="stl-bet-adv">🔭 1.5× stake bonus</span>}
+        <span className="stl-bet-vol">{formatVolume(volume)} ✦ staked</span>
+      </div>
     </div>
   );
 }
+
+interface ResolvedRowProps {
+  market: Market;
+  onClick: () => void;
+}
+
+function ResolvedRow({ market, onClick }: ResolvedRowProps) {
+  const cancelled = market.status === 'cancelled';
+  const isYes = !cancelled && market.onChain.outcome === 'yes';
+  const isNo = !cancelled && market.onChain.outcome === 'no';
+  const emoji = market.metadata.emoji ?? '✦';
+  const date = market.metadata.resolutionTime.toLocaleDateString([], {
+    month: 'short',
+    day: 'numeric',
+  });
+
+  const tagClass = cancelled
+    ? 'stl-resolved-tag'
+    : isYes
+      ? 'stl-resolved-tag stl-resolved-yes'
+      : 'stl-resolved-tag stl-resolved-no';
+
+  const tagLabel = cancelled ? '⟳ CANCELLED' : isYes ? '✓ YES' : '✗ NO';
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      className="stl-resolved-row"
+    >
+      <span className="stl-resolved-emoji" aria-hidden>{emoji}</span>
+      <span className="stl-resolved-title">{market.metadata.title}</span>
+      <span className={tagClass}>{tagLabel}</span>
+      <span className="stl-resolved-date">{date}</span>
+    </div>
+  );
+}
+

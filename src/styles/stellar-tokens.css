@@ -692,3 +692,246 @@
   .stl-row-obs-meta { font-size: 8px; gap: 6px; }
   .stl-oracle-src { font-size: 8px; }
 }
+
+/* ===== Bet row — YES/NO payout cards (Sky Markets v3) ===== */
+.stl-bet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0 2px;
+}
+.stl-bet-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--stl-r-md);
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.07);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  color: inherit;
+  text-decoration: none;
+}
+.stl-bet-row:hover,
+.stl-bet-row:focus-visible {
+  background: rgba(255,255,255,0.045);
+  border-color: rgba(255,255,255,0.14);
+  outline: none;
+}
+.stl-bet-head {
+  display: grid;
+  grid-template-columns: 18px 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+.stl-bet-emoji {
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0.9;
+}
+.stl-bet-title {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  font-weight: 500;
+  color: #F2F0EA;
+  line-height: 1.3;
+  letter-spacing: -0.003em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stl-bet-countdown {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.55);
+  text-transform: lowercase;
+  flex-shrink: 0;
+}
+.stl-bet-countdown.urgent { color: #F59E0B; }
+.stl-bet-countdown.hot    { color: #34D399; }
+.stl-bet-countdown.locked { color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.14em; font-size: 9px; }
+
+.stl-bet-sides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.stl-bet-side {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 9px 11px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: rgba(255,255,255,0.03);
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.stl-bet-yes {
+  background: rgba(52,211,153,0.07);
+  border-color: rgba(52,211,153,0.22);
+}
+.stl-bet-no {
+  background: rgba(244,114,182,0.06);
+  border-color: rgba(244,114,182,0.22);
+}
+.stl-bet-row:hover .stl-bet-yes { background: rgba(52,211,153,0.12); }
+.stl-bet-row:hover .stl-bet-no  { background: rgba(244,114,182,0.10); }
+
+.stl-bet-side-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.stl-bet-side-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.stl-bet-yes .stl-bet-side-label { color: #34D399; }
+.stl-bet-no  .stl-bet-side-label { color: #F472B6; }
+
+.stl-bet-side-pct {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: #F2F0EA;
+}
+.stl-bet-side-mult {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.6);
+  font-variant-numeric: tabular-nums;
+}
+.stl-bet-yes .stl-bet-side-mult { color: rgba(52,211,153,0.85); }
+.stl-bet-no  .stl-bet-side-mult { color: rgba(244,114,182,0.85); }
+
+.stl-bet-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.55);
+}
+.stl-bet-oracle {
+  color: rgba(56,240,255,0.8);
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(56,240,255,0.08);
+  border: 1px solid rgba(56,240,255,0.18);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+}
+.stl-bet-adv {
+  color: var(--stl-gold);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+.stl-bet-vol {
+  margin-left: auto;
+  color: rgba(255,255,255,0.55);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .stl-bet-row { padding: 10px 11px; gap: 8px; }
+  .stl-bet-title { font-size: 13px; }
+  .stl-bet-side { padding: 8px 9px; }
+  .stl-bet-side-pct { font-size: 14px; }
+  .stl-bet-foot { font-size: 9px; gap: 8px; }
+}
+
+/* ===== Dedicated Resolved section at page bottom ===== */
+.stl-resolved-section {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.stl-resolved-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.stl-resolved-title {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 500;
+  color: #F2F0EA;
+  letter-spacing: -0.005em;
+}
+.stl-resolved-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+}
+.stl-resolved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stl-resolved-row {
+  display: grid;
+  grid-template-columns: 20px 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.015);
+  border: 1px solid rgba(255,255,255,0.05);
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.stl-resolved-row:hover,
+.stl-resolved-row:focus-visible {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.12);
+  outline: none;
+}
+.stl-resolved-emoji {
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0.7;
+  text-align: center;
+}
+.stl-resolved-row .stl-resolved-title {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(242,240,234,0.85);
+  letter-spacing: -0.003em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.stl-resolved-date {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.5);
+  font-variant-numeric: tabular-nums;
+  min-width: 44px;
+  text-align: right;
+}
+@media (max-width: 640px) {
+  .stl-resolved-row { grid-template-columns: 18px 1fr auto auto; gap: 8px; padding: 8px 10px; }
+  .stl-resolved-row .stl-resolved-title { font-size: 12.5px; }
+}
