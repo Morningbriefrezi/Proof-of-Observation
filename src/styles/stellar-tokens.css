@@ -1000,13 +1000,13 @@
 
 /* Polymarket-style centered shell — edges around the content column */
 .mkt-shell {
-  max-width: 1360px;
+  max-width: 1080px;
   margin: 0 auto;
   border-left: 1px solid var(--stl-border);
   border-right: 1px solid var(--stl-border);
   min-height: calc(100vh - 56px);
 }
-@media (max-width: 1400px) {
+@media (max-width: 1120px) {
   .mkt-shell { border-left: 0; border-right: 0; }
 }
 
@@ -1761,6 +1761,92 @@
   .mkt-odds-btn { font-size: 12px; padding: 5px 8px; min-width: 44px; }
   .mkt-row-volume { display: none; }
   .mkt-group-header { padding: 12px 0 4px; }
+}
+
+/* === UNIFIED PAGE SHELL (Sky / Missions / Markets / Profile / Home) === */
+/* Wraps page content inside a 1080px column on a unified white canvas.
+   Matches the homepage design language. */
+.stl-page {
+  background: #FFFFFF;
+  color: #0F172A;
+  font-family: var(--font-display);
+  min-height: calc(100vh - 56px);
+}
+.stl-page-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 40px;
+}
+@media (max-width: 768px) {
+  .stl-page-inner { padding: 18px 16px; }
+}
+
+/* Neutralize dark-theme inline patterns inside the unified shell */
+.stl-page h1,
+.stl-page h2,
+.stl-page h3,
+.stl-page h4 { color: #0F172A; }
+.stl-page p,
+.stl-page span,
+.stl-page div,
+.stl-page li { color: inherit; }
+.stl-page a { color: #5B3DC8; }
+.stl-page a:hover { text-decoration: underline; }
+
+/* Common link/label color normalizations */
+.stl-page .mkt-theme-toggle { display: none; }
+
+/* Neutralize .glass-card dark surface inside unified shell */
+.stl-page .glass-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.stl-page .glass-card:hover {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+}
+.stl-page .glass-card:active {
+  background: #F1F5F9;
+  border-color: #CBD5E1;
+}
+
+/* Neutralize global CSS variables used by legacy components inside unified shell */
+.stl-page {
+  --text-primary:   #0F172A;
+  --text-muted:     #64748B;
+  --text-dim:       #94A3B8;
+  --bg-card:        #FFFFFF;
+  --bg-card-hover:  #F8FAFC;
+  --border-subtle:  #F1F5F9;
+  --border-default: #E2E8F0;
+  --accent:         #5B3DC8;
+  --accent-dim:     #EDE9FE;
+  --accent-glow:    rgba(91,61,200,0.15);
+  --accent-border:  #C4B5FD;
+  --color-text-muted: #64748B;
+
+  /* Stellar design system tokens — light-mode repaint */
+  --stl-text-bright:  #0F172A;
+  --stl-text-primary: #0F172A;
+  --stl-text-muted:   #475569;
+  --stl-text-dim:     #64748B;
+  --stl-text-whisper: #94A3B8;
+  --stl-bg-deep:      #FFFFFF;
+  --stl-bg-base:      #FFFFFF;
+  --stl-bg-surface:   #F8FAFC;
+  --stl-bg-elevated:  #F1F5F9;
+  --stl-border-soft:    #F1F5F9;
+  --stl-border-regular: #E2E8F0;
+  --stl-border-strong:  #CBD5E1;
+  --stl-gold:     #D97706;
+  --stl-gold-dim: #B45309;
+  --stl-teal:     #0891B2;
+  --stl-green:    #16A34A;
+  --stl-lilac:    #5B3DC8;
+  --stl-rose:     #DB2777;
 }
 
 /* === HOMEPAGE === */

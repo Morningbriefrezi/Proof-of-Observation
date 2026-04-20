@@ -23,7 +23,7 @@ function MoonPhaseSVG({ phaseDeg, size = 56 }: { phaseDeg: number; size?: number
   if (illum < 0.01) {
     return (
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ display: 'block' }}>
-        <circle cx={r} cy={r} r={R} fill="oklch(0.18 0.012 260)" stroke="oklch(0.94 0.015 80 / 0.18)" strokeWidth="0.75" />
+        <circle cx={r} cy={r} r={R} fill="oklch(0.18 0.012 260)" stroke="#CBD5E1" strokeWidth="0.75" />
       </svg>
     );
   }
@@ -68,7 +68,7 @@ function MoonPhaseSVG({ phaseDeg, size = 56 }: { phaseDeg: number; size?: number
           </>
         )}
       </g>
-      <circle cx={r} cy={r} r={R} fill="none" stroke="oklch(0.94 0.015 80 / 0.18)" strokeWidth="0.75" />
+      <circle cx={r} cy={r} r={R} fill="none" stroke="#CBD5E1" strokeWidth="0.75" />
     </svg>
   );
 }
@@ -163,11 +163,11 @@ function ObservingWindowBar({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between">
-        <span className="text-[11px] uppercase tracking-[0.14em] font-medium" style={{ color: 'oklch(0.94 0.015 80 / 0.45)' }}>
+        <span className="text-[11px] uppercase tracking-[0.14em] font-medium" style={{ color: '#64748B' }}>
           Observing window — dusk to dawn
         </span>
       </div>
-      <div className="relative h-2 overflow-hidden" style={{ background: 'oklch(0.94 0.015 80 / 0.04)' }}>
+      <div className="relative h-2 overflow-hidden" style={{ background: '#F1F5F9' }}>
         {windowHours.map((h, i) => {
           const cover = h.cloudCover;
           const pct = 100 / TOTAL_H;
@@ -189,7 +189,7 @@ function ObservingWindowBar({
       </div>
       <div
         className="flex justify-between text-[11px] tabular-nums"
-        style={{ color: 'oklch(0.94 0.015 80 / 0.45)', fontFamily: 'var(--font-mono)' }}
+        style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}
       >
         <span>{sunSet ? fmt(sunSet) : '18:00'} sunset</span>
         <span style={{ opacity: 0.5 }}>00:00</span>
@@ -329,7 +329,7 @@ export default function TonightHighlights() {
     return (
       <div className="py-12 flex items-center gap-3">
         <div className="w-3 h-3 rounded-full border border-current border-t-transparent animate-spin" style={{ color: 'oklch(0.78 0.15 160)' }} />
-        <span className="text-sm" style={{ color: 'oklch(0.94 0.015 80 / 0.55)' }}>
+        <span className="text-sm" style={{ color: '#475569' }}>
           {!ready ? 'Detecting your location…' : 'Reading the sky…'}
         </span>
       </div>
@@ -339,14 +339,14 @@ export default function TonightHighlights() {
   if (error || !card) {
     return (
       <div className="py-12 flex flex-col gap-3 max-w-md">
-        <p className="text-sm" style={{ color: 'oklch(0.94 0.015 80 / 0.7)' }}>{t('forecastError')}</p>
+        <p className="text-sm" style={{ color: '#334155' }}>{t('forecastError')}</p>
         <button
           onClick={() => { setError(false); setLoading(true); compute(lat, lng); }}
           className="self-start px-4 py-2 text-sm transition-colors"
           style={{
             background: 'transparent',
-            border: '1px solid oklch(0.94 0.015 80 / 0.2)',
-            color: 'oklch(0.94 0.015 80 / 0.85)',
+            border: '1px solid #CBD5E1',
+            color: '#1E293B',
           }}
         >
           {t('retry')}
@@ -373,14 +373,14 @@ export default function TonightHighlights() {
     <section className="flex flex-col gap-8 pt-2">
       {/* ── Page slug: date / location / coords ─────────────────── */}
       <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
-        <div className="text-[11px] uppercase tracking-[0.18em] font-semibold" style={{ color: 'oklch(0.94 0.015 80 / 0.6)' }}>
+        <div className="text-[11px] uppercase tracking-[0.18em] font-semibold" style={{ color: '#475569' }}>
           {dateLabel}
         </div>
         <LocationPicker compact />
-        <div className="text-[11px] tabular-nums" style={{ color: 'oklch(0.94 0.015 80 / 0.45)', fontFamily: 'var(--font-mono)' }}>
+        <div className="text-[11px] tabular-nums" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>
           {lat.toFixed(2)}°{lat >= 0 ? 'N' : 'S'} {Math.abs(lng).toFixed(2)}°{lng >= 0 ? 'E' : 'W'}
         </div>
-        <div className="text-[11px] tabular-nums" style={{ color: 'oklch(0.94 0.015 80 / 0.45)', fontFamily: 'var(--font-mono)' }}>
+        <div className="text-[11px] tabular-nums" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>
           Bortle {bortle} · {bortleLabel(bortle)}
         </div>
       </div>
@@ -404,7 +404,7 @@ export default function TonightHighlights() {
             </h1>
             <span
               className="text-base sm:text-lg font-medium"
-              style={{ color: 'oklch(0.94 0.015 80 / 0.92)' }}
+              style={{ color: '#0F172A' }}
             >
               {verdictTagline[state]}
             </span>
@@ -412,7 +412,7 @@ export default function TonightHighlights() {
 
           {state !== 'skip' && obsWindow && (
             <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="text-[11px] uppercase tracking-[0.18em]" style={{ color: 'oklch(0.94 0.015 80 / 0.55)' }}>
+              <span className="text-[11px] uppercase tracking-[0.18em]" style={{ color: '#475569' }}>
                 Best window
               </span>
               <span
@@ -421,7 +421,7 @@ export default function TonightHighlights() {
                   fontFamily: 'var(--font-mono)',
                   fontSize: 'clamp(24px, 3.4vw, 32px)',
                   fontWeight: 500,
-                  color: 'oklch(0.94 0.015 80 / 0.92)',
+                  color: '#0F172A',
                   letterSpacing: '-0.01em',
                 }}
               >
@@ -432,7 +432,7 @@ export default function TonightHighlights() {
 
           <p
             className="text-[15px] leading-relaxed max-w-[60ch]"
-            style={{ color: 'oklch(0.94 0.015 80 / 0.7)' }}
+            style={{ color: '#334155' }}
           >
             {summary}
           </p>
@@ -449,7 +449,7 @@ export default function TonightHighlights() {
                     fontFamily: 'var(--font-mono)',
                     fontSize: 'clamp(64px, 8vw, 88px)',
                     fontWeight: 500,
-                    color: 'oklch(0.94 0.015 80 / 0.95)',
+                    color: '#0F172A',
                     letterSpacing: '-0.02em',
                   }}
                 >
@@ -457,15 +457,15 @@ export default function TonightHighlights() {
                 </span>
                 <span
                   className="text-base tabular-nums"
-                  style={{ fontFamily: 'var(--font-mono)', color: 'oklch(0.94 0.015 80 / 0.4)' }}
+                  style={{ fontFamily: 'var(--font-mono)', color: '#64748B' }}
                 >
                   /100
                 </span>
               </div>
-              <div className="text-[11px] uppercase tracking-[0.18em]" style={{ color: 'oklch(0.94 0.015 80 / 0.55)' }}>
+              <div className="text-[11px] uppercase tracking-[0.18em]" style={{ color: '#475569' }}>
                 Sky score · {skyScore.grade}
               </div>
-              <p className="text-[12px] mt-1 max-w-[28ch] md:text-right" style={{ color: 'oklch(0.94 0.015 80 / 0.45)' }}>
+              <p className="text-[12px] mt-1 max-w-[28ch] md:text-right" style={{ color: '#64748B' }}>
                 {scoreCaption(skyScore.grade)}
               </p>
             </div>
@@ -474,7 +474,7 @@ export default function TonightHighlights() {
       </div>
 
       {/* ── Hairline rule ────────────────────────────────────────── */}
-      <div style={{ height: 1, background: 'oklch(0.94 0.015 80 / 0.10)' }} />
+      <div style={{ height: 1, background: '#E2E8F0' }} />
 
       {/* ── Below-the-fold detail row: window timeline + moon + planets ── */}
       <div className="grid grid-cols-12 gap-x-8 gap-y-6">
@@ -489,40 +489,40 @@ export default function TonightHighlights() {
 
         {/* Moon block — spans 2 cols */}
         <div className="col-span-6 md:col-span-2 flex flex-col gap-2">
-          <span className="text-[11px] uppercase tracking-[0.14em]" style={{ color: 'oklch(0.94 0.015 80 / 0.45)' }}>
+          <span className="text-[11px] uppercase tracking-[0.14em]" style={{ color: '#64748B' }}>
             Moon
           </span>
           {moonData ? (
             <div className="flex items-center gap-3">
               <MoonPhaseSVG phaseDeg={moonData.moonPhaseDeg} size={36} />
               <div className="flex flex-col">
-                <span className="text-[13px] font-medium" style={{ color: 'oklch(0.94 0.015 80 / 0.92)' }}>
+                <span className="text-[13px] font-medium" style={{ color: '#0F172A' }}>
                   {phaseName(moonData.moonPhaseDeg, locale)}
                 </span>
-                <span className="text-[11px] tabular-nums" style={{ color: 'oklch(0.94 0.015 80 / 0.5)', fontFamily: 'var(--font-mono)' }}>
+                <span className="text-[11px] tabular-nums" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>
                   {moonData.illuminationPct}% illuminated
                 </span>
               </div>
             </div>
           ) : (
-            <div className="h-9 w-9 rounded-full" style={{ background: 'oklch(0.94 0.015 80 / 0.05)' }} />
+            <div className="h-9 w-9 rounded-full" style={{ background: '#F1F5F9' }} />
           )}
         </div>
 
         {/* Atmosphere stats — spans 3 cols, inline rows */}
         <div className="col-span-6 md:col-span-3 flex flex-col gap-1">
-          <span className="text-[11px] uppercase tracking-[0.14em]" style={{ color: 'oklch(0.94 0.015 80 / 0.45)' }}>
+          <span className="text-[11px] uppercase tracking-[0.14em]" style={{ color: '#64748B' }}>
             Atmosphere
           </span>
           <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-[12px] tabular-nums" style={{ fontFamily: 'var(--font-mono)' }}>
-            <dt style={{ color: 'oklch(0.94 0.015 80 / 0.5)' }}>Cloud</dt>
-            <dd className="text-right" style={{ color: 'oklch(0.94 0.015 80 / 0.92)' }}>{cloudCover}%</dd>
-            <dt style={{ color: 'oklch(0.94 0.015 80 / 0.5)' }}>Humidity</dt>
-            <dd className="text-right" style={{ color: 'oklch(0.94 0.015 80 / 0.92)' }}>{humidity}%</dd>
-            <dt style={{ color: 'oklch(0.94 0.015 80 / 0.5)' }}>Wind</dt>
-            <dd className="text-right" style={{ color: 'oklch(0.94 0.015 80 / 0.92)' }}>{wind} km/h</dd>
-            <dt style={{ color: 'oklch(0.94 0.015 80 / 0.5)' }}>Visibility</dt>
-            <dd className="text-right" style={{ color: 'oklch(0.94 0.015 80 / 0.92)' }}>{visKm} km</dd>
+            <dt style={{ color: '#64748B' }}>Cloud</dt>
+            <dd className="text-right" style={{ color: '#0F172A' }}>{cloudCover}%</dd>
+            <dt style={{ color: '#64748B' }}>Humidity</dt>
+            <dd className="text-right" style={{ color: '#0F172A' }}>{humidity}%</dd>
+            <dt style={{ color: '#64748B' }}>Wind</dt>
+            <dd className="text-right" style={{ color: '#0F172A' }}>{wind} km/h</dd>
+            <dt style={{ color: '#64748B' }}>Visibility</dt>
+            <dd className="text-right" style={{ color: '#0F172A' }}>{visKm} km</dd>
           </dl>
         </div>
       </div>
@@ -530,16 +530,16 @@ export default function TonightHighlights() {
       {/* ── Planet rail ─────────────────────────────────────────── */}
       {planets.length > 0 && (
         <div className="flex flex-col gap-2">
-          <span className="text-[11px] uppercase tracking-[0.14em]" style={{ color: 'oklch(0.94 0.015 80 / 0.45)' }}>
+          <span className="text-[11px] uppercase tracking-[0.14em]" style={{ color: '#64748B' }}>
             Planets up now
           </span>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             {planets.map(p => (
               <div key={p.key} className="flex items-baseline gap-2">
-                <span className="text-[14px] font-medium" style={{ color: 'oklch(0.94 0.015 80 / 0.92)' }}>
+                <span className="text-[14px] font-medium" style={{ color: '#0F172A' }}>
                   {p.key.charAt(0).toUpperCase() + p.key.slice(1)}
                 </span>
-                <span className="text-[12px] tabular-nums" style={{ color: 'oklch(0.94 0.015 80 / 0.5)', fontFamily: 'var(--font-mono)' }}>
+                <span className="text-[12px] tabular-nums" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>
                   {p.altitude}° alt
                 </span>
               </div>

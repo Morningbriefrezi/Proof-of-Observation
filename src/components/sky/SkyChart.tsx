@@ -111,7 +111,7 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
         aspectRatio: '2 / 1',
         height: '100%',
         borderRadius: 14,
-        border: '1px solid rgba(255,255,255,0.08)',
+        border: '1px solid #E2E8F0',
         background: [
           // warm nebula patch — east
           'radial-gradient(ellipse 180px 90px at 82% 58%, rgba(255,150,110,0.1) 0%, transparent 70%)',
@@ -186,7 +186,7 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
           transform: 'translateX(-50%)',
           fontFamily: 'var(--font-serif)',
           fontSize: 9,
-          color: 'rgba(255,255,255,0.35)',
+          color: '#94A3B8',
           letterSpacing: '0.2em',
         }}
       >N</div>
@@ -198,7 +198,7 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
           transform: 'translateX(-50%)',
           fontFamily: 'var(--font-serif)',
           fontSize: 9,
-          color: 'rgba(255,255,255,0.35)',
+          color: '#94A3B8',
           letterSpacing: '0.2em',
         }}
       >S</div>
@@ -210,7 +210,7 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
           transform: 'translateY(-50%)',
           fontFamily: 'var(--font-serif)',
           fontSize: 9,
-          color: 'rgba(255,255,255,0.35)',
+          color: '#94A3B8',
           letterSpacing: '0.2em',
         }}
       >W</div>
@@ -222,7 +222,7 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
           transform: 'translateY(-50%)',
           fontFamily: 'var(--font-serif)',
           fontSize: 9,
-          color: 'rgba(255,255,255,0.35)',
+          color: '#94A3B8',
           letterSpacing: '0.2em',
         }}
       >E</div>
@@ -233,7 +233,7 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
           style={{
             fontFamily: 'var(--font-serif)',
             fontSize: 9,
-            color: 'rgba(255,255,255,0.45)',
+            color: '#64748B',
             letterSpacing: '0.22em',
           }}
         >
@@ -245,7 +245,7 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
           style={{
             fontFamily: 'var(--font-serif)',
             fontSize: 9,
-            color: 'rgba(255,255,255,0.45)',
+            color: '#64748B',
             letterSpacing: '0.22em',
           }}
         >
@@ -277,7 +277,7 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
               opacity: aboveHorizon ? 1 : 0.35,
               cursor: 'pointer',
               zIndex: isHovered ? 10 : isPrime ? 4 : 2,
-              filter: aboveHorizon ? 'drop-shadow(0 0 8px rgba(255,255,255,0.18))' : 'none',
+              filter: aboveHorizon ? 'drop-shadow(0 0 8px #CBD5E1)' : 'none',
             }}
             aria-label={`Jump to ${mission.name}`}
           >
@@ -312,8 +312,8 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
                   style={{
                     [nearTop ? 'top' : 'bottom']: `calc(100% + 6px)` as never,
                     transform: 'translateX(-50%)',
-                    background: 'rgba(7,11,20,0.92)',
-                    border: '1px solid rgba(255,255,255,0.14)',
+                    background: '#0F172A',
+                    border: '1px solid #334155',
                     borderRadius: 6,
                     padding: '4px 8px',
                     whiteSpace: 'nowrap',
@@ -324,7 +324,7 @@ export default function SkyChart({ lat, lon, date, missions, primeId, city, onSe
                     {mission.name}
                   </div>
                   {magnitude < 50 && (
-                    <div style={{ fontFamily: 'var(--font-serif)', fontSize: 9, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', marginTop: 2 }}>
+                    <div style={{ fontFamily: 'var(--font-serif)', fontSize: 9, color: '#64748B', letterSpacing: '0.1em', marginTop: 2 }}>
                       MAG {magnitude > 0 ? '+' : ''}{magnitude.toFixed(1)}
                     </div>
                   )}

@@ -72,7 +72,7 @@ export default function PrimeHeroCard({ mission, altitude, tagline, onStart, mag
                 style={{
                   fontFamily: 'var(--font-serif)',
                   fontSize: 8,
-                  color: 'rgba(255,255,255,0.3)',
+                  color: '#94A3B8',
                   letterSpacing: '0.1em',
                 }}
               >
@@ -86,7 +86,7 @@ export default function PrimeHeroCard({ mission, altitude, tagline, onStart, mag
               style={{
                 fontFamily: 'var(--font-serif)',
                 fontSize: 8,
-                color: 'rgba(255,255,255,0.3)',
+                color: '#94A3B8',
                 letterSpacing: '0.14em',
                 whiteSpace: 'nowrap',
               }}
@@ -112,7 +112,7 @@ export default function PrimeHeroCard({ mission, altitude, tagline, onStart, mag
           style={{
             fontFamily: 'var(--font-serif)',
             fontSize: 11.5,
-            color: 'rgba(255,255,255,0.5)',
+            color: '#64748B',
             fontStyle: 'italic',
             fontWeight: 400,
             marginTop: 1,
@@ -130,12 +130,12 @@ export default function PrimeHeroCard({ mission, altitude, tagline, onStart, mag
               fontSize: 9,
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.55)',
+              color: '#475569',
             }}
           >
             {magnitude != null && (
               <span>
-                <span style={{ color: 'rgba(255,255,255,0.35)', marginRight: 4 }}>MAG</span>
+                <span style={{ color: '#94A3B8', marginRight: 4 }}>MAG</span>
                 <span style={{ color: '#F2F0EA', fontWeight: 600 }}>
                   {magnitude > 0 ? '+' : ''}{magnitude.toFixed(1)}
                 </span>
@@ -143,7 +143,7 @@ export default function PrimeHeroCard({ mission, altitude, tagline, onStart, mag
             )}
             {azimuth != null && (
               <span>
-                <span style={{ color: 'rgba(255,255,255,0.35)', marginRight: 4 }}>AZ</span>
+                <span style={{ color: '#94A3B8', marginRight: 4 }}>AZ</span>
                 <span style={{ color: '#F2F0EA', fontWeight: 600 }}>
                   {Math.round(azimuth)}°
                 </span>

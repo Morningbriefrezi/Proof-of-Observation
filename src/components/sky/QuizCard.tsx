@@ -142,7 +142,7 @@ export default function QuizCard({
           style={{
             fontFamily: 'var(--font-serif)',
             fontSize: 10.5,
-            color: 'rgba(255,255,255,0.48)',
+            color: '#64748B',
             lineHeight: 1.35,
             marginTop: 1,
           }}
@@ -157,7 +157,7 @@ export default function QuizCard({
                 flex: 1,
                 maxWidth: 120,
                 height: 3,
-                background: 'rgba(255,255,255,0.08)',
+                background: '#E2E8F0',
                 borderRadius: 2,
                 overflow: 'hidden',
               }}
@@ -177,7 +177,7 @@ export default function QuizCard({
           </div>
         ) : isCompleted ? (
           <div className="flex items-center gap-2.5 mt-2">
-            <span style={{ fontFamily: 'var(--font-serif)', fontSize: 9.5, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.05em' }}>
+            <span style={{ fontFamily: 'var(--font-serif)', fontSize: 9.5, color: '#64748B', letterSpacing: '0.05em' }}>
               {totalQuestions} Q · BEST {Math.round((bestPct! / 100) * totalQuestions)}/{totalQuestions}
             </span>
             <span style={{ fontSize: 10, color: '#FFD166', fontWeight: 600 }}>
@@ -186,7 +186,7 @@ export default function QuizCard({
           </div>
         ) : (
           <div className="flex items-center gap-2.5 mt-2">
-            <span style={{ fontFamily: 'var(--font-serif)', fontSize: 9.5, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.05em' }}>
+            <span style={{ fontFamily: 'var(--font-serif)', fontSize: 9.5, color: '#64748B', letterSpacing: '0.05em' }}>
               {totalQuestions} QUESTIONS
             </span>
             <span style={{ fontSize: 10, color: '#FFD166', fontWeight: 600 }}>
@@ -201,13 +201,13 @@ export default function QuizCard({
         style={{
           width: 28,
           height: 28,
-          background: isCompleted ? 'rgba(255,255,255,0.04)' : t.buttonBg,
-          border: `1px solid ${isCompleted ? 'rgba(255,255,255,0.1)' : t.buttonBorder}`,
+          background: isCompleted ? '#F1F5F9' : t.buttonBg,
+          border: `1px solid ${isCompleted ? '#E2E8F0' : t.buttonBorder}`,
           borderRadius: 9,
         }}
       >
         {isCompleted
-          ? <RotateCw size={11} color="rgba(255,255,255,0.6)" />
+          ? <RotateCw size={11} color="#475569" />
           : <Play size={11} fill={t.buttonFill} color={t.buttonFill} />}
       </div>
     </button>

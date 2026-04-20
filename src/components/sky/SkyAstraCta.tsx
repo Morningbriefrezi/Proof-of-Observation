@@ -20,7 +20,7 @@ export default function SkyAstraCta() {
         <span style={{ color: '#818cf8' }}>✦</span>
       </div>
       <div>
-        <p className="text-white text-sm font-semibold">Not sure what to observe?</p>
+        <p className="text-slate-900 text-sm font-semibold">Not sure what to observe?</p>
         <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
           {authenticated ? 'Ask ASTRA for a personalized recommendation →' : 'Explore tonight\'s missions →'}
         </p>

@@ -31,7 +31,7 @@ export default function ObserveCTA() {
         background: 'linear-gradient(135deg, rgba(52,211,153,0.08), rgba(99,102,241,0.04))',
         border: '1px solid rgba(52,211,153,0.2)',
       }}>
-        <p className="text-white font-semibold text-sm mb-1">Clear skies tonight</p>
+        <p className="text-slate-900 font-semibold text-sm mb-1">Clear skies tonight</p>
         <p className="text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>
           Sky Score {score}/100 · {grade} conditions
         </p>
@@ -48,8 +48,8 @@ export default function ObserveCTA() {
 
   return (
     <div className="rounded-2xl p-4 text-center" style={{
-      background: 'rgba(255,255,255,0.02)',
-      border: '1px solid rgba(255,255,255,0.06)',
+      background: '#F8FAFC',
+      border: '1px solid #F1F5F9',
     }}>
       <p className="text-sm mb-1" style={{ color: 'var(--color-text-secondary)' }}>
         Sky conditions are limited tonight

@@ -45,7 +45,7 @@ export default function StatsBar() {
               fontFamily: 'var(--font-serif)',
               fontSize: 10,
               letterSpacing: '0.18em',
-              color: 'rgba(255,255,255,0.45)',
+              color: '#64748B',
               textTransform: 'uppercase',
             }}
           >
@@ -75,7 +75,7 @@ export default function StatsBar() {
             }}
           >
             {count}/{TOTAL}
-            <span style={{ fontFamily: 'var(--font-serif)', fontSize: 9.5, color: 'rgba(255,255,255,0.4)', marginLeft: 4, letterSpacing: '0.12em', textTransform: 'uppercase', fontStyle: 'italic' }}>
+            <span style={{ fontFamily: 'var(--font-serif)', fontSize: 9.5, color: '#64748B', marginLeft: 4, letterSpacing: '0.12em', textTransform: 'uppercase', fontStyle: 'italic' }}>
               obs
             </span>
           </span>
@@ -95,7 +95,7 @@ export default function StatsBar() {
 
       <div
         className="mt-2 h-[2px] rounded-full overflow-hidden"
-        style={{ background: 'rgba(255,255,255,0.06)' }}
+        style={{ background: '#F1F5F9' }}
       >
         <div
           className="h-full rounded-full transition-all duration-700 ease-out"
