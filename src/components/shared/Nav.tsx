@@ -7,7 +7,7 @@ import { useAppState } from '@/hooks/useAppState';
 import { useState, useEffect, useRef } from 'react';
 import {
   CloudSun, ShoppingBag, Satellite, User, Search, BookOpen,
-  Trophy, Map, MessageCircle, Telescope, LogOut, Settings, Gem, TrendingUp,
+  Trophy, Radio, MessageCircle, Telescope, LogOut, Settings, Gem, TrendingUp,
 } from 'lucide-react';
 import AstroLogo from './AstroLogo';
 import { useTranslations } from 'next-intl';
@@ -21,7 +21,7 @@ const SECTIONS = [
       { href: '/markets',     label: 'Markets',        desc: 'Predict tonight\'s sky',   icon: TrendingUp },
       { href: '/missions',    label: 'Missions',       desc: 'Observe & earn Stars',     icon: Satellite },
       { href: '/learn',       label: 'Learning',       desc: 'Planets, quizzes & more',  icon: BookOpen },
-      { href: '/darksky',     label: 'Dark Sky Map',   desc: 'Find dark sky sites',      icon: Map },
+      { href: '/network',     label: 'Network',        desc: 'Observer network + DePIN', icon: Radio },
       { href: '/chat',        label: 'ASTRA AI',       desc: 'Your space companion',     icon: MessageCircle },
     ],
   },

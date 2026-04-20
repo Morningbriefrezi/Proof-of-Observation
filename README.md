@@ -39,6 +39,31 @@ Stellar is a prediction market protocol where the events are in the sky and your
 - **Zero-crypto UX** — email signup via Privy, embedded wallets, gasless transactions
 - **Scientific oracles** — Open-Meteo (weather), NOAA (solar), IMO (meteors), astronomy-engine (celestial mechanics)
 
+## DePIN: Decentralized Sky Observation Infrastructure
+
+Stellar is a DePIN (Decentralized Physical Infrastructure Network) where the physical infrastructure is the night sky and the nodes are human observers with phones and telescopes.
+
+### How it works
+
+Every Stellar user is a node in a decentralized sky observation network:
+
+| Node Type | Hardware | Data Contributed | Reward |
+|---|---|---|---|
+| **Passive** | Smartphone | GPS + timestamp + weather confirmation | 5–25 ✦ |
+| **Observer** | Smartphone + eyes | Verified sky photo, AI-analyzed observation, cNFT proof | 50–250 ✦ |
+| **Advanced** | Telescope + camera | High-resolution captures, Bortle readings, spectral data | 100–500 ✦ |
+
+### Why this is DePIN
+
+1. **The infrastructure is physical.** Each observation comes from a real location, at a real time, verified by GPS + timestamp + AI photo analysis. You cannot fake looking at the sky.
+2. **The network is decentralized.** No central observatory controls the data. Every smartphone with Stellar is a sensor in a global sky monitoring grid. More observers = better coverage = more accurate market resolution.
+3. **Data has economic value.** Observation data directly feeds prediction market resolution. The same data that proves "I saw the Lyrids" also resolves the "Lyrids ZHR > 18" market. Contributors are paid in Stars tokens.
+4. **Proofs are on-chain.** Every observation is sealed as a compressed NFT on Solana (~$0.000005/mint), creating an immutable, timestamped, geolocated record of sky conditions worldwide.
+
+### Network stats
+
+Live at [stellarrclub.vercel.app/network](https://stellarrclub.vercel.app/network) — real-time map of all observer nodes and sky data contributions.
+
 ## Tech Stack
 
 | Layer | Technology |

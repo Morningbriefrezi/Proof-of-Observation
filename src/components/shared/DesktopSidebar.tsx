@@ -6,7 +6,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { useAppState } from '@/hooks/useAppState';
 import {
   CloudSun, Satellite, ShoppingBag, User, BookOpen,
-  Trophy, Map, MessageCircle, Telescope, LogOut, Settings, ChevronRight, Gem, TrendingUp,
+  Trophy, Radio, MessageCircle, Telescope, LogOut, Settings, ChevronRight, Gem, TrendingUp,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -18,7 +18,7 @@ const SECTIONS = [
       { href: '/markets',     label: 'Markets',        icon: TrendingUp },
       { href: '/missions',    label: 'Missions',       icon: Satellite },
       { href: '/learn',       label: 'Learning',       icon: BookOpen },
-      { href: '/darksky',     label: 'Dark Sky Map',   icon: Map },
+      { href: '/network',     label: 'Network',        icon: Radio },
       { href: '/chat',        label: 'ASTRA AI',       icon: MessageCircle },
     ],
   },

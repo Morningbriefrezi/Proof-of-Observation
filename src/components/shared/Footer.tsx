@@ -10,7 +10,7 @@ const columns = [
       { label: 'Sky Forecast',   href: '/sky' },
       { label: 'Markets',        href: '/markets' },
       { label: 'Missions',       href: '/missions' },
-      { label: 'Dark Sky Map',   href: '/darksky' },
+      { label: 'Observer Network', href: '/network' },
       { label: 'ASTRA AI',       href: '/chat' },
     ],
   },

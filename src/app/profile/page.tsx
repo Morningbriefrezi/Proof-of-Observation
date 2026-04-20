@@ -115,6 +115,25 @@ export default function ProfilePage() {
     txId: m.txId ?? null,
   }));
 
+  const nodeType = (() => {
+    if (obsCount >= 5 || completed.length >= 5) {
+      return { type: 'advanced' as const, label: 'Advanced Node', emoji: '🛸',
+        description: 'Telescope-grade contributions + environmental data',
+        color: '#FFD166', reward: '100–500 ✦ per mission',
+        upgradeHint: null };
+    }
+    if (completed.length >= 1 || obsCount >= 1) {
+      return { type: 'observer' as const, label: 'Observer Node', emoji: '🔭',
+        description: 'Verified sky observations with on-chain cNFT proofs',
+        color: '#38F0FF', reward: '50–250 ✦ per mission',
+        upgradeHint: 'Complete 5+ missions or submit a Bortle reading to become Advanced' };
+    }
+    return { type: 'passive' as const, label: 'Passive Node', emoji: '📱',
+      description: 'Weather confirmations + GPS location data',
+      color: '#9CA3AF', reward: '5–25 ✦ per check-in',
+      upgradeHint: 'Complete your first mission to become an Observer' };
+  })();
+
   const shimmer = profileLoaded ? undefined : { animation: 'pulse 1.5s ease-in-out infinite', background: 'rgba(255,255,255,0.06)', borderRadius: 6 };
 
   return (
@@ -209,6 +228,57 @@ export default function ProfilePage() {
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 10, margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em', lineHeight: 1.3 }}>{s.label}</p>
             </div>
           ))}
+        </div>
+
+        {/* — NETWORK STATUS — */}
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <p style={{ color: 'white', fontWeight: 700, fontSize: 16, margin: 0 }}>Network Status</p>
+            <Link href="/network" style={{ color: '#34d399', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
+              View network <ChevronRight size={13} />
+            </Link>
+          </div>
+          <div style={{
+            borderRadius: 18, padding: '18px 20px',
+            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+            display: 'flex', flexDirection: 'column', gap: 12,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 26, lineHeight: 1 }}>{nodeType.emoji}</span>
+              <div style={{ flex: 1 }}>
+                <p style={{ color: nodeType.color, fontWeight: 700, fontSize: 15, margin: 0, letterSpacing: '0.01em' }}>
+                  {nodeType.label}
+                </p>
+                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, margin: '2px 0 0' }}>
+                  {nodeType.description}
+                </p>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+              {[
+                { label: 'Missions', value: String(completed.length) },
+                { label: 'Observations', value: String(obsCount) },
+                { label: 'Earn rate', value: nodeType.reward },
+              ].map(row => (
+                <div key={row.label} style={{
+                  padding: '10px 12px', borderRadius: 12,
+                  background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
+                }}>
+                  <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10, margin: 0, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    {row.label}
+                  </p>
+                  <p style={{ color: 'white', fontWeight: 600, fontSize: 13, margin: '4px 0 0', fontFamily: 'monospace' }}>
+                    {row.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+            {nodeType.upgradeHint && (
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11.5, margin: 0, lineHeight: 1.45 }}>
+                {nodeType.upgradeHint}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* — MY DISCOVERIES — */}

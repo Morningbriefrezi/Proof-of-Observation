@@ -26,6 +26,7 @@ type TabValue = 'all' | 'tonight' | 'week';
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const ONE_WEEK_MS = 7 * ONE_DAY_MS;
+const THIRTY_DAYS_MS = 30 * ONE_DAY_MS;
 
 interface CategoryDef {
   key: MarketCategory;
@@ -106,6 +107,71 @@ function oddsColorClass(yesPct: number): { odds: string; fill: string } {
   return                   { odds: 'stl-odds-lo',  fill: 'stl-fill-lo' };
 }
 
+function urgencyLevel(msToClose: number): 'urgent' | 'hot' | 'distant' | 'normal' {
+  if (msToClose <= 0) return 'normal';
+  if (msToClose <= ONE_DAY_MS) return 'urgent';
+  if (msToClose <= ONE_WEEK_MS) return 'hot';
+  if (msToClose > THIRTY_DAYS_MS) return 'distant';
+  return 'normal';
+}
+
+function categoryPillClass(category: string): string {
+  switch (category) {
+    case 'meteor': return 'stl-cat-pill stl-cat-meteor';
+    case 'solar': return 'stl-cat-pill stl-cat-solar';
+    case 'mission': return 'stl-cat-pill stl-cat-mission';
+    case 'comet': return 'stl-cat-pill stl-cat-comet';
+    case 'discovery': return 'stl-cat-pill stl-cat-discovery';
+    case 'weather':
+    case 'weather_event':
+    case 'natural_phenomenon':
+    case 'sky_event':
+    default:
+      return 'stl-cat-pill stl-cat-weather';
+  }
+}
+
+function categoryLabel(category: string): string {
+  switch (category) {
+    case 'meteor': return 'Meteor';
+    case 'solar': return 'Solar';
+    case 'mission': return 'Mission';
+    case 'comet': return 'Comet';
+    case 'discovery': return 'Discovery';
+    case 'weather': return 'Weather';
+    case 'weather_event': return 'Weather';
+    case 'natural_phenomenon': return 'Phenom';
+    case 'sky_event': return 'Sky';
+    default: return category.slice(0, 8).toUpperCase();
+  }
+}
+
+/** Shorten long resolution source strings to a compact oracle badge. */
+function oracleBadge(src: string | undefined): string | null {
+  if (!src) return null;
+  const s = src.toLowerCase();
+  if (s.includes('imo') || s.includes('international meteor')) return 'IMO live';
+  if (s.includes('swpc') || s.includes('noaa space weather')) return 'NOAA SWPC';
+  if (s.includes('noaa')) return 'NOAA';
+  if (s.includes('open-meteo')) return 'Open-Meteo';
+  if (s.includes('nasa') && s.includes('spacex')) return 'NASA / SpaceX';
+  if (s.includes('nasa')) return 'NASA';
+  if (s.includes('spacex')) return 'SpaceX';
+  if (s.includes('mpc') || s.includes('minor planet')) return 'MPC';
+  if (s.includes('cobs')) return 'COBS';
+  if (s.includes('ams ') || s.includes('american meteor')) return 'AMS';
+  if (s.includes('jpl') || s.includes('horizons')) return 'NASA JPL';
+  if (s.includes('gcn') || s.includes('ligo')) return 'LIGO / GCN';
+  if (s.includes('jwst')) return 'JWST team';
+  if (s.includes('nobel')) return 'Nobel cttee';
+  if (s.includes('gaia')) return 'ESA Gaia';
+  if (s.includes('laser seti') || s.includes('seti')) return 'SETI';
+  if (s.includes('esa')) return 'ESA';
+  if (s.includes('cnsa') || s.includes('chang')) return 'CNSA';
+  if (s.includes('colosseum')) return 'Colosseum';
+  return null;
+}
+
 export default function MarketsPage() {
   const router = useRouter();
   const program = useReadOnlyProgram();
@@ -153,6 +219,15 @@ export default function MarketsPage() {
       cancelled = true;
     };
   }, [program]);
+
+  // Hero: 3 markets closest to closing (open only)
+  const heroMarkets = useMemo(() => {
+    const now = Date.now();
+    return markets
+      .filter((m) => m.status === 'open' && m.metadata.closeTime.getTime() > now)
+      .sort((a, b) => a.metadata.closeTime.getTime() - b.metadata.closeTime.getTime())
+      .slice(0, 3);
+  }, [markets]);
 
   // Visible set after tab filter (tonight / week / all)
   const visible = useMemo(() => {
@@ -231,11 +306,6 @@ export default function MarketsPage() {
           <SkyMapHeader markets={markets} advantageByMarketId={advantageByMarketId} />
         )}
 
-        {/* Recently resolved strip */}
-        {!loading && markets.length > 0 && (
-          <RecentlyResolved markets={markets} />
-        )}
-
         {/* Summary stat grid */}
         {!loading && markets.length > 0 && (
           <div className="stl-summary-grid">
@@ -259,6 +329,28 @@ export default function MarketsPage() {
               </span>
             </div>
           </div>
+        )}
+
+        {/* Hero: 3 closest-to-closing markets */}
+        {!loading && heroMarkets.length > 0 && (
+          <section className="flex flex-col">
+            <div className="stl-hero-kicker">Closing soon — trade now</div>
+            <div className="stl-hero-grid">
+              {heroMarkets.map((m) => (
+                <HeroCard
+                  key={m.onChain.marketId}
+                  market={m}
+                  advantage={!!advantageByMarketId[m.onChain.marketId]}
+                  onClick={() => router.push(`/markets/${m.onChain.marketId}`)}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Recently resolved strip */}
+        {!loading && markets.length > 0 && (
+          <RecentlyResolved markets={markets} />
         )}
 
         {/* Tab bar */}
@@ -350,7 +442,7 @@ export default function MarketsPage() {
             {grouped.map(({ def, items }) => (
               <section key={def.key} style={{ display: 'flex', flexDirection: 'column' }}>
                 <header className="stl-cat-header">
-                  <span style={{ fontSize: 13, opacity: 0.7 }}>{def.emoji}</span>
+                  <span style={{ fontSize: 13, opacity: 0.7, width: 20, display: 'inline-block' }}>{def.emoji}</span>
                   <span className="stl-cat-name">{def.label}</span>
                   <span className="stl-cat-count">({items.length})</span>
                 </header>
@@ -373,6 +465,62 @@ export default function MarketsPage() {
   );
 }
 
+interface HeroCardProps {
+  market: Market;
+  advantage: boolean;
+  onClick: () => void;
+}
+
+function HeroCard({ market, advantage, onClick }: HeroCardProps) {
+  const yesPct = Math.round(market.impliedYesOdds * 100);
+  const msToClose = market.metadata.closeTime.getTime() - Date.now();
+  const urgency = urgencyLevel(msToClose);
+  const colors = oddsColorClass(yesPct);
+  const pillClass = categoryPillClass(market.metadata.category);
+  const pillLabel = categoryLabel(market.metadata.category);
+
+  const cardClass = [
+    'stl-hero-card',
+    urgency === 'urgent' ? 'urgent' : urgency === 'hot' ? 'hot' : '',
+  ].filter(Boolean).join(' ');
+
+  const timeClass = [
+    'stl-hero-time',
+    urgency === 'urgent' ? 'urgent' : urgency === 'hot' ? 'hot' : '',
+  ].filter(Boolean).join(' ');
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      className={cardClass}
+    >
+      <div className="stl-hero-top">
+        <span className={pillClass}>{pillLabel}</span>
+        <span className={timeClass}>closes {formatCountdown(msToClose)}</span>
+      </div>
+      <h3 className="stl-hero-title">{market.metadata.title}</h3>
+      <div className="stl-hero-odds-row">
+        <span className={`stl-hero-odds ${colors.odds}`}>{yesPct}%</span>
+        <div className="stl-hero-bar" aria-hidden>
+          <div className={`stl-hero-fill ${colors.fill}`} style={{ width: `${yesPct}%` }} />
+        </div>
+      </div>
+      <div className="stl-hero-foot">
+        <span>{formatVolume(market.onChain.totalStaked)} staked</span>
+        {advantage && <span className="stl-hero-adv">🔭 1.5×</span>}
+      </div>
+    </div>
+  );
+}
+
 interface RowProps {
   market: Market;
   advantage: boolean;
@@ -386,11 +534,19 @@ function MarketRow({ market, advantage, onClick }: RowProps) {
   const yesPct = Math.round(market.impliedYesOdds * 100);
   const volume = market.onChain.totalStaked;
   const now = Date.now();
-  const countdown = formatCountdown(market.metadata.closeTime.getTime() - now);
+  const msToClose = market.metadata.closeTime.getTime() - now;
+  const countdown = formatCountdown(msToClose);
   const colors = oddsColorClass(yesPct);
+  const urgency = urgencyLevel(msToClose);
+  const oracle = oracleBadge(market.metadata.resolutionSource);
 
   const isResolvedYes = resolved && market.onChain.outcome === 'yes';
   const isResolvedNo = resolved && market.onChain.outcome === 'no';
+
+  const timeClass = [
+    'stl-row-obs-time',
+    urgency === 'urgent' ? 'urgent' : urgency === 'distant' ? 'distant' : '',
+  ].filter(Boolean).join(' ');
 
   return (
     <div
@@ -407,21 +563,30 @@ function MarketRow({ market, advantage, onClick }: RowProps) {
       id={`market-${market.onChain.marketId}`}
     >
       <span className="stl-row-obs-emoji" aria-hidden>{emoji}</span>
-      <span className="stl-row-obs-title">
-        {advantage && !resolved && (
-          <span className="stl-adv-badge" title="Observer advantage — 1.5× payout">
-            🔭 1.5×
+      <span className="stl-row-obs-title-wrap">
+        <span className="stl-row-obs-title">{market.metadata.title}</span>
+        {!resolved && !cancelled && (oracle || advantage) && (
+          <span className="stl-row-obs-meta">
+            {oracle && <span className="stl-oracle-src">{oracle}</span>}
+            {advantage && <span className="stl-row-adv">🔭 1.5×</span>}
           </span>
         )}
-        {market.metadata.title}
       </span>
       <span className="stl-row-obs-right">
         {resolved ? (
-          <span
-            className={`stl-resolved-tag ${isResolvedYes ? 'stl-resolved-yes' : isResolvedNo ? 'stl-resolved-no' : ''}`}
-          >
-            {isResolvedYes ? '✓ YES' : isResolvedNo ? '✗ NO' : '⟳'}
-          </span>
+          <>
+            <span
+              className={`stl-resolved-tag ${isResolvedYes ? 'stl-resolved-yes' : isResolvedNo ? 'stl-resolved-no' : ''}`}
+            >
+              {isResolvedYes ? '✓ YES' : isResolvedNo ? '✗ NO' : '⟳'}
+            </span>
+            <span
+              className="stl-row-obs-time"
+              style={{ color: isResolvedYes ? 'rgba(52,211,153,0.55)' : 'rgba(244,114,182,0.55)' }}
+            >
+              done
+            </span>
+          </>
         ) : cancelled ? (
           <span className="stl-resolved-tag" style={{ color: 'var(--stl-text-dim)' }}>
             ⟳ CANCELLED
@@ -433,7 +598,7 @@ function MarketRow({ market, advantage, onClick }: RowProps) {
               <div className={`stl-prob-fill ${colors.fill}`} style={{ width: `${yesPct}%` }} />
             </div>
             <span className="stl-row-obs-vol">{formatVolume(volume)} ✦</span>
-            <span className="stl-row-obs-time">{countdown}</span>
+            <span className={timeClass}>{countdown}</span>
           </>
         )}
       </span>

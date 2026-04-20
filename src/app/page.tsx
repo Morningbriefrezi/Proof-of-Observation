@@ -7,7 +7,6 @@ import Link from 'next/link';
 
 import { useTranslations } from 'next-intl';
 import HomeSkyPreview from '@/components/home/HomeSkyPreview';
-import TonightMarkets from '@/components/markets/TonightMarkets';
 import PageContainer from '@/components/layout/PageContainer';
 import { usePrivy } from '@privy-io/react-auth';
 import { useAppState } from '@/hooks/useAppState';
@@ -628,8 +627,49 @@ export default function HomePage() {
       {/* Remaining sections */}
       <PageContainer variant="wide" className="pt-4 pb-8 sm:pb-12 flex flex-col gap-4 animate-page-enter">
 
-        {/* Tonight's Markets */}
-        <TonightMarkets />
+        {/* Markets CTA — single line linking to the observatory */}
+        <Link
+          href="/markets"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '14px 18px',
+            borderRadius: 12,
+            background: 'var(--stl-bg-surface)',
+            border: '1px solid var(--stl-border-regular)',
+            textDecoration: 'none',
+            transition: 'border-color 0.15s ease, background 0.15s ease',
+          }}
+          onMouseOver={e => {
+            (e.currentTarget as HTMLElement).style.borderColor = 'var(--stl-border-strong)';
+            (e.currentTarget as HTMLElement).style.background = 'var(--stl-bg-elevated)';
+          }}
+          onMouseOut={e => {
+            (e.currentTarget as HTMLElement).style.borderColor = 'var(--stl-border-regular)';
+            (e.currentTarget as HTMLElement).style.background = 'var(--stl-bg-surface)';
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <span
+              className="stl-mono-kicker"
+              style={{ color: 'var(--stl-text-dim)', fontSize: 9, letterSpacing: '0.2em' }}
+            >
+              Observatory Logbook
+            </span>
+            <span
+              style={{
+                fontFamily: 'var(--font-serif)',
+                fontSize: 15,
+                fontWeight: 500,
+                color: 'var(--stl-text-bright)',
+              }}
+            >
+              Browse 30 cosmic prediction markets
+            </span>
+          </div>
+          <span style={{ color: 'var(--stl-gold)', fontSize: 16 }}>→</span>
+        </Link>
 
         {/* Tonight's Sky Preview Strip */}
         <div style={{

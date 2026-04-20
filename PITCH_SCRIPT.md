@@ -48,6 +48,11 @@
 2. Stars is a real SPL token verified on Explorer — not localStorage points
 3. Market settlement is trustless — the contract pays winners automatically"
 
+## DePIN Angle (15 seconds)
+[Screen: /network page with map + stats]
+
+"Stellar is also a DePIN. Every user is a node in a decentralized sky observation network. Their smartphones and telescopes are the physical infrastructure. The data they contribute — verified observations, Bortle readings, weather confirmations — feeds directly into market resolution. More observers means better data, better markets, better predictions. The network grows itself."
+
 ## The Moat (15 seconds)
 [Screen: Flywheel diagram]
 
