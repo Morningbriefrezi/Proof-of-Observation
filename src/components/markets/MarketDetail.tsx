@@ -216,7 +216,7 @@ export default function MarketDetail({
           fontSize: 30,
           lineHeight: 1.18,
           fontWeight: 600,
-          color: '#F2F0EA',
+          color: 'var(--stl-text-bright)',
           letterSpacing: '-0.01em',
           margin: 0,
         }}
@@ -254,7 +254,7 @@ export default function MarketDetail({
                 fontFamily: 'var(--font-serif)',
                 fontSize: 14,
                 fontWeight: 600,
-                color: '#FFD166',
+                color: 'var(--stl-gold)',
                 margin: 0,
               }}
             >
@@ -430,7 +430,7 @@ export default function MarketDetail({
                   fontFamily: 'var(--font-display)',
                   fontSize: 14,
                   fontWeight: 600,
-                  color: '#F2F0EA',
+                  color: 'var(--stl-text-bright)',
                   margin: 0,
                 }}
               >
@@ -528,7 +528,7 @@ export default function MarketDetail({
               style={{
                 fontFamily: 'var(--font-mono)',
                 fontSize: 12,
-                color: '#F2F0EA',
+                color: 'var(--stl-text-bright)',
                 marginTop: 4,
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -565,9 +565,9 @@ export default function MarketDetail({
 
 function StatusBadge({ status }: { status: DerivedStatus }) {
   const meta = {
-    open: { label: 'Open', dot: '#34D399' },
+    open: { label: 'Open', dot: 'var(--stl-green)' },
     locked: { label: 'Locked', dot: '#FBBF24' },
-    resolved: { label: 'Resolved', dot: '#FFD166' },
+    resolved: { label: 'Resolved', dot: 'var(--stl-gold)' },
     cancelled: { label: 'Cancelled', dot: '#94A3B8' },
   }[status.kind];
   return (
@@ -614,7 +614,7 @@ function Banner({
     emerald: {
       bg: 'rgba(52,211,153,0.10)',
       border: 'rgba(52,211,153,0.3)',
-      color: '#34D399',
+      color: 'var(--stl-green)',
     },
     rose: {
       bg: 'rgba(244,114,182,0.10)',
@@ -706,7 +706,7 @@ function DetailRow({
         style={{
           fontFamily: mono ? 'var(--font-mono)' : 'var(--font-display)',
           fontSize: mono ? 12 : 13,
-          color: '#F2F0EA',
+          color: 'var(--stl-text-bright)',
           margin: '4px 0 0',
           lineHeight: 1.4,
           fontVariantNumeric: mono ? 'tabular-nums' : undefined,

@@ -47,7 +47,7 @@ interface Row {
 }
 
 const CATEGORY_META: Record<string, { label: string; color: string; bg: string; border: string; emoji: string }> = {
-  sky_event: { label: 'SKY', color: '#FFD166', bg: 'rgba(255,209,102,0.12)', border: 'rgba(255,209,102,0.25)', emoji: '🔭' },
+  sky_event: { label: 'SKY', color: 'var(--stl-gold)', bg: 'rgba(255,209,102,0.12)', border: 'rgba(255,209,102,0.25)', emoji: '🔭' },
   weather_event: { label: 'WEATHER', color: '#5EEAD4', bg: 'rgba(94,234,212,0.10)', border: 'rgba(94,234,212,0.25)', emoji: '🌧' },
   natural_phenomenon: { label: 'NATURE', color: '#C4B5FD', bg: 'rgba(196,181,253,0.10)', border: 'rgba(196,181,253,0.25)', emoji: '⚡' },
 };
@@ -253,7 +253,7 @@ export default function MyPositionsPage() {
       <PageTransition>
         <PageContainer variant="wide" className="py-3 sm:py-6 flex flex-col gap-5">
           <header className="flex flex-col gap-1.5">
-            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 38, lineHeight: 1.05, fontWeight: 600, color: '#F2F0EA', letterSpacing: '-0.012em', margin: 0 }}>
+            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 38, lineHeight: 1.05, fontWeight: 600, color: 'var(--stl-text-bright)', letterSpacing: '-0.012em', margin: 0 }}>
               My Positions
             </h1>
           </header>
@@ -262,7 +262,7 @@ export default function MyPositionsPage() {
             style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
           >
             <span style={{ fontSize: 28, opacity: 0.6 }}>✦</span>
-            <p style={{ fontFamily: 'var(--font-serif)', fontSize: 17, color: '#F2F0EA', margin: 0 }}>Sign in to see your positions</p>
+            <p style={{ fontFamily: 'var(--font-serif)', fontSize: 17, color: 'var(--stl-text-bright)', margin: 0 }}>Sign in to see your positions</p>
             <button
               onClick={login}
               style={{
@@ -270,7 +270,7 @@ export default function MyPositionsPage() {
                 padding: '9px 16px',
                 borderRadius: 8,
                 border: '1px solid rgba(255,209,102,0.5)',
-                background: '#FFD166',
+                background: 'var(--stl-gold)',
                 color: '#0a0a0a',
                 fontFamily: 'var(--font-mono)',
                 fontSize: 12,
@@ -292,7 +292,7 @@ export default function MyPositionsPage() {
     <PageTransition>
       <PageContainer variant="wide" className="py-3 sm:py-6 flex flex-col gap-5">
         <header className="flex flex-col gap-1.5">
-          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 38, lineHeight: 1.05, fontWeight: 600, color: '#F2F0EA', letterSpacing: '-0.012em', margin: 0 }}>
+          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 38, lineHeight: 1.05, fontWeight: 600, color: 'var(--stl-text-bright)', letterSpacing: '-0.012em', margin: 0 }}>
             My Positions
           </h1>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.04em', margin: 0 }}>
@@ -335,14 +335,14 @@ export default function MyPositionsPage() {
             style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
           >
             <span style={{ fontSize: 28, opacity: 0.6 }}>✦</span>
-            <p style={{ fontFamily: 'var(--font-serif)', fontSize: 17, color: '#F2F0EA', margin: 0 }}>No positions yet</p>
+            <p style={{ fontFamily: 'var(--font-serif)', fontSize: 17, color: 'var(--stl-text-bright)', margin: 0 }}>No positions yet</p>
             <Link
               href="/markets"
               style={{
                 padding: '8px 14px',
                 borderRadius: 8,
                 border: '1px solid rgba(255,209,102,0.5)',
-                background: '#FFD166',
+                background: 'var(--stl-gold)',
                 color: '#0a0a0a',
                 fontFamily: 'var(--font-mono)',
                 fontSize: 12,
@@ -399,7 +399,7 @@ function Stat({ label, value, accent = false }: { label: string; value: string; 
         style={{
           fontFamily: 'var(--font-serif)',
           fontSize: 22,
-          color: accent ? '#FFD166' : '#F2F0EA',
+          color: accent ? 'var(--stl-gold)' : 'var(--stl-text-bright)',
           fontVariantNumeric: 'tabular-nums',
           letterSpacing: '-0.01em',
         }}
@@ -411,8 +411,8 @@ function Stat({ label, value, accent = false }: { label: string; value: string; 
 }
 
 const BUCKET_META: Record<Bucket, { label: string; color: string; bg: string; border: string }> = {
-  won:     { label: 'Won',     color: '#FFD166', bg: 'rgba(255,209,102,0.12)', border: 'rgba(255,209,102,0.30)' },
-  active:  { label: 'Active',  color: '#34D399', bg: 'rgba(52,211,153,0.10)',  border: 'rgba(52,211,153,0.25)' },
+  won:     { label: 'Won',     color: 'var(--stl-gold)', bg: 'rgba(255,209,102,0.12)', border: 'rgba(255,209,102,0.30)' },
+  active:  { label: 'Active',  color: 'var(--stl-green)', bg: 'rgba(52,211,153,0.10)',  border: 'rgba(52,211,153,0.25)' },
   lost:    { label: 'Lost',    color: '#F472B6', bg: 'rgba(244,114,182,0.10)', border: 'rgba(244,114,182,0.25)' },
   claimed: { label: 'Claimed', color: '#94A3B8', bg: 'rgba(148,163,184,0.10)', border: 'rgba(148,163,184,0.25)' },
 };
@@ -508,7 +508,7 @@ function PositionRow({
         style={{
           fontFamily: 'var(--font-serif)',
           fontSize: 16,
-          color: '#F2F0EA',
+          color: 'var(--stl-text-bright)',
           fontWeight: 600,
           lineHeight: 1.25,
           letterSpacing: '-0.005em',
@@ -533,7 +533,7 @@ function PositionRow({
               fontSize: 10,
               fontWeight: 700,
               letterSpacing: '0.14em',
-              color: isYes ? '#34D399' : '#F472B6',
+              color: isYes ? 'var(--stl-green)' : '#F472B6',
               background: isYes ? 'rgba(52,211,153,0.10)' : 'rgba(244,114,182,0.10)',
               border: `1px solid ${isYes ? 'rgba(52,211,153,0.25)' : 'rgba(244,114,182,0.25)'}`,
               borderRadius: 4,
@@ -559,7 +559,7 @@ function PositionRow({
               style={{
                 fontFamily: 'var(--font-mono)',
                 fontSize: 12,
-                color: '#FFD166',
+                color: 'var(--stl-gold)',
                 fontVariantNumeric: 'tabular-nums',
               }}
             >
@@ -587,7 +587,7 @@ function PositionRow({
               padding: '8px 14px',
               borderRadius: 8,
               border: '1px solid rgba(255,209,102,0.5)',
-              background: '#FFD166',
+              background: 'var(--stl-gold)',
               color: '#0a0a0a',
               fontFamily: 'var(--font-mono)',
               fontSize: 12,
@@ -616,7 +616,7 @@ function PositionRow({
               {' · '}
               <a
                 href="#redeem"
-                style={{ color: '#FFD166', textDecoration: 'underline' }}
+                style={{ color: 'var(--stl-gold)', textDecoration: 'underline' }}
               >
                 Redeem Stars for telescope gear →
               </a>
@@ -646,7 +646,7 @@ function ObserverAdvantageBadge({
         fontSize: compact ? 9.5 : 10.5,
         fontWeight: 700,
         letterSpacing: '0.08em',
-        color: '#FFD166',
+        color: 'var(--stl-gold)',
         background: 'rgba(255,209,102,0.10)',
         border: '1px solid rgba(255,209,102,0.32)',
         borderRadius: 999,
@@ -679,14 +679,14 @@ function ClaimResultCard({ result }: { result: ClaimResult }) {
           <span>Base payout</span>
           <span style={{ fontVariantNumeric: 'tabular-nums' }}>{fmtInt(base)} ✦</span>
         </div>
-        <div className="flex items-center justify-between" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#FFD166' }}>
+        <div className="flex items-center justify-between" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--stl-gold)' }}>
           <span>Observer bonus (1.5×)</span>
           <span style={{ fontVariantNumeric: 'tabular-nums' }}>+{fmtInt(bonus)} ✦</span>
         </div>
         <div
           style={{ height: 1, background: 'rgba(255,209,102,0.2)', margin: '2px 0' }}
         />
-        <div className="flex items-center justify-between" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#FFD166', fontWeight: 700 }}>
+        <div className="flex items-center justify-between" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--stl-gold)', fontWeight: 700 }}>
           <span>Total</span>
           <span style={{ fontVariantNumeric: 'tabular-nums' }}>{fmtInt(total)} ✦</span>
         </div>
@@ -712,7 +712,7 @@ function ClaimResultCard({ result }: { result: ClaimResult }) {
         border: '1px solid rgba(255,255,255,0.08)',
       }}
     >
-      <div className="flex items-center justify-between" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#FFD166', fontWeight: 700 }}>
+      <div className="flex items-center justify-between" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--stl-gold)', fontWeight: 700 }}>
         <span>Claimed</span>
         <span style={{ fontVariantNumeric: 'tabular-nums' }}>{fmtInt(total)} ✦</span>
       </div>
@@ -726,7 +726,7 @@ function ClaimResultCard({ result }: { result: ClaimResult }) {
         }}
       >
         💡 Complete a related sky mission next time for 1.5× payout —{' '}
-        <Link href="/missions" style={{ color: '#FFD166', textDecoration: 'underline' }}>
+        <Link href="/missions" style={{ color: 'var(--stl-gold)', textDecoration: 'underline' }}>
           start a mission →
         </Link>
       </p>
@@ -833,7 +833,7 @@ function RedeemSection({
             style={{
               fontFamily: 'var(--font-serif)',
               fontSize: 20,
-              color: '#F2F0EA',
+              color: 'var(--stl-text-bright)',
               margin: 0,
               letterSpacing: '-0.005em',
             }}
@@ -861,7 +861,7 @@ function RedeemSection({
           style={{
             fontFamily: 'var(--font-mono)',
             fontSize: 10,
-            color: '#FFD166',
+            color: 'var(--stl-gold)',
             textDecoration: 'underline',
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
@@ -889,7 +889,7 @@ function RedeemSection({
                 style={{
                   fontFamily: 'var(--font-mono)',
                   fontSize: 10,
-                  color: unlocked ? '#FFD166' : 'rgba(255,255,255,0.5)',
+                  color: unlocked ? 'var(--stl-gold)' : 'rgba(255,255,255,0.5)',
                   letterSpacing: '0.14em',
                   fontWeight: 700,
                 }}
@@ -900,7 +900,7 @@ function RedeemSection({
                 style={{
                   fontFamily: 'var(--font-serif)',
                   fontSize: 14,
-                  color: '#F2F0EA',
+                  color: 'var(--stl-text-bright)',
                   lineHeight: 1.3,
                 }}
               >
@@ -924,7 +924,7 @@ function RedeemSection({
                   padding: '8px 12px',
                   borderRadius: 8,
                   border: `1px solid ${unlocked ? 'rgba(255,209,102,0.5)' : 'rgba(255,255,255,0.08)'}`,
-                  background: unlocked ? '#FFD166' : 'rgba(255,255,255,0.04)',
+                  background: unlocked ? 'var(--stl-gold)' : 'rgba(255,255,255,0.04)',
                   color: unlocked ? '#0a0a0a' : 'rgba(255,255,255,0.5)',
                   fontFamily: 'var(--font-mono)',
                   fontSize: 11,
@@ -981,7 +981,7 @@ function RedeemSection({
                 fontFamily: 'var(--font-mono)',
                 fontSize: 10,
                 letterSpacing: '0.14em',
-                color: '#FFD166',
+                color: 'var(--stl-gold)',
                 textTransform: 'uppercase',
               }}
             >
@@ -995,7 +995,7 @@ function RedeemSection({
                 style={{
                   fontFamily: 'var(--font-mono)',
                   fontSize: 14,
-                  color: '#FFD166',
+                  color: 'var(--stl-gold)',
                   letterSpacing: '0.04em',
                   wordBreak: 'break-all',
                 }}
@@ -1008,7 +1008,7 @@ function RedeemSection({
                   padding: '6px 10px',
                   borderRadius: 6,
                   border: '1px solid rgba(255,209,102,0.5)',
-                  background: copied ? '#34D399' : '#FFD166',
+                  background: copied ? 'var(--stl-green)' : 'var(--stl-gold)',
                   color: '#0a0a0a',
                   fontFamily: 'var(--font-mono)',
                   fontSize: 10,
@@ -1046,7 +1046,7 @@ function RedeemSection({
                   padding: '8px 14px',
                   borderRadius: 8,
                   border: '1px solid rgba(255,209,102,0.5)',
-                  background: '#FFD166',
+                  background: 'var(--stl-gold)',
                   color: '#0a0a0a',
                   fontFamily: 'var(--font-mono)',
                   fontSize: 11,

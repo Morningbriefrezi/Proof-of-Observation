@@ -119,7 +119,7 @@ export default function ProfilePage() {
     if (obsCount >= 5 || completed.length >= 5) {
       return { type: 'advanced' as const, label: 'Advanced Node', emoji: '🛸',
         description: 'Telescope-grade contributions + environmental data',
-        color: '#FFD166', reward: '100–500 ✦ per mission',
+        color: 'var(--stl-gold)', reward: '100–500 ✦ per mission',
         upgradeHint: null };
     }
     if (completed.length >= 1 || obsCount >= 1) {
@@ -212,8 +212,8 @@ export default function ProfilePage() {
         {/* — STATS ROW — */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 28 }}>
           {[
-            { value: `★ ${starsDisplay.toLocaleString()}`, label: 'Stars Earned', color: '#FFD166' },
-            { value: String(completed.length), label: 'Missions Done', color: '#34d399' },
+            { value: `★ ${starsDisplay.toLocaleString()}`, label: 'Stars Earned', color: 'var(--stl-gold)' },
+            { value: String(completed.length), label: 'Missions Done', color: 'var(--stl-green)' },
             { value: starsDisplay > 0 ? `~${gelWorth}₾` : String(obsCount), label: starsDisplay > 0 ? 'Store Value' : 'NFTs Minted', color: '#818cf8' },
           ].map(s => (
             <div key={s.label} style={{
@@ -234,7 +234,7 @@ export default function ProfilePage() {
         <div style={{ marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
             <p style={{ color: 'white', fontWeight: 700, fontSize: 16, margin: 0 }}>Network Status</p>
-            <Link href="/network" style={{ color: '#34d399', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Link href="/network" style={{ color: 'var(--stl-green)', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
               View network <ChevronRight size={13} />
             </Link>
           </div>
@@ -285,7 +285,7 @@ export default function ProfilePage() {
         <div style={{ marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
             <p style={{ color: 'white', fontWeight: 700, fontSize: 16, margin: 0 }}>My Discoveries</p>
-            <Link href="/missions" style={{ color: '#34d399', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Link href="/missions" style={{ color: 'var(--stl-green)', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
               View all <ChevronRight size={13} />
             </Link>
           </div>
@@ -326,7 +326,7 @@ export default function ProfilePage() {
                         style={{
                           display: 'inline-block', padding: '3px 8px', borderRadius: 20,
                           background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)',
-                          color: '#34d399', fontSize: 10, fontWeight: 600, textDecoration: 'none',
+                          color: 'var(--stl-green)', fontSize: 10, fontWeight: 600, textDecoration: 'none',
                         }}
                       >
                         On-chain Proof

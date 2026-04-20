@@ -136,7 +136,7 @@ export default function BetForm({
         <SideButton
           label="YES"
           active={side === 'yes'}
-          color="#34D399"
+          color="var(--stl-green)"
           activeBg="rgba(52,211,153,0.14)"
           activeBorder="rgba(52,211,153,0.5)"
           onClick={() => setSide('yes')}
@@ -176,7 +176,7 @@ export default function BetForm({
             disabled={locked || submitting}
             style={{
               background: 'transparent',
-              color: '#F2F0EA',
+              color: 'var(--stl-text-bright)',
               fontFamily: 'var(--font-mono)',
               fontSize: 18,
               fontVariantNumeric: 'tabular-nums',
@@ -188,7 +188,7 @@ export default function BetForm({
           />
           <span
             style={{
-              color: '#FFD166',
+              color: 'var(--stl-gold)',
               fontFamily: 'var(--font-mono)',
               fontSize: 14,
               marginLeft: 8,
@@ -260,7 +260,7 @@ export default function BetForm({
             style={{
               fontFamily: 'var(--font-mono)',
               fontSize: 16,
-              color: '#F2F0EA',
+              color: 'var(--stl-text-bright)',
               fontVariantNumeric: 'tabular-nums',
             }}
           >
@@ -396,7 +396,7 @@ function primaryBtnStyle(disabled: boolean): React.CSSProperties {
   return {
     padding: '12px 14px',
     borderRadius: 8,
-    background: disabled ? 'rgba(255,209,102,0.25)' : '#FFD166',
+    background: disabled ? 'rgba(255,209,102,0.25)' : 'var(--stl-gold)',
     color: disabled ? 'rgba(0,0,0,0.55)' : '#0a0a0a',
     fontFamily: 'var(--font-mono)',
     fontSize: 13,

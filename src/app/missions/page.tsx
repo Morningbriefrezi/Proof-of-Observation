@@ -118,7 +118,7 @@ export default function MissionsPage() {
               <TelescopeIcon size={28} animate />
               <span
                 className="absolute -top-1 -right-1 text-[10px] leading-none"
-                style={{ color: '#FFD166', textShadow: '0 0 6px rgba(255,209,102,0.6)' }}
+                style={{ color: 'var(--stl-gold)', textShadow: '0 0 6px rgba(255,209,102,0.6)' }}
               >✦</span>
             </div>
             <div className="flex-1 min-w-0">
@@ -228,7 +228,7 @@ export default function MissionsPage() {
                   style={{
                     fontFamily: 'var(--font-serif)',
                     fontSize: 24,
-                    color: '#F2F0EA',
+                    color: 'var(--stl-text-bright)',
                     fontWeight: 600,
                     margin: 0,
                     letterSpacing: '-0.01em',
@@ -264,7 +264,7 @@ export default function MissionsPage() {
               className="flex items-center gap-1 px-2.5 py-1.5 rounded-full"
               style={{ background: 'rgba(255,209,102,0.08)', border: '1px solid rgba(255,209,102,0.2)' }}
             >
-              <span style={{ fontSize: 11, color: '#FFD166', fontWeight: 600 }}>
+              <span style={{ fontSize: 11, color: 'var(--stl-gold)', fontWeight: 600 }}>
                 ✦ {quizStarsEarned}
               </span>
             </div>
@@ -549,7 +549,7 @@ function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
             style={{
               fontFamily: 'var(--font-serif)',
               fontSize: 20,
-              color: '#F2F0EA',
+              color: 'var(--stl-text-bright)',
               fontWeight: 600,
               margin: 0,
             }}
@@ -578,7 +578,7 @@ function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
                       fontSize: 13,
                       fontWeight: active ? 600 : 400,
                       fontStyle: active ? 'normal' : 'italic',
-                      color: active ? '#F2F0EA' : 'rgba(255,255,255,0.5)',
+                      color: active ? 'var(--stl-text-bright)' : 'rgba(255,255,255,0.5)',
                       letterSpacing: '0.005em',
                       transition: 'color 0.2s ease',
                     }}
@@ -590,7 +590,7 @@ function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
                       fontFamily: 'var(--font-mono)',
                       fontSize: 10,
                       fontWeight: 500,
-                      color: active ? '#FFD166' : 'rgba(255,255,255,0.35)',
+                      color: active ? 'var(--stl-gold)' : 'rgba(255,255,255,0.35)',
                       letterSpacing: '0.02em',
                       transition: 'color 0.2s ease',
                     }}
@@ -628,7 +628,7 @@ function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
             const disabled = isDone || !status?.aboveHorizon;
 
             const badge = isPrime
-              ? { label: 'PRIME', color: '#FFD166', bg: 'rgba(255,209,102,0.15)' }
+              ? { label: 'PRIME', color: 'var(--stl-gold)', bg: 'rgba(255,209,102,0.15)' }
               : status && !status.aboveHorizon
               ? { label: 'HIDDEN', color: 'rgba(255,255,255,0.5)', bg: 'rgba(255,255,255,0.06)' }
               : status && status.altitude < 20
@@ -710,7 +710,7 @@ function MissionGridCard({
               style={{
                 fontFamily: 'var(--font-serif)',
                 fontSize: isPrime ? 16 : 14,
-                color: '#F2F0EA',
+                color: 'var(--stl-text-bright)',
                 fontWeight: 600,
                 lineHeight: 1.1,
                 letterSpacing: '-0.005em',
@@ -790,7 +790,7 @@ function MissionMiniRail({
           style={{
             fontFamily: 'var(--font-serif)',
             fontSize: 18,
-            color: '#F2F0EA',
+            color: 'var(--stl-text-bright)',
             fontWeight: 600,
             margin: 0,
           }}
@@ -856,7 +856,7 @@ function MiniCard({
         style={{
           fontFamily: 'var(--font-serif)',
           fontSize: 12,
-          color: '#F2F0EA',
+          color: 'var(--stl-text-bright)',
           fontWeight: 600,
           lineHeight: 1.1,
           opacity: hover ? 1 : 0,

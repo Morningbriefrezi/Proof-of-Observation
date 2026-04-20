@@ -27,8 +27,8 @@ type Stats = {
 
 const NODE_COLOR: Record<NodeType, string> = {
   passive: '#9CA3AF',
-  observer: '#38F0FF',
-  advanced: '#FFD166',
+  observer: 'var(--stl-teal)',
+  advanced: 'var(--stl-gold)',
 };
 
 function timeAgo(iso: string): string {
@@ -117,12 +117,12 @@ export default function NetworkPage() {
               className="stl-live-dot"
               style={{
                 width: 8, height: 8, borderRadius: '50%',
-                background: '#34d399',
+                background: 'var(--stl-green)',
                 display: 'inline-block',
               }}
               aria-hidden
             />
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', color: '#34d399', fontWeight: 600 }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', color: 'var(--stl-green)', fontWeight: 600 }}>
               LIVE
             </span>
           </div>

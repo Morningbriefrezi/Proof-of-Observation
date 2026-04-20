@@ -31,7 +31,8 @@ const columns = [
   {
     title: 'About',
     links: [
-      { label: 'GitHub',         href: 'https://github.com', external: true },
+      { label: 'GitHub',         href: 'https://github.com/Morningbriefrezi/Stellar', external: true },
+      { label: 'Twitter / X',    href: 'https://x.com/StellarClub26', external: true },
       { label: 'Colosseum',      href: 'https://arena.colosseum.org', external: true },
     ],
   },
@@ -101,11 +102,11 @@ export default function Footer() {
             justifyContent: 'space-between',
           }}
         >
-          <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11 }}>
+          <span style={{ color: 'var(--stl-text-whisper)', fontSize: 11 }}>
             Built in Tbilisi 🇬🇪 · Colosseum Frontier 2026 · © 2026 Stellar
           </span>
           <span style={{
-            color: 'rgba(255,255,255,0.25)',
+            color: 'var(--stl-text-whisper)',
             fontSize: 11,
             display: 'flex',
             alignItems: 'center',

@@ -87,7 +87,7 @@ export default function BottomNav() {
                       width: 20,
                       height: 2,
                       borderRadius: 2,
-                      background: '#FFD166',
+                      background: 'var(--stl-gold)',
                       boxShadow: '0 0 10px rgba(255,209,102,0.8)',
                     }}
                   />
@@ -95,7 +95,7 @@ export default function BottomNav() {
                 <Icon
                   size={22}
                   strokeWidth={isActive ? 2.2 : 1.7}
-                  color={isActive ? '#FFD166' : 'rgba(255,255,255,0.42)'}
+                  color={isActive ? 'var(--stl-gold)' : 'rgba(255,255,255,0.42)'}
                   style={{
                     filter: isActive ? 'drop-shadow(0 0 6px rgba(255,209,102,0.45))' : 'none',
                     transition: 'color 0.2s ease, filter 0.2s ease',
@@ -108,7 +108,7 @@ export default function BottomNav() {
                   fontFamily: 'var(--font-serif)',
                   fontSize: 10.5,
                   fontWeight: isActive ? 600 : 400,
-                  color: isActive ? '#F2F0EA' : 'rgba(255,255,255,0.42)',
+                  color: isActive ? 'var(--stl-text-bright)' : 'rgba(255,255,255,0.42)',
                   letterSpacing: '0.01em',
                   lineHeight: 1,
                   transition: 'color 0.2s ease',
