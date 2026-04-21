@@ -1,59 +1,112 @@
 'use client';
 
-import { useState, useEffect, useMemo, type ComponentType } from 'react';
+import { useState, useEffect, useMemo, useCallback, type ComponentType } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock } from 'lucide-react';
-import BackButton from '@/components/shared/BackButton';
 import { useAppState } from '@/hooks/useAppState';
 import { usePrivy } from '@privy-io/react-auth';
 import { useLocale, useTranslations } from 'next-intl';
 import { useLocation } from '@/lib/location';
-import StatsBar from '@/components/sky/StatsBar';
-import SkyChart from '@/components/sky/SkyChart';
-import PrimeHeroCard from '@/components/sky/PrimeHeroCard';
-import JupiterNode from '@/components/sky/chart-nodes/JupiterNode';
-import SaturnNode from '@/components/sky/chart-nodes/SaturnNode';
-import MoonNode from '@/components/sky/chart-nodes/MoonNode';
-import VenusNode from '@/components/sky/chart-nodes/VenusNode';
-import MarsNode from '@/components/sky/chart-nodes/MarsNode';
-import MercuryNode from '@/components/sky/chart-nodes/MercuryNode';
-import PleiadesNode from '@/components/sky/chart-nodes/PleiadesNode';
-import OrionNode from '@/components/sky/chart-nodes/OrionNode';
-import AndromedaNode from '@/components/sky/chart-nodes/AndromedaNode';
-import CrabNode from '@/components/sky/chart-nodes/CrabNode';
-import ObservationLog from '@/components/sky/ObservationLog';
-import RewardsSection from '@/components/sky/RewardsSection';
-import QuizActive from '@/components/sky/QuizActive';
-import { getChartDeepSky } from '@/lib/sky-chart';
 import { getVisiblePlanets } from '@/lib/planets';
-import { QUIZZES } from '@/lib/quizzes';
+import { getChartDeepSky } from '@/lib/sky-chart';
+import { getRank } from '@/lib/rewards';
 import { MISSIONS } from '@/lib/constants';
+import { QUIZZES } from '@/lib/quizzes';
+import { PlanetViz } from '@/components/sky/PlanetViz';
+import QuizActive from '@/components/sky/QuizActive';
 import type { Mission } from '@/lib/types';
 import type { QuizDef } from '@/lib/quizzes';
-import PageTransition from '@/components/ui/PageTransition';
-import PageContainer from '@/components/layout/PageContainer';
-import { MissionIcon } from '@/components/shared/PlanetIcons';
-import { TelescopeIcon, StarTokenIcon, DifficultyDots } from '@/components/icons/CelestialIcons';
-import QuizCard, { type QuizTheme } from '@/components/sky/QuizCard';
 import SolarSystemIcon from '@/components/sky/quiz-icons/SolarSystemIcon';
 import ConstellationsIcon from '@/components/sky/quiz-icons/ConstellationsIcon';
 import TelescopeIconArt from '@/components/sky/quiz-icons/TelescopeIcon';
 import CosmologyIcon from '@/components/sky/quiz-icons/CosmologyIcon';
 import ExplorationIcon from '@/components/sky/quiz-icons/ExplorationIcon';
 
+type Theme = 'light' | 'dark';
+const THEME_KEY = 'stellar-missions-theme';
+
+// Missions that appear in the grid (tied to sky-map-locatable targets).
+const GRID_MISSION_IDS = ['moon', 'jupiter', 'saturn', 'pleiades', 'orion', 'andromeda'];
+
+// All targets we render on the sky map (planets + deep sky).
+const SKY_PLANET_KEYS = ['moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn'];
+const SKY_DEEP_KEYS = ['pleiades', 'orion', 'andromeda', 'crab'];
+
+const TAGLINES: Record<string, string> = {
+  moon:      'Terminator cuts sharp craters',
+  jupiter:   'Four Galilean moons visible',
+  saturn:    'Rings at their widest tilt',
+  pleiades:  'Seven sisters, one glance',
+  orion:     'Stellar nursery, 1,344 ly out',
+  andromeda: 'Trillion suns, 2.5M ly away',
+  crab:      'Ghost of a 1054 AD supernova',
+  venus:     'Brightest object in the sky',
+  mars:      'Rust-red and unmistakable',
+  mercury:   'Low and fleeting — catch it fast',
+};
+
+const EQUIPMENT_LABEL: Record<string, string> = {
+  moon:      'Naked eye',
+  jupiter:   'Naked eye',
+  saturn:    'Telescope',
+  pleiades:  'Naked eye',
+  orion:     'Telescope',
+  andromeda: 'Binoculars',
+  crab:      'Telescope',
+};
+
+type Difficulty = 'easy' | 'med' | 'hard';
+
+function diffClass(d: Mission['difficulty']): Difficulty {
+  if (d === 'Beginner') return 'easy';
+  if (d === 'Intermediate') return 'med';
+  return 'hard';
+}
+
+function diffLabel(d: Mission['difficulty']): string {
+  if (d === 'Beginner') return 'Easy';
+  if (d === 'Intermediate') return 'Medium';
+  return 'Hard';
+}
+
+function missionTheme(id: string): string {
+  if (GRID_MISSION_IDS.includes(id)) return id;
+  return 'moon';
+}
+
+function getPlanetSize(key: string): 'small' | 'medium' {
+  if (key === 'jupiter' || key === 'saturn' || key === 'moon') return 'medium';
+  return 'small';
+}
+
+function getCardPlanetSize(key: string): 'small' | 'medium' {
+  if (key === 'jupiter' || key === 'saturn') return 'medium';
+  return 'medium';
+}
+
+function planetMapPosition(altitude: number, azimuth: number): { x: number; y: number } {
+  // Azimuth: 0=N, 90=E, 180=S, 270=W. Map x: 0%=W edge, 50%=center/S, 100%=E edge.
+  // Invert so north is center-top, south is center-bottom via altitude mapping.
+  const x = ((azimuth + 180) % 360) / 360 * 100;
+  const y = Math.max(0, 100 - (altitude / 90) * 78) + 6;
+  return {
+    x: Math.max(6, Math.min(94, x)),
+    y: Math.max(8, Math.min(86, y)),
+  };
+}
+
 interface QuizSpec {
-  theme: QuizTheme;
-  Icon: React.ComponentType<{ size?: number }>;
+  Icon: ComponentType<{ size?: number }>;
   reward: number;
-  badge?: 'new' | 'hard';
+  descEn: string;
+  descKa: string;
 }
 
 const QUIZ_SPECS: Record<string, QuizSpec> = {
-  'solar-system':     { theme: 'solar',       Icon: SolarSystemIcon,   reward: 100 },
-  'constellations':   { theme: 'stars',       Icon: ConstellationsIcon, reward: 100 },
-  'telescopes':       { theme: 'telescope',   Icon: TelescopeIconArt,   reward: 100, badge: 'new' },
-  'universe':         { theme: 'cosmos',      Icon: CosmologyIcon,      reward: 100, badge: 'hard' },
-  'space-exploration':{ theme: 'exploration', Icon: ExplorationIcon,    reward: 100 },
+  'solar-system':      { Icon: SolarSystemIcon,    reward: 100, descEn: '10 questions · planets, moons, orbits',      descKa: '10 კითხვა · პლანეტები, მთვარეები, ორბიტები' },
+  'constellations':    { Icon: ConstellationsIcon, reward: 100, descEn: '10 questions · stars, myths, sky patterns',    descKa: '10 კითხვა · ვარსკვლავები, მითები, ცის ფიგურები' },
+  'telescopes':        { Icon: TelescopeIconArt,   reward: 100, descEn: '10 questions · optics, mounts, magnification', descKa: '10 კითხვა · ოპტიკა, სადგარები, გადიდება' },
+  'universe':          { Icon: CosmologyIcon,      reward: 100, descEn: '10 questions · galaxies, cosmology, time',     descKa: '10 კითხვა · გალაქტიკები, კოსმოლოგია, დრო' },
+  'space-exploration': { Icon: ExplorationIcon,    reward: 100, descEn: '10 questions · missions, probes, astronauts',  descKa: '10 კითხვა · მისიები, ზონდები, ასტრონავტები' },
 };
 
 export default function MissionsPage() {
@@ -63,823 +116,428 @@ export default function MissionsPage() {
   const locale = useLocale() === 'ka' ? 'ka' : 'en';
   const t = useTranslations('missions');
   const { location } = useLocation();
+
+  const [theme, setTheme] = useState<Theme>('light');
+  const [now, setNow] = useState<Date>(() => new Date());
   const [activeQuiz, setActiveQuiz] = useState<QuizDef | null>(null);
-  const [skyConditions, setSkyConditions] = useState<{ cloudCover: number; visibility: string; verified: boolean } | null>(null);
-  const [streak, setStreak] = useState<number>(0);
-  const [isNight, setIsNight] = useState(false);
-  const [skyTimeout, setSkyTimeout] = useState(false);
-  const quizStarsEarned = useMemo(
-    () => (state.completedQuizzes ?? []).reduce((sum, r) => sum + (r.stars ?? 0), 0),
-    [state.completedQuizzes]
-  );
+
   useEffect(() => {
-    const h = new Date().getHours();
-    setIsNight(h >= 18 || h < 5);
+    try {
+      const saved = localStorage.getItem(THEME_KEY);
+      if (saved === 'dark') setTheme('dark');
+    } catch {}
   }, []);
 
-  useEffect(() => {
-    if (!authenticated || !state.walletAddress) return;
-    fetch(`/api/streak?walletAddress=${encodeURIComponent(state.walletAddress)}`)
-      .then(r => r.json())
-      .then(d => setStreak(d.streak ?? 0))
-      .catch(() => {});
-  }, [authenticated, state.walletAddress]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setSkyTimeout(true), 10000);
-    fetch(`/api/sky/verify?lat=${location.lat}&lon=${location.lon}`)
-      .then(r => r.json())
-      .then(d => {
-        setSkyConditions({ cloudCover: d.cloudCover, visibility: d.visibility, verified: d.verified });
-        // If verified, we know it's actually night — override the rough time check
-        if (d.verified) setIsNight(true);
-      })
-      .catch(() => {})
-      .finally(() => clearTimeout(timer));
-    return () => clearTimeout(timer);
-  }, [location.lat, location.lon]);
-
-  if (!authenticated) {
-    return (
-      <PageContainer variant="wide" className="py-3 sm:py-6 animate-page-enter flex flex-col gap-4">
-        {/* Sign-in card */}
-        <div
-          className="rounded-2xl p-5 sm:p-6"
-          style={{
-            background: 'linear-gradient(135deg, rgba(99,102,241,0.05), rgba(15,31,61,0.5))',
-            border: '1px solid rgba(99,102,241,0.1)',
-          }}
-        >
-          <div className="flex items-center gap-4">
-            <div
-              className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 relative"
-              style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.15)' }}
-            >
-              <TelescopeIcon size={28} animate />
-              <span
-                className="absolute -top-1 -right-1 text-[10px] leading-none"
-                style={{ color: 'var(--stl-gold)', textShadow: '0 0 6px rgba(255,209,102,0.6)' }}
-              >✦</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <h2 className="text-base font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>{t('title')}</h2>
-              <p className="text-slate-500 text-xs mt-0.5">{t('subtitle')}</p>
-            </div>
-            <button
-              onClick={login}
-              className="flex-shrink-0 px-4 py-2 rounded-xl font-bold text-xs transition-all hover:opacity-90"
-              style={{ background: 'linear-gradient(135deg, #FFD166, #CC9A33)', color: '#0a0a0a' }}
-            >
-              {t('signIn')}
-            </button>
-          </div>
-        </div>
-
-        {/* Preview mission list */}
-        <div>
-          <p className="text-slate-600 text-[11px] uppercase tracking-widest mb-3">{t('availableMissions')}</p>
-          <div className="flex flex-col gap-2.5">
-            {MISSIONS.map(mission => (
-              <div
-                key={mission.id}
-                className="relative flex items-center gap-4 rounded-2xl px-4 py-3.5 overflow-hidden"
-                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
-              >
-                <div className="absolute inset-0 bg-[#070B14]/40 backdrop-blur-[1px] z-10 flex items-center justify-end pr-4">
-                  <Lock size={13} className="text-slate-600" />
-                </div>
-                <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <MissionIcon id={mission.id} size={28}/>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-slate-400 text-sm font-semibold">{mission.name}</p>
-                  <p className="text-slate-600 text-xs mt-0.5 line-clamp-1">{mission.desc}</p>
-                  <div className="mt-1.5">
-                    <DifficultyDots level={
-                      mission.difficulty === 'Beginner' ? 1
-                      : mission.difficulty === 'Intermediate' ? 2
-                      : mission.difficulty === 'Expert' ? 4
-                      : 3
-                    }/>
-                  </div>
-                </div>
-                <span className="text-[#FFD166]/40 text-xs font-bold flex-shrink-0 flex items-center gap-0.5"
-                  style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  +{mission.stars}<StarTokenIcon size={11}/>
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Tonight's sky */}
-        <div
-          className="rounded-2xl p-4"
-          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
-        >
-          <p className="text-slate-600 text-[11px] uppercase tracking-widest mb-3">{t('tonightsSky')}</p>
-          {skyConditions ? (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${skyConditions.verified ? 'bg-[#34d399] animate-pulse' : 'bg-amber-400'}`} />
-                <span className="text-white text-sm font-medium">
-                  {skyConditions.verified ? t('goodConditions') : t('cloudyTonight')}
-                </span>
-              </div>
-              <div className="flex gap-3 text-xs text-slate-500 flex-shrink-0">
-                <span>{skyConditions.cloudCover}% cloud</span>
-                <span>{skyConditions.visibility}</span>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isNight ? 'bg-[#34d399] animate-pulse' : 'bg-slate-700'}`} />
-              {isNight ? (
-                <span className="loading-dots"><span></span><span></span><span></span></span>
-              ) : (
-                <span className="text-slate-500 text-sm">Come back after sunset to observe</span>
-              )}
-            </div>
-          )}
-        </div>
-      </PageContainer>
-    );
-  }
-
-  return (
-    <PageTransition>
-      <>
-      {activeQuiz && <QuizActive quiz={activeQuiz} onClose={() => setActiveQuiz(null)} />}
-
-      <PageContainer variant="wide" className="py-2 flex flex-col gap-3" style={{ fontFamily: 'var(--font-serif)' }}>
-        <BackButton />
-
-        <ChartSection onStart={(m) => router.push(`/observe/${m.id}`)} />
-
-        <StatsBar />
-
-        {/* Quiz Missions */}
-        <section className="mt-4">
-          <div className="flex items-baseline justify-between mb-4 px-0.5">
-            <div>
-              <div className="flex items-baseline gap-2.5">
-                <h2
-                  style={{
-                    fontFamily: 'var(--font-serif)',
-                    fontSize: 24,
-                    color: 'var(--stl-text-bright)',
-                    fontWeight: 600,
-                    margin: 0,
-                    letterSpacing: '-0.01em',
-                  }}
-                >
-                  {t('knowledgeQuizzes')}
-                </h2>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-serif)',
-                    fontSize: 10,
-                    color: 'rgba(255,255,255,0.35)',
-                    letterSpacing: '0.14em',
-                  }}
-                >
-                  {String(QUIZZES.length).padStart(2, '0')} QUIZZES
-                </span>
-              </div>
-              <div
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: 13,
-                  color: 'rgba(255,255,255,0.55)',
-                  fontStyle: 'italic',
-                  fontWeight: 400,
-                  marginTop: 2,
-                }}
-              >
-                Earn stars while you wait for clear skies
-              </div>
-            </div>
-            <div
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full"
-              style={{ background: 'rgba(255,209,102,0.08)', border: '1px solid rgba(255,209,102,0.2)' }}
-            >
-              <span style={{ fontSize: 11, color: 'var(--stl-gold)', fontWeight: 600 }}>
-                ✦ {quizStarsEarned}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2.5">
-            {QUIZZES.map(quiz => {
-              const spec = QUIZ_SPECS[quiz.id];
-              if (!spec) return null;
-              const bestResult = [...(state.completedQuizzes ?? [])]
-                .filter(r => r.quizId === quiz.id)
-                .sort((a, b) => b.score - a.score)[0];
-              const bestPct = bestResult ? Math.round((bestResult.score / bestResult.total) * 100) : null;
-              const badges: Array<{ label: string; variant: 'new' | 'hard' | 'done' }> = [];
-              if (bestPct !== null && bestPct >= 90) badges.push({ label: `✓ ${bestPct}%`, variant: 'done' });
-              if (spec.badge === 'new' && bestPct === null) badges.push({ label: 'NEW', variant: 'new' });
-              if (spec.badge === 'hard') badges.push({ label: 'HARD', variant: 'hard' });
-
-              return (
-                <QuizCard
-                  key={quiz.id}
-                  quiz={quiz}
-                  theme={spec.theme}
-                  Icon={spec.Icon}
-                  titleEn={quiz.title[locale] ?? quiz.title.en}
-                  descEn={quiz.description[locale] ?? quiz.description.en}
-                  totalQuestions={quiz.questions?.length ?? 10}
-                  bestPct={bestPct}
-                  starsEarned={bestResult?.stars}
-                  badges={badges}
-                  reward={spec.reward}
-                  onStart={() => setActiveQuiz(quiz)}
-                />
-              );
-            })}
-          </div>
-        </section>
-
-        <RewardsSection />
-        <ObservationLog />
-      </PageContainer>
-      </>
-    </PageTransition>
-  );
-}
-
-const CHARTABLE_IDS = ['moon','jupiter','saturn','venus','mars','mercury','pleiades','orion','andromeda','crab'];
-const PRIME_ORDER = ['jupiter','saturn','moon','venus','mars','andromeda','pleiades','orion','crab','mercury'];
-
-const NODE_MAP_FOR_LIST: Record<string, ComponentType<{ size?: number }>> = {
-  moon: MoonNode, jupiter: JupiterNode, saturn: SaturnNode,
-  venus: VenusNode, mars: MarsNode, mercury: MercuryNode,
-  pleiades: PleiadesNode, orion: OrionNode, andromeda: AndromedaNode, crab: CrabNode,
-};
-
-const TAGLINES: Record<string, string> = {
-  jupiter:   'Four Galilean moons visible',
-  saturn:    'Rings at their widest tilt',
-  moon:      'Terminator cuts sharp craters',
-  venus:     'Brightest object in the sky',
-  mars:      'Rust-red and unmistakable',
-  mercury:   'Low and fleeting — catch it fast',
-  pleiades:  'Seven sisters, one glance',
-  orion:     'Stellar nursery, 1,344 ly out',
-  andromeda: 'Trillion suns, 2.5M ly away',
-  crab:      'Ghost of a 1054 AD supernova',
-};
-
-const LIST_META: Record<string, string> = {
-  jupiter:   'Gas giant · Naked eye',
-  saturn:    'Rings wide open · Telescope',
-  moon:      'Easy — look up',
-  venus:     'Evening star · Naked eye',
-  mars:      'Red planet · Naked eye',
-  mercury:   'Tricky — twilight only',
-  pleiades:  'Naked eye',
-  orion:     'Naked eye',
-  andromeda: 'Binoculars help',
-  crab:      'Telescope needed',
-};
-
-const DIR_NAMES: Record<string, string> = {
-  N: 'north', NE: 'northeast', E: 'east', SE: 'southeast',
-  S: 'south', SW: 'southwest', W: 'west', NW: 'northwest',
-};
-const AZ_DIR_LIST = ['N','NE','E','SE','S','SW','W','NW'] as const;
-function azToDirName(az: number): string {
-  return DIR_NAMES[AZ_DIR_LIST[Math.round(az / 45) % 8]] ?? '';
-}
-
-function friendlyMeta({
-  aboveHorizon, altitude, dirName, peakDate, riseDate, now, hint, cloudCover,
-}: {
-  aboveHorizon: boolean;
-  altitude: number;
-  dirName: string;
-  peakDate: Date | null;
-  riseDate: Date | null;
-  now: Date;
-  hint?: string;
-  cloudCover?: number | null;
-}): string {
-  if (!aboveHorizon) {
-    if (riseDate) {
-      const diffH = (riseDate.getTime() - now.getTime()) / 3_600_000;
-      const riseStr = riseDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-      if (diffH > 0 && diffH < 8) return `Rises at ${riseStr}`;
-      return 'Back tomorrow night';
-    }
-    return 'Below horizon';
-  }
-  let where: string;
-  if (altitude >= 60) where = 'High overhead';
-  else if (altitude >= 30) where = dirName ? `High in the ${dirName}` : 'Well placed';
-  else if (altitude >= 10) where = dirName ? `Low in the ${dirName}` : 'Low on horizon';
-  else where = dirName ? `Skimming the ${dirName} horizon` : 'Barely up';
-
-  const tail: string[] = [];
-  if (cloudCover != null && cloudCover >= 60) tail.push(`Cloudy ${Math.round(cloudCover)}%`);
-  else if (cloudCover != null && cloudCover >= 40) tail.push(`Hazy ${Math.round(cloudCover)}%`);
-  else if (peakDate && peakDate.getTime() > now.getTime()) {
-    const peakStr = peakDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-    tail.push(`Best at ${peakStr}`);
-  } else if (hint) {
-    tail.push(hint);
-  }
-  return [where, ...tail].join(' · ');
-}
-
-function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
-  const { state } = useAppState();
-  const { location } = useLocation();
-  const [now, setNow] = useState<Date>(() => new Date());
-  const [cloudCover, setCloudCover] = useState<number | null>(null);
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(id);
   }, []);
+
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => {
+      const next: Theme = prev === 'light' ? 'dark' : 'light';
+      try { localStorage.setItem(THEME_KEY, next); } catch {}
+      return next;
+    });
+  }, []);
+
   const lat = location.lat ?? 41.7151;
   const lon = location.lon ?? 44.8271;
-  useEffect(() => {
-    fetch(`/api/sky/verify?lat=${lat}&lon=${lon}`)
-      .then(r => r.json())
-      .then(d => setCloudCover(typeof d.cloudCover === 'number' ? d.cloudCover : null))
-      .catch(() => {});
-  }, [lat, lon]);
-  const cityLabel = location.city || (location.country === 'GE' ? 'Tbilisi' : location.country);
+  const cityLabel = location.city || 'Tbilisi';
 
-  const completedIds = useMemo(
-    () => new Set(state.completedMissions.filter(m => m.status === 'completed').map(m => m.id)),
-    [state.completedMissions]
-  );
-
-  const chartableMissions = useMemo(
-    () => MISSIONS.filter(m => CHARTABLE_IDS.includes(m.id)),
-    []
-  );
-
-  const statusById = useMemo(() => {
-    const out: Record<string, {
-      aboveHorizon: boolean;
-      altitude: number;
-      azDir: string;
-      peakTime: string | null;
-      metaLine: string;
-    }> = {};
+  // Compute altitudes/azimuths for all sky targets.
+  const skyPositions = useMemo(() => {
+    const out: Record<string, { altitude: number; azimuth: number }> = {};
     const planets = getVisiblePlanets(lat, lon, now);
     for (const p of planets) {
-      const aboveHorizon = p.altitude > 0;
-      const peakDate = p.transit ? (p.transit instanceof Date ? p.transit : new Date(p.transit)) : null;
-      const riseDate = p.rise    ? (p.rise    instanceof Date ? p.rise    : new Date(p.rise))    : null;
-      const dirName = DIR_NAMES[p.azimuthDir] ?? '';
-      const metaLine = friendlyMeta({
-        aboveHorizon,
-        altitude: p.altitude,
-        dirName,
-        peakDate,
-        riseDate,
-        now,
-        hint: LIST_META[p.key],
-        cloudCover,
-      });
-      out[p.key] = {
-        aboveHorizon,
-        altitude: p.altitude,
-        azDir: p.azimuthDir,
-        peakTime: peakDate ? peakDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : null,
-        metaLine,
-      };
+      out[p.key] = { altitude: p.altitude, azimuth: p.azimuth };
     }
     const ds = getChartDeepSky(lat, lon, now, 200, 100, 180);
     for (const d of ds) {
-      const dirName = azToDirName(d.azimuth);
-      const metaLine = friendlyMeta({
-        aboveHorizon: d.aboveHorizon,
-        altitude: d.altitude,
-        dirName,
-        peakDate: null,
-        riseDate: null,
-        now,
-        hint: LIST_META[d.id],
-        cloudCover,
-      });
-      out[d.id] = {
-        aboveHorizon: d.aboveHorizon,
-        altitude: d.altitude,
-        azDir: '',
-        peakTime: null,
-        metaLine,
-      };
+      out[d.id] = { altitude: d.altitude, azimuth: d.azimuth };
     }
     return out;
-  }, [lat, lon, now, cloudCover]);
+  }, [lat, lon, now]);
+
+  const gridMissions = useMemo(
+    () => GRID_MISSION_IDS
+      .map((id) => MISSIONS.find((m) => m.id === id))
+      .filter((m): m is Mission => !!m),
+    [],
+  );
+
+  const completedIds = useMemo(
+    () => new Set(state.completedMissions.filter((m) => m.status === 'completed').map((m) => m.id)),
+    [state.completedMissions],
+  );
+
+  const visibleCount = useMemo(
+    () => gridMissions.filter((m) => (skyPositions[m.id]?.altitude ?? -90) > 0).length,
+    [gridMissions, skyPositions],
+  );
+
+  const completedCount = useMemo(
+    () => gridMissions.filter((m) => completedIds.has(m.id)).length,
+    [gridMissions, completedIds],
+  );
 
   const primeMission = useMemo(() => {
-    const candidates = chartableMissions
-      .filter(m => !completedIds.has(m.id) || m.repeatable)
-      .filter(m => statusById[m.id]?.aboveHorizon);
-    if (candidates.length === 0) return null;
-    candidates.sort((a, b) => PRIME_ORDER.indexOf(a.id) - PRIME_ORDER.indexOf(b.id));
-    return candidates[0];
-  }, [chartableMissions, completedIds, statusById]);
+    const visible = gridMissions
+      .filter((m) => !completedIds.has(m.id) || m.repeatable)
+      .filter((m) => (skyPositions[m.id]?.altitude ?? -90) > 10);
+    if (visible.length === 0) return null;
+    visible.sort((a, b) => (skyPositions[b.id]?.altitude ?? -90) - (skyPositions[a.id]?.altitude ?? -90));
+    return visible[0];
+  }, [gridMissions, completedIds, skyPositions]);
 
-  const [filter, setFilter] = useState<'visible' | 'all'>('visible');
-  const visibleCount = useMemo(
-    () => chartableMissions.filter(m => statusById[m.id]?.aboveHorizon).length,
-    [chartableMissions, statusById]
+  const sortedGrid = useMemo(() => {
+    const withPos = gridMissions.map((m) => ({
+      mission: m,
+      altitude: skyPositions[m.id]?.altitude ?? -90,
+    }));
+    withPos.sort((a, b) => b.altitude - a.altitude);
+    return withPos;
+  }, [gridMissions, skyPositions]);
+
+  const totalStars = useMemo(() => {
+    const missionStars = state.completedMissions
+      .filter((m) => m.status === 'completed')
+      .reduce((sum, m) => {
+        const mission = MISSIONS.find((x) => x.id === m.id);
+        return sum + (mission?.stars ?? 0);
+      }, 0);
+    const quizStars = (state.completedQuizzes ?? []).reduce((sum, r) => sum + (r.stars ?? 0), 0);
+    return missionStars + quizStars;
+  }, [state.completedMissions, state.completedQuizzes]);
+
+  const rank = useMemo(
+    () => getRank(state.completedMissions.filter((m) => m.status === 'completed').length),
+    [state.completedMissions],
   );
-  const sortedMissions = useMemo(() => {
-    let pool = chartableMissions.filter(m => m.id !== primeMission?.id);
-    if (filter === 'visible') {
-      pool = pool.filter(m => statusById[m.id]?.aboveHorizon);
-    }
-    pool.sort((a, b) => (statusById[b.id]?.altitude ?? -100) - (statusById[a.id]?.altitude ?? -100));
-    return primeMission ? [primeMission, ...pool] : pool;
-  }, [chartableMissions, primeMission, filter, statusById]);
 
-  const railMissions = useMemo(() => {
-    const visible = chartableMissions
-      .filter(m => m.id !== primeMission?.id && statusById[m.id]?.aboveHorizon);
-    visible.sort((a, b) => (statusById[b.id]?.altitude ?? -100) - (statusById[a.id]?.altitude ?? -100));
-    return visible.slice(0, 6);
-  }, [chartableMissions, primeMission, statusById]);
+  const liveTime = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const dateLabel = now.toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+  const startMission = useCallback((m: Mission) => {
+    router.push(`/observe/${m.id}`);
+  }, [router]);
+
+  const scrollToMission = useCallback((id: string) => {
+    const node = document.getElementById(`mis-card-${id}`);
+    if (node) node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, []);
+
+  // ---- Map planets (visible only) ----
+  const mapPlanets = useMemo(() => {
+    const items: { id: string; key: string; x: number; y: number; missionId?: string }[] = [];
+    for (const key of SKY_PLANET_KEYS) {
+      const pos = skyPositions[key];
+      if (!pos || pos.altitude <= -5) continue;
+      const map = planetMapPosition(pos.altitude, pos.azimuth);
+      const mission = MISSIONS.find((m) => m.id === key);
+      items.push({
+        id: key,
+        key,
+        x: map.x,
+        y: map.y,
+        missionId: mission?.id,
+      });
+    }
+    for (const id of SKY_DEEP_KEYS) {
+      const pos = skyPositions[id];
+      if (!pos || pos.altitude <= -5) continue;
+      const map = planetMapPosition(pos.altitude, pos.azimuth);
+      const mission = MISSIONS.find((m) => m.id === id);
+      items.push({
+        id,
+        key: id,
+        x: map.x,
+        y: map.y,
+        missionId: mission?.id,
+      });
+    }
+    return items;
+  }, [skyPositions]);
+
+  // ---- Auth gate variant ----
+  if (!authenticated) {
+    return (
+      <div className={`missions-page ${theme === 'dark' ? 'dark' : ''}`}>
+        <div className="mis-stats-bar">
+          <div className="mis-stats-left">
+            <h1 className="mis-stats-title">{t('title')}</h1>
+            <span className="mis-stats-meta">Sign in to start observing</span>
+          </div>
+          <div className="mis-stats-right">
+            <button
+              type="button"
+              className="mis-theme-toggle"
+              onClick={toggleTheme}
+              aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            />
+          </div>
+        </div>
+
+        <SkyMap
+          mapPlanets={mapPlanets}
+          liveTime={liveTime}
+          dateLabel={dateLabel}
+          cityLabel={cityLabel}
+          onPlanetClick={() => undefined}
+        />
+
+        <div className="mis-content">
+          <section className="mis-section">
+            <div className="mis-auth-card">
+              <h2 className="mis-auth-title">Sign in to start observing</h2>
+              <p className="mis-auth-body">
+                Complete sky missions to earn Stars and mint discovery NFTs on Solana.
+              </p>
+              <button type="button" className="mis-auth-btn" onClick={login}>
+                Sign in with email
+              </button>
+              <p className="mis-auth-sub">Free · No wallet needed</p>
+            </div>
+          </section>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col gap-0">
-      {/* Top area: prime card + missions mini-rail (desktop) */}
-      <div className="mb-4 grid grid-cols-1 lg:grid-cols-2 lg:gap-4">
-        {primeMission && (
-          <PrimeHeroCard
-            mission={primeMission}
-            altitude={statusById[primeMission.id]?.altitude ?? null}
-            tagline={TAGLINES[primeMission.id] ?? primeMission.desc}
-            onStart={() => onStart(primeMission)}
-          />
-        )}
-        <div className="hidden lg:block">
-          <MissionMiniRail
-            missions={railMissions}
-            statusById={statusById}
-            onSelect={onStart}
+    <div className={`missions-page ${theme === 'dark' ? 'dark' : ''}`}>
+      {activeQuiz && <QuizActive quiz={activeQuiz} onClose={() => setActiveQuiz(null)} />}
+
+      {/* Stats bar */}
+      <div className="mis-stats-bar">
+        <div className="mis-stats-left">
+          <h1 className="mis-stats-title">Missions</h1>
+          <span className="mis-stats-meta">
+            {completedCount}/{gridMissions.length} completed · {visibleCount} visible tonight
+          </span>
+        </div>
+        <div className="mis-stats-right">
+          <span className="mis-rank-pill">{rank.name}</span>
+          <span className="mis-stars-count">✦ {totalStars}</span>
+          <button
+            type="button"
+            className="mis-theme-toggle"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
           />
         </div>
       </div>
 
-      <div className="mb-4">
-        <SkyChart
-          lat={lat}
-          lon={lon}
-          date={now}
-          missions={chartableMissions.filter(m => statusById[m.id]?.aboveHorizon)}
-          primeId={primeMission?.id ?? null}
-          city={cityLabel}
-          onSelect={onStart}
-        />
-      </div>
+      {/* Sky map — full-width, always dark */}
+      <SkyMap
+        mapPlanets={mapPlanets}
+        liveTime={liveTime}
+        dateLabel={dateLabel}
+        cityLabel={cityLabel}
+        onPlanetClick={(missionId) => missionId && scrollToMission(missionId)}
+      />
 
-      {/* Missions list — mobile only; desktop uses mini-rail above */}
-      <div className="lg:hidden">
-        <div className="flex items-baseline justify-between mb-3">
-          <h2
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: 20,
-              color: 'var(--stl-text-bright)',
-              fontWeight: 600,
-              margin: 0,
-            }}
-          >
-            Missions tonight
-          </h2>
-          <div className="flex items-center gap-4">
-            {(['visible','all'] as const).map(f => {
-              const count = f === 'visible' ? visibleCount : chartableMissions.length;
-              const active = filter === f;
+      {/* Centered content */}
+      <div className="mis-content">
+        {/* Prime target */}
+        {primeMission && (
+          <section className="mis-section">
+            <PrimeCard
+              mission={primeMission}
+              altitude={skyPositions[primeMission.id]?.altitude ?? null}
+              onStart={() => startMission(primeMission)}
+            />
+          </section>
+        )}
+
+        {/* Mission grid */}
+        <section className="mis-section">
+          <div className="mis-section-head">
+            <h2 className="mis-section-title">Missions tonight</h2>
+            <span className="mis-section-meta">{visibleCount} visible</span>
+          </div>
+          <div className="mis-grid">
+            {sortedGrid.map(({ mission, altitude }) => (
+              <MissionCard
+                key={mission.id}
+                mission={mission}
+                above={altitude > 0}
+                onClick={() => startMission(mission)}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Quizzes */}
+        <section className="mis-section">
+          <div className="mis-section-head">
+            <h2 className="mis-section-title">Knowledge quizzes</h2>
+            <span className="mis-section-meta">Earn stars while you wait for clear skies</span>
+          </div>
+          <div className="mis-quiz-list">
+            {QUIZZES.map((quiz) => {
+              const spec = QUIZ_SPECS[quiz.id];
+              if (!spec) return null;
+              const title = quiz.title[locale] ?? quiz.title.en;
+              const desc = locale === 'ka' ? spec.descKa : spec.descEn;
               return (
                 <button
-                  key={f}
-                  onClick={() => setFilter(f)}
-                  className="relative flex items-baseline gap-1 pb-1"
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: 0,
-                  }}
+                  type="button"
+                  key={quiz.id}
+                  className="mis-quiz-row"
+                  onClick={() => setActiveQuiz(quiz)}
                 >
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-serif)',
-                      fontSize: 13,
-                      fontWeight: active ? 600 : 400,
-                      fontStyle: active ? 'normal' : 'italic',
-                      color: active ? 'var(--stl-text-bright)' : 'rgba(255,255,255,0.5)',
-                      letterSpacing: '0.005em',
-                      transition: 'color 0.2s ease',
-                    }}
-                  >
-                    {f === 'visible' ? 'Up now' : 'All'}
+                  <span className="mis-quiz-icon">
+                    <spec.Icon size={16} />
                   </span>
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 10,
-                      fontWeight: 500,
-                      color: active ? 'var(--stl-gold)' : 'rgba(255,255,255,0.35)',
-                      letterSpacing: '0.02em',
-                      transition: 'color 0.2s ease',
-                    }}
-                  >
-                    {count}
+                  <div className="mis-quiz-body">
+                    <div className="mis-quiz-name">{title}</div>
+                    <div className="mis-quiz-desc">{desc}</div>
+                  </div>
+                  <span className="mis-quiz-reward">+{spec.reward}</span>
+                  <span className="mis-quiz-play" aria-hidden>
+                    <PlayIcon />
                   </span>
-                  {active && (
-                    <span
-                      aria-hidden
-                      style={{
-                        position: 'absolute',
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        height: 1.5,
-                        borderRadius: 1,
-                        background: 'linear-gradient(to right, transparent, #FFD166 30%, #FFD166 70%, transparent)',
-                        boxShadow: '0 0 8px rgba(255,209,102,0.55)',
-                      }}
-                    />
-                  )}
                 </button>
               );
             })}
           </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          {sortedMissions.map(m => {
-            const Art = NODE_MAP_FOR_LIST[m.id];
-            if (!Art) return null;
-            const status = statusById[m.id];
-            const isPrime = m.id === primeMission?.id;
-            const isDone = completedIds.has(m.id) && !m.repeatable;
-            const disabled = isDone || !status?.aboveHorizon;
-
-            const badge = isPrime
-              ? { label: 'PRIME', color: 'var(--stl-gold)', bg: 'rgba(255,209,102,0.15)' }
-              : status && !status.aboveHorizon
-              ? { label: 'HIDDEN', color: 'rgba(255,255,255,0.5)', bg: 'rgba(255,255,255,0.06)' }
-              : status && status.altitude < 20
-              ? { label: 'LOW', color: '#38F0FF', bg: 'rgba(56,240,255,0.12)' }
-              : undefined;
-
-            return (
-              <MissionGridCard
-                key={m.id}
-                mission={m}
-                Art={Art}
-                metaLine={statusById[m.id]?.metaLine ?? LIST_META[m.id] ?? ''}
-                badge={badge}
-                isPrime={isPrime}
-                disabled={disabled}
-                onClick={() => onStart(m)}
-              />
-            );
-          })}
-        </div>
+        </section>
       </div>
     </div>
   );
 }
 
-function MissionGridCard({
-  mission, Art, metaLine, badge, isPrime, disabled, onClick,
+// ---- Sky map component ----
+
+interface MapPlanet {
+  id: string;
+  key: string;
+  x: number;
+  y: number;
+  missionId?: string;
+}
+
+function SkyMap({
+  mapPlanets,
+  liveTime,
+  dateLabel,
+  cityLabel,
+  onPlanetClick,
+}: {
+  mapPlanets: MapPlanet[];
+  liveTime: string;
+  dateLabel: string;
+  cityLabel: string;
+  onPlanetClick: (missionId: string | undefined) => void;
+}) {
+  return (
+    <div className="mis-skymap" role="region" aria-label="Night sky map">
+      <div className="mis-skymap-milkyway" aria-hidden />
+      <div className="mis-skymap-horizon" aria-hidden />
+
+      <span className="mis-skymap-compass n">N</span>
+      <span className="mis-skymap-compass s">S</span>
+      <span className="mis-skymap-compass e">E</span>
+      <span className="mis-skymap-compass w">W</span>
+
+      <div className="mis-skymap-live">
+        <span className="mis-skymap-live-dot" />
+        <span>LIVE · {liveTime}</span>
+      </div>
+      <div className="mis-skymap-date">{dateLabel} · {cityLabel}</div>
+
+      {mapPlanets.map((p) => (
+        <button
+          key={p.id}
+          type="button"
+          className="mis-skymap-planet"
+          style={{ left: `${p.x}%`, top: `${p.y}%`, background: 'transparent', border: 0, padding: 0 }}
+          onClick={() => onPlanetClick(p.missionId)}
+          aria-label={p.key}
+        >
+          <PlanetViz name={p.key} size={getPlanetSize(p.key)} />
+          <span className="mis-skymap-label">{p.key}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ---- Prime target card ----
+
+function PrimeCard({
+  mission,
+  altitude,
+  onStart,
 }: {
   mission: Mission;
-  Art: ComponentType<{ size?: number }>;
-  metaLine: string;
-  badge?: { label: string; color: string; bg: string };
-  isPrime?: boolean;
-  disabled?: boolean;
-  onClick: () => void;
+  altitude: number | null;
+  onStart: () => void;
 }) {
+  const tag = TAGLINES[mission.id] ?? mission.desc;
+  const altTxt = altitude != null ? ` · Alt ${Math.round(altitude)}°` : '';
   return (
-    <button
-      onClick={() => !disabled && onClick()}
-      disabled={disabled}
-      className={`relative text-left overflow-hidden transition-all active:scale-[0.98] disabled:opacity-55 disabled:cursor-default hover:-translate-y-0.5 ${isPrime ? 'col-span-2' : ''}`}
-      style={{
-        background: isPrime
-          ? 'radial-gradient(ellipse at 75% 20%, rgba(255,209,102,0.14) 0%, transparent 55%), linear-gradient(135deg, rgba(10,12,22,0.85), rgba(6,8,16,0.95))'
-          : 'linear-gradient(145deg, rgba(20,24,40,0.75), rgba(8,10,20,0.95))',
-        border: isPrime
-          ? '1px solid rgba(255,209,102,0.3)'
-          : '1px solid rgba(255,255,255,0.06)',
-        borderRadius: 10,
-        padding: '8px 10px',
-        minHeight: isPrime ? 72 : 64,
-      }}
-    >
-      <div className="flex items-center gap-2.5">
-        {/* Planet illustration with soft halo */}
-        <div
-          className="relative flex items-center justify-center flex-shrink-0"
-          style={{ width: isPrime ? 52 : 44, height: isPrime ? 52 : 44 }}
-        >
-          <div
-            aria-hidden
-            className="absolute inset-0 rounded-full"
-            style={{
-              background: disabled
-                ? 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 62%)'
-                : isPrime
-                ? 'radial-gradient(circle at 50% 50%, rgba(255,209,102,0.16) 0%, transparent 65%)'
-                : 'radial-gradient(circle at 50% 50%, rgba(184,212,255,0.08) 0%, transparent 65%)',
-              filter: 'blur(2px)',
-            }}
-          />
-          <Art size={isPrime ? 48 : 40} />
-        </div>
-
-        {/* Text block */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span
-              style={{
-                fontFamily: 'var(--font-serif)',
-                fontSize: isPrime ? 16 : 14,
-                color: 'var(--stl-text-bright)',
-                fontWeight: 600,
-                lineHeight: 1.1,
-                letterSpacing: '-0.005em',
-              }}
-            >
-              {mission.name}
-            </span>
-            {badge && (
-              <span
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: 7.5,
-                  color: badge.color,
-                  letterSpacing: '0.15em',
-                  background: badge.bg,
-                  padding: '1.5px 4px',
-                  borderRadius: 3,
-                  fontWeight: 500,
-                }}
-              >
-                {badge.label}
-              </span>
-            )}
-          </div>
-          <div
-            className="truncate mt-0.5"
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: 10.5,
-              color: 'rgba(255,255,255,0.5)',
-              fontStyle: 'italic',
-              fontWeight: 400,
-              lineHeight: 1.2,
-            }}
-          >
-            {metaLine}
-          </div>
-        </div>
-
-        {/* Stars pill */}
-        <span
-          className="flex-shrink-0 flex items-baseline gap-0.5"
-          style={{
-            color: 'var(--stl-gold)',
-          }}
-        >
-          <span
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 12,
-              fontWeight: 600,
-              letterSpacing: '0.01em',
-            }}
-          >
-            +{mission.stars}
-          </span>
-          <span style={{ fontSize: 11, fontWeight: 700, lineHeight: 1 }}>✦</span>
-        </span>
+    <div className="mis-prime">
+      <div className="mis-prime-icon">
+        <PlanetViz name={mission.id} size="medium" />
       </div>
-    </button>
-  );
-}
-
-function MissionMiniRail({
-  missions,
-  statusById,
-  onSelect,
-}: {
-  missions: Mission[];
-  statusById: Record<string, { aboveHorizon: boolean; altitude: number; azDir: string; peakTime: string | null; metaLine: string }>;
-  onSelect: (m: Mission) => void;
-}) {
-  return (
-    <div className="h-full flex flex-col">
-      <div className="flex items-baseline justify-between mb-2">
-        <h2
-          style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: 18,
-            color: 'var(--stl-text-bright)',
-            fontWeight: 600,
-            margin: 0,
-          }}
-        >
-          Missions tonight
-        </h2>
-        <span
-          style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: 9,
-            color: 'rgba(255,255,255,0.4)',
-            letterSpacing: '0.15em',
-          }}
-        >
-          {String(missions.length).padStart(2, '0')} VISIBLE
-        </span>
+      <div className="mis-prime-body">
+        <div className="mis-prime-badge">Prime target tonight</div>
+        <div className="mis-prime-name">{mission.name}</div>
+        <div className="mis-prime-desc">{tag}{altTxt}</div>
       </div>
-      <div className="grid grid-cols-3 gap-2 flex-1">
-        {missions.map(m => {
-          const Art = NODE_MAP_FOR_LIST[m.id];
-          if (!Art) return null;
-          const meta = statusById[m.id];
-          return <MiniCard key={m.id} mission={m} Art={Art} meta={meta} onClick={() => onSelect(m)} />;
-        })}
-      </div>
+      <button type="button" className="mis-prime-cta" onClick={onStart}>
+        Observe <span style={{ fontVariantNumeric: 'tabular-nums' }}>+{mission.stars}</span>
+      </button>
     </div>
   );
 }
 
-function MiniCard({
+// ---- Mission card ----
+
+function MissionCard({
   mission,
-  Art,
-  meta,
+  above,
   onClick,
 }: {
   mission: Mission;
-  Art: ComponentType<{ size?: number }>;
-  meta?: { aboveHorizon: boolean; altitude: number; azDir: string; peakTime: string | null; metaLine: string };
+  above: boolean;
   onClick: () => void;
 }) {
-  const [hover, setHover] = useState(false);
   return (
     <button
+      type="button"
+      id={`mis-card-${mission.id}`}
+      className={`mis-card ${above ? '' : 'dim'}`}
       onClick={onClick}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      className="relative overflow-hidden rounded-xl transition-all duration-200 ease-out"
-      style={{
-        background: hover ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
-        border: `1px solid ${hover ? 'rgba(255,209,102,0.35)' : 'rgba(255,255,255,0.08)'}`,
-        transform: hover ? 'translateY(-2px) scale(1.04)' : 'none',
-        boxShadow: hover ? '0 8px 24px rgba(0,0,0,0.35)' : 'none',
-        padding: '10px 8px',
-        cursor: 'pointer',
-        minHeight: 86,
-      }}
+      disabled={!above}
     >
-      <div className="flex items-center justify-center" style={{ height: 40 }}>
-        <Art size={hover ? 44 : 38} />
+      <div className={`mis-card-sky theme-${missionTheme(mission.id)}`}>
+        <PlanetViz name={mission.id} size={getCardPlanetSize(mission.id)} />
       </div>
-      <div
-        className="mt-1 text-center"
-        style={{
-          fontFamily: 'var(--font-serif)',
-          fontSize: 12,
-          color: 'var(--stl-text-bright)',
-          fontWeight: 600,
-          lineHeight: 1.1,
-          opacity: hover ? 1 : 0,
-          transform: hover ? 'translateY(0)' : 'translateY(3px)',
-          transition: 'opacity 180ms ease-out, transform 180ms ease-out',
-        }}
-      >
-        {mission.name}
-      </div>
-      <div
-        className="text-center"
-        style={{
-          fontFamily: 'var(--font-serif)',
-          fontSize: 8.5,
-          color: 'rgba(255,255,255,0.45)',
-          letterSpacing: '0.1em',
-          marginTop: 2,
-          opacity: hover ? 1 : 0,
-          transition: 'opacity 180ms ease-out',
-        }}
-      >
-        {meta?.aboveHorizon ? `ALT ${Math.round(meta.altitude)}°` : 'HIDDEN'}
+      <div className="mis-card-info">
+        <div className="mis-card-row">
+          <span className="mis-card-name">{mission.name}</span>
+          <span className="mis-card-stars">+{mission.stars}</span>
+        </div>
+        <div className="mis-card-meta">
+          <span className={`mis-diff ${diffClass(mission.difficulty)}`}>
+            {diffLabel(mission.difficulty)}
+          </span>
+          <span className="mis-card-equip">
+            {above ? (EQUIPMENT_LABEL[mission.id] ?? (mission.type === 'telescope' ? 'Telescope' : 'Naked eye')) : 'Below horizon'}
+          </span>
+        </div>
       </div>
     </button>
+  );
+}
+
+function PlayIcon() {
+  return (
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+      <path d="M3 2L8 5L3 8V2Z" fill="currentColor" />
+    </svg>
   );
 }
