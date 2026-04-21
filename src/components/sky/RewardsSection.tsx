@@ -54,7 +54,7 @@ export default function RewardsSection() {
                   : 'rgba(15,31,61,0.35)',
                 border: r.unlocked
                   ? '1px solid rgba(52,211,153,0.2)'
-                  : '1px solid #F1F5F9',
+                  : '1px solid rgba(255,255,255,0.05)',
                 opacity: !r.unlocked && r.progress === 0 ? 0.5 : 1,
               }}
             >
@@ -87,20 +87,20 @@ export default function RewardsSection() {
                   <div
                     className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-base"
                     style={{
-                      background: '#F1F5F9',
-                      border: '1px solid #F1F5F9',
+                      background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.06)',
                     }}
                   >
                     {r.icon}
                   </div>
-                  <div className={`text-[11.5px] font-semibold leading-tight truncate ${r.unlocked ? 'text-slate-900' : 'text-slate-600'}`}>
+                  <div className={`text-[11.5px] font-semibold leading-tight truncate ${r.unlocked ? 'text-white' : 'text-slate-400'}`}>
                     {r.name}
                   </div>
                 </div>
 
                 {/* Bottom: progress bar + pct */}
                 <div className="flex items-center gap-2 mt-2">
-                  <div className="flex-1 h-0.5 rounded-full overflow-hidden" style={{ background: '#F1F5F9' }}>
+                  <div className="flex-1 h-0.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                     <div
                       className="h-full rounded-full transition-all duration-700"
                       style={{ width: `${pct}%`, backgroundColor: progressColor }}
@@ -126,7 +126,7 @@ export default function RewardsSection() {
                             key={mId}
                             className="text-[9px] px-1.5 py-0.5 rounded-full border"
                             style={{
-                              borderColor: done ? 'rgba(52,211,153,0.3)' : '#F1F5F9',
+                              borderColor: done ? 'rgba(52,211,153,0.3)' : 'rgba(255,255,255,0.06)',
                               color: done ? '#34d399' : '#4a5568',
                             }}
                           >

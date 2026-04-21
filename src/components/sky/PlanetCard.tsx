@@ -28,7 +28,7 @@ function PlanetIcon({ planetKey, size = 36 }: { planetKey: string; size?: number
             <rect x={r} y={r - R} width={R} height={R * 2} fill="rgba(220,215,200,0.85)" />
             <ellipse cx={r} cy={r} rx={litR * 0.55} ry={litR} fill="#0d1f3a" />
           </g>
-          <circle cx={r} cy={r} r={R} fill="none" stroke="#E2E8F0" strokeWidth="0.75" />
+          <circle cx={r} cy={r} r={R} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="0.75" />
         </svg>
       );
     }
@@ -79,7 +79,7 @@ function PlanetIcon({ planetKey, size = 36 }: { planetKey: string; size?: number
           </defs>
           <circle cx={r} cy={r} r={R} fill={`url(#mars-grad-${size})`} />
           {/* Polar ice cap */}
-          <ellipse cx={r} cy={r - R + 3} rx={4} ry={2} fill="#94A3B8" />
+          <ellipse cx={r} cy={r - R + 3} rx={4} ry={2} fill="rgba(255,255,255,0.35)" />
         </svg>
       );
     }
@@ -172,8 +172,8 @@ function AltitudeArc({ altitude, size = 44 }: { altitude: number; size?: number 
   const dotX = cx + R * Math.cos(theta);
   const dotY = cy - R * Math.sin(theta);
 
-  const dotColor = altitude > 30 ? '#34D399' : altitude > 10 ? '#F59E0B' : '#94A3B8';
-  const arcStroke = altitude > 30 ? 'rgba(52,211,153,0.2)' : altitude > 10 ? 'rgba(245,158,11,0.2)' : '#E2E8F0';
+  const dotColor = altitude > 30 ? '#34D399' : altitude > 10 ? '#F59E0B' : 'rgba(255,255,255,0.3)';
+  const arcStroke = altitude > 30 ? 'rgba(52,211,153,0.2)' : altitude > 10 ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.08)';
 
   return (
     <svg
@@ -192,7 +192,7 @@ function AltitudeArc({ altitude, size = 44 }: { altitude: number; size?: number 
       {/* Horizon line */}
       <line
         x1={cx - R - 2} y1={cy} x2={cx + R + 2} y2={cy}
-        stroke="#E2E8F0"
+        stroke="rgba(255,255,255,0.08)"
         strokeWidth="0.75"
         strokeDasharray="2 2"
       />
@@ -247,7 +247,7 @@ export default function PlanetCard({ planet }: Props) {
           <PlanetIcon planetKey={planet.key} size={32} />
         </div>
         <div className="flex flex-col gap-1 min-w-0">
-          <span className="font-semibold text-slate-900 text-sm leading-tight" style={{ fontFamily: 'var(--font-display)' }}>
+          <span className="font-semibold text-white text-sm leading-tight" style={{ fontFamily: 'var(--font-display)' }}>
             {t(planet.key as Parameters<typeof t>[0])}
           </span>
           {planet.visible ? (
@@ -277,7 +277,7 @@ export default function PlanetCard({ planet }: Props) {
           <p
             className="text-sm font-bold font-mono"
             style={{
-              color: planet.altitude > 30 ? '#34D399' : planet.altitude > 10 ? '#F59E0B' : '#94A3B8',
+              color: planet.altitude > 30 ? '#34D399' : planet.altitude > 10 ? '#F59E0B' : 'rgba(255,255,255,0.3)',
             }}
           >
             {planet.altitude}°
@@ -306,13 +306,13 @@ export default function PlanetCard({ planet }: Props) {
       })()}
 
       {/* Rise / Transit / Set */}
-      <div className="grid grid-cols-3 gap-1 text-center pt-1" style={{ borderTop: '1px solid #F1F5F9' }}>
+      <div className="grid grid-cols-3 gap-1 text-center pt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
         {(['rise', 'transit', 'set'] as const).map(label => (
           <div key={label}>
             <p className="text-[9px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--color-text-muted)' }}>
               {t(label as Parameters<typeof t>[0])}
             </p>
-            <p className="text-xs font-mono text-slate-900">{hhmm(planet[label], locale)}</p>
+            <p className="text-xs font-mono text-white">{hhmm(planet[label], locale)}</p>
           </div>
         ))}
       </div>

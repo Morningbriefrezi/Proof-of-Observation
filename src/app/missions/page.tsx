@@ -101,35 +101,34 @@ export default function MissionsPage() {
 
   if (!authenticated) {
     return (
-      <div className="stl-page">
-      <div className="stl-page-inner animate-page-enter flex flex-col gap-4">
+      <PageContainer variant="wide" className="py-3 sm:py-6 animate-page-enter flex flex-col gap-4">
         {/* Sign-in card */}
         <div
           className="rounded-2xl p-5 sm:p-6"
           style={{
-            background: '#F8FAFC',
-            border: '1px solid #E2E8F0',
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.05), rgba(15,31,61,0.5))',
+            border: '1px solid rgba(99,102,241,0.1)',
           }}
         >
           <div className="flex items-center gap-4">
             <div
               className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 relative"
-              style={{ background: '#EEF2FF', border: '1px solid #C7D2FE' }}
+              style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.15)' }}
             >
               <TelescopeIcon size={28} animate />
               <span
                 className="absolute -top-1 -right-1 text-[10px] leading-none"
-                style={{ color: '#D97706' }}
+                style={{ color: 'var(--stl-gold)', textShadow: '0 0 6px rgba(255,209,102,0.6)' }}
               >✦</span>
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-base font-bold" style={{ fontFamily: 'Georgia, serif', color: '#0F172A' }}>{t('title')}</h2>
-              <p className="text-xs mt-0.5" style={{ color: '#64748B' }}>{t('subtitle')}</p>
+              <h2 className="text-base font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>{t('title')}</h2>
+              <p className="text-slate-500 text-xs mt-0.5">{t('subtitle')}</p>
             </div>
             <button
               onClick={login}
               className="flex-shrink-0 px-4 py-2 rounded-xl font-bold text-xs transition-all hover:opacity-90"
-              style={{ background: '#0F172A', color: '#FFFFFF' }}
+              style={{ background: 'linear-gradient(135deg, #FFD166, #CC9A33)', color: '#0a0a0a' }}
             >
               {t('signIn')}
             </button>
@@ -138,24 +137,24 @@ export default function MissionsPage() {
 
         {/* Preview mission list */}
         <div>
-          <p className="text-[11px] uppercase tracking-widest mb-3" style={{ color: '#64748B' }}>{t('availableMissions')}</p>
+          <p className="text-slate-600 text-[11px] uppercase tracking-widest mb-3">{t('availableMissions')}</p>
           <div className="flex flex-col gap-2.5">
             {MISSIONS.map(mission => (
               <div
                 key={mission.id}
                 className="relative flex items-center gap-4 rounded-2xl px-4 py-3.5 overflow-hidden"
-                style={{ background: '#FFFFFF', border: '1px solid #E2E8F0' }}
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
               >
-                <div className="absolute inset-0 z-10 flex items-center justify-end pr-4" style={{ background: 'rgba(248,250,252,0.6)', backdropFilter: 'blur(1px)' }}>
-                  <Lock size={13} color="#94A3B8" />
+                <div className="absolute inset-0 bg-[#070B14]/40 backdrop-blur-[1px] z-10 flex items-center justify-end pr-4">
+                  <Lock size={13} className="text-slate-600" />
                 </div>
                 <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
                   <MissionIcon id={mission.id} size={28}/>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold" style={{ color: '#0F172A' }}>{mission.name}</p>
-                  <p className="text-xs mt-0.5 line-clamp-1" style={{ color: '#64748B' }}>{mission.desc}</p>
+                  <p className="text-slate-400 text-sm font-semibold">{mission.name}</p>
+                  <p className="text-slate-600 text-xs mt-0.5 line-clamp-1">{mission.desc}</p>
                   <div className="mt-1.5">
                     <DifficultyDots level={
                       mission.difficulty === 'Beginner' ? 1
@@ -165,8 +164,8 @@ export default function MissionsPage() {
                     }/>
                   </div>
                 </div>
-                <span className="text-xs font-bold flex-shrink-0 flex items-center gap-0.5"
-                  style={{ fontVariantNumeric: 'tabular-nums', color: '#D97706' }}>
+                <span className="text-[#FFD166]/40 text-xs font-bold flex-shrink-0 flex items-center gap-0.5"
+                  style={{ fontVariantNumeric: 'tabular-nums' }}>
                   +{mission.stars}<StarTokenIcon size={11}/>
                 </span>
               </div>
@@ -177,35 +176,34 @@ export default function MissionsPage() {
         {/* Tonight's sky */}
         <div
           className="rounded-2xl p-4"
-          style={{ background: '#F8FAFC', border: '1px solid #E2E8F0' }}
+          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
         >
-          <p className="text-[11px] uppercase tracking-widest mb-3" style={{ color: '#64748B' }}>{t('tonightsSky')}</p>
+          <p className="text-slate-600 text-[11px] uppercase tracking-widest mb-3">{t('tonightsSky')}</p>
           {skyConditions ? (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${skyConditions.verified ? 'bg-[#16A34A] animate-pulse' : 'bg-amber-500'}`} />
-                <span className="text-sm font-medium" style={{ color: '#0F172A' }}>
+                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${skyConditions.verified ? 'bg-[#34d399] animate-pulse' : 'bg-amber-400'}`} />
+                <span className="text-white text-sm font-medium">
                   {skyConditions.verified ? t('goodConditions') : t('cloudyTonight')}
                 </span>
               </div>
-              <div className="flex gap-3 text-xs flex-shrink-0" style={{ color: '#64748B' }}>
+              <div className="flex gap-3 text-xs text-slate-500 flex-shrink-0">
                 <span>{skyConditions.cloudCover}% cloud</span>
                 <span>{skyConditions.visibility}</span>
               </div>
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isNight ? 'bg-[#16A34A] animate-pulse' : 'bg-slate-300'}`} />
+              <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isNight ? 'bg-[#34d399] animate-pulse' : 'bg-slate-700'}`} />
               {isNight ? (
                 <span className="loading-dots"><span></span><span></span><span></span></span>
               ) : (
-                <span className="text-sm" style={{ color: '#64748B' }}>Come back after sunset to observe</span>
+                <span className="text-slate-500 text-sm">Come back after sunset to observe</span>
               )}
             </div>
           )}
         </div>
-      </div>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -214,8 +212,7 @@ export default function MissionsPage() {
       <>
       {activeQuiz && <QuizActive quiz={activeQuiz} onClose={() => setActiveQuiz(null)} />}
 
-      <div className="stl-page">
-      <div className="stl-page-inner flex flex-col gap-3" style={{ fontFamily: 'var(--font-serif)' }}>
+      <PageContainer variant="wide" className="py-2 flex flex-col gap-3" style={{ fontFamily: 'var(--font-serif)' }}>
         <BackButton />
 
         <ChartSection onStart={(m) => router.push(`/observe/${m.id}`)} />
@@ -231,7 +228,7 @@ export default function MissionsPage() {
                   style={{
                     fontFamily: 'var(--font-serif)',
                     fontSize: 24,
-                    color: '#0F172A',
+                    color: 'var(--stl-text-bright)',
                     fontWeight: 600,
                     margin: 0,
                     letterSpacing: '-0.01em',
@@ -243,7 +240,7 @@ export default function MissionsPage() {
                   style={{
                     fontFamily: 'var(--font-serif)',
                     fontSize: 10,
-                    color: '#94A3B8',
+                    color: 'rgba(255,255,255,0.35)',
                     letterSpacing: '0.14em',
                   }}
                 >
@@ -254,7 +251,7 @@ export default function MissionsPage() {
                 style={{
                   fontFamily: 'var(--font-serif)',
                   fontSize: 13,
-                  color: '#475569',
+                  color: 'rgba(255,255,255,0.55)',
                   fontStyle: 'italic',
                   fontWeight: 400,
                   marginTop: 2,
@@ -265,9 +262,9 @@ export default function MissionsPage() {
             </div>
             <div
               className="flex items-center gap-1 px-2.5 py-1.5 rounded-full"
-              style={{ background: '#FEF3C7', border: '1px solid #FDE68A' }}
+              style={{ background: 'rgba(255,209,102,0.08)', border: '1px solid rgba(255,209,102,0.2)' }}
             >
-              <span style={{ fontSize: 11, color: '#D97706', fontWeight: 600 }}>
+              <span style={{ fontSize: 11, color: 'var(--stl-gold)', fontWeight: 600 }}>
                 ✦ {quizStarsEarned}
               </span>
             </div>
@@ -308,8 +305,7 @@ export default function MissionsPage() {
 
         <RewardsSection />
         <ObservationLog />
-      </div>
-      </div>
+      </PageContainer>
       </>
     </PageTransition>
   );
@@ -553,7 +549,7 @@ function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
             style={{
               fontFamily: 'var(--font-serif)',
               fontSize: 20,
-              color: '#0F172A',
+              color: 'var(--stl-text-bright)',
               fontWeight: 600,
               margin: 0,
             }}
@@ -582,7 +578,7 @@ function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
                       fontSize: 13,
                       fontWeight: active ? 600 : 400,
                       fontStyle: active ? 'normal' : 'italic',
-                      color: active ? '#0F172A' : '#64748B',
+                      color: active ? 'var(--stl-text-bright)' : 'rgba(255,255,255,0.5)',
                       letterSpacing: '0.005em',
                       transition: 'color 0.2s ease',
                     }}
@@ -594,7 +590,7 @@ function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
                       fontFamily: 'var(--font-mono)',
                       fontSize: 10,
                       fontWeight: 500,
-                      color: active ? '#D97706' : '#94A3B8',
+                      color: active ? 'var(--stl-gold)' : 'rgba(255,255,255,0.35)',
                       letterSpacing: '0.02em',
                       transition: 'color 0.2s ease',
                     }}
@@ -611,8 +607,8 @@ function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
                         bottom: 0,
                         height: 1.5,
                         borderRadius: 1,
-                        background: 'linear-gradient(to right, transparent, #D97706 30%, #D97706 70%, transparent)',
-                        boxShadow: 'none',
+                        background: 'linear-gradient(to right, transparent, #FFD166 30%, #FFD166 70%, transparent)',
+                        boxShadow: '0 0 8px rgba(255,209,102,0.55)',
                       }}
                     />
                   )}
@@ -632,11 +628,11 @@ function ChartSection({ onStart }: { onStart: (m: Mission) => void }) {
             const disabled = isDone || !status?.aboveHorizon;
 
             const badge = isPrime
-              ? { label: 'PRIME', color: '#D97706', bg: '#FEF3C7' }
+              ? { label: 'PRIME', color: 'var(--stl-gold)', bg: 'rgba(255,209,102,0.15)' }
               : status && !status.aboveHorizon
-              ? { label: 'HIDDEN', color: '#64748B', bg: '#E2E8F0' }
+              ? { label: 'HIDDEN', color: 'rgba(255,255,255,0.5)', bg: 'rgba(255,255,255,0.06)' }
               : status && status.altitude < 20
-              ? { label: 'LOW', color: '#0891B2', bg: '#E0F7FA' }
+              ? { label: 'LOW', color: '#38F0FF', bg: 'rgba(56,240,255,0.12)' }
               : undefined;
 
             return (
@@ -676,11 +672,11 @@ function MissionGridCard({
       className={`relative text-left overflow-hidden transition-all active:scale-[0.98] disabled:opacity-55 disabled:cursor-default hover:-translate-y-0.5 ${isPrime ? 'col-span-2' : ''}`}
       style={{
         background: isPrime
-          ? 'linear-gradient(135deg, #FFFBEB, #FEF3C7)'
-          : '#FFFFFF',
+          ? 'radial-gradient(ellipse at 75% 20%, rgba(255,209,102,0.14) 0%, transparent 55%), linear-gradient(135deg, rgba(10,12,22,0.85), rgba(6,8,16,0.95))'
+          : 'linear-gradient(145deg, rgba(20,24,40,0.75), rgba(8,10,20,0.95))',
         border: isPrime
-          ? '1px solid #FDE68A'
-          : '1px solid #E2E8F0',
+          ? '1px solid rgba(255,209,102,0.3)'
+          : '1px solid rgba(255,255,255,0.06)',
         borderRadius: 10,
         padding: '8px 10px',
         minHeight: isPrime ? 72 : 64,
@@ -697,10 +693,10 @@ function MissionGridCard({
             className="absolute inset-0 rounded-full"
             style={{
               background: disabled
-                ? 'radial-gradient(circle at 50% 50%, #F1F5F9 0%, transparent 62%)'
+                ? 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 62%)'
                 : isPrime
-                ? 'radial-gradient(circle at 50% 50%, rgba(217,119,6,0.16) 0%, transparent 65%)'
-                : 'radial-gradient(circle at 50% 50%, rgba(91,61,200,0.10) 0%, transparent 65%)',
+                ? 'radial-gradient(circle at 50% 50%, rgba(255,209,102,0.16) 0%, transparent 65%)'
+                : 'radial-gradient(circle at 50% 50%, rgba(184,212,255,0.08) 0%, transparent 65%)',
               filter: 'blur(2px)',
             }}
           />
@@ -714,7 +710,7 @@ function MissionGridCard({
               style={{
                 fontFamily: 'var(--font-serif)',
                 fontSize: isPrime ? 16 : 14,
-                color: '#0F172A',
+                color: 'var(--stl-text-bright)',
                 fontWeight: 600,
                 lineHeight: 1.1,
                 letterSpacing: '-0.005em',
@@ -744,7 +740,7 @@ function MissionGridCard({
             style={{
               fontFamily: 'var(--font-serif)',
               fontSize: 10.5,
-              color: '#64748B',
+              color: 'rgba(255,255,255,0.5)',
               fontStyle: 'italic',
               fontWeight: 400,
               lineHeight: 1.2,
@@ -758,7 +754,7 @@ function MissionGridCard({
         <span
           className="flex-shrink-0 flex items-baseline gap-0.5"
           style={{
-            color: '#D97706',
+            color: 'var(--stl-gold)',
           }}
         >
           <span
@@ -794,7 +790,7 @@ function MissionMiniRail({
           style={{
             fontFamily: 'var(--font-serif)',
             fontSize: 18,
-            color: '#0F172A',
+            color: 'var(--stl-text-bright)',
             fontWeight: 600,
             margin: 0,
           }}
@@ -805,7 +801,7 @@ function MissionMiniRail({
           style={{
             fontFamily: 'var(--font-serif)',
             fontSize: 9,
-            color: '#64748B',
+            color: 'rgba(255,255,255,0.4)',
             letterSpacing: '0.15em',
           }}
         >
@@ -843,10 +839,10 @@ function MiniCard({
       onMouseLeave={() => setHover(false)}
       className="relative overflow-hidden rounded-xl transition-all duration-200 ease-out"
       style={{
-        background: hover ? '#FEF3C7' : '#F8FAFC',
-        border: `1px solid ${hover ? '#FDE68A' : '#E2E8F0'}`,
+        background: hover ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
+        border: `1px solid ${hover ? 'rgba(255,209,102,0.35)' : 'rgba(255,255,255,0.08)'}`,
         transform: hover ? 'translateY(-2px) scale(1.04)' : 'none',
-        boxShadow: hover ? '0 8px 24px rgba(15,23,42,0.08)' : 'none',
+        boxShadow: hover ? '0 8px 24px rgba(0,0,0,0.35)' : 'none',
         padding: '10px 8px',
         cursor: 'pointer',
         minHeight: 86,
@@ -860,7 +856,7 @@ function MiniCard({
         style={{
           fontFamily: 'var(--font-serif)',
           fontSize: 12,
-          color: '#0F172A',
+          color: 'var(--stl-text-bright)',
           fontWeight: 600,
           lineHeight: 1.1,
           opacity: hover ? 1 : 0,
@@ -875,7 +871,7 @@ function MiniCard({
         style={{
           fontFamily: 'var(--font-serif)',
           fontSize: 8.5,
-          color: '#64748B',
+          color: 'rgba(255,255,255,0.45)',
           letterSpacing: '0.1em',
           marginTop: 2,
           opacity: hover ? 1 : 0,

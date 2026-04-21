@@ -27,7 +27,7 @@ export default function BestTargets() {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-28 rounded-xl animate-pulse" style={{ background: '#F1F5F9' }} />
+          <div key={i} className="h-28 rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.05)' }} />
         ))}
       </div>
     );
@@ -44,7 +44,7 @@ export default function BestTargets() {
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[13px] -mt-2 mb-1 max-w-[60ch]" style={{ color: '#475569' }}>
+      <p className="text-[13px] -mt-2 mb-1 max-w-[60ch]" style={{ color: 'oklch(0.94 0.015 80 / 0.55)' }}>
         {isDefault ? 'Showing Tbilisi — change location above' : 'Based on your location and current sky conditions'}
       </p>
 
@@ -67,7 +67,7 @@ export default function BestTargets() {
               style={{
                 borderLeft: target.visible
                   ? '2px solid rgba(52,211,153,0.4)'
-                  : '2px solid #F1F5F9',
+                  : '2px solid rgba(255,255,255,0.06)',
                 opacity: target.visible ? 1 : 0.5,
               }}
             >
@@ -75,7 +75,7 @@ export default function BestTargets() {
                 <div className="flex items-center gap-2">
                   <span className="text-lg">{target.emoji}</span>
                   <div>
-                    <p className="text-slate-900 text-sm font-semibold">{target.name}</p>
+                    <p className="text-white text-sm font-semibold">{target.name}</p>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="text-[10px] px-1.5 py-0.5 rounded" style={{
                         background: eqBg,

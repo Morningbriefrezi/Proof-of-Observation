@@ -71,25 +71,23 @@ export default function ProfilePage() {
 
   if (!authenticated) {
     return (
-      <div className="stl-page">
-        <div className="stl-page-inner flex flex-col gap-4">
+      <PageContainer variant="content" className="py-8 flex flex-col gap-4">
+        <div style={{
+          borderRadius: 20, padding: '28px 24px', textAlign: 'center',
+          background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+        }}>
           <div style={{
-            borderRadius: 20, padding: '28px 24px', textAlign: 'center',
-            background: '#F8FAFC', border: '1px solid #E2E8F0',
+            width: 64, height: 64, borderRadius: '50%', margin: '0 auto 16px',
+            background: 'linear-gradient(135deg, #8B5CF6, #818cf8)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <div style={{
-              width: 64, height: 64, borderRadius: '50%', margin: '0 auto 16px',
-              background: 'linear-gradient(135deg, #8B5CF6, #818cf8)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Lock size={24} color="white" />
-            </div>
-            <p style={{ color: '#0F172A', fontWeight: 700, fontSize: 17, margin: '0 0 6px' }}>Sign in to view your profile</p>
-            <p style={{ color: '#64748B', fontSize: 13, margin: '0 0 20px' }}>Track missions, discoveries, and Stars earned</p>
-            <Button variant="brass" onClick={login}>Sign In</Button>
+            <Lock size={24} color="white" />
           </div>
+          <p style={{ color: 'white', fontWeight: 700, fontSize: 17, margin: '0 0 6px' }}>Sign in to view your profile</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, margin: '0 0 20px' }}>Track missions, discoveries, and Stars earned</p>
+          <Button variant="brass" onClick={login}>Sign In</Button>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -136,7 +134,7 @@ export default function ProfilePage() {
       upgradeHint: 'Complete your first mission to become an Observer' };
   })();
 
-  const shimmer = profileLoaded ? undefined : { animation: 'pulse 1.5s ease-in-out infinite', background: '#E2E8F0', borderRadius: 6 };
+  const shimmer = profileLoaded ? undefined : { animation: 'pulse 1.5s ease-in-out infinite', background: 'rgba(255,255,255,0.06)', borderRadius: 6 };
 
   return (
     <PageTransition>
@@ -153,21 +151,20 @@ export default function ProfilePage() {
             onClick={e => e.stopPropagation()}
           >
             <Image src={selectedPhoto.photo} alt={selectedPhoto.name} width={480} height={480} className="w-full object-cover" unoptimized />
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '12px 16px', background: 'linear-gradient(0deg,rgba(15,23,42,0.88),transparent)' }}>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '12px 16px', background: 'linear-gradient(0deg,rgba(7,11,20,0.9),transparent)' }}>
               <p style={{ color: 'white', fontWeight: 600, fontSize: 14, margin: 0 }}>{selectedPhoto.name}</p>
             </div>
             <button
               onClick={() => setSelectedPhoto(null)}
-              style={{ position: 'absolute', top: 12, right: 12, width: 28, height: 28, borderRadius: '50%', background: 'rgba(15,23,42,0.7)', border: '1px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+              style={{ position: 'absolute', top: 12, right: 12, width: 28, height: 28, borderRadius: '50%', background: 'rgba(7,11,20,0.7)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
             >
-              <X size={13} color="rgba(255,255,255,0.85)" />
+              <X size={13} color="rgba(255,255,255,0.7)" />
             </button>
           </div>
         </div>
       )}
 
-      <div className="stl-page">
-      <div className="stl-page-inner flex flex-col gap-0">
+      <PageContainer variant="content" className="py-6 pb-10 flex flex-col gap-0">
 
         {/* — HEADER: Avatar + Name + Address — */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 24, gap: 10 }}>
@@ -189,23 +186,23 @@ export default function ProfilePage() {
 
           {/* Name */}
           <div style={{ textAlign: 'center' }}>
-            <p style={{ color: '#0F172A', fontWeight: 700, fontSize: 19, margin: 0, lineHeight: 1.2 }}>{displayName}</p>
+            <p style={{ color: 'white', fontWeight: 700, fontSize: 19, margin: 0, lineHeight: 1.2 }}>{displayName}</p>
             {addrShort && (
               <button
                 onClick={handleCopy}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 5, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
               >
-                <span style={{ color: '#64748B', fontSize: 12, fontFamily: 'monospace' }}>{addrShort}</span>
+                <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, fontFamily: 'monospace' }}>{addrShort}</span>
                 {copied
-                  ? <Check size={12} color="#16A34A" />
-                  : <Copy size={12} color="#94A3B8" />
+                  ? <Check size={12} color="#34d399" />
+                  : <Copy size={12} color="rgba(255,255,255,0.3)" />
                 }
                 <a
                   href={`https://explorer.solana.com/address/${address}?cluster=${cluster}`}
                   target="_blank" rel="noopener noreferrer"
                   onClick={e => e.stopPropagation()}
                 >
-                  <ExternalLink size={12} color="#94A3B8" />
+                  <ExternalLink size={12} color="rgba(255,255,255,0.3)" />
                 </a>
               </button>
             )}
@@ -215,20 +212,20 @@ export default function ProfilePage() {
         {/* — STATS ROW — */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 28 }}>
           {[
-            { value: `★ ${starsDisplay.toLocaleString()}`, label: 'Stars Earned', color: '#D97706' },
-            { value: String(completed.length), label: 'Missions Done', color: '#16A34A' },
-            { value: starsDisplay > 0 ? `~${gelWorth}₾` : String(obsCount), label: starsDisplay > 0 ? 'Store Value' : 'NFTs Minted', color: '#5B3DC8' },
+            { value: `★ ${starsDisplay.toLocaleString()}`, label: 'Stars Earned', color: 'var(--stl-gold)' },
+            { value: String(completed.length), label: 'Missions Done', color: 'var(--stl-green)' },
+            { value: starsDisplay > 0 ? `~${gelWorth}₾` : String(obsCount), label: starsDisplay > 0 ? 'Store Value' : 'NFTs Minted', color: '#818cf8' },
           ].map(s => (
             <div key={s.label} style={{
               borderRadius: 16, padding: '14px 10px', textAlign: 'center',
-              background: '#F8FAFC', border: '1px solid #E2E8F0',
+              background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
             }}>
               {!profileLoaded && s.label !== 'Missions Done' ? (
                 <div style={{ ...shimmer, height: 20, width: 48, margin: '0 auto 4px' }} />
               ) : (
                 <p style={{ color: s.color, fontWeight: 800, fontSize: 17, margin: '0 0 3px', fontFamily: 'monospace' }}>{s.value}</p>
               )}
-              <p style={{ color: '#64748B', fontSize: 10, margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em', lineHeight: 1.3 }}>{s.label}</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 10, margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em', lineHeight: 1.3 }}>{s.label}</p>
             </div>
           ))}
         </div>
@@ -236,23 +233,23 @@ export default function ProfilePage() {
         {/* — NETWORK STATUS — */}
         <div style={{ marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-            <p style={{ color: '#0F172A', fontWeight: 700, fontSize: 16, margin: 0 }}>Network Status</p>
-            <Link href="/network" style={{ color: '#5B3DC8', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
+            <p style={{ color: 'white', fontWeight: 700, fontSize: 16, margin: 0 }}>Network Status</p>
+            <Link href="/network" style={{ color: 'var(--stl-green)', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
               View network <ChevronRight size={13} />
             </Link>
           </div>
           <div style={{
             borderRadius: 18, padding: '18px 20px',
-            background: '#F8FAFC', border: '1px solid #E2E8F0',
+            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
             display: 'flex', flexDirection: 'column', gap: 12,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <span style={{ fontSize: 26, lineHeight: 1 }}>{nodeType.emoji}</span>
               <div style={{ flex: 1 }}>
-                <p style={{ color: '#0F172A', fontWeight: 700, fontSize: 15, margin: 0, letterSpacing: '0.01em' }}>
+                <p style={{ color: nodeType.color, fontWeight: 700, fontSize: 15, margin: 0, letterSpacing: '0.01em' }}>
                   {nodeType.label}
                 </p>
-                <p style={{ color: '#64748B', fontSize: 12, margin: '2px 0 0' }}>
+                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, margin: '2px 0 0' }}>
                   {nodeType.description}
                 </p>
               </div>
@@ -265,19 +262,19 @@ export default function ProfilePage() {
               ].map(row => (
                 <div key={row.label} style={{
                   padding: '10px 12px', borderRadius: 12,
-                  background: '#FFFFFF', border: '1px solid #E2E8F0',
+                  background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
                 }}>
-                  <p style={{ color: '#94A3B8', fontSize: 10, margin: 0, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10, margin: 0, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                     {row.label}
                   </p>
-                  <p style={{ color: '#0F172A', fontWeight: 600, fontSize: 13, margin: '4px 0 0', fontFamily: 'monospace' }}>
+                  <p style={{ color: 'white', fontWeight: 600, fontSize: 13, margin: '4px 0 0', fontFamily: 'monospace' }}>
                     {row.value}
                   </p>
                 </div>
               ))}
             </div>
             {nodeType.upgradeHint && (
-              <p style={{ color: '#64748B', fontSize: 11.5, margin: 0, lineHeight: 1.45 }}>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11.5, margin: 0, lineHeight: 1.45 }}>
                 {nodeType.upgradeHint}
               </p>
             )}
@@ -287,8 +284,8 @@ export default function ProfilePage() {
         {/* — MY DISCOVERIES — */}
         <div style={{ marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-            <p style={{ color: '#0F172A', fontWeight: 700, fontSize: 16, margin: 0 }}>My Discoveries</p>
-            <Link href="/missions" style={{ color: '#5B3DC8', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
+            <p style={{ color: 'white', fontWeight: 700, fontSize: 16, margin: 0 }}>My Discoveries</p>
+            <Link href="/missions" style={{ color: 'var(--stl-green)', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}>
               View all <ChevronRight size={13} />
             </Link>
           </div>
@@ -296,10 +293,10 @@ export default function ProfilePage() {
           {photoDiscoveries.length === 0 ? (
             <div style={{
               borderRadius: 16, padding: '28px 20px', textAlign: 'center',
-              background: '#F8FAFC', border: '1px dashed #CBD5E1',
+              background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)',
             }}>
-              <Telescope size={22} color="#94A3B8" style={{ marginBottom: 8 }} />
-              <p style={{ color: '#64748B', fontSize: 13, margin: 0 }}>Complete a mission with a photo to see your discoveries</p>
+              <Telescope size={22} color="rgba(255,255,255,0.2)" style={{ marginBottom: 8 }} />
+              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, margin: 0 }}>Complete a mission with a photo to see your discoveries</p>
             </div>
           ) : (
             <div style={{ display: 'flex', gap: 12, overflowX: 'auto', scrollbarWidth: 'none', marginLeft: -2, paddingLeft: 2 }}>
@@ -309,7 +306,7 @@ export default function ProfilePage() {
                   onClick={() => setSelectedPhoto({ photo: d.photo, name: d.name })}
                   style={{
                     flexShrink: 0, width: 160, borderRadius: 16, overflow: 'hidden',
-                    background: '#FFFFFF', border: '1px solid #E2E8F0',
+                    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
                     cursor: 'pointer', textAlign: 'left', padding: 0,
                   }}
                 >
@@ -317,8 +314,8 @@ export default function ProfilePage() {
                     <Image src={d.photo} alt={d.name} fill style={{ objectFit: 'cover' }} unoptimized />
                   </div>
                   <div style={{ padding: '10px 12px 12px' }}>
-                    <p style={{ color: '#0F172A', fontWeight: 600, fontSize: 13, margin: '0 0 3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.name}</p>
-                    <p style={{ color: '#94A3B8', fontSize: 11, margin: '0 0 8px' }}>
+                    <p style={{ color: 'white', fontWeight: 600, fontSize: 13, margin: '0 0 3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.name}</p>
+                    <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, margin: '0 0 8px' }}>
                       {new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </p>
                     {d.txId ? (
@@ -328,8 +325,8 @@ export default function ProfilePage() {
                         onClick={e => e.stopPropagation()}
                         style={{
                           display: 'inline-block', padding: '3px 8px', borderRadius: 20,
-                          background: '#DCFCE7', border: '1px solid #86EFAC',
-                          color: '#16A34A', fontSize: 10, fontWeight: 600, textDecoration: 'none',
+                          background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)',
+                          color: 'var(--stl-green)', fontSize: 10, fontWeight: 600, textDecoration: 'none',
                         }}
                       >
                         On-chain Proof
@@ -337,8 +334,8 @@ export default function ProfilePage() {
                     ) : (
                       <span style={{
                         display: 'inline-block', padding: '3px 8px', borderRadius: 20,
-                        background: '#F1F5F9', border: '1px solid #E2E8F0',
-                        color: '#94A3B8', fontSize: 10,
+                        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                        color: 'rgba(255,255,255,0.3)', fontSize: 10,
                       }}>
                         Local
                       </span>
@@ -353,35 +350,35 @@ export default function ProfilePage() {
         {/* — SETTINGS — */}
         <div style={{ marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-            <p style={{ color: '#0F172A', fontWeight: 700, fontSize: 16, margin: 0 }}>Settings</p>
-            <Link href="/settings" style={{ color: '#5B3DC8', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3 }}>
+            <p style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: 16, margin: 0 }}>Settings</p>
+            <Link href="/settings" style={{ color: 'var(--accent)', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3 }}>
               <Settings size={13} /> All settings
             </Link>
           </div>
-          <div style={{ borderRadius: 18, overflow: 'hidden', border: '1px solid #E2E8F0', background: '#FFFFFF' }}>
-            <Link href="/settings#language" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 14, padding: '15px 18px', borderBottom: '1px solid #F1F5F9' }}>
-              <div style={{ width: 34, height: 34, borderRadius: 10, background: '#EEF2FF', border: '1px solid #C7D2FE', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Globe size={16} color="#6366F1" />
+          <div style={{ borderRadius: 18, overflow: 'hidden', border: '1px solid var(--border-default)', background: 'var(--bg-card)' }}>
+            <Link href="/settings#language" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 14, padding: '15px 18px', borderBottom: '1px solid var(--border-subtle)' }}>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Globe size={16} color="#818cf8" />
               </div>
-              <p style={{ color: '#0F172A', fontSize: 15, fontWeight: 500, margin: 0, flex: 1 }}>Language</p>
-              <span style={{ color: '#64748B', fontSize: 13 }}>EN / KA</span>
-              <ChevronRight size={15} color="#94A3B8" />
+              <p style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 500, margin: 0, flex: 1 }}>Language</p>
+              <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>EN / KA</span>
+              <ChevronRight size={15} color="var(--text-muted)" />
             </Link>
-            <Link href="/settings#notifications" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 14, padding: '15px 18px', borderBottom: '1px solid #F1F5F9' }}>
-              <div style={{ width: 34, height: 34, borderRadius: 10, background: '#FEF3C7', border: '1px solid #FDE68A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Bell size={16} color="#D97706" />
+            <Link href="/settings#notifications" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 14, padding: '15px 18px', borderBottom: '1px solid var(--border-subtle)' }}>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(255,209,102,0.08)', border: '1px solid rgba(255,209,102,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Bell size={16} color="#FFD166" />
               </div>
-              <p style={{ color: '#0F172A', fontSize: 15, fontWeight: 500, margin: 0, flex: 1 }}>Notifications</p>
-              <span style={{ color: '#64748B', fontSize: 13 }}>On</span>
-              <ChevronRight size={15} color="#94A3B8" />
+              <p style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 500, margin: 0, flex: 1 }}>Notifications</p>
+              <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>On</span>
+              <ChevronRight size={15} color="var(--text-muted)" />
             </Link>
             <Link href="/settings#appearance" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 14, padding: '15px 18px' }}>
-              <div style={{ width: 34, height: 34, borderRadius: 10, background: '#EDE9FE', border: '1px solid #DDD6FE', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Moon size={16} color="#7C3AED" />
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Moon size={16} color="#8B5CF6" />
               </div>
-              <p style={{ color: '#0F172A', fontSize: 15, fontWeight: 500, margin: 0, flex: 1 }}>Appearance</p>
-              <span style={{ color: '#64748B', fontSize: 13 }}>Dark / Day</span>
-              <ChevronRight size={15} color="#94A3B8" />
+              <p style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 500, margin: 0, flex: 1 }}>Appearance</p>
+              <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>Dark / Day</span>
+              <ChevronRight size={15} color="var(--text-muted)" />
             </Link>
           </div>
         </div>
@@ -392,9 +389,9 @@ export default function ProfilePage() {
           style={{
             width: '100%', padding: '13px', borderRadius: 14, fontSize: 14, fontWeight: 600,
             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            background: confirmSignOut ? '#FEE2E2' : '#F8FAFC',
-            border: `1px solid ${confirmSignOut ? '#FCA5A5' : '#E2E8F0'}`,
-            color: confirmSignOut ? '#DC2626' : '#64748B',
+            background: confirmSignOut ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.03)',
+            border: `1px solid ${confirmSignOut ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.07)'}`,
+            color: confirmSignOut ? '#f87171' : 'rgba(255,255,255,0.4)',
             transition: 'all 0.2s',
           }}
         >
@@ -405,14 +402,13 @@ export default function ProfilePage() {
         {confirmSignOut && (
           <button
             onClick={() => setConfirmSignOut(false)}
-            style={{ marginTop: 8, width: '100%', padding: '10px', borderRadius: 12, fontSize: 13, color: '#94A3B8', background: 'none', border: 'none', cursor: 'pointer' }}
+            style={{ marginTop: 8, width: '100%', padding: '10px', borderRadius: 12, fontSize: 13, color: 'rgba(255,255,255,0.3)', background: 'none', border: 'none', cursor: 'pointer' }}
           >
             Cancel
           </button>
         )}
 
-      </div>
-      </div>
+      </PageContainer>
     </PageTransition>
   );
 }

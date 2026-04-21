@@ -73,11 +73,11 @@ export default function PlanetGrid() {
       <div className="flex flex-col gap-3">
         {error && (
           <div className="flex items-center justify-between glass-card px-4 py-3"
-            style={{ border: '1px solid #E2E8F0' }}>
-            <p className="text-slate-600 text-sm">{t('forecastError')}</p>
+            style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+            <p className="text-slate-400 text-sm">{t('forecastError')}</p>
             <button
               onClick={() => load(lat, lng)}
-              className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 text-xs hover:bg-slate-100 transition-colors"
+              className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-xs hover:bg-white/10 transition-colors"
             >
               {t('retry')}
             </button>
@@ -89,13 +89,13 @@ export default function PlanetGrid() {
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">{m.emoji}</span>
-                  <span className="text-slate-900 text-sm font-semibold">{m.name}</span>
+                  <span className="text-white text-sm font-semibold">{m.name}</span>
                 </div>
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border bg-slate-100 text-slate-600 border-slate-200">
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border bg-[#0F1F3D] text-slate-400 border-[rgba(99,102,241,0.12)]">
                   Check tonight
                 </span>
               </div>
-              <div className="h-1 rounded-full bg-slate-100" />
+              <div className="h-1 rounded-full bg-white/[0.06]" />
               <div className="grid grid-cols-3 gap-1 text-center">
                 {(['Rise', 'Transit', 'Set'] as const).map(label => (
                   <div key={label}>
@@ -128,7 +128,7 @@ export default function PlanetGrid() {
             </button>
             {p.altitude < 0 ? (
               <span className="px-3 py-1.5 text-xs rounded-lg w-full text-center block"
-                style={{ background: '#F8FAFC', color: 'var(--color-text-muted)' }}>
+                style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--color-text-muted)' }}>
                 Below horizon
               </span>
             ) : MISSION_PLANETS.has(p.key) ? (
@@ -144,8 +144,8 @@ export default function PlanetGrid() {
                 href="/learn"
                 className="px-3 py-1.5 text-xs font-medium rounded-lg w-full text-center block"
                 style={{
-                  background: '#F1F5F9',
-                  border: '1px solid #E2E8F0',
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
                   color: 'var(--color-text-secondary)',
                 }}
               >
