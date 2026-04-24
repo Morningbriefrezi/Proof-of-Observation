@@ -791,17 +791,6 @@ input, select, textarea { font-size: 16px !important; }
 /* --- Selection color --- */
 ::selection { background: rgba(99, 102, 241, 0.20); color: #a5b4fc; }
 
-/* --- Desktop sidebar offset --- */
-@media (min-width: 1024px) {
-  .sidebar-main-offset {
-    margin-left: 0;
-    transition: margin-left 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  body.sidebar-expanded .sidebar-main-offset {
-    margin-left: 216px;
-  }
-}
-
 /* ===== Game mechanics animations ===== */
 
 @keyframes starlightFlicker {

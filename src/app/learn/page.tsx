@@ -483,7 +483,7 @@ function GuideTab({ locale }: { locale: Locale }) {
       part === 'Sky page' ? (
         <Link key={i} href="/sky" onClick={e => e.stopPropagation()} className="text-[#14B8A6] hover:opacity-80">{part}</Link>
       ) : part === 'Dark Sky Map' ? (
-        <Link key={i} href="/darksky" onClick={e => e.stopPropagation()} className="text-[#14B8A6] hover:opacity-80">{part}</Link>
+        <Link key={i} href="/network" onClick={e => e.stopPropagation()} className="text-[#14B8A6] hover:opacity-80">{part}</Link>
       ) : part
     );
   };
@@ -567,7 +567,7 @@ function GuideTab({ locale }: { locale: Locale }) {
               ))}
             </div>
             <Link
-              href="/darksky"
+              href="/network"
               className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs font-medium transition-all hover:opacity-80"
               style={{ background: 'rgba(20,184,166,0.06)', border: '1px solid rgba(20,184,166,0.2)', color: '#14B8A6' }}
             >

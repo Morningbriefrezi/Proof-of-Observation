@@ -3,7 +3,7 @@
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
-import { Copy, Check, ExternalLink, Telescope, Lock, ChevronRight, Globe, Bell, Moon, LogOut, X, Settings } from 'lucide-react';
+import { Copy, Check, ExternalLink, Telescope, User, ChevronRight, Globe, Bell, Moon, LogOut, X, Settings } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAppState } from '@/hooks/useAppState';
@@ -71,20 +71,28 @@ export default function ProfilePage() {
 
   if (!authenticated) {
     return (
-      <PageContainer variant="content" className="py-8 flex flex-col gap-4">
+      <PageContainer variant="content" className="py-10 flex flex-col items-center">
         <div style={{
-          borderRadius: 20, padding: '28px 24px', textAlign: 'center',
+          width: '100%', maxWidth: 420, borderRadius: 20, padding: '36px 28px', textAlign: 'center',
           background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
         }}>
           <div style={{
-            width: 64, height: 64, borderRadius: '50%', margin: '0 auto 16px',
-            background: 'linear-gradient(135deg, #8B5CF6, #818cf8)',
+            width: 72, height: 72, borderRadius: '50%', margin: '0 auto 20px',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <Lock size={24} color="white" />
+            <User size={28} color="rgba(255,255,255,0.7)" strokeWidth={1.5} />
           </div>
-          <p style={{ color: 'white', fontWeight: 700, fontSize: 17, margin: '0 0 6px' }}>Sign in to view your profile</p>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, margin: '0 0 20px' }}>Track missions, discoveries, and Stars earned</p>
+          <h1 style={{
+            color: 'white', fontWeight: 400, fontSize: 26, margin: '0 0 10px',
+            fontFamily: 'var(--font-serif)', letterSpacing: '-0.01em',
+          }}>
+            Your Observatory
+          </h1>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, margin: '0 0 24px', lineHeight: 1.5 }}>
+            Sign in to view your observations, Stars balance, and rank
+          </p>
           <Button variant="brass" onClick={login}>Sign In</Button>
         </div>
       </PageContainer>

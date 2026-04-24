@@ -41,7 +41,7 @@ const columns = [
 export default function Footer() {
   return (
     <footer
-      className="relative z-10 mt-auto sidebar-main-offset"
+      className="relative z-10 mt-auto"
       style={{
         background: 'rgba(10,22,40,0.85)',
         borderTop: '1px solid rgba(255,255,255,0.04)',
