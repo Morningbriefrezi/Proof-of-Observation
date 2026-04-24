@@ -3,7 +3,7 @@ import { getVisiblePlanets } from '@/lib/planets';
 
 export async function GET(req: NextRequest) {
   const lat = parseFloat(req.nextUrl.searchParams.get('lat') ?? '41.6941');
-  const lng = parseFloat(req.nextUrl.searchParams.get('lng') ?? '44.8337');
+  const lng = parseFloat(req.nextUrl.searchParams.get('lng') ?? req.nextUrl.searchParams.get('lon') ?? '44.8337');
 
   if (!isFinite(lat) || !isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
     return NextResponse.json({ error: 'Invalid coordinates' }, { status: 400 });

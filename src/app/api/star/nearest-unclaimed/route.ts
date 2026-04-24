@@ -23,7 +23,7 @@ function buildCatalogId(star: StarRow): string {
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const lat = parseFloat(searchParams.get('lat') ?? '');
-  const lon = parseFloat(searchParams.get('lon') ?? '');
+  const lon = parseFloat(searchParams.get('lon') ?? searchParams.get('lng') ?? '');
 
   if (!isFinite(lat) || !isFinite(lon)) {
     return NextResponse.json({ error: 'lat and lon are required' }, { status: 400 });
@@ -75,6 +75,13 @@ export async function GET(req: NextRequest) {
     });
   } catch (err) {
     console.error('[nearest-unclaimed] DB error:', err);
+    const code = (err as { code?: string } | null)?.code;
+    if (code === '42P01') {
+      return NextResponse.json(
+        { error: 'Star catalog not imported. Run `npm run setup:stars`.' },
+        { status: 503 },
+      );
+    }
     return NextResponse.json({ error: 'Could not find star' }, { status: 500 });
   }
 }

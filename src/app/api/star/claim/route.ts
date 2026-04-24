@@ -143,6 +143,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, catalogId, chosenName: trimmedName, proofUrl });
   } catch (err) {
     console.error('[star/claim] DB error:', err);
+    const code = (err as { code?: string } | null)?.code;
+    if (code === '42P01') {
+      return NextResponse.json(
+        { error: 'Star catalog not imported. Run `npm run setup:stars`.' },
+        { status: 503 },
+      );
+    }
     return NextResponse.json({ error: 'Claim failed' }, { status: 500 });
   }
 }

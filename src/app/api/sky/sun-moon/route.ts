@@ -3,7 +3,7 @@ import { Body, Observer, SearchRiseSet, Illumination, MoonPhase } from 'astronom
 
 export async function GET(req: NextRequest) {
   const lat = parseFloat(req.nextUrl.searchParams.get('lat') ?? '41.6941');
-  const lng = parseFloat(req.nextUrl.searchParams.get('lng') ?? '44.8337');
+  const lng = parseFloat(req.nextUrl.searchParams.get('lng') ?? req.nextUrl.searchParams.get('lon') ?? '44.8337');
   const now = new Date();
 
   const midnight = new Date(now);

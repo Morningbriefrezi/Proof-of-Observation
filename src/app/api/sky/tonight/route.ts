@@ -77,7 +77,7 @@ function nearMeteorShower(now: Date): MeteorShower | null {
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
   const lat = Number(searchParams.get('lat') ?? DEFAULT_LAT)
-  const lon = Number(searchParams.get('lon') ?? DEFAULT_LON)
+  const lon = Number(searchParams.get('lon') ?? searchParams.get('lng') ?? DEFAULT_LON)
 
   const now = new Date()
   const midnight = new Date(now)

@@ -5,7 +5,7 @@ import { calculateSkyScore } from '@/lib/sky-score'
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
   const latParam = searchParams.get('lat')
-  const lonParam = searchParams.get('lon')
+  const lonParam = searchParams.get('lon') ?? searchParams.get('lng')
 
   const lat = Number(latParam)
   const lon = Number(lonParam)
