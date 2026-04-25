@@ -1314,28 +1314,231 @@
 .mkt-row-date { color: var(--stl-text3); }
 
 .mkt-odds-pair { display: flex; align-items: center; gap: 4px; }
-.mkt-odds-btn {
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 5px 12px;
-  border-radius: 6px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  min-width: 64px;
+
+/* Stellarr instrument-readout: single split bar showing YES/NO odds.
+   Visually proportional fills + tabular mono numbers. Click each half. */
+.mkt-odds-readout {
+  display: flex;
+  align-items: stretch;
+  height: 28px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--stl-border2);
+  background: var(--stl-bg2);
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  transition: border-color 0.12s ease;
+  width: 130px;
+}
+.mkt-odds-readout:hover { border-color: var(--stl-text3); }
+
+.mkt-odds-readout-half {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: var(--stl-text2);
+  transition: color 0.12s ease, background 0.12s ease;
+}
+.mkt-odds-readout-half + .mkt-odds-readout-half {
+  border-left: 1px solid var(--stl-border2);
+}
+.mkt-odds-readout-half .arrow {
+  font-size: 9px;
+  line-height: 1;
+  opacity: 0.85;
+}
+.mkt-odds-readout-half .num {
+  font-feature-settings: 'tnum';
+}
+
+/* Proportional tinted fill behind each side, anchored to outer edge */
+.mkt-odds-readout-half::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--side-fill, transparent);
+  width: var(--side-pct, 50%);
+  pointer-events: none;
+  transition: width 0.18s ease;
+}
+.mkt-odds-readout-half.yes::before { right: auto; left: 0; }
+.mkt-odds-readout-half.no::before  { left: auto; right: 0; }
+
+.mkt-odds-readout-half.yes {
+  --side-fill: var(--stl-green-bg);
+  color: var(--stl-green);
+}
+.mkt-odds-readout-half.no {
+  --side-fill: var(--stl-red-bg);
+  color: var(--stl-red);
+}
+.mkt-odds-readout-half.yes:hover { background: var(--stl-green-bg); }
+.mkt-odds-readout-half.no:hover  { background: var(--stl-red-bg); }
+.mkt-odds-readout-half > * { position: relative; z-index: 1; }
+
+.mkt-odds-readout-half.active {
+  background: var(--side-fill);
+  box-shadow: inset 0 -2px 0 0 currentColor;
+}
+
+/* Inline bet panel — drop-down beneath an expanded market row */
+.mkt-row.expanded {
+  border-bottom: 1px solid transparent;
+}
+.mkt-row.expanded:hover {
+  background: transparent;
+  margin: 0;
+  padding: 10px 0;
+}
+.mkt-bet-panel {
+  grid-column: 1 / -1;
+  margin: 0 -20px;
+  padding: 14px 20px 16px;
+  background: var(--stl-bg2);
+  border-top: 1px solid var(--stl-border);
+  border-bottom: 1px solid var(--stl-border);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px 20px;
+  align-items: center;
+}
+.mkt-bet-panel-side {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.mkt-bet-panel-side.yes { color: var(--stl-green); background: var(--stl-green-bg); }
+.mkt-bet-panel-side.no  { color: var(--stl-red);   background: var(--stl-red-bg); }
+.mkt-bet-stake {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.mkt-bet-input {
+  font-family: var(--font-mono), monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 16px;
+  font-weight: 600;
+  width: 96px;
+  padding: 8px 10px;
+  background: var(--stl-bg);
+  border: 1px solid var(--stl-border2);
+  border-radius: 6px;
+  color: var(--stl-text1);
+  outline: none;
   transition: border-color 0.12s ease;
 }
-.mkt-odds-btn.yes {
-  color: var(--stl-green);
-  background: var(--stl-green-bg);
+.mkt-bet-input:focus { border-color: var(--stl-amber); }
+.mkt-bet-chip {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--stl-border2);
+  background: var(--stl-bg);
+  color: var(--stl-text2);
+  cursor: pointer;
+  transition: all 0.12s ease;
 }
-.mkt-odds-btn.yes:hover { border-color: var(--stl-green); }
-.mkt-odds-btn.no {
-  color: var(--stl-red);
-  background: var(--stl-red-bg);
+.mkt-bet-chip:hover { border-color: var(--stl-amber); color: var(--stl-text1); }
+.mkt-bet-chip.active { border-color: var(--stl-amber); background: var(--stl-amber-bg); color: var(--stl-amber); }
+.mkt-bet-payout {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 0 14px;
+  border-left: 1px solid var(--stl-border);
+  min-width: 140px;
 }
-.mkt-odds-btn.no:hover { border-color: var(--stl-red); }
+.mkt-bet-payout-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--stl-text3);
+}
+.mkt-bet-payout-value {
+  font-family: var(--font-mono), monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--stl-text1);
+}
+.mkt-bet-payout-hint {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  color: var(--stl-text3);
+  letter-spacing: 0.04em;
+}
+.mkt-bet-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mkt-bet-cancel {
+  background: none;
+  border: none;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--stl-text3);
+  cursor: pointer;
+  padding: 8px 6px;
+}
+.mkt-bet-cancel:hover { color: var(--stl-text1); }
+.mkt-bet-submit {
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  background: var(--stl-amber);
+  color: #0a0a0a;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.12s ease;
+}
+.mkt-bet-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+.mkt-bet-error {
+  grid-column: 1 / -1;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  color: var(--stl-amber);
+  background: var(--stl-amber-bg);
+  border: 1px solid var(--stl-border2);
+  border-radius: 4px;
+  padding: 6px 10px;
+}
+.mkt-bet-balance {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  color: var(--stl-text3);
+  letter-spacing: 0.04em;
+}
 
 .mkt-row-volume {
   font-family: var(--font-mono), 'JetBrains Mono', monospace;
@@ -1827,7 +2030,22 @@
   .mkt-row-title { font-size: 13px; }
   .mkt-odds-pair { gap: 3px; }
   .mkt-odds-btn { font-size: 12px; padding: 5px 8px; min-width: 44px; }
+  .mkt-odds-readout { width: 110px; height: 26px; }
+  .mkt-odds-readout-half { font-size: 10px; padding: 0 4px; }
   .mkt-row-volume { display: none; }
+  .mkt-bet-panel {
+    grid-template-columns: 1fr;
+    margin: 0 -12px;
+    padding: 12px;
+    gap: 10px;
+  }
+  .mkt-bet-payout {
+    border-left: none;
+    border-top: 1px solid var(--stl-border);
+    padding: 10px 0 0;
+    width: 100%;
+  }
+  .mkt-bet-actions { width: 100%; justify-content: space-between; }
   .mkt-group-header { padding: 12px 0 4px; }
 }
 

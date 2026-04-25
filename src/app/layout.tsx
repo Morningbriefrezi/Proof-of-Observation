@@ -59,8 +59,10 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Stellar — Observe the Night Sky',
-  description: 'Photograph the night sky. Get AI-verified. Earn Stars tokens on Solana. Shop telescopes from your local dealer.',
+  title: 'Stellar — From the telescope shop to on-chain',
+  description:
+    "The crypto layer for Astroman, Georgia's astronomy store. Predict the sky, observe at night, redeem winnings for real telescopes.",
+  metadataBase: new URL('https://stellarrclub.vercel.app'),
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -68,19 +70,22 @@ export const metadata: Metadata = {
     title: 'Stellar',
   },
   openGraph: {
-    title: 'Stellar — Observe the Night Sky',
-    description: 'Photograph the night sky. Get AI-verified. Earn Stars tokens on Solana. Shop telescopes from your local dealer.',
-    images: ['https://stellarrclub.vercel.app/api/og/sky'],
+    title: 'Stellar — From the telescope shop to on-chain',
+    description: '60,000 astronomers, on-chain. Predict, observe, redeem for real telescopes.',
+    url: 'https://stellarrclub.vercel.app',
+    siteName: 'Stellar',
+    images: ['/opengraph-image'],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Stellar — Observe the Night Sky',
-    description: 'Photograph the night sky. Get AI-verified. Earn Stars tokens on Solana. Shop telescopes from your local dealer.',
-    images: ['https://stellarrclub.vercel.app/api/og/sky'],
+    title: 'Stellar — From the telescope shop to on-chain',
+    description: '60,000 astronomers, on-chain.',
+    images: ['/opengraph-image'],
+    creator: '@StellarClub26',
   },
   other: {
     'fc:frame': 'vNext',
-    'fc:frame:image': 'https://stellarrclub.vercel.app/api/og/sky',
+    'fc:frame:image': 'https://stellarrclub.vercel.app/opengraph-image',
     'fc:frame:image:aspect_ratio': '1.91:1',
     'fc:frame:button:1': "Tonight's Sky →",
     'fc:frame:button:1:action': 'link',

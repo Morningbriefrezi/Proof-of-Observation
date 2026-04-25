@@ -2,20 +2,27 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import type { PublicKey } from '@solana/web3.js';
 import PageTransition from '@/components/ui/PageTransition';
-import { useReadOnlyProgram } from '@/lib/markets/privy-adapter';
+import {
+  useReadOnlyProgram,
+  usePrivySigner,
+} from '@/lib/markets/privy-adapter';
 import { useAppState } from '@/hooks/useAppState';
+import InlineBetPanel from '@/components/markets/InlineBetPanel';
 import {
   checkObserverAdvantage,
   getOracleKeyForMarketId,
   missionsToObservations,
 } from '@/lib/observer-advantage';
 import {
+  getConfig,
   getFullMarkets,
   getAllMarkets,
   type Market,
   type MarketCategory,
   type MarketOnChain,
+  type MarketSide,
   type MarketStatus,
 } from '@/lib/markets';
 import {
@@ -163,6 +170,7 @@ function oracleBadge(src: string | undefined): string | null {
 export default function MarketsPage() {
   const router = useRouter();
   const program = useReadOnlyProgram();
+  const signer = usePrivySigner();
   const { state } = useAppState();
 
   const [markets, setMarkets] = useState<Market[]>([]);
@@ -171,6 +179,39 @@ export default function MarketsPage() {
   const [retryKey, setRetryKey] = useState(0);
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [theme, setTheme] = useState<Theme>('light');
+  const [mint, setMint] = useState<PublicKey | null>(null);
+  const [balance, setBalance] = useState<number | null>(null);
+  const [expanded, setExpanded] = useState<{
+    marketId: number;
+    side: MarketSide;
+  } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getConfig(program)
+      .then((cfg) => {
+        if (cancelled) return;
+        setMint(cfg?.mint ?? null);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [program]);
+
+  useEffect(() => {
+    if (!signer.publicKey) {
+      setBalance(null);
+      return;
+    }
+    let cancelled = false;
+    fetch(`/api/stars-balance?address=${signer.publicKey.toBase58()}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled) return;
+        setBalance(typeof d?.balance === 'number' ? d.balance : 0);
+      })
+      .catch(() => { if (!cancelled) setBalance(0); });
+    return () => { cancelled = true; };
+  }, [signer.publicKey, retryKey]);
 
   useEffect(() => {
     const saved = localStorage.getItem(THEME_KEY);
@@ -433,6 +474,26 @@ export default function MarketsPage() {
                         market={m}
                         advantage={!!advantageByMarketId[m.onChain.marketId]}
                         onClick={() => router.push(`/markets/${m.onChain.marketId}`)}
+                        expandedSide={
+                          expanded?.marketId === m.onChain.marketId
+                            ? expanded.side
+                            : null
+                        }
+                        onPickSide={(side) =>
+                          setExpanded((prev) =>
+                            prev?.marketId === m.onChain.marketId &&
+                            prev.side === side
+                              ? null
+                              : { marketId: m.onChain.marketId, side },
+                          )
+                        }
+                        onCloseBet={() => setExpanded(null)}
+                        onBetSuccess={() => setRetryKey((k) => k + 1)}
+                        mint={mint}
+                        balance={balance}
+                        boost={
+                          advantageByMarketId[m.onChain.marketId] ? 1.5 : undefined
+                        }
                       />
                     ))}
                   </section>
@@ -580,9 +641,27 @@ interface RowProps {
   market: Market;
   advantage: boolean;
   onClick: () => void;
+  expandedSide: MarketSide | null;
+  onPickSide: (side: MarketSide) => void;
+  onCloseBet: () => void;
+  onBetSuccess: () => void;
+  mint: PublicKey | null;
+  balance: number | null;
+  boost?: number;
 }
 
-function MarketRow({ market, advantage, onClick }: RowProps) {
+function MarketRow({
+  market,
+  advantage,
+  onClick,
+  expandedSide,
+  onPickSide,
+  onCloseBet,
+  onBetSuccess,
+  mint,
+  balance,
+  boost,
+}: RowProps) {
   const Icon = getCategoryIcon(market.metadata.category);
   const yesPct = Math.round(market.impliedYesOdds * 100);
   const noPct = 100 - yesPct;
@@ -590,12 +669,13 @@ function MarketRow({ market, advantage, onClick }: RowProps) {
   const closeDate = formatCloseDate(market.metadata.closeTime);
   const volume = market.onChain.totalStaked;
   const locked = market.status === 'locked';
+  const expanded = expandedSide !== null;
 
   return (
     <div
       role="button"
       tabIndex={0}
-      className="mkt-row"
+      className={`mkt-row${expanded ? ' expanded' : ''}`}
       onClick={onClick}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -618,25 +698,55 @@ function MarketRow({ market, advantage, onClick }: RowProps) {
           <span className="mkt-row-date">{locked ? 'Locked' : closeDate}</span>
         </div>
       </div>
-      <div className="mkt-odds-pair">
+      <div
+        className="mkt-odds-readout"
+        role="group"
+        aria-label="Place position"
+      >
         <button
           type="button"
-          className="mkt-odds-btn yes"
-          onClick={(e) => { e.stopPropagation(); onClick(); }}
-          aria-label={`Yes ${yesPct}%`}
+          className={`mkt-odds-readout-half yes${expandedSide === 'yes' ? ' active' : ''}`}
+          style={{ ['--side-pct' as string]: `${yesPct}%` }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onPickSide('yes');
+          }}
+          aria-label={`Bet Yes at ${yesPct}%`}
+          disabled={locked}
         >
-          Yes {yesPct}%
+          <span className="arrow">▲</span>
+          <span>YES</span>
+          <span className="num">{yesPct}</span>
         </button>
         <button
           type="button"
-          className="mkt-odds-btn no"
-          onClick={(e) => { e.stopPropagation(); onClick(); }}
-          aria-label={`No ${noPct}%`}
+          className={`mkt-odds-readout-half no${expandedSide === 'no' ? ' active' : ''}`}
+          style={{ ['--side-pct' as string]: `${noPct}%` }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onPickSide('no');
+          }}
+          aria-label={`Bet No at ${noPct}%`}
+          disabled={locked}
         >
-          No {noPct}%
+          <span className="num">{noPct}</span>
+          <span>NO</span>
+          <span className="arrow">▼</span>
         </button>
       </div>
       <div className="mkt-row-volume">{formatVolume(volume)}</div>
+      {expanded && expandedSide && (
+        <InlineBetPanel
+          onChain={market.onChain}
+          mint={mint}
+          balance={balance}
+          side={expandedSide}
+          locked={locked}
+          boostMultiplier={boost}
+          onClose={onCloseBet}
+          onSuccess={onBetSuccess}
+        />
+      )}
     </div>
   );
 }
