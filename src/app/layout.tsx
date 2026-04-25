@@ -46,6 +46,7 @@ import StarField from '@/components/shared/StarField';
 import Footer from '@/components/shared/Footer';
 import BottomNav from '@/components/shared/BottomNav';
 import AstraPopup from '@/components/shared/AstraPopup';
+import { AstraFab } from '@/components/astra/AstraFab';
 import OfflineBanner from '@/components/shared/OfflineBanner';
 import PullToRefresh from '@/components/shared/PullToRefresh';
 import PageTransition from '@/components/layout/PageTransition';
@@ -122,6 +123,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <Footer />
                 <BottomNav />
                 <AstraPopup />
+                <AstraFab />
                 <Toaster />
               </AppStateProvider>
               </LocationProvider>

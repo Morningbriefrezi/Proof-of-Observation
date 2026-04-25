@@ -38,51 +38,59 @@ export default function ProductCard({ product, showDealer, dealerName, priority 
 
   return (
     <div
-      className="flex flex-col rounded-2xl overflow-hidden"
+      className="product-card flex flex-col rounded-2xl overflow-hidden"
       style={{
         background: 'rgba(255,255,255,0.04)',
         border: '1px solid rgba(255,255,255,0.1)',
         backdropFilter: 'blur(8px)',
+        transition: 'transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease',
       }}
     >
-      <div className="relative flex-shrink-0" style={{
-        aspectRatio: '1 / 1',
-        background: showImg ? 'rgba(0,0,0,0.3)' : fallback.bg,
-        overflow: 'hidden',
-      }}>
-        {showImg ? (
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            sizes="(max-width: 768px) 50vw, 300px"
-            style={{ objectFit: 'contain', padding: '12px' }}
-            unoptimized
-            priority={priority}
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-            <span className="text-5xl leading-none">{fallback.icon}</span>
-            <p className="text-[10px] font-medium tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.15)' }}>
-              {fallback.label}
-            </p>
-          </div>
-        )}
-        {badgeStyle && (
-          <span className="absolute top-2 left-2 text-[8px] px-1.5 py-0.5 rounded-full font-semibold"
-            style={{ background: badgeStyle.bg, color: badgeStyle.color }}>
-            {product.badge}
-          </span>
-        )}
-        {product.skillLevel && (
-          <span
-            className="absolute top-2 right-2 text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide"
-            style={SKILL_BADGE_STYLES[product.skillLevel]}
-          >
-            {product.skillLevel === 'intermediate' ? 'Mid' : product.skillLevel}
-          </span>
-        )}
+      <div className="p-3 pb-0">
+        <div
+          className="relative"
+          style={{
+            aspectRatio: '1 / 1',
+            background: showImg ? 'rgba(255,255,255,0.02)' : fallback.bg,
+            border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: 16,
+            overflow: 'hidden',
+          }}
+        >
+          {showImg ? (
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              sizes="(max-width: 768px) 50vw, 300px"
+              style={{ objectFit: 'contain', padding: '24px' }}
+              unoptimized
+              priority={priority}
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+              <span className="text-5xl leading-none">{fallback.icon}</span>
+              <p className="text-[10px] font-medium tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.15)' }}>
+                {fallback.label}
+              </p>
+            </div>
+          )}
+          {badgeStyle && (
+            <span className="absolute top-2 left-2 text-[8px] px-1.5 py-0.5 rounded-full font-semibold"
+              style={{ background: badgeStyle.bg, color: badgeStyle.color }}>
+              {product.badge}
+            </span>
+          )}
+          {product.skillLevel && (
+            <span
+              className="absolute top-2 right-2 text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide"
+              style={SKILL_BADGE_STYLES[product.skillLevel]}
+            >
+              {product.skillLevel === 'intermediate' ? 'Mid' : product.skillLevel}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col p-3 gap-1.5">
