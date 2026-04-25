@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useLocation } from '@/lib/location';
 import { LOCATIONS } from '@/lib/darksky-locations';
 import { getUpcomingEvents, type AstroEvent } from '@/lib/astro-events';
 import type { SkyDay, SkyHour } from '@/lib/sky-data';
 import type { PlanetInfo } from '@/lib/planets';
+import { PRODUCTS, type Product } from '@/lib/products';
 import { PlanetViz } from '@/components/sky/PlanetViz';
 import {
   MeteorIcon,
@@ -17,6 +18,7 @@ import {
 
 type Theme = 'light' | 'dark';
 const THEME_KEY = 'stellar-sky-theme';
+const DEFAULT_BADGE_KEY = 'stellar-sky-default-badge-dismissed';
 
 const PLANET_ORDER = ['moon', 'venus', 'mars', 'jupiter', 'saturn', 'mercury'];
 
@@ -41,6 +43,7 @@ interface NightSummary {
   cloudCover: number;
   target: string;
   event?: AstroEvent;
+  hours: SkyHour[];
 }
 
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -97,6 +100,20 @@ function pickBestHour(hours: SkyHour[]): SkyHour | null {
   });
   const src = pool.length ? pool : hours;
   return src.reduce((a, b) => (a.cloudCover <= b.cloudCover ? a : b));
+}
+
+function bestWindowFromHours(hours: SkyHour[]): { start: string; end: string } | null {
+  if (!hours.length) return null;
+  const evening = hours.filter((h) => {
+    const hr = parseInt(h.time.slice(11, 13));
+    return hr >= 20 || hr <= 4;
+  });
+  const pool = evening.length ? evening : hours;
+  const sorted = [...pool].sort((a, b) => a.cloudCover - b.cloudCover);
+  if (!sorted.length) return null;
+  const top = sorted.slice(0, Math.min(3, sorted.length));
+  top.sort((a, b) => a.time.localeCompare(b.time));
+  return { start: top[0].time.slice(11, 16), end: top[top.length - 1].time.slice(11, 16) };
 }
 
 function tierFromCloud(c: number): 'go' | 'maybe' | 'skip' {
@@ -163,6 +180,246 @@ function scoreColorClass(score: number): string {
   return 'poor';
 }
 
+function scoreTagline(score: number): { text: string; color: string } {
+  if (score >= 85) return { text: 'Perfect night — set up the scope', color: '#34d399' };
+  if (score >= 65) return { text: 'Good observation window', color: '#34d399' };
+  if (score >= 45) return { text: 'Fair — pick targets carefully', color: '#FFD166' };
+  if (score >= 25) return { text: 'Tough night — maybe tomorrow', color: '#f97316' };
+  return { text: 'Stay in. Read about telescopes.', color: '#ef4444' };
+}
+
+function scoreRingColor(score: number): string {
+  if (score >= 65) return '#4ADE80';
+  if (score >= 45) return '#FBBF24';
+  if (score >= 25) return '#FB923C';
+  return '#FB7185';
+}
+
+function planetTip(key: string, altitude: number, azimuthDir: string): string {
+  const where = altitude > 50
+    ? 'high overhead'
+    : altitude > 20
+      ? `look ${azimuthDir.toLowerCase()}`
+      : `low to the ${azimuthDir.toLowerCase()} horizon`;
+  switch (key) {
+    case 'moon':
+      return `Bright surface — ${where}. A 10mm eyepiece reveals craters along the terminator.`;
+    case 'venus':
+      return `Brightest planet — ${where}. Best in twilight; a 12mm eyepiece shows the phase.`;
+    case 'mars':
+      return `Reddish disc — ${where}. Wait for steady seeing; an 8mm eyepiece pulls out polar caps.`;
+    case 'jupiter':
+      return `Steady cream-white target — ${where}. A 10mm eyepiece shows cloud belts and 4 Galilean moons.`;
+    case 'saturn':
+      return `Rings need at least 50× — ${where}. A 12mm eyepiece on a 700mm scope is the sweet spot.`;
+    case 'mercury':
+      return `Small and quick — ${where}. Catch it just after sunset or before sunrise.`;
+    default:
+      return `Currently ${where}.`;
+  }
+}
+
+function pickRecommendedProduct(planetsUp: PlanetInfo[], cloud: number): {
+  product: Product;
+  pitch: string;
+} {
+  const upKeys = new Set(planetsUp.filter((p) => p.altitude > 10).map((p) => p.key));
+  const find = (id: string) => PRODUCTS.find((p) => p.id === id)!;
+
+  if (cloud > 65) {
+    return {
+      product: find('scope-bresser-76-300'),
+      pitch:
+        'Skies are mostly closed tonight. Browse our beginner kits — perfect for the first clear evening.',
+    };
+  }
+  if (upKeys.has('saturn')) {
+    return {
+      product: find('acc-eyepiece'),
+      pitch:
+        "Saturn's rings need at least 50×. A 12mm eyepiece on your scope hits the sweet spot.",
+    };
+  }
+  if (upKeys.has('jupiter')) {
+    return {
+      product: find('acc-eyepiece'),
+      pitch:
+        'For Jupiter detail tonight, an 8mm eyepiece pulls cloud belts and the four Galilean moons.',
+    };
+  }
+  if (upKeys.has('mars')) {
+    return {
+      product: find('scope-foreseen-80'),
+      pitch:
+        "Mars rewards steady seeing. The Foreseen 80mm refractor is sharp enough to show polar caps.",
+    };
+  }
+  if (upKeys.has('moon')) {
+    return {
+      product: find('acc-phone'),
+      pitch:
+        "The Moon is up — perfect for afocal phone shots. Our adapter clips onto any eyepiece.",
+    };
+  }
+  return {
+    product: find('scope-celestron-70az'),
+    pitch:
+      "Wide-field viewing favored tonight. The Celestron 70AZ frames the Pleiades full-edge.",
+  };
+}
+
+interface PlanetDetailModalProps {
+  planet: PlanetInfo;
+  onClose: () => void;
+}
+
+function PlanetDetailModal({ planet, onClose }: PlanetDetailModalProps) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handler);
+      document.body.style.overflow = '';
+    };
+  }, [onClose]);
+
+  const below = planet.altitude <= 0;
+  const rise = planet.rise
+    ? fmtTime(typeof planet.rise === 'string' ? planet.rise : planet.rise.toISOString())
+    : null;
+  const transit = planet.transit
+    ? fmtTime(typeof planet.transit === 'string' ? planet.transit : planet.transit.toISOString())
+    : null;
+  const set = planet.set
+    ? fmtTime(typeof planet.set === 'string' ? planet.set : planet.set.toISOString())
+    : null;
+
+  let bestWindow = '—';
+  if (transit && rise && set) {
+    const trH = parseInt(transit.slice(0, 2));
+    const trM = parseInt(transit.slice(3, 5));
+    const total = trH * 60 + trM;
+    const start = total - 60;
+    const end = total + 60;
+    const fmt = (mins: number) => {
+      const m = ((mins % 1440) + 1440) % 1440;
+      return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+    };
+    bestWindow = `${fmt(start)}–${fmt(end)}`;
+  }
+
+  return (
+    <div className="sky-modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="sky-modal" onClick={(e) => e.stopPropagation()}>
+        <button
+          type="button"
+          className="sky-modal-close"
+          onClick={onClose}
+          aria-label="Close"
+        >
+          ×
+        </button>
+        <div className="sky-modal-head">
+          <div className="sky-modal-viz">
+            <PlanetViz name={planet.key} />
+          </div>
+          <div className="sky-modal-title">
+            <span className="sky-modal-name">{planet.key}</span>
+            <span className="sky-modal-sub">
+              {below ? 'Below horizon' : `Currently ${Math.round(planet.altitude)}° above ${planet.azimuthDir}`}
+              {planet.constellation ? ` · in ${planet.constellation}` : ''}
+            </span>
+          </div>
+        </div>
+        <dl className="sky-modal-grid">
+          <div>
+            <dt>Altitude</dt>
+            <dd>{below ? '—' : `${Math.round(planet.altitude)}°`}</dd>
+          </div>
+          <div>
+            <dt>Magnitude</dt>
+            <dd>{planet.magnitude.toFixed(1)}</dd>
+          </div>
+          <div>
+            <dt>Rises</dt>
+            <dd>{rise ?? '—'}</dd>
+          </div>
+          <div>
+            <dt>Transits</dt>
+            <dd>{transit ?? '—'}</dd>
+          </div>
+          <div>
+            <dt>Sets</dt>
+            <dd>{set ?? '—'}</dd>
+          </div>
+          <div>
+            <dt>Best viewed</dt>
+            <dd>{bestWindow}</dd>
+          </div>
+        </dl>
+        <p className="sky-modal-tip">
+          {planetTip(planet.key, planet.altitude, planet.azimuthDir)}
+        </p>
+        <div className="sky-modal-actions">
+          <Link href="/missions" className="sky-modal-cta primary">
+            Start mission
+          </Link>
+          <Link href="/markets" className="sky-modal-cta">
+            Bet on visibility
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface AnimatedScoreProps {
+  score: number;
+}
+
+function AnimatedScore({ score }: AnimatedScoreProps) {
+  const [animated, setAnimated] = useState(0);
+  useEffect(() => {
+    const start = performance.now();
+    const duration = 1000;
+    let raf = 0;
+    function tick(now: number) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setAnimated(Math.round(score * eased));
+      if (progress < 1) raf = requestAnimationFrame(tick);
+    }
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [score]);
+
+  const ringColor = scoreRingColor(score);
+  const tagline = scoreTagline(score);
+
+  return (
+    <div className="sky-score-block">
+      <div
+        className="sky-score-ring2"
+        style={{
+          background: `conic-gradient(${ringColor} ${animated * 3.6}deg, rgba(255,255,255,0.06) 0deg)`,
+        }}
+      >
+        <div className="sky-score-ring2-inner">
+          <span className="sky-score-num2">{animated}</span>
+          <span className="sky-score-sub2">/100</span>
+        </div>
+      </div>
+      <span className="sky-score-tag" style={{ color: tagline.color }}>
+        {tagline.text}
+      </span>
+    </div>
+  );
+}
+
 export default function SkyPage() {
   const { location } = useLocation();
   const { lat, lon, city, source } = location;
@@ -174,11 +431,17 @@ export default function SkyPage() {
   const [moonSun, setMoonSun] = useState<MoonSunData | null>(null);
   const [score, setScore] = useState<SkyScore | null>(null);
   const [error, setError] = useState(false);
+  const [openPlanet, setOpenPlanet] = useState<PlanetInfo | null>(null);
+  const [selectedNightIdx, setSelectedNightIdx] = useState<number | null>(null);
+  const [defaultBadgeDismissed, setDefaultBadgeDismissed] = useState(false);
+  const planSectionRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem(THEME_KEY);
       if (saved === 'dark') setTheme('dark');
+      const dismissed = localStorage.getItem(DEFAULT_BADGE_KEY);
+      if (dismissed === '1') setDefaultBadgeDismissed(true);
     } catch {}
   }, []);
 
@@ -218,6 +481,13 @@ export default function SkyPage() {
     setTheme(next);
     try {
       localStorage.setItem(THEME_KEY, next);
+    } catch {}
+  }
+
+  function dismissDefaultBadge() {
+    setDefaultBadgeDismissed(true);
+    try {
+      localStorage.setItem(DEFAULT_BADGE_KEY, '1');
     } catch {}
   }
 
@@ -306,9 +576,42 @@ export default function SkyPage() {
         cloudCover: cloud,
         target,
         event,
+        hours: day.hours,
       };
     });
   }, [forecast, upcomingEvents]);
+
+  const bestNightIdx = useMemo(() => {
+    if (!nights.length) return -1;
+    let best = -1;
+    let lowest = Infinity;
+    nights.forEach((n, i) => {
+      if (n.cloudCover < lowest) {
+        lowest = n.cloudCover;
+        best = i;
+      }
+    });
+    return best;
+  }, [nights]);
+
+  const recommended = useMemo(() => {
+    if (!planets) return null;
+    return pickRecommendedProduct(planets, tonightCloud);
+  }, [planets, tonightCloud]);
+
+  const selectedNight = selectedNightIdx !== null ? nights[selectedNightIdx] ?? null : null;
+  const selectedWindow = useMemo(() => {
+    if (!selectedNight) return null;
+    return bestWindowFromHours(selectedNight.hours);
+  }, [selectedNight]);
+
+  function handleNightClick(idx: number, n: NightSummary) {
+    if (n.tier === 'skip') return;
+    setSelectedNightIdx(idx);
+    requestAnimationFrame(() => {
+      planSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
 
   const tip = useMemo(() => {
     const soon = upcomingEvents.find((e) => {
@@ -337,16 +640,24 @@ export default function SkyPage() {
             <div className="sky-hero-loc">
               <span className="sky-hero-dot" />
               <span className="sky-hero-city">{city || 'Tbilisi'}</span>
-              {isDefaultLocation && (
-                <span className="sky-hero-default" aria-label="Using default location">
-                  📍 Tbilisi (default)
-                </span>
-              )}
               <span className="sky-hero-coords">
                 {fmtCoord(lat, lon)} · Bortle {bortle}
               </span>
             </div>
             <div className="sky-hero-head-right">
+              {isDefaultLocation && !defaultBadgeDismissed && (
+                <span className="sky-default-badge" role="status">
+                  📍 Tbilisi (default) · Allow location for yours
+                  <button
+                    type="button"
+                    className="sky-default-badge-close"
+                    onClick={dismissDefaultBadge}
+                    aria-label="Dismiss default location notice"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
               <span className="sky-hero-date">{dateLabel}</span>
               <button
                 type="button"
@@ -359,19 +670,18 @@ export default function SkyPage() {
 
           <div className="sky-verdict-row">
             {score ? (
-              <div className={`sky-score-ring ${scoreColorClass(score.score)}`}>
-                <span className="sky-score-num">{score.score}</span>
-                <span className="sky-score-sub">/100</span>
-              </div>
+              <AnimatedScore score={score.score} />
             ) : (
-              <div
-                className="sky-score-ring sky-score-ring-skel animate-pulse"
-                aria-hidden
-              />
+              <div className="sky-score-block">
+                <div className="sky-score-ring2 sky-score-ring2-skel animate-pulse" aria-hidden />
+                <span className="sky-score-tag-skel animate-pulse" aria-hidden />
+              </div>
             )}
             <div className="sky-verdict-text">
               {score ? (
-                <div className="sky-verdict-head">{verdictHead}</div>
+                <div className={`sky-verdict-head ${scoreColorClass(score.score)}`}>
+                  {verdictHead}
+                </div>
               ) : (
                 <div className="sky-verdict-skel-head animate-pulse" aria-hidden />
               )}
@@ -430,10 +740,13 @@ export default function SkyPage() {
                       : '';
 
                 return (
-                  <div
+                  <button
                     key={p.key}
+                    type="button"
                     role="listitem"
                     className={`sky-planet-card ${below ? 'below' : ''}`}
+                    onClick={() => setOpenPlanet(p)}
+                    aria-label={`Open details for ${p.key}`}
                   >
                     <div className="sky-planet-viz">
                       <PlanetViz name={p.key} />
@@ -453,7 +766,7 @@ export default function SkyPage() {
                         </>
                       )}
                     </div>
-                  </div>
+                  </button>
                 );
               })}
           </div>
@@ -480,12 +793,28 @@ export default function SkyPage() {
                       ? 'partial'
                       : 'overcast';
                 const isToday = i === 0;
+                const isBest = !placeholder && i === bestNightIdx && n!.tier !== 'skip';
+                const clickable = !placeholder && n!.tier !== 'skip';
+                const isSelected = selectedNightIdx === i;
 
                 return (
-                  <div
+                  <button
                     key={placeholder ? `ph-${i}` : n!.date}
-                    className={`sky-night-tile ${isToday ? 'today' : ''}`}
+                    type="button"
+                    className={`sky-night-tile ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} ${clickable ? 'clickable' : ''}`}
+                    onClick={() => !placeholder && handleNightClick(i, n!)}
+                    disabled={!clickable}
+                    aria-label={
+                      placeholder
+                        ? 'Loading night'
+                        : `${n!.label}: ${n!.tier === 'go' ? 'Go' : n!.tier === 'maybe' ? 'Maybe' : 'Skip'}, ${n!.cloudCover}% cloud`
+                    }
                   >
+                    {isBest && (
+                      <span className="sky-night-bell" title="Best night this week" aria-label="Best night this week">
+                        <BellIcon />
+                      </span>
+                    )}
                     <div className={`sky-night-viewport ${viewClass}`}>
                       {(viewClass === 'clear' || viewClass === 'partial') && (
                         <div className="sky-night-stars" />
@@ -521,13 +850,86 @@ export default function SkyPage() {
                         </>
                       )}
                     </div>
-                  </div>
+                  </button>
                 );
               },
             )}
           </div>
         </div>
       </section>
+
+      {/* ── PLAN FOR [DAY] ───────────────────────────────────────────── */}
+      {selectedNight && (
+        <section className="sky-section" ref={planSectionRef}>
+          <div className="sky-content">
+            <div className="sky-section-head">
+              <h2 className="sky-section-title">
+                Plan for {selectedNight.label}
+                <span className="sky-section-date">
+                  {' · '}
+                  {new Date(selectedNight.date + 'T12:00:00').toLocaleDateString([], {
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </span>
+              </h2>
+              <button
+                type="button"
+                className="sky-plan-close"
+                onClick={() => setSelectedNightIdx(null)}
+                aria-label="Close plan"
+              >
+                Clear
+              </button>
+            </div>
+
+            <div className="sky-plan-grid">
+              <div className="sky-plan-card">
+                <span className="sky-detail-label">Cloud</span>
+                <span
+                  className={`sky-detail-value ${selectedNight.cloudCover < 25 ? 'good' : selectedNight.cloudCover <= 60 ? 'fair' : 'poor'}`}
+                >
+                  {selectedNight.cloudCover}%
+                </span>
+                <span className="sky-detail-sub">
+                  {selectedNight.tier === 'go' ? 'Open skies' : 'Gaps expected'}
+                </span>
+              </div>
+              <div className="sky-plan-card">
+                <span className="sky-detail-label">Best window</span>
+                <span className="sky-detail-value">
+                  {selectedWindow ? `${selectedWindow.start}–${selectedWindow.end}` : '—'}
+                </span>
+                <span className="sky-detail-sub">Lowest cloud cover</span>
+              </div>
+              <div className="sky-plan-card">
+                <span className="sky-detail-label">Planets up</span>
+                <span className="sky-detail-value sky-detail-value-sm">
+                  {planets && planets.filter((p) => p.altitude > 10).length
+                    ? planets
+                        .filter((p) => p.altitude > 10 && p.key !== 'moon')
+                        .slice(0, 3)
+                        .map((p) => p.key.charAt(0).toUpperCase() + p.key.slice(1))
+                        .join(', ') || 'Moon'
+                    : 'None tonight'}
+                </span>
+                <span className="sky-detail-sub">From your location</span>
+              </div>
+            </div>
+
+            <div className="sky-plan-actions">
+              <Link href="/markets" className="sky-plan-link">
+                Markets closing before this night →
+              </Link>
+              {selectedNight.event && (
+                <span className="sky-plan-event">
+                  <StarBurstIcon size={14} /> {selectedNight.event.name}
+                </span>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── TONIGHT IN DETAIL ────────────────────────────────────────── */}
       <section className="sky-section">
@@ -607,10 +1009,43 @@ export default function SkyPage() {
         </div>
       </section>
 
-      {/* ── TIP BAR ──────────────────────────────────────────────────── */}
-      <section className="sky-section">
-        <div className="sky-content">
-          {tip ? (
+      {/* ── ASTROMAN RECOMMENDATION ──────────────────────────────────── */}
+      {recommended && (
+        <section className="sky-section">
+          <div className="sky-content">
+            <div className="sky-section-head">
+              <h2 className="sky-section-title">Recommended for tonight</h2>
+              <span className="sky-section-meta">From Astroman</span>
+            </div>
+            <div className="sky-reco-card">
+              <div className="sky-reco-body">
+                <span className="sky-reco-pitch">{recommended.pitch}</span>
+                <span className="sky-reco-product">
+                  <strong>{recommended.product.name.en}</strong>
+                  <span className="sky-reco-price">
+                    {recommended.product.priceGEL} GEL
+                  </span>
+                </span>
+                <Link href="/marketplace" className="sky-reco-cta">
+                  Buy at Astroman →
+                </Link>
+              </div>
+              {recommended.product.image && (
+                <div
+                  className="sky-reco-thumb"
+                  style={{ backgroundImage: `url(${recommended.product.image})` }}
+                  aria-hidden
+                />
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── EVENT TIP (optional) ─────────────────────────────────────── */}
+      {tip && (
+        <section className="sky-section">
+          <div className="sky-content">
             <div className="sky-tip">
               <span className="sky-tip-icon">
                 <MeteorIcon size={18} />
@@ -628,21 +1063,39 @@ export default function SkyPage() {
                 Trade this market →
               </Link>
             </div>
-          ) : (
-            <div className="sky-tip">
-              <span className="sky-tip-icon">
-                <StarBurstIcon size={18} />
-              </span>
-              <span className="sky-tip-body">
-                <strong>Start a sky mission</strong> — log a verified observation and earn Stars.
-              </span>
-              <Link href="/missions" className="sky-tip-cta">
-                Open missions →
-              </Link>
-            </div>
-          )}
+          </div>
+        </section>
+      )}
+
+      {/* ── BOTTOM CTA BAR ───────────────────────────────────────────── */}
+      <section className="sky-section">
+        <div className="sky-content">
+          <div className="sky-bottom-ctas">
+            <Link href="/missions" className="sky-bottom-cta">
+              Start tonight&apos;s mission →
+            </Link>
+            <Link href="/markets" className="sky-bottom-cta">
+              Browse markets closing tonight →
+            </Link>
+          </div>
         </div>
       </section>
+
+      {openPlanet && (
+        <PlanetDetailModal
+          planet={openPlanet}
+          onClose={() => setOpenPlanet(null)}
+        />
+      )}
     </div>
+  );
+}
+
+function BellIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+    </svg>
   );
 }

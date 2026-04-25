@@ -6,6 +6,7 @@ import {
   Illumination,
   SearchRiseSet,
   SearchHourAngle,
+  Constellation,
 } from 'astronomy-engine';
 
 export interface PlanetInfo {
@@ -18,6 +19,7 @@ export interface PlanetInfo {
   set: Date | string | null;
   magnitude: number;
   visible: boolean;
+  constellation?: string;
 }
 
 const BODIES: { body: Body; key: string }[] = [
@@ -63,6 +65,9 @@ export function getVisiblePlanets(lat: number, lng: number, date: Date): PlanetI
         transit = SearchHourAngle(body, observer, 0, midnight, +1).time.date;
       } catch { /* ignore */ }
 
+      let constellation: string | undefined;
+      try { constellation = Constellation(eq.ra, eq.dec)?.name; } catch { /* ignore */ }
+
       return [{
         key,
         altitude:    Math.round(horiz.altitude * 10) / 10,
@@ -73,6 +78,7 @@ export function getVisiblePlanets(lat: number, lng: number, date: Date): PlanetI
         set,
         magnitude:   Math.round(magnitude * 10) / 10,
         visible:     horiz.altitude > 10,
+        constellation,
       }];
     } catch (err) {
       console.warn(`[planets] skipping ${key}:`, err instanceof Error ? err.message : err);

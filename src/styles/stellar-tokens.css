@@ -3150,6 +3150,448 @@
   padding: 12px 40px 0;
 }
 
+/* === Big score ring === */
+.sky-score-block {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.sky-score-ring2 {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: conic-gradient(rgba(255,255,255,0.06) 0deg, rgba(255,255,255,0.06) 360deg);
+}
+.sky-score-ring2-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #070B14;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.sky-score-num2 {
+  font-family: var(--font-mono);
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(255,255,255,0.96);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.sky-score-sub2 {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.06em;
+}
+.sky-score-tag {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: -0.005em;
+  max-width: 200px;
+  line-height: 1.3;
+}
+.sky-score-ring2-skel {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.sky-score-tag-skel {
+  width: 160px;
+  height: 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.sky-verdict-row { align-items: center; gap: 28px; }
+.sky-verdict-head.fair { color: #FBBF24; }
+.sky-verdict-head.poor { color: #FB7185; }
+
+/* === Default location dismissable badge === */
+.sky-default-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.02em;
+}
+.sky-default-badge-close {
+  background: none;
+  border: 0;
+  color: rgba(255,255,255,0.5);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.sky-default-badge-close:hover {
+  color: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.08);
+}
+
+/* === Planet card as button === */
+.sky-planet-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: center;
+}
+.sky-planet-card.below { cursor: default; }
+.sky-planet-card:not(.below):hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.07);
+}
+.sky-planet-card:focus-visible {
+  outline: 2px solid #A78BFA;
+  outline-offset: 2px;
+}
+
+/* === Planet detail modal === */
+.sky-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 8, 16, 0.72);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+  animation: sky-modal-fade 0.18s ease;
+}
+@keyframes sky-modal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.sky-modal {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  background: linear-gradient(180deg, #0F172A, #0A0E1A);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 28px;
+  color: rgba(255,255,255,0.92);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+  animation: sky-modal-pop 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+@keyframes sky-modal-pop {
+  from { transform: translateY(8px) scale(0.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+.sky-modal-close {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.7);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.sky-modal-close:hover {
+  background: rgba(255,255,255,0.08);
+  color: white;
+}
+.sky-modal-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.sky-modal-viz {
+  width: 64px; height: 64px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sky-modal-title { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.sky-modal-name {
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: capitalize;
+  letter-spacing: -0.01em;
+}
+.sky-modal-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.4;
+}
+.sky-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin: 0 0 16px 0;
+}
+.sky-modal-grid > div {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sky-modal-grid dt {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.4);
+}
+.sky-modal-grid dd {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.92);
+  margin: 0;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.sky-modal-tip {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255,255,255,0.7);
+  margin: 0 0 18px 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(167,139,250,0.06);
+  border: 1px solid rgba(167,139,250,0.12);
+}
+.sky-modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.sky-modal-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.92);
+  background: rgba(255,255,255,0.04);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.sky-modal-cta:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.18);
+}
+.sky-modal-cta.primary {
+  background: linear-gradient(180deg, #14B8A6, #0EA5A1);
+  border-color: rgba(20,184,166,0.6);
+  color: white;
+}
+.sky-modal-cta.primary:hover {
+  background: linear-gradient(180deg, #2DD4BF, #14B8A6);
+}
+
+/* === Night tile button overrides === */
+.sky-night-tile {
+  position: relative;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  padding: 0;
+  width: 100%;
+}
+.sky-night-tile.clickable { cursor: pointer; }
+.sky-night-tile.clickable:hover {
+  transform: translateY(-2px);
+  border-color: var(--sky-acc);
+}
+.sky-night-tile:disabled { cursor: default; }
+.sky-night-tile.selected {
+  border-color: var(--sky-acc);
+  box-shadow: 0 0 0 2px var(--sky-acc) inset;
+}
+.sky-night-tile:focus-visible {
+  outline: 2px solid var(--sky-acc);
+  outline-offset: 2px;
+}
+.sky-night-bell {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: rgba(167,139,250,0.95);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(167,139,250,0.4);
+}
+
+/* === Plan-for section === */
+.sky-section-date {
+  font-weight: 400;
+  color: var(--sky-t2);
+  font-size: 14px;
+}
+.sky-plan-close {
+  background: none;
+  border: 0;
+  color: var(--sky-t2);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.sky-plan-close:hover { color: var(--sky-t1); background: var(--sky-bg2); }
+.sky-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.sky-plan-card {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--sky-bd);
+  background: var(--sky-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sky-detail-value-sm { font-size: 14px; font-family: var(--font-display), inherit; }
+.sky-plan-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.sky-plan-link {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sky-acc);
+  text-decoration: none;
+}
+.sky-plan-link:hover { text-decoration: underline; }
+.sky-plan-event {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--sky-t2);
+  font-family: var(--font-mono);
+  letter-spacing: 0.03em;
+}
+
+/* === Astroman Recommendation card === */
+.sky-reco-card {
+  display: grid;
+  grid-template-columns: 1fr 96px;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid var(--sky-bd);
+  background: var(--sky-bg);
+}
+.sky-reco-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.sky-reco-pitch {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--sky-t1);
+}
+.sky-reco-product {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.sky-reco-product strong {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sky-t1);
+}
+.sky-reco-price {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--sky-acc);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.sky-reco-cta {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sky-acc);
+  text-decoration: none;
+  align-self: flex-start;
+}
+.sky-reco-cta:hover { text-decoration: underline; }
+.sky-reco-thumb {
+  width: 96px;
+  height: 96px;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--sky-bg2);
+  border: 1px solid var(--sky-bd);
+}
+
+/* === Bottom split CTAs === */
+.sky-bottom-ctas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.sky-bottom-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  padding: 0 16px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #14B8A6, #0EA5A1);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: -0.005em;
+  border: 1px solid rgba(20,184,166,0.5);
+  text-align: center;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.sky-bottom-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(20,184,166,0.25);
+}
+
 /* === Mobile === */
 @media (max-width: 768px) {
   .sky-section { padding: 16px; }
@@ -3160,7 +3602,7 @@
   .sky-score-num { font-size: 22px; }
   .sky-verdict-head { font-size: 16px; }
   .sky-verdict-body { font-size: 12px; }
-  .sky-planet-card { min-width: 90px; padding: 10px 8px; }
+  .sky-planet-card { min-width: 0; padding: 10px 8px; }
   .sky-planets { gap: 6px; }
   .sky-nights-grid {
     grid-template-columns: repeat(7, minmax(64px, 1fr));
@@ -3171,6 +3613,36 @@
   .sky-nights-grid::-webkit-scrollbar { display: none; }
   .sky-detail-grid { grid-template-columns: 1fr 1fr; }
   .sky-tip { flex-wrap: wrap; }
+}
+
+@media (max-width: 640px) {
+  .sky-verdict-row { flex-direction: column; gap: 14px; align-items: stretch; text-align: center; }
+  .sky-score-block { align-items: center; }
+  .sky-score-ring2 { width: 140px; height: 140px; }
+  .sky-score-num2 { font-size: 44px; }
+  .sky-score-sub2 { font-size: 10px; }
+  .sky-score-tag { font-size: 12px; max-width: 240px; }
+  .sky-verdict-head { font-size: 16px; }
+  .sky-planets {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    overflow: visible;
+  }
+  .sky-planet-card { min-height: 100px; min-width: 0; }
+  .sky-planet-card:not(.below):hover { transform: none; }
+  .sky-bottom-ctas { grid-template-columns: 1fr; }
+  .sky-bottom-cta { height: 48px; }
+  .sky-modal { padding: 20px; }
+  .sky-modal-grid { grid-template-columns: 1fr 1fr; }
+  .sky-reco-card { grid-template-columns: 1fr 72px; padding: 12px; gap: 12px; }
+  .sky-reco-thumb { width: 72px; height: 72px; }
+  .sky-plan-grid { grid-template-columns: 1fr; }
+  .sky-night-tile { min-height: 110px; }
+  .sky-default-badge {
+    font-size: 9px;
+    padding: 3px 6px 3px 8px;
+  }
 }
 
 /* === Deep-sky objects (shared illustrations) === */
