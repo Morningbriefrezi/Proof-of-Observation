@@ -431,6 +431,7 @@ export default function SkyPage() {
   const [moonSun, setMoonSun] = useState<MoonSunData | null>(null);
   const [score, setScore] = useState<SkyScore | null>(null);
   const [error, setError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
   const [openPlanet, setOpenPlanet] = useState<PlanetInfo | null>(null);
   const [selectedNightIdx, setSelectedNightIdx] = useState<number | null>(null);
   const [defaultBadgeDismissed, setDefaultBadgeDismissed] = useState(false);
@@ -474,7 +475,7 @@ export default function SkyPage() {
     return () => {
       cancelled = true;
     };
-  }, [lat, lon]);
+  }, [lat, lon, retryKey]);
 
   function toggleTheme() {
     const next: Theme = theme === 'light' ? 'dark' : 'light';
@@ -694,7 +695,15 @@ export default function SkyPage() {
               )}
               {error && !loading && (
                 <div className="sky-verdict-body" style={{ color: '#FB7185' }}>
-                  Couldn&apos;t reach the forecast service. Showing what we have.
+                  Could not load — try again{' '}
+                  <button
+                    type="button"
+                    onClick={() => setRetryKey((k) => k + 1)}
+                    className="text-teal-400 hover:underline"
+                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                  >
+                    Retry
+                  </button>
                 </div>
               )}
             </div>

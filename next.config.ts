@@ -16,6 +16,8 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'www.bresser.com' },
       { protocol: 'https', hostname: 'images.bresser.de' },
       { protocol: 'https', hostname: 'astroman.ge' },
+      { protocol: 'https', hostname: 'levenhuk.com' },
+      { protocol: 'https', hostname: 'www.levenhuk.com' },
     ],
   },
   turbopack: {

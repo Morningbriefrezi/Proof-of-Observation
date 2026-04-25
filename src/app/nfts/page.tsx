@@ -8,7 +8,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import PageTransition from '@/components/ui/PageTransition';
 import StaggerChildren from '@/components/ui/StaggerChildren';
-import { SkeletonGrid } from '@/components/ui/Skeleton';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { REWARDS, MISSION_REWARD_HINTS } from '@/lib/rewards';
 import { MISSIONS } from '@/lib/constants';
 import { useAppState } from '@/hooks/useAppState';
@@ -589,13 +589,19 @@ export default function NftsPage() {
       )}
 
       {/* Loading */}
-      {loading && <SkeletonGrid cols={2} count={4} />}
+      {loading && (
+        <div className="grid grid-cols-2 gap-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-56" />
+          ))}
+        </div>
+      )}
 
       {/* Error */}
       {error && !loading && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '64px 0', gap: 16 }}>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Couldn&apos;t load NFTs</p>
-          <button onClick={fetchNfts} className="btn-ghost" style={{ padding: '8px 20px', minHeight: 40, fontSize: 13 }}>
+        <div className="text-center py-12">
+          <p className="text-slate-400 mb-3">Could not load — try again</p>
+          <button onClick={fetchNfts} className="text-teal-400 hover:underline">
             Retry
           </button>
         </div>
@@ -604,15 +610,15 @@ export default function NftsPage() {
       {/* Empty state */}
       {!loading && !error && allNfts.length === 0 && (
         <div style={{ padding: '64px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, textAlign: 'center' }}>
-          <span style={{ fontSize: 60 }}>🔭</span>
+          <Telescope size={44} color="rgba(255,255,255,0.45)" strokeWidth={1.4} />
           <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 20, color: 'var(--text-primary)', margin: 0 }}>
-            No discoveries yet
+            Your observatory awaits
           </p>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: 0, maxWidth: 280 }}>
-            Complete your first mission to mint a verified observation NFT.
+          <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: 0, maxWidth: 320 }}>
+            Complete a sky mission to seal your first discovery on-chain.
           </p>
           <Link href="/missions" className="btn-primary" style={{ textDecoration: 'none', marginTop: 8 }}>
-            Start Observing →
+            Start a mission →
           </Link>
         </div>
       )}

@@ -11,6 +11,7 @@ import { getRank } from '@/lib/rewards';
 import Button from '@/components/shared/Button';
 import PageTransition from '@/components/ui/PageTransition';
 import PageContainer from '@/components/layout/PageContainer';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 export default function ProfilePage() {
   const t = useTranslations('profile');
@@ -142,12 +143,8 @@ export default function ProfilePage() {
       upgradeHint: 'Complete your first mission to become an Observer' };
   })();
 
-  const shimmer = profileLoaded ? undefined : { animation: 'pulse 1.5s ease-in-out infinite', background: 'rgba(255,255,255,0.06)', borderRadius: 6 };
-
   return (
     <PageTransition>
-      <style>{`@keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }`}</style>
-
       {/* Lightbox */}
       {selectedPhoto && (
         <div
@@ -229,7 +226,9 @@ export default function ProfilePage() {
               background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
             }}>
               {!profileLoaded && s.label !== 'Missions Done' ? (
-                <div style={{ ...shimmer, height: 20, width: 48, margin: '0 auto 4px' }} />
+                <Skeleton
+                  className={`${s.label === 'Stars Earned' ? 'w-20' : 'w-12'} h-8 mx-auto mb-1`}
+                />
               ) : (
                 <p style={{ color: s.color, fontWeight: 800, fontSize: 17, margin: '0 0 3px', fontFamily: 'monospace' }}>{s.value}</p>
               )}

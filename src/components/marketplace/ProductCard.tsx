@@ -128,9 +128,9 @@ export default function ProductCard({ product, showDealer, dealerName, priority 
             rel="noopener noreferrer"
             className="text-[11px] px-3 py-1.5 rounded-lg flex-shrink-0"
             style={{
-              background: 'rgba(52,211,153,0.1)',
-              border: '1px solid rgba(52,211,153,0.25)',
-              color: '#34d399',
+              background: 'rgba(124,58,237,0.14)',
+              border: '1px solid rgba(124,58,237,0.32)',
+              color: '#C4B5FD',
               textDecoration: 'none',
               fontWeight: 600,
             }}

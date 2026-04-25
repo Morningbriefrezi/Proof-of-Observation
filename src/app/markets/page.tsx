@@ -168,6 +168,7 @@ export default function MarketsPage() {
   const [markets, setMarkets] = useState<Market[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [theme, setTheme] = useState<Theme>('light');
 
@@ -213,11 +214,11 @@ export default function MarketsPage() {
       .catch((err: unknown) => {
         if (cancelled) return;
         console.error('[markets] failed to load', err);
-        setError(err instanceof Error ? err.message : 'Failed to load markets');
+        setError('Could not load — try again');
         setLoading(false);
       });
     return () => { cancelled = true; };
-  }, [program]);
+  }, [program, retryKey]);
 
   // Stats
   const summary = useMemo(() => {
@@ -406,9 +407,15 @@ export default function MarketsPage() {
                 ))}
               </div>
             ) : error ? (
-              <div className="mkt-state">
-                <p className="mkt-state-title">Couldn&rsquo;t load markets</p>
-                <p>{error}</p>
+              <div className="text-center py-12">
+                <p className="text-slate-400 mb-3">{error}</p>
+                <button
+                  type="button"
+                  onClick={() => setRetryKey((k) => k + 1)}
+                  className="text-teal-400 hover:underline"
+                >
+                  Retry
+                </button>
               </div>
             ) : activeCount === 0 ? (
               <div className="mkt-state">
