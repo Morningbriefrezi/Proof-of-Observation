@@ -1,16 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
-import { useAppState } from '@/hooks/useAppState';
 import { useState, useEffect, useRef } from 'react';
 import {
   CloudSun, ShoppingBag, Satellite, User, Search, BookOpen,
-  Trophy, Radio, MessageCircle, Telescope, LogOut, Settings, Gem, TrendingUp,
+  Trophy, Radio, MessageCircle, Telescope, Gem, TrendingUp,
 } from 'lucide-react';
 import AstroLogo from './AstroLogo';
-import { useTranslations } from 'next-intl';
 import SearchModal from './SearchModal';
 
 const SECTIONS = [
@@ -45,22 +43,19 @@ const QUICK_TABS = [
   { href: '/sky',         label: 'Sky',       icon: CloudSun },
   { href: '/missions',    label: 'Missions',  icon: Satellite },
   { href: '/markets',     label: 'Markets',   icon: TrendingUp },
+  { href: '/learn',       label: 'Learning',  icon: BookOpen },
   { href: '/marketplace', label: 'Shop',      icon: ShoppingBag },
   { href: '/profile',     label: 'Profile',   icon: User },
 ];
 
 export default function Nav() {
   const pathname = usePathname();
-  const router = useRouter();
-  const { logout, authenticated, ready, login, user } = usePrivy();
-  const { setWallet } = useAppState();
-  const [showMenu, setShowMenu] = useState(false);
+  const { authenticated, ready, login } = usePrivy();
   const [searchOpen, setSearchOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const logoRef = useRef<HTMLDivElement>(null);
-  const t = useTranslations('nav');
 
-  useEffect(() => { setSearchOpen(false); setDropdownOpen(false); setShowMenu(false); }, [pathname]);
+  useEffect(() => { setSearchOpen(false); setDropdownOpen(false); }, [pathname]);
 
   useEffect(() => {
     if (!dropdownOpen) return;
@@ -68,19 +63,6 @@ export default function Nav() {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [dropdownOpen]);
-
-  const userEmail =
-    user?.email?.address ??
-    (user?.linkedAccounts?.find(a => a.type === 'email') as { address?: string } | undefined)?.address ??
-    '';
-  const username = userEmail ? userEmail.split('@')[0] : '';
-
-  const handleLogout = async () => {
-    await logout();
-    setWallet('');
-    router.push('/');
-    setShowMenu(false);
-  };
 
   return (
     <>
@@ -261,52 +243,11 @@ export default function Nav() {
               })}
             </div>
 
-            {/* Right cluster: profile/login */}
+            {/* Right cluster: login only when signed out (Profile lives in the middle tabs) */}
             <div className="ml-auto flex items-center gap-1 flex-shrink-0 z-10">
               {!ready ? (
                 <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse" />
-              ) : authenticated ? (
-                <div className="relative">
-                  <button
-                    onClick={() => setShowMenu(v => !v)}
-                    style={{
-                      height: 34, borderRadius: 9999, cursor: 'pointer',
-                      background: 'rgba(124,58,237,0.12)',
-                      border: '1px solid rgba(124,58,237,0.35)',
-                      color: 'rgba(255,255,255,0.85)',
-                      padding: '0 12px',
-                      display: 'flex', alignItems: 'center', fontSize: 12, fontWeight: 600, gap: 6,
-                      transition: 'all 0.18s ease',
-                    }}
-                  >
-                    <User size={13} />
-                    <span style={{ maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {username || 'Profile'}
-                    </span>
-                  </button>
-                  {showMenu && (
-                    <div className="absolute right-0 top-full mt-2 p-1.5 w-44 z-50 flex flex-col gap-0.5" style={{
-                      background: 'rgba(6,9,18,0.97)',
-                      backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
-                      border: '1px solid rgba(124,58,237,0.2)',
-                      borderRadius: 14,
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.02)',
-                      animation: 'dropIn 0.18s cubic-bezier(0.22,1,0.36,1)',
-                    }}>
-                      <Link href="/profile" onClick={() => setShowMenu(false)} className="text-slate-300 hover:text-white text-xs py-2 px-3 rounded-lg hover:bg-white/5 transition-all flex items-center gap-2">
-                        <User size={12} /> Profile
-                      </Link>
-                      <Link href="/profile?tab=settings" onClick={() => setShowMenu(false)} className="text-slate-300 hover:text-white text-xs py-2 px-3 rounded-lg hover:bg-white/5 transition-all flex items-center gap-2">
-                        <Settings size={12} /> Settings
-                      </Link>
-                      <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '2px 0' }} />
-                      <button onClick={handleLogout} className="w-full text-left text-red-400 hover:text-red-300 text-xs py-2 px-3 rounded-lg hover:bg-red-500/10 transition-all flex items-center gap-2">
-                        <LogOut size={12} /> Sign out
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
+              ) : !authenticated ? (
                 <button
                   onClick={() => login()}
                   className="nav-login-btn"
@@ -324,7 +265,7 @@ export default function Nav() {
                 >
                   Log In
                 </button>
-              )}
+              ) : null}
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, ArrowUp, Sparkles } from 'lucide-react';
 import { useLocale } from 'next-intl';
+import { usePrivy } from '@privy-io/react-auth';
 
 interface Msg { role: 'user' | 'assistant'; content: string; }
 
@@ -15,6 +16,7 @@ const INIT_MSG = (locale: string): Msg => ({
 
 export default function AstraPopup() {
   const locale = useLocale();
+  const { authenticated, getAccessToken, login } = usePrivy();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([INIT_MSG(locale)]);
   const [input, setInput] = useState('');
@@ -32,38 +34,55 @@ export default function AstraPopup() {
   const send = async (text?: string) => {
     const msg = (text ?? input).trim();
     if (!msg || loading) return;
+    if (!authenticated) {
+      login();
+      return;
+    }
     setInput('');
     const next: Msg[] = [...messages, { role: 'user', content: msg }];
     setMessages(next);
     setLoading(true);
     try {
+      const token = await getAccessToken().catch(() => null);
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: next, locale }),
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          message: msg,
+          history: messages.filter(m => m.content).map(m => ({ role: m.role, content: m.content })),
+          locale,
+        }),
       });
-      if (!res.body) throw new Error();
+      if (!res.ok || !res.body) throw new Error('chat failed');
+
+      setMessages(m => [...m, { role: 'assistant', content: '' }]);
       const reader = res.body.getReader();
       const dec = new TextDecoder();
-      let buf = '';
-      setMessages(m => [...m, { role: 'assistant', content: '' }]);
+      let buffer = '';
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        const chunk = dec.decode(value);
-        for (const line of chunk.split('\n')) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6).trim();
-            if (data === '[DONE]') break;
-            try { buf += JSON.parse(data).text ?? ''; } catch { /* noop */ }
-          }
+        buffer += dec.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const payload = line.slice(6);
+          if (payload === '[DONE]') break;
+          if (payload === '[ERROR]') throw new Error('stream error');
+          const text = payload.replace(/\u2028/g, '\n');
+          setMessages(m => {
+            const copy = [...m];
+            copy[copy.length - 1] = {
+              role: 'assistant',
+              content: copy[copy.length - 1].content + text,
+            };
+            return copy;
+          });
         }
-        const captured = buf;
-        setMessages(m => {
-          const copy = [...m];
-          copy[copy.length - 1] = { role: 'assistant', content: captured };
-          return copy;
-        });
       }
     } catch {
       setMessages(m => [...m, { role: 'assistant', content: 'Sorry, something went wrong. Try again.' }]);
