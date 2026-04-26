@@ -162,8 +162,6 @@ function ChatPageInner() {
         .streaming-cursor { animation: cursorBlink 0.7s ease-in-out infinite; color: var(--accent); }
       `}</style>
 
-      <h1 className="sr-only">ASTRA — AI Space Companion</h1>
-
       {/* Header */}
       <div style={{
         flexShrink: 0,
@@ -192,8 +190,11 @@ function ChatPageInner() {
 
         {/* Name + subtitle */}
         <div>
-          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: 'var(--text-primary)', margin: 0, lineHeight: 1.2 }}>ASTRA</p>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--text-muted)', margin: 0 }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: 'var(--text-primary)', margin: 0, lineHeight: 1.2, letterSpacing: '-0.01em' }}>
+            ASTRA
+            <span className="sr-only"> — AI Space Companion</span>
+          </h1>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             {t('subtitle')}
           </p>
         </div>
@@ -201,7 +202,7 @@ function ChatPageInner() {
         {/* Online indicator */}
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
           <span className="live-dot" />
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--success)' }}>Online</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--success)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Online</span>
         </div>
       </div>
 

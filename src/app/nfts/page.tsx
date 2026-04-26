@@ -14,6 +14,7 @@ import { MISSIONS } from '@/lib/constants';
 import { useAppState } from '@/hooks/useAppState';
 import type { CompletedMission } from '@/lib/types';
 import PageContainer from '@/components/layout/PageContainer';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { getRarityInfo } from '@/lib/nft-rarity';
 
 interface NftAttribute {
@@ -460,29 +461,32 @@ export default function NftsPage() {
       <BackButton />
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 22, color: 'var(--text-primary)', margin: 0 }}>
-          My Observations
-        </h1>
-        {!loading && (
-          <span className="badge-pill badge-muted">{allNfts.length} NFTs</span>
-        )}
-        {/* Sort toggle */}
-        {allNfts.length > 1 && (
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
-            {(['recent', 'stars'] as const).map(s => (
-              <button
-                key={s}
-                onClick={() => setSort(s)}
-                className={sort === s ? 'badge-pill badge-accent' : 'badge-pill badge-muted'}
-                style={{ fontSize: 11, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-display)' }}
-              >
-                {s.charAt(0).toUpperCase() + s.slice(1)}
-              </button>
-            ))}
+      <PageHeader
+        label="YOUR DISCOVERIES"
+        title="My Observations"
+        subtitle="Each one sealed on Solana."
+        action={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            {!loading && (
+              <span className="badge-pill badge-muted">{allNfts.length} NFTs</span>
+            )}
+            {allNfts.length > 1 && (
+              <div style={{ display: 'flex', gap: 4 }}>
+                {(['recent', 'stars'] as const).map(s => (
+                  <button
+                    key={s}
+                    onClick={() => setSort(s)}
+                    className={sort === s ? 'badge-pill badge-accent' : 'badge-pill badge-muted'}
+                    style={{ fontSize: 11, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-display)' }}
+                  >
+                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        }
+      />
 
       {/* Stats bar */}
       {!loading && allNfts.length > 0 && (
@@ -503,7 +507,7 @@ export default function NftsPage() {
               }}>
                 {stat.value}
               </p>
-              <p style={{ color: 'var(--text-muted)', fontSize: 10, margin: '4px 0 0', textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: 'var(--font-body)' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: '4px 0 0', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-mono)' }}>
                 {stat.label}
               </p>
             </div>

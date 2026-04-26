@@ -11,6 +11,7 @@ import { getRank } from '@/lib/rewards';
 import Button from '@/components/shared/Button';
 import PageTransition from '@/components/ui/PageTransition';
 import PageContainer from '@/components/layout/PageContainer';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
 
 export default function ProfilePage() {
@@ -86,8 +87,8 @@ export default function ProfilePage() {
             <User size={28} color="rgba(255,255,255,0.7)" strokeWidth={1.5} />
           </div>
           <h1 style={{
-            color: 'white', fontWeight: 400, fontSize: 26, margin: '0 0 10px',
-            fontFamily: 'var(--font-serif)', letterSpacing: '-0.01em',
+            color: 'white', fontWeight: 700, fontSize: 'clamp(24px, 4vw, 30px)', margin: '0 0 10px',
+            fontFamily: 'var(--font-display)', letterSpacing: '-0.025em', lineHeight: 1.18,
           }}>
             Your Observatory
           </h1>
@@ -170,6 +171,8 @@ export default function ProfilePage() {
       )}
 
       <PageContainer variant="content" className="py-6 pb-10 flex flex-col gap-0">
+
+        <PageHeader label="OBSERVATORY" title="Your profile" />
 
         {/* — HEADER: Avatar + Name + Address — */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 24, gap: 10 }}>
