@@ -180,23 +180,6 @@ export default function Nav() {
               </div>
             </button>
 
-            {/* Search — icon-only button, matched in weight to the hamburger */}
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="nav-icon-btn w-9 h-9 flex items-center justify-center rounded-xl flex-shrink-0"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#FFFFFF',
-                cursor: 'pointer',
-                padding: 0,
-                transition: 'all 0.18s ease',
-              }}
-              aria-label="Search"
-            >
-              <Search size={17} strokeWidth={1.9} />
-            </button>
-
             {/* Logo — mobile: absolutely centered; sm+: in flow */}
             <div className="sm:hidden absolute left-0 right-0 flex justify-center pointer-events-none">
               <Link href="/" className="pointer-events-auto" title="Stellar">
@@ -213,8 +196,8 @@ export default function Nav() {
               </Link>
             </div>
 
-            {/* Quick tabs — sm and up */}
-            <div className="hidden sm:flex flex-1 items-center justify-center gap-1">
+            {/* Quick tabs — sm and up, evenly distributed */}
+            <div className="hidden sm:flex flex-1 items-center justify-around">
               {QUICK_TABS.map(tab => {
                 const Icon = tab.icon;
                 const isActive = tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);
@@ -243,8 +226,23 @@ export default function Nav() {
               })}
             </div>
 
-            {/* Right cluster: login only when signed out (Profile lives in the middle tabs) */}
+            {/* Right cluster: search + login (Profile lives in the middle tabs) */}
             <div className="ml-auto flex items-center gap-1 flex-shrink-0 z-10">
+              <button
+                onClick={() => setSearchOpen(true)}
+                className="nav-icon-btn w-9 h-9 flex items-center justify-center rounded-xl"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#FFFFFF',
+                  cursor: 'pointer',
+                  padding: 0,
+                  transition: 'all 0.18s ease',
+                }}
+                aria-label="Search"
+              >
+                <Search size={17} strokeWidth={1.9} />
+              </button>
               {!ready ? (
                 <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse" />
               ) : !authenticated ? (
