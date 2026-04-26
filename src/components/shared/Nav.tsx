@@ -196,8 +196,8 @@ export default function Nav() {
               </Link>
             </div>
 
-            {/* Quick tabs — sm and up, evenly distributed */}
-            <div className="hidden sm:flex flex-1 items-center justify-around">
+            {/* Quick tabs — sm and up */}
+            <div className="hidden sm:flex flex-1 items-center justify-center gap-1">
               {QUICK_TABS.map(tab => {
                 const Icon = tab.icon;
                 const isActive = tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);
