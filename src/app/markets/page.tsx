@@ -61,8 +61,6 @@ interface CategoryDef {
 }
 
 const CATEGORY_ORDER: CategoryDef[] = [
-  { key: 'crypto',             label: 'Crypto markets' },
-  { key: 'sports',             label: 'Sports' },
   { key: 'meteor',             label: 'Meteor showers' },
   { key: 'solar',              label: 'Solar activity' },
   { key: 'mission',            label: 'Space missions' },
@@ -72,12 +70,12 @@ const CATEGORY_ORDER: CategoryDef[] = [
   { key: 'sky_event',          label: 'Sky events' },
   { key: 'weather_event',      label: 'Weather events' },
   { key: 'natural_phenomenon', label: 'Natural phenomena' },
+  { key: 'crypto',             label: 'Crypto markets' },
+  { key: 'sports',             label: 'Sports' },
 ];
 
 const CATEGORY_TABS: { value: CategoryFilter; label: string }[] = [
   { value: 'all',        label: 'All' },
-  { value: 'crypto',     label: 'Crypto' },
-  { value: 'sports',     label: 'Sports' },
   { value: 'meteor',     label: 'Meteor showers' },
   { value: 'solar',      label: 'Solar' },
   { value: 'mission',    label: 'Missions' },
@@ -85,6 +83,8 @@ const CATEGORY_TABS: { value: CategoryFilter; label: string }[] = [
   { value: 'discovery',  label: 'Discoveries' },
   { value: 'weather',    label: 'Weather' },
   { value: 'sky_event',  label: 'Sky events' },
+  { value: 'crypto',     label: 'Crypto' },
+  { value: 'sports',     label: 'Sports' },
 ];
 
 interface SkyEvent {
