@@ -1,29 +1,21 @@
-'use client';
-
-import HeroSection from '@/components/home/HeroSection';
-import SkyOutlook from '@/components/home/SkyOutlook';
-import HomeMissions from '@/components/home/HomeMissions';
-import HomeMarkets from '@/components/home/HomeMarkets';
-import HomeShop from '@/components/home/HomeShop';
-import AstraSection from '@/components/home/AstraSection';
+import HeroSection from '@/components/landing/HeroSection';
+import PartnersSection from '@/components/landing/PartnersSection';
+import HowItWorksSection from '@/components/landing/HowItWorksSection';
+import MissionsSection from '@/components/landing/MissionsSection';
+import MarketplaceSection from '@/components/landing/MarketplaceSection';
+import StackSection from '@/components/landing/StackSection';
+import ClosingCtaSection from '@/components/landing/ClosingCtaSection';
 
 export default function HomePage() {
   return (
-    <div className="home-page">
+    <div className="bg-[#050811] text-[#E8E6DD] overflow-x-hidden -mt-14 pt-14">
       <HeroSection />
-
-      <SkyOutlook />
-
-      <section className="home-section home-section-border">
-        <div className="home-two-col">
-          <HomeMissions />
-          <HomeMarkets />
-        </div>
-      </section>
-
-      <HomeShop />
-
-      <AstraSection />
+      <PartnersSection />
+      <HowItWorksSection />
+      <MissionsSection />
+      <MarketplaceSection />
+      <StackSection />
+      <ClosingCtaSection />
     </div>
   );
 }

@@ -1,0 +1,91 @@
+'use client';
+
+import Link from 'next/link';
+import { usePrivy } from '@privy-io/react-auth';
+
+const STARS = [
+  { top: '18%',  left: '12%', size: 1.5, opacity: 0.55, gold: false, mobile: true },
+  { top: '32%',  left: '88%', size: 1,   opacity: 0.45, gold: false, mobile: true },
+  { top: '70%',  left: '8%',  size: 1,   opacity: 0.35, gold: true,  mobile: true },
+  { top: '78%',  left: '92%', size: 1.5, opacity: 0.5,  gold: false, mobile: true },
+  { top: '24%',  left: '70%', size: 1,   opacity: 0.4,  gold: false, mobile: false },
+  { top: '55%',  left: '20%', size: 1,   opacity: 0.3,  gold: false, mobile: false },
+  { top: '12%',  left: '40%', size: 1,   opacity: 0.45, gold: false, mobile: false },
+];
+
+export default function HeroSection() {
+  const { authenticated, ready, login, user } = usePrivy();
+
+  const greeting =
+    ready && authenticated
+      ? user?.email?.address || user?.google?.name || user?.twitter?.username || null
+      : null;
+
+  return (
+    <section className="relative overflow-hidden py-20 md:py-32 px-5 md:px-7 bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,209,102,0.06)_0%,transparent_60%)]">
+      {STARS.map((s, i) => (
+        <span
+          key={i}
+          aria-hidden
+          className={`pointer-events-none absolute rounded-full ${s.mobile ? '' : 'hidden md:block'}`}
+          style={{
+            top: s.top,
+            left: s.left,
+            width: `${s.size}px`,
+            height: `${s.size}px`,
+            opacity: s.opacity,
+            background: s.gold ? '#FFD166' : '#E8E6DD',
+          }}
+        />
+      ))}
+
+      <div className="relative mx-auto flex max-w-[640px] flex-col items-center text-center">
+        <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-[rgba(232,230,221,0.4)]">
+          BUILT ON SOLANA · COLOSSEUM FRONTIER
+        </span>
+
+        <h1 className="mt-5 font-serif font-medium tracking-[-0.03em] leading-[1] md:leading-[0.95] text-[40px] md:text-[64px] text-[#E8E6DD]">
+          <span className="block">Astronomy,</span>
+          <span className="block italic text-[#FFD166]">on chain.</span>
+        </h1>
+
+        <p className="mt-6 max-w-[440px] px-2 text-[15px] md:text-[16px] leading-[1.65] text-[rgba(232,230,221,0.65)]">
+          Stellar brings astrolovers on chain. Observe the night sky, earn rewards,
+          and seal your discoveries on Solana.
+        </p>
+
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-2.5 w-full">
+          <Link
+            href="/missions"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#FFD166] px-6 py-3 text-[13px] font-medium text-[#1a1208] transition-[filter,transform] hover:brightness-110"
+          >
+            Start observing  →
+          </Link>
+
+          {ready && !authenticated ? (
+            <button
+              type="button"
+              onClick={() => login()}
+              className="w-full sm:w-auto inline-flex items-center justify-center rounded-lg border-[0.5px] border-[rgba(232,230,221,0.2)] px-6 py-3 text-[13px] font-medium text-[rgba(232,230,221,0.85)] transition-colors hover:border-[rgba(232,230,221,0.35)]"
+            >
+              Sign in
+            </button>
+          ) : (
+            <Link
+              href="/profile"
+              className="w-full sm:w-auto inline-flex items-center justify-center rounded-lg border-[0.5px] border-[rgba(232,230,221,0.2)] px-6 py-3 text-[13px] font-medium text-[rgba(232,230,221,0.85)] transition-colors hover:border-[rgba(232,230,221,0.35)]"
+            >
+              Your profile
+            </Link>
+          )}
+        </div>
+
+        {greeting && (
+          <p className="mt-5 text-[11px] text-[rgba(232,230,221,0.4)] font-mono tracking-[0.16em] uppercase">
+            Signed in as {greeting}
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}
