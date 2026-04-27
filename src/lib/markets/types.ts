@@ -9,7 +9,9 @@ export type MarketCategory =
   | "mission"
   | "comet"
   | "discovery"
-  | "weather";
+  | "weather"
+  | "crypto"
+  | "sports";
 export type MarketSide = "yes" | "no";
 export type MarketOutcome = "yes" | "no" | "unresolved" | "cancelled";
 export type MarketStatus = "open" | "locked" | "resolved" | "cancelled";
@@ -30,6 +32,8 @@ export interface MarketMetadata {
   analysis?: string;
   preResolved?: boolean;
   preResolvedOutcome?: "yes" | "no";
+  previewOnly?: boolean;
+  simpleTitle?: string;
 }
 
 export interface MarketOnChain {
@@ -99,5 +103,7 @@ export interface SeedMarketsFile {
     analysis?: string;
     pre_resolved?: boolean;
     pre_resolved_outcome?: "yes" | "no";
+    preview_only?: boolean;
+    simple_title?: string;
   }>;
 }

@@ -25,6 +25,7 @@ import {
   type MarketSide,
   type MarketStatus,
 } from '@/lib/markets';
+import { displayTitle } from '@/lib/markets/display';
 import {
   getCategoryIcon,
   TelescopeIcon,
@@ -60,6 +61,8 @@ interface CategoryDef {
 }
 
 const CATEGORY_ORDER: CategoryDef[] = [
+  { key: 'crypto',             label: 'Crypto markets' },
+  { key: 'sports',             label: 'Sports' },
   { key: 'meteor',             label: 'Meteor showers' },
   { key: 'solar',              label: 'Solar activity' },
   { key: 'mission',            label: 'Space missions' },
@@ -73,6 +76,8 @@ const CATEGORY_ORDER: CategoryDef[] = [
 
 const CATEGORY_TABS: { value: CategoryFilter; label: string }[] = [
   { value: 'all',        label: 'All' },
+  { value: 'crypto',     label: 'Crypto' },
+  { value: 'sports',     label: 'Sports' },
   { value: 'meteor',     label: 'Meteor showers' },
   { value: 'solar',      label: 'Solar' },
   { value: 'mission',    label: 'Missions' },
@@ -278,12 +283,13 @@ export default function MarketsPage() {
     return () => { cancelled = true; };
   }, [program, retryKey]);
 
-  // Stats
+  // Stats — preview markets don't count toward staked/open counters.
   const summary = useMemo(() => {
     let open = 0;
     let resolved = 0;
     let staked = 0;
     for (const m of markets) {
+      if (m.metadata.previewOnly) continue;
       if (m.status === 'open') open++;
       if (m.status === 'resolved') resolved++;
       staked += m.onChain.totalStaked;
@@ -291,11 +297,15 @@ export default function MarketsPage() {
     return { open, resolved, staked };
   }, [markets]);
 
-  // Trending pool: up to 12 open markets closing soonest, used for the rotating strip.
+  // Trending pool: real (non-preview) open markets closing soonest.
   const trendingPool = useMemo(() => {
     const now = Date.now();
     return markets
-      .filter((m) => m.status === 'open' && m.metadata.closeTime.getTime() > now)
+      .filter((m) =>
+        m.status === 'open' &&
+        !m.metadata.previewOnly &&
+        m.metadata.closeTime.getTime() > now
+      )
       .sort((a, b) => a.metadata.closeTime.getTime() - b.metadata.closeTime.getTime())
       .slice(0, 12);
   }, [markets]);
@@ -322,10 +332,10 @@ export default function MarketsPage() {
     return out;
   }, [trendingPool, trendingOffset]);
 
-  // Sidebar trending: top 4 by volume (open only)
+  // Sidebar trending: top 4 by volume (open only, no previews)
   const sidebarTrending = useMemo(() => {
     return markets
-      .filter((m) => m.status === 'open')
+      .filter((m) => m.status === 'open' && !m.metadata.previewOnly)
       .sort((a, b) => b.onChain.totalStaked - a.onChain.totalStaked)
       .slice(0, 4);
   }, [markets]);
@@ -378,7 +388,14 @@ export default function MarketsPage() {
     [],
   );
 
-  const activeCount = grouped.reduce((n, g) => n + g.items.length, 0);
+  const activeCount = grouped.reduce(
+    (n, g) => n + g.items.filter((m) => !m.metadata.previewOnly).length,
+    0,
+  );
+  const previewCount = grouped.reduce(
+    (n, g) => n + g.items.filter((m) => m.metadata.previewOnly).length,
+    0,
+  );
 
   return (
     <PageTransition>
@@ -433,7 +450,7 @@ export default function MarketsPage() {
                     <Icon size={20} />
                   </span>
                   <div className="mkt-trending-body">
-                    <div className="mkt-trending-title">{m.metadata.title}</div>
+                    <div className="mkt-trending-title">{displayTitle(m.metadata)}</div>
                     <div className="mkt-trending-meta">
                       {oracle && <span className="mkt-trending-oracle">{oracle}</span>}
                       <span>{countdown}</span>
@@ -459,6 +476,9 @@ export default function MarketsPage() {
                 <span className="mkt-section-meta mkt-section-live">
                   <span className="live-led" aria-hidden />
                   {activeCount} live markets on Solana
+                  {previewCount > 0 && (
+                    <span className="mkt-section-preview-count"> · {previewCount} preview</span>
+                  )}
                 </span>
               )}
             </header>
@@ -610,7 +630,7 @@ export default function MarketsPage() {
                         onClick={() => router.push(`/markets/${m.onChain.marketId}`)}
                       >
                         <span className="mkt-trend-rank">{i + 1}</span>
-                        <span className="mkt-trend-title">{m.metadata.title}</span>
+                        <span className="mkt-trend-title">{displayTitle(m.metadata)}</span>
                         <span className={`mkt-trend-odds ${yesPct >= 50 ? 'hi' : 'lo'}`}>
                           {yesPct}%
                         </span>
@@ -724,18 +744,24 @@ function MarketRow({
   const closeDate = formatCloseDate(market.metadata.closeTime);
   const volume = market.onChain.totalStaked;
   const locked = market.status === 'locked';
+  const isPreview = market.metadata.previewOnly === true;
   const expanded = expandedSide !== null;
+  const disabledForBet = locked || isPreview;
 
   return (
     <div
       role="button"
       tabIndex={0}
       data-category={market.metadata.category}
-      className={`mkt-row${expanded ? ' expanded' : ''}`}
-      onClick={onClick}
+      className={`mkt-row${expanded ? ' expanded' : ''}${isPreview ? ' preview' : ''}`}
+      onClick={() => {
+        if (isPreview) return;
+        onClick();
+      }}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
+          if (isPreview) return;
           onClick();
         }
       }}
@@ -744,7 +770,7 @@ function MarketRow({
         <Icon size={16} />
       </span>
       <div className="mkt-row-content">
-        <div className="mkt-row-title">{market.metadata.title}</div>
+        <div className="mkt-row-title">{displayTitle(market.metadata)}</div>
         <div className="mkt-row-meta">
           {oracle && <span className="mkt-row-oracle">{oracle}</span>}
           {advantage && (
@@ -753,6 +779,7 @@ function MarketRow({
               1.5×
             </span>
           )}
+          {isPreview && <span className="mkt-row-preview">Preview · trading soon</span>}
           <span className="mkt-row-date">{locked ? 'Locked' : closeDate}</span>
         </div>
       </div>
@@ -766,10 +793,11 @@ function MarketRow({
           className={`mkt-odds-cell yes${expandedSide === 'yes' ? ' active' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
+            if (disabledForBet) return;
             onPickSide('yes');
           }}
           aria-label={`Bet Yes at ${yesPct}%`}
-          disabled={locked}
+          disabled={disabledForBet}
         >
           <span className="cell-label">Yes</span>
           <span className="cell-num">{yesPct}<span className="cell-pct">%</span></span>
@@ -779,10 +807,11 @@ function MarketRow({
           className={`mkt-odds-cell no${expandedSide === 'no' ? ' active' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
+            if (disabledForBet) return;
             onPickSide('no');
           }}
           aria-label={`Bet No at ${noPct}%`}
-          disabled={locked}
+          disabled={disabledForBet}
         >
           <span className="cell-label">No</span>
           <span className="cell-num">{noPct}<span className="cell-pct">%</span></span>
@@ -835,7 +864,7 @@ function ResolvedRow({ market, onClick }: { market: Market; onClick: () => void 
         <Icon size={16} />
       </span>
       <div className="mkt-row-content">
-        <div className="mkt-row-title">{market.metadata.title}</div>
+        <div className="mkt-row-title">{displayTitle(market.metadata)}</div>
         <div className="mkt-row-meta">
           <span className="mkt-row-date">Resolved {date}</span>
         </div>

@@ -1480,6 +1480,8 @@
 [data-category="weather_event"]     { --cat-fg: #38BDF8; --cat-bg: rgba( 56,189,248,0.12); --cat-border: rgba( 56,189,248,0.30); }
 [data-category="natural_phenomenon"]{ --cat-fg: #34D399; --cat-bg: rgba( 52,211,153,0.12); --cat-border: rgba( 52,211,153,0.30); }
 [data-category="sky_event"]         { --cat-fg: #C084FC; --cat-bg: rgba(192,132,252,0.14); --cat-border: rgba(192,132,252,0.32); }
+[data-category="crypto"]            { --cat-fg: #F7931A; --cat-bg: rgba(247,147, 26,0.12); --cat-border: rgba(247,147, 26,0.30); }
+[data-category="sports"]            { --cat-fg: #10B981; --cat-bg: rgba( 16,185,129,0.12); --cat-border: rgba( 16,185,129,0.30); }
 
 .mkt-row-content { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .mkt-row-title {
@@ -1514,6 +1516,27 @@
   font-family: var(--font-mono), monospace;
 }
 .mkt-row-date { color: var(--stl-text3); }
+.mkt-row-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--stl-accent);
+  background: var(--stl-accent-bg);
+  border: 1px solid var(--stl-accent);
+  border-color: rgba(124,58,237,0.30);
+}
+.mkt-section-preview-count {
+  color: var(--stl-accent);
+  font-weight: 500;
+}
+.mkt-row.preview { cursor: default; }
+.mkt-row.preview:hover { background: transparent; margin: 0; padding: 10px 0; }
 
 .mkt-odds-pair { display: flex; align-items: center; gap: 4px; }
 
@@ -2037,30 +2060,47 @@
 .mkt-mission-thumb {
   position: relative;
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   overflow: hidden;
-  background: #000;
+  background:
+    radial-gradient(circle at 30% 30%, #0F1233 0%, #050618 70%);
   box-shadow:
-    0 0 0 1px var(--stl-border2) inset,
-    0 0 0 2px var(--stl-bg) inset,
-    0 0 8px rgba(124,58,237,0.18);
+    0 0 0 1px rgba(255,255,255,0.08) inset,
+    0 0 0 2px var(--stl-bg2),
+    0 0 12px rgba(124,58,237,0.22);
   transition: box-shadow 0.18s ease, transform 0.18s ease;
 }
 .mkt-mission-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
+  transform: scale(1.18);
+  transition: transform 0.4s ease;
+  filter: contrast(1.05) saturate(1.05);
+}
+/* Subtle inner vignette so the planet sits inside its own atmosphere */
+.mkt-mission-thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 30% 30%, transparent 35%, rgba(0,0,0,0.45) 100%);
+  mix-blend-mode: multiply;
 }
 .mkt-mission:hover .mkt-mission-thumb {
-  transform: scale(1.04);
+  transform: translateY(-1px);
   box-shadow:
-    0 0 0 1px var(--stl-accent) inset,
-    0 0 0 2px var(--stl-bg) inset,
-    0 0 14px rgba(124,58,237,0.45);
+    0 0 0 1px rgba(167,139,250,0.55) inset,
+    0 0 0 2px var(--stl-bg2),
+    0 0 18px rgba(124,58,237,0.55);
 }
+.mkt-mission:hover .mkt-mission-thumb img { transform: scale(1.28); }
 .mkt-mission-body { flex: 1; min-width: 0; }
 .mkt-mission-title {
   font-size: 12px;

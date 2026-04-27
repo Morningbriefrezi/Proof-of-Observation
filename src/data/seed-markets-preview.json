@@ -1,0 +1,127 @@
+{
+  "version": "preview-1.0",
+  "generated_at": "2026-04-27T00:00:00Z",
+  "window": {
+    "start": "2026-04-27T00:00:00Z",
+    "end": "2026-12-31T23:59:59Z",
+    "judging_week": {
+      "start": "2026-04-25T00:00:00Z",
+      "end": "2026-05-03T23:59:59Z"
+    }
+  },
+  "notes": "Preview-only markets — not on-chain yet. Used for the everyday Crypto + Sports sections so the catalogue isn't 100% astronomy.",
+  "markets": [
+    {
+      "id": "crypto-001-btc-100k",
+      "title": "Bitcoin price ≥ $100,000 USD on May 31, 2026",
+      "simple_title": "Will Bitcoin close above $100K by end of May?",
+      "category": "crypto",
+      "close_time": "2026-05-31T23:00:00Z",
+      "resolution_time": "2026-06-01T08:00:00Z",
+      "resolution_source": "CoinGecko BTC/USD daily close on May 31, 2026.",
+      "YES_condition": "CoinGecko reports BTC/USD daily close ≥ 100,000 on 2026-05-31.",
+      "initial_yes_pct": 62,
+      "preview_only": true,
+      "why_interesting": "BTC has been bouncing around the $100K psychological level all spring. The May close is what every trader is watching.",
+      "ui_description": "Bitcoin's daily close on the last day of May 2026, measured against the $100,000 line. Resolves off CoinGecko's USD price feed."
+    },
+    {
+      "id": "crypto-002-sol-300",
+      "title": "Solana price ≥ $300 USD before July 1, 2026",
+      "simple_title": "Will Solana hit $300 before July?",
+      "category": "crypto",
+      "close_time": "2026-06-30T23:00:00Z",
+      "resolution_time": "2026-07-01T08:00:00Z",
+      "resolution_source": "CoinGecko SOL/USD intraday high between 2026-04-27 and 2026-06-30.",
+      "YES_condition": "CoinGecko reports SOL/USD intraday high ≥ 300 at any point between 2026-04-27 and 2026-06-30.",
+      "initial_yes_pct": 45,
+      "preview_only": true,
+      "why_interesting": "Solana cleared $250 in March and stalled. Retesting $300 is the next leg up — or a rejection.",
+      "ui_description": "Tracks Solana's USD price against $300 across May and June. A single tag is enough — does not need to close above."
+    },
+    {
+      "id": "crypto-003-eth-flippening",
+      "title": "Ethereum market cap > Bitcoin's at any point before 2027",
+      "simple_title": "Will Ethereum overtake Bitcoin in market cap?",
+      "category": "crypto",
+      "close_time": "2026-12-31T23:00:00Z",
+      "resolution_time": "2027-01-01T08:00:00Z",
+      "resolution_source": "CoinGecko market cap snapshot any time before 2027-01-01.",
+      "YES_condition": "CoinGecko ETH market cap exceeds BTC market cap at any 5-minute snapshot before 2027-01-01.",
+      "initial_yes_pct": 8,
+      "preview_only": true,
+      "why_interesting": "The flippening — when ETH overtakes BTC — has been crypto's white whale for half a decade. The 2026 ratio is the closest it's been since 2017.",
+      "ui_description": "A long-tail YES market. Resolves YES if ETH's market cap ever exceeds BTC's between today and end of 2026."
+    },
+    {
+      "id": "crypto-004-stable-volume",
+      "title": "Stablecoin daily volume on Solana > $5B before October 2026",
+      "simple_title": "Will Solana stablecoin volume hit $5B in a day?",
+      "category": "crypto",
+      "close_time": "2026-09-30T23:00:00Z",
+      "resolution_time": "2026-10-01T08:00:00Z",
+      "resolution_source": "Artemis or DefiLlama stablecoin transfer volume on Solana, daily.",
+      "YES_condition": "Daily on-chain stablecoin transfer volume on Solana ≥ $5,000,000,000 on any single day before 2026-10-01.",
+      "initial_yes_pct": 70,
+      "preview_only": true,
+      "why_interesting": "Solana stablecoin volume crossed $3B in March 2026. $5B in a single day would mark a new payments-rail milestone.",
+      "ui_description": "A growth metric for Solana as payments infrastructure. Tracks the highest single-day stablecoin transfer volume across all Solana stablecoins."
+    },
+    {
+      "id": "sports-001-cl-final",
+      "title": "Real Madrid wins UEFA Champions League 2025/26 final",
+      "simple_title": "Will Real Madrid win the Champions League?",
+      "category": "sports",
+      "close_time": "2026-05-30T18:00:00Z",
+      "resolution_time": "2026-05-30T23:00:00Z",
+      "resolution_source": "UEFA official result for the 2026 Champions League final on 2026-05-30.",
+      "YES_condition": "UEFA records Real Madrid as the winner of the 2025/26 UEFA Champions League final played on 2026-05-30.",
+      "initial_yes_pct": 35,
+      "preview_only": true,
+      "why_interesting": "Real Madrid is back in another final after winning in 2024 and reaching the semis in 2025. The final is May 30 in Munich.",
+      "ui_description": "Resolves on the night of the 2026 UCL final. YES if Real Madrid lifts the trophy, NO otherwise."
+    },
+    {
+      "id": "sports-002-nba-finals",
+      "title": "Boston Celtics win NBA Finals 2026",
+      "simple_title": "Will the Celtics win the NBA Finals?",
+      "category": "sports",
+      "close_time": "2026-06-25T03:00:00Z",
+      "resolution_time": "2026-06-25T08:00:00Z",
+      "resolution_source": "NBA official result for the 2026 NBA Finals.",
+      "YES_condition": "NBA records the Boston Celtics as the 2025/26 NBA Champions on or before 2026-06-25.",
+      "initial_yes_pct": 28,
+      "preview_only": true,
+      "why_interesting": "Reigning champs from 2024, made it back to the conference finals in 2025. The 2026 run is their last shot before payroll forces a roster shake-up.",
+      "ui_description": "Resolves on the night of NBA Finals Game 7 (or whenever a team clinches). YES if Boston wins the championship, NO otherwise."
+    },
+    {
+      "id": "sports-003-world-cup-host",
+      "title": "USA national team reaches the 2026 World Cup quarterfinal",
+      "simple_title": "Will the USA reach the World Cup quarterfinals?",
+      "category": "sports",
+      "close_time": "2026-07-04T20:00:00Z",
+      "resolution_time": "2026-07-05T06:00:00Z",
+      "resolution_source": "FIFA bracket for the 2026 FIFA World Cup hosted by USA, Canada, Mexico.",
+      "YES_condition": "FIFA records the USA Men's National Team as advancing past the round of 16 to reach the quarterfinal of the 2026 World Cup.",
+      "initial_yes_pct": 42,
+      "preview_only": true,
+      "why_interesting": "Home tournament, deepest USMNT roster in a decade. Quarters has been the USA's ceiling since 2002.",
+      "ui_description": "The 2026 World Cup is hosted across the USA, Canada, and Mexico. This market tracks whether the USA Men's National Team reaches the final 8."
+    },
+    {
+      "id": "sports-004-f1-driver",
+      "title": "Max Verstappen wins F1 Drivers' Championship 2026",
+      "simple_title": "Will Verstappen win the F1 Championship again?",
+      "category": "sports",
+      "close_time": "2026-12-06T18:00:00Z",
+      "resolution_time": "2026-12-07T08:00:00Z",
+      "resolution_source": "FIA official 2026 F1 season standings after the final race in Abu Dhabi.",
+      "YES_condition": "FIA records Max Verstappen as the 2026 Formula 1 World Drivers' Champion after the final race on 2026-12-06.",
+      "initial_yes_pct": 50,
+      "preview_only": true,
+      "why_interesting": "2026 brings major regulation changes — new power units, new aero. Verstappen's dynasty is either continuing or ending here.",
+      "ui_description": "Resolves after the final race of the 2026 F1 season in Abu Dhabi (December 6). YES if Verstappen is the champion, NO if anyone else takes the crown."
+    }
+  ]
+}

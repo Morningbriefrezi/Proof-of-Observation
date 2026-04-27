@@ -150,6 +150,51 @@ export function CloudIcon(props: MarketIconProps) {
   );
 }
 
+export function CryptoIcon(props: MarketIconProps) {
+  return (
+    <Base {...props}>
+      <circle cx="10" cy="10" r="6.5" stroke="currentColor" strokeWidth="1.2" />
+      <path
+        d="M8 6v8M11.5 6v8"
+        stroke="currentColor"
+        strokeWidth="1.1"
+        strokeLinecap="round"
+      />
+      <path
+        d="M7 7.8h4.5a1.6 1.6 0 0 1 0 3.2H7M7 11h5a1.6 1.6 0 0 1 0 3.2H7"
+        stroke="currentColor"
+        strokeWidth="1.1"
+        strokeLinejoin="round"
+      />
+    </Base>
+  );
+}
+
+export function TrophyIcon(props: MarketIconProps) {
+  return (
+    <Base {...props}>
+      <path
+        d="M6 4h8v3.5a4 4 0 0 1-8 0V4Z"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M6 5.5H4.5a1.5 1.5 0 0 0 0 3H6M14 5.5h1.5a1.5 1.5 0 0 1 0 3H14"
+        stroke="currentColor"
+        strokeWidth="1.1"
+        strokeLinecap="round"
+      />
+      <path
+        d="M10 11.5v3M7.5 17h5"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+    </Base>
+  );
+}
+
 type IconComp = React.FC<MarketIconProps>;
 
 export const CATEGORY_ICONS: Record<string, IconComp> = {
@@ -162,6 +207,8 @@ export const CATEGORY_ICONS: Record<string, IconComp> = {
   weather_event: CloudIcon,
   natural_phenomenon: AuroraIcon,
   sky_event: TelescopeIcon,
+  crypto: CryptoIcon,
+  sports: TrophyIcon,
 };
 
 export function getCategoryIcon(category: string): IconComp {
