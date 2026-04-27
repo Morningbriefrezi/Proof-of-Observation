@@ -115,7 +115,10 @@ export async function getFullMarkets(
     const on = onChainById.get(meta.marketId);
     if (!on) continue;
     const total = on.yesPool + on.noPool;
-    const impliedYesOdds = total === 0 ? 0.5 : on.yesPool / total;
+    const seedOdds = typeof meta.initialYesPct === 'number'
+      ? Math.min(0.99, Math.max(0.01, meta.initialYesPct / 100))
+      : 0.5;
+    const impliedYesOdds = total === 0 ? seedOdds : on.yesPool / total;
     out.push({
       metadata: meta,
       onChain: on,

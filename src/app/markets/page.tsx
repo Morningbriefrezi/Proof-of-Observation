@@ -29,6 +29,7 @@ import {
   getCategoryIcon,
   TelescopeIcon,
 } from '@/components/icons/MarketIcons';
+import { getMissionIcon } from '@/components/icons/MissionIcons';
 import { MISSIONS } from '@/lib/constants';
 
 type CategoryFilter = 'all' | MarketCategory;
@@ -274,14 +275,36 @@ export default function MarketsPage() {
     return { open, resolved, staked };
   }, [markets]);
 
-  // Trending strip: 5 markets closing soonest (still open)
-  const trending = useMemo(() => {
+  // Trending pool: up to 12 open markets closing soonest, used for the rotating strip.
+  const trendingPool = useMemo(() => {
     const now = Date.now();
     return markets
       .filter((m) => m.status === 'open' && m.metadata.closeTime.getTime() > now)
       .sort((a, b) => a.metadata.closeTime.getTime() - b.metadata.closeTime.getTime())
-      .slice(0, 5);
+      .slice(0, 12);
   }, [markets]);
+
+  const [trendingOffset, setTrendingOffset] = useState(0);
+  const [trendingPaused, setTrendingPaused] = useState(false);
+  const TRENDING_VISIBLE = 4;
+
+  useEffect(() => {
+    if (trendingPool.length <= TRENDING_VISIBLE || trendingPaused) return;
+    const id = setInterval(() => {
+      setTrendingOffset((o) => (o + 1) % trendingPool.length);
+    }, 4500);
+    return () => clearInterval(id);
+  }, [trendingPool.length, trendingPaused]);
+
+  const trending = useMemo(() => {
+    if (trendingPool.length === 0) return [];
+    const visible = Math.min(TRENDING_VISIBLE, trendingPool.length);
+    const out: Market[] = [];
+    for (let i = 0; i < visible; i++) {
+      out.push(trendingPool[(trendingOffset + i) % trendingPool.length]);
+    }
+    return out;
+  }, [trendingPool, trendingOffset]);
 
   // Sidebar trending: top 4 by volume (open only)
   const sidebarTrending = useMemo(() => {
@@ -365,9 +388,14 @@ export default function MarketsPage() {
           />
         </div>
 
-        {/* Trending strip */}
+        {/* Trending strip — auto-rotates every 4.5s, pauses on hover */}
         {!loading && trending.length > 0 && (
-          <div className="mkt-trending-strip" role="list">
+          <div
+            className="mkt-trending-strip"
+            role="list"
+            onMouseEnter={() => setTrendingPaused(true)}
+            onMouseLeave={() => setTrendingPaused(false)}
+          >
             {trending.map((m) => {
               const Icon = getCategoryIcon(m.metadata.category);
               const yesPct = Math.round(m.impliedYesOdds * 100);
@@ -379,9 +407,9 @@ export default function MarketsPage() {
               const vol = m.onChain.totalStaked;
               return (
                 <div
-                  key={m.onChain.marketId}
+                  key={`${trendingOffset}-${m.onChain.marketId}`}
                   role="listitem"
-                  className="mkt-trending-chip"
+                  className="mkt-trending-chip mkt-trending-chip--anim"
                   onClick={() => router.push(`/markets/${m.onChain.marketId}`)}
                 >
                   <span className="mkt-trending-icon"><Icon size={22} /></span>
@@ -597,24 +625,29 @@ export default function MarketsPage() {
                       See all
                     </a>
                   </div>
-                  {sidebarMissions.map((m) => (
-                    <div
-                      key={m.id}
-                      className="mkt-mission"
-                      onClick={() => router.push('/missions')}
-                    >
-                      <span className="mkt-mission-emoji" aria-hidden>{m.emoji}</span>
-                      <div className="mkt-mission-body">
-                        <div className="mkt-mission-title">{m.name}</div>
-                        <div className="mkt-mission-meta">
-                          <span>{m.difficulty}</span>
-                          <span className="mkt-mission-dot" aria-hidden>·</span>
-                          <span>{m.type === 'telescope' ? 'Telescope' : 'Naked eye'}</span>
+                  {sidebarMissions.map((m) => {
+                    const MissionIcon = getMissionIcon(m.id);
+                    return (
+                      <div
+                        key={m.id}
+                        className="mkt-mission"
+                        onClick={() => router.push('/missions')}
+                      >
+                        <span className="mkt-mission-icon" aria-hidden>
+                          <MissionIcon size={16} />
+                        </span>
+                        <div className="mkt-mission-body">
+                          <div className="mkt-mission-title">{m.name}</div>
+                          <div className="mkt-mission-meta">
+                            <span>{m.difficulty}</span>
+                            <span className="mkt-mission-dot" aria-hidden>·</span>
+                            <span>{m.type === 'telescope' ? 'Telescope' : 'Naked eye'}</span>
+                          </div>
                         </div>
+                        <span className="mkt-mission-reward">+{m.stars}</span>
                       </div>
-                      <span className="mkt-mission-reward">+{m.stars}</span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
@@ -700,14 +733,13 @@ function MarketRow({
         </div>
       </div>
       <div
-        className="mkt-odds-readout"
+        className="mkt-odds-cells"
         role="group"
         aria-label="Place position"
       >
         <button
           type="button"
-          className={`mkt-odds-readout-half yes${expandedSide === 'yes' ? ' active' : ''}`}
-          style={{ ['--side-pct' as string]: `${yesPct}%` }}
+          className={`mkt-odds-cell yes${expandedSide === 'yes' ? ' active' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
             onPickSide('yes');
@@ -715,14 +747,12 @@ function MarketRow({
           aria-label={`Bet Yes at ${yesPct}%`}
           disabled={locked}
         >
-          <span className="arrow">▲</span>
-          <span>YES</span>
-          <span className="num">{yesPct}</span>
+          <span className="cell-label">Yes</span>
+          <span className="cell-num">{yesPct}<span className="cell-pct">%</span></span>
         </button>
         <button
           type="button"
-          className={`mkt-odds-readout-half no${expandedSide === 'no' ? ' active' : ''}`}
-          style={{ ['--side-pct' as string]: `${noPct}%` }}
+          className={`mkt-odds-cell no${expandedSide === 'no' ? ' active' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
             onPickSide('no');
@@ -730,9 +760,8 @@ function MarketRow({
           aria-label={`Bet No at ${noPct}%`}
           disabled={locked}
         >
-          <span className="num">{noPct}</span>
-          <span>NO</span>
-          <span className="arrow">▼</span>
+          <span className="cell-label">No</span>
+          <span className="cell-num">{noPct}<span className="cell-pct">%</span></span>
         </button>
       </div>
       <div className="mkt-row-volume">{formatVolume(volume)}</div>

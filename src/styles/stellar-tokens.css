@@ -1195,6 +1195,16 @@
   background: var(--stl-bg-hover);
   transform: translateY(-1px);
 }
+@keyframes mkt-trending-fade {
+  from { opacity: 0; transform: translateY(3px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.mkt-trending-chip--anim {
+  animation: mkt-trending-fade 0.45s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mkt-trending-chip--anim { animation: none; }
+}
 .mkt-trending-icon {
   color: var(--stl-text2);
   display: flex;
@@ -1399,82 +1409,92 @@
 
 .mkt-odds-pair { display: flex; align-items: center; gap: 4px; }
 
-/* Stellarr instrument-readout: single split bar showing YES/NO odds.
-   Visually proportional fills + tabular mono numbers. Click each half. */
-.mkt-odds-readout {
+/* Stellarr odds cells: two distinct stat-like pills, gap between, no joined bar.
+   Side-stacked label + number. Quiet by default, fills on hover/active. */
+.mkt-odds-cells {
   display: flex;
   align-items: stretch;
-  height: 28px;
-  border-radius: 4px;
-  overflow: hidden;
-  border: 1px solid var(--stl-border2);
-  background: var(--stl-bg2);
-  font-family: var(--font-mono), 'JetBrains Mono', monospace;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
-  transition: border-color 0.12s ease;
-  width: 130px;
+  gap: 6px;
 }
-.mkt-odds-readout:hover { border-color: var(--stl-text3); }
 
-.mkt-odds-readout-half {
-  flex: 1;
+.mkt-odds-cell {
   position: relative;
-  display: flex;
+  display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 0 6px;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
+  min-width: 56px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--stl-border2);
+  border-radius: 6px;
   background: transparent;
-  border: none;
+  cursor: pointer;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
   color: var(--stl-text2);
-  transition: color 0.12s ease, background 0.12s ease;
+  transition: border-color 0.12s ease, background 0.12s ease, color 0.12s ease,
+    transform 0.12s ease;
 }
-.mkt-odds-readout-half + .mkt-odds-readout-half {
-  border-left: 1px solid var(--stl-border2);
+.mkt-odds-cell:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
-.mkt-odds-readout-half .arrow {
+.mkt-odds-cell .cell-label {
+  font-family: var(--font-sans), system-ui, sans-serif;
   font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--stl-text3);
   line-height: 1;
-  opacity: 0.85;
+  margin-bottom: 3px;
+  transition: color 0.12s ease;
 }
-.mkt-odds-readout-half .num {
+.mkt-odds-cell .cell-num {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
   font-feature-settings: 'tnum';
 }
-
-/* Proportional tinted fill behind each side, anchored to outer edge */
-.mkt-odds-readout-half::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--side-fill, transparent);
-  width: var(--side-pct, 50%);
-  pointer-events: none;
-  transition: width 0.18s ease;
+.mkt-odds-cell .cell-pct {
+  font-size: 9px;
+  font-weight: 500;
+  margin-left: 1px;
+  opacity: 0.55;
 }
-.mkt-odds-readout-half.yes::before { right: auto; left: 0; }
-.mkt-odds-readout-half.no::before  { left: auto; right: 0; }
 
-.mkt-odds-readout-half.yes {
-  --side-fill: rgba(52, 211, 153, 0.10);
+.mkt-odds-cell.yes {
   color: var(--color-success);
-  border-left: 1px solid rgba(52, 211, 153, 0.45);
+  border-color: rgba(52, 211, 153, 0.32);
 }
-.mkt-odds-readout-half.no {
-  --side-fill: rgba(248, 113, 113, 0.10);
+.mkt-odds-cell.no {
   color: var(--color-error);
-  border-left: 1px solid rgba(248, 113, 113, 0.45);
+  border-color: rgba(248, 113, 113, 0.32);
 }
-.mkt-odds-readout-half.yes:hover { background: rgba(52, 211, 153, 0.16); }
-.mkt-odds-readout-half.no:hover  { background: rgba(248, 113, 113, 0.16); }
-.mkt-odds-readout-half > * { position: relative; z-index: 1; }
+.mkt-odds-cell.yes .cell-label { color: rgba(52, 211, 153, 0.72); }
+.mkt-odds-cell.no  .cell-label { color: rgba(248, 113, 113, 0.72); }
 
-.mkt-odds-readout-half.active {
-  background: var(--side-fill);
-  box-shadow: inset 0 -2px 0 0 currentColor;
+.mkt-odds-cell.yes:hover:not(:disabled) {
+  background: rgba(52, 211, 153, 0.10);
+  border-color: rgba(52, 211, 153, 0.55);
+  transform: translateY(-1px);
+}
+.mkt-odds-cell.no:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.10);
+  border-color: rgba(248, 113, 113, 0.55);
+  transform: translateY(-1px);
+}
+
+.mkt-odds-cell.yes.active {
+  background: rgba(52, 211, 153, 0.16);
+  border-color: rgba(52, 211, 153, 0.75);
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.45) inset;
+}
+.mkt-odds-cell.no.active {
+  background: rgba(248, 113, 113, 0.16);
+  border-color: rgba(248, 113, 113, 0.75);
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.45) inset;
 }
 
 /* Inline bet panel — drop-down beneath an expanded market row */
@@ -1888,17 +1908,23 @@
   transition: opacity 0.12s ease;
 }
 .mkt-mission:hover { opacity: 0.85; }
-.mkt-mission-emoji {
+.mkt-mission-icon {
   flex-shrink: 0;
   width: 28px;
   height: 28px;
   border-radius: 7px;
   background: var(--stl-bg3);
+  border: 1px solid var(--stl-border);
+  color: var(--stl-text2);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
   line-height: 1;
+  transition: color 0.12s ease, border-color 0.12s ease;
+}
+.mkt-mission:hover .mkt-mission-icon {
+  color: var(--stl-accent);
+  border-color: var(--stl-border2);
 }
 .mkt-mission-body { flex: 1; min-width: 0; }
 .mkt-mission-title {
@@ -2121,8 +2147,10 @@
   .mkt-row-title { font-size: 13px; }
   .mkt-odds-pair { gap: 3px; }
   .mkt-odds-btn { font-size: 12px; padding: 5px 8px; min-width: 44px; }
-  .mkt-odds-readout { width: 110px; height: 26px; }
-  .mkt-odds-readout-half { font-size: 10px; padding: 0 4px; }
+  .mkt-odds-cells { gap: 4px; }
+  .mkt-odds-cell { min-width: 48px; height: 32px; padding: 0 6px; }
+  .mkt-odds-cell .cell-label { font-size: 8px; margin-bottom: 2px; }
+  .mkt-odds-cell .cell-num { font-size: 12px; }
   .mkt-row-volume { display: none; }
   .mkt-bet-panel {
     grid-template-columns: 1fr;
