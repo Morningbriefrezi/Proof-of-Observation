@@ -4276,182 +4276,131 @@
 .mis-prime-cta:active { transform: translateY(0); }
 
 /* === Sky map (rounded, inside hero) === */
-.mis-skymap {
-  position: relative;
-  height: 340px;
+/* === Tonight's lineup (replaces sky map) === */
+.mis-lineup {
   border-radius: 14px;
-  overflow: hidden;
-  background: radial-gradient(ellipse at 50% 80%, rgba(15,25,55,1), rgba(5,8,16,1) 70%);
-  border: 1px solid rgba(255,255,255,0.05);
-  box-shadow: 0 0 40px rgba(10,20,50,0.4), inset 0 0 60px rgba(5,10,30,0.3);
+  border: 1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(180deg, rgba(10,14,28,0.7), rgba(6,9,20,0.85));
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-.mis-skymap::before {
-  content: '';
-  position: absolute; inset: 0; pointer-events: none;
-  background:
-    radial-gradient(1.8px 1.8px at 8% 18%, rgba(255,255,255,0.6), transparent),
-    radial-gradient(1.2px 1.2px at 22% 40%, rgba(255,255,255,0.35), transparent),
-    radial-gradient(1.8px 1.8px at 36% 14%, rgba(255,255,255,0.55), transparent),
-    radial-gradient(1.2px 1.2px at 48% 58%, rgba(255,255,255,0.28), transparent),
-    radial-gradient(1.8px 1.8px at 62% 28%, rgba(255,255,255,0.5), transparent),
-    radial-gradient(1.2px 1.2px at 74% 50%, rgba(255,255,255,0.3), transparent),
-    radial-gradient(1.8px 1.8px at 86% 72%, rgba(255,255,255,0.45), transparent),
-    radial-gradient(1.2px 1.2px at 15% 68%, rgba(255,255,255,0.3), transparent),
-    radial-gradient(1.2px 1.2px at 30% 78%, rgba(255,255,255,0.25), transparent),
-    radial-gradient(1.2px 1.2px at 54% 82%, rgba(255,255,255,0.28), transparent),
-    radial-gradient(1.2px 1.2px at 68% 10%, rgba(255,255,255,0.3), transparent),
-    radial-gradient(1.2px 1.2px at 92% 32%, rgba(255,255,255,0.28), transparent),
-    radial-gradient(0.6px 0.6px at 42% 86%, rgba(255,255,255,0.12), transparent),
-    radial-gradient(0.6px 0.6px at 12% 38%, rgba(255,255,255,0.1), transparent),
-    radial-gradient(0.6px 0.6px at 78% 82%, rgba(255,255,255,0.1), transparent),
-    radial-gradient(0.6px 0.6px at 58% 6%, rgba(255,255,255,0.08), transparent),
-    radial-gradient(0.6px 0.6px at 33% 55%, rgba(255,255,255,0.08), transparent),
-    radial-gradient(0.6px 0.6px at 95% 60%, rgba(255,255,255,0.08), transparent);
-}
-.mis-skymap::after {
-  content: '';
-  position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(3,7,18,0.5));
-}
-.mis-skymap-milkyway {
-  position: absolute;
-  top: 22%;
-  left: 5%;
-  width: 90%;
-  height: 56%;
-  background: radial-gradient(ellipse at 50% 50%, rgba(200,210,240,0.05), transparent 70%);
-  transform: rotate(-15deg);
-  pointer-events: none;
-}
-.mis-skymap-horizon {
-  position: absolute;
-  bottom: 10%;
-  left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent 5%, rgba(100,140,200,0.06) 20%, rgba(100,140,200,0.1) 50%, rgba(100,140,200,0.06) 80%, transparent 95%);
-  pointer-events: none;
-}
-.mis-skymap-horizon::after {
-  content: '';
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  height: 40px;
-  background: linear-gradient(180deg, transparent, rgba(15,30,65,0.25));
-  pointer-events: none;
-}
-
-.mis-skymap-compass {
-  position: absolute;
+.mis-lineup-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   font-family: var(--font-mono);
-  font-size: 8px;
-  color: rgba(255,255,255,0.1);
-  letter-spacing: 0.1em;
-  pointer-events: none;
+  font-size: 10px;
+  letter-spacing: 0.04em;
 }
-.mis-skymap-compass.n { top: 10px; left: 50%; transform: translateX(-50%); }
-.mis-skymap-compass.s { bottom: 10px; left: 50%; transform: translateX(-50%); }
-.mis-skymap-compass.e { top: 50%; right: 10px; transform: translateY(-50%); }
-.mis-skymap-compass.w { top: 50%; left: 10px; transform: translateY(-50%); }
-
-.mis-skymap-live {
-  position: absolute;
-  top: 12px;
-  left: 14px;
+.mis-lineup-status {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-family: var(--font-mono);
-  font-size: 9px;
-  color: rgba(255,255,255,0.28);
-  letter-spacing: 0.04em;
-  pointer-events: none;
-  z-index: 3;
+  color: rgba(255,255,255,0.55);
 }
-.mis-skymap-live-dot {
-  width: 5px; height: 5px;
+.mis-lineup-dot {
+  width: 6px; height: 6px;
   border-radius: 50%;
   background: #4ADE80;
   box-shadow: 0 0 6px rgba(74,222,128,0.6);
   animation: home-pulse-dot 2s ease-in-out infinite;
 }
-.mis-skymap-date {
-  position: absolute;
-  top: 12px;
-  right: 14px;
-  font-family: var(--font-mono);
-  font-size: 9px;
-  color: rgba(255,255,255,0.18);
-  letter-spacing: 0.02em;
-  pointer-events: none;
-  z-index: 3;
+.mis-lineup-loc {
+  color: rgba(255,255,255,0.32);
 }
-
-.mis-skymap-planet {
-  position: absolute;
-  transform: translate(-50%, -50%);
+.mis-lineup-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+@media (max-width: 900px) {
+  .mis-lineup-list { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 540px) {
+  .mis-lineup-list { grid-template-columns: 1fr; }
+}
+.mis-lineup-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  color: #fff;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+.mis-lineup-item:hover {
+  border-color: rgba(139,92,246,0.45);
+  background: rgba(139,92,246,0.06);
+  transform: translateY(-1px);
+}
+.mis-lineup-art {
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.mis-lineup-info {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  cursor: pointer;
-  transition: transform 0.18s ease, filter 0.18s ease;
-  z-index: 2;
-  background: transparent;
-  border: 0;
-  padding: 0;
+  gap: 3px;
 }
-.mis-skymap-planet:hover {
-  transform: translate(-50%, -50%) scale(1.25);
-  filter: drop-shadow(0 0 8px rgba(255,255,255,0.35));
+.mis-lineup-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #E8E6E0;
+  letter-spacing: -0.005em;
 }
-.mis-skymap-planet:hover .mis-skymap-label { color: rgba(255,255,255,0.6); }
-.mis-skymap-label {
+.mis-lineup-row {
   font-family: var(--font-mono);
-  font-size: 8px;
-  color: rgba(255,255,255,0.3);
-  text-transform: capitalize;
-  letter-spacing: 0.04em;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.7);
-  transition: color 0.15s ease;
+  font-size: 10px;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
 }
-
-/* Map deep-sky objects (positioned inline, rendered as colored blobs) */
-.mis-skymap-dso {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  z-index: 1;
+.mis-lineup-stat b {
+  color: rgba(255,255,255,0.85);
+  font-weight: 600;
 }
-.mis-skymap-dso.andromeda {
-  width: 22px; height: 12px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 50%, rgba(210,210,255,0.5), rgba(150,150,220,0.16) 60%, transparent 80%);
-  filter: blur(0.4px);
-  transform: translate(-50%, -50%) rotate(-30deg);
+.mis-lineup-sep { color: rgba(255,255,255,0.2); }
+.mis-lineup-stars {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-accent-gold);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
 }
-.mis-skymap-dso.orion {
-  width: 16px; height: 16px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(200,170,255,0.55), rgba(140,100,220,0.18) 55%, transparent 75%);
-  filter: blur(0.5px);
+.mis-lineup-stars::before { content: '✦ '; }
+.mis-lineup-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 22px 16px;
+  text-align: center;
+  border: 1px dashed rgba(255,255,255,0.07);
+  border-radius: 12px;
 }
-.mis-skymap-dso.crab {
-  width: 9px; height: 9px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,150,120,0.55), rgba(220,100,80,0.2) 50%, transparent 70%);
-  filter: blur(0.4px);
+.mis-lineup-empty-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.7);
 }
-.mis-skymap-dso.pleiades {
-  width: 18px; height: 18px;
-  background:
-    radial-gradient(0.8px 0.8px at 35% 30%, rgba(220,230,255,0.95), transparent 60%),
-    radial-gradient(0.6px 0.6px at 55% 25%, rgba(220,230,255,0.85), transparent 60%),
-    radial-gradient(0.6px 0.6px at 40% 55%, rgba(220,230,255,0.75), transparent 60%),
-    radial-gradient(0.6px 0.6px at 65% 50%, rgba(220,230,255,0.65), transparent 60%),
-    radial-gradient(0.5px 0.5px at 50% 70%, rgba(220,230,255,0.5), transparent 60%),
-    radial-gradient(0.5px 0.5px at 30% 65%, rgba(220,230,255,0.45), transparent 60%),
-    radial-gradient(0.5px 0.5px at 60% 35%, rgba(220,230,255,0.55), transparent 60%);
-  filter: drop-shadow(0 0 3px rgba(200,215,255,0.3));
+.mis-lineup-empty-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
 }
 
 /* === Section header === */
@@ -4479,9 +4428,12 @@
 /* === Mission tile deck === */
 .mis-deck {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
 }
+@media (max-width: 1100px) { .mis-deck { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 820px)  { .mis-deck { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px)  { .mis-deck { grid-template-columns: 1fr; } }
 .mis-tile {
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-xl);
@@ -4511,7 +4463,7 @@
 
 .mis-tile-sky {
   position: relative;
-  height: 120px;
+  height: 96px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4544,15 +4496,15 @@
 .mis-tile-sky.theme-mars      { background: linear-gradient(150deg, #140806, #20100A, #2C1610); }
 .mis-tile-sky.theme-venus     { background: linear-gradient(150deg, #10100A, #1A1810, #242016); }
 
-/* Glow halo behind planet art */
+/* Glow halo behind planet art — softer to keep planet edge crisp */
 .mis-tile-glow {
   position: absolute;
   left: 50%; top: 50%;
   transform: translate(-50%, -50%);
-  width: 90px; height: 90px;
+  width: 70px; height: 70px;
   border-radius: 50%;
-  filter: blur(12px);
-  opacity: 0.25;
+  filter: blur(18px);
+  opacity: 0.16;
   pointer-events: none;
 }
 .mis-tile-glow.theme-moon      { background: rgba(232,228,216,0.9); }
@@ -4571,18 +4523,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6)) contrast(1.06) saturate(1.08);
 }
 
 .mis-tile-info {
-  padding: 12px 14px;
+  padding: 10px 12px 11px;
   background: linear-gradient(180deg, rgba(8,12,24,0.95), rgba(12,18,36,0.98));
   border-top: 1px solid rgba(255,255,255,0.04);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 .mis-tile-name {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   color: #E8E6E0;
   letter-spacing: -0.005em;
@@ -4600,13 +4553,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-top: 2px;
+  gap: 6px;
+  margin-top: 1px;
 }
 .mis-tile-foot-left {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   min-width: 0;
 }
 .mis-diff {
@@ -4626,21 +4579,131 @@
 .mis-tile-equip {
   font-family: var(--font-mono);
   font-size: 9px;
-  color: rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.4);
   letter-spacing: 0.02em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.mis-equip-icon {
+  flex-shrink: 0;
+  color: rgba(255,255,255,0.55);
 }
 .mis-tile-stars {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--color-accent-gold);
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
 }
 .mis-tile-stars::before { content: '✦ '; }
+
+/* === Telescope tips === */
+.mis-tips-deck {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+@media (max-width: 1100px) { .mis-tips-deck { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 540px)  { .mis-tips-deck { grid-template-columns: 1fr; } }
+.mis-tip-card {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 12px;
+  background: var(--color-bg-card);
+  padding: 14px 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.18s ease, transform 0.18s ease;
+}
+.mis-tip-card:hover {
+  border-color: var(--color-border-medium);
+  transform: translateY(-1px);
+}
+.mis-tip-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-accent-teal);
+}
+.mis-tip-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mis-t1);
+  margin: 0;
+  letter-spacing: -0.005em;
+}
+.mis-tip-body {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--mis-t2);
+  margin: 0;
+}
+
+/* === Elsewhere in Stellar === */
+.mis-explore-deck {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+@media (max-width: 900px) { .mis-explore-deck { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 540px) { .mis-explore-deck { grid-template-columns: 1fr; } }
+.mis-explore-card {
+  position: relative;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 12px;
+  background: var(--color-bg-card);
+  padding: 14px 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+}
+.mis-explore-card:hover {
+  border-color: rgba(139,92,246,0.4);
+  transform: translateY(-1px);
+  background: var(--color-bg-card-hover);
+}
+.mis-explore-meta {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mis-t3);
+}
+.mis-explore-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mis-t1);
+  letter-spacing: -0.005em;
+}
+.mis-explore-desc {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--mis-t2);
+  margin-top: 2px;
+}
+.mis-explore-arrow {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--mis-t3);
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+.mis-explore-card:hover .mis-explore-arrow {
+  color: var(--color-accent-purple, #8B5CF6);
+  transform: translateX(2px);
+}
 
 /* === Quiz tile deck === */
 .mis-quiz-deck {

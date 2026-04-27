@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAppState } from '@/hooks/useAppState';
 import { usePrivy } from '@privy-io/react-auth';
 import { useLocale, useTranslations } from 'next-intl';
@@ -45,23 +46,35 @@ const GRID: GridEntry[] = [
   { id: 'crab',      name: 'Crab Nebula (M1)', desc: 'Supernova remnant from 1054 AD',              stars: 250, diff: 'expert', diffLabel: 'Expert', equip: 'Telescope', routeId: 'crab' },
 ];
 
-// Things that appear on the sky map (planets + deep sky).
-const MAP_PLANET_KEYS = ['moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn'];
-const MAP_DEEP_KEYS = ['pleiades', 'orion', 'andromeda', 'crab'];
+const TIPS = [
+  {
+    title: 'Cool the optics first',
+    body: 'Set the scope outside 30 minutes before observing. Warm glass smears detail and ruins planetary views.',
+  },
+  {
+    title: 'Start at low magnification',
+    body: 'Use your longest-focal eyepiece to find a target. A wide field is forgiving — push power only after you have the object centered.',
+  },
+  {
+    title: 'Align the finder by day',
+    body: 'Aim at a distant tree or antenna. Match the finder cross-hair to the eyepiece view. Saves 15 minutes of fumbling at night.',
+  },
+  {
+    title: 'Mind your dark adaptation',
+    body: 'It takes 20–30 minutes for eyes to fully dark-adapt. Use a red flashlight only — phone screens reset the clock.',
+  },
+];
 
-function getMapSize(key: string): 'small' | 'medium' {
-  if (key === 'jupiter' || key === 'saturn' || key === 'moon') return 'medium';
-  return 'small';
-}
+const EXPLORE: { href: string; name: string; meta: string; desc: string }[] = [
+  { href: '/sky',         name: 'Sky',      meta: 'Forecast', desc: '7-day cloud, seeing, and transparency forecast for your location.' },
+  { href: '/markets',     name: 'Markets',  meta: 'Predict',  desc: 'On-chain prediction markets on celestial events and observations.' },
+  { href: '/learn',       name: 'Learning', meta: 'Articles', desc: 'Field guides, equipment primers, and observing techniques.' },
+  { href: '/network',     name: 'Network',  meta: 'Community',desc: 'See where other Stellar observers are reporting from tonight.' },
+  { href: '/marketplace', name: 'Shop',     meta: 'Gear',     desc: 'Telescopes, eyepieces, and accessories from verified dealers.' },
+  { href: '/chat',        name: 'ASTRA AI', meta: 'Assistant',desc: 'Ask anything about the night sky or your equipment.' },
+];
 
-function planetMapPosition(altitude: number, azimuth: number): { x: number; y: number } {
-  const x = ((azimuth + 180) % 360) / 360 * 100;
-  const y = Math.max(5, 100 - (altitude / 90) * 85);
-  return {
-    x: Math.max(6, Math.min(94, x)),
-    y: Math.max(8, Math.min(88, y)),
-  };
-}
+const LINEUP_KEYS = ['moon', 'jupiter', 'saturn', 'mars', 'venus', 'mercury'];
 
 interface QuizUi {
   key: 'solar-system' | 'constellations' | 'telescopes' | 'universe' | 'space-exploration';
@@ -180,29 +193,35 @@ export default function MissionsPage() {
     router.push(`/observe/${routeId}`);
   }, [router]);
 
-  const mapPlanets = useMemo(() => {
-    const items: { id: string; key: string; x: number; y: number; routeId?: string }[] = [];
-    for (const key of MAP_PLANET_KEYS) {
-      const pos = skyPositions[key];
-      if (!pos || pos.altitude <= -5) continue;
-      const map = planetMapPosition(pos.altitude, pos.azimuth);
+  const lineup = useMemo(() => {
+    const planets = getVisiblePlanets(lat, lon, now);
+    const map = new Map(planets.map((p) => [p.key, p] as const));
+    const items: {
+      key: string;
+      name: string;
+      altitude: number;
+      azimuthDir: string;
+      magnitude: number;
+      routeId: string;
+      stars: number;
+    }[] = [];
+    for (const key of LINEUP_KEYS) {
+      const p = map.get(key);
+      if (!p || p.altitude <= 0) continue;
       const entry = GRID.find((g) => g.id === key);
-      items.push({ id: key, key, x: map.x, y: map.y, routeId: entry?.routeId });
+      items.push({
+        key,
+        name: entry?.name ?? key.charAt(0).toUpperCase() + key.slice(1),
+        altitude: p.altitude,
+        azimuthDir: p.azimuthDir,
+        magnitude: p.magnitude,
+        routeId: entry?.routeId ?? 'free-observation',
+        stars: entry?.stars ?? 40,
+      });
     }
+    items.sort((a, b) => b.altitude - a.altitude);
     return items;
-  }, [skyPositions]);
-
-  const mapDso = useMemo(() => {
-    const items: { id: string; x: number; y: number; routeId?: string }[] = [];
-    for (const id of MAP_DEEP_KEYS) {
-      const pos = skyPositions[id];
-      if (!pos || pos.altitude <= -5) continue;
-      const map = planetMapPosition(pos.altitude, pos.azimuth);
-      const entry = GRID.find((g) => g.id === id);
-      items.push({ id, x: map.x, y: map.y, routeId: entry?.routeId });
-    }
-    return items;
-  }, [skyPositions]);
+  }, [lat, lon, now]);
 
   // ---- Auth gate ----
   if (!authenticated) {
@@ -224,13 +243,12 @@ export default function MissionsPage() {
                 />
               </div>
             </div>
-            <SkyMap
-              mapPlanets={mapPlanets}
-              mapDso={mapDso}
+            <TonightLineup
+              items={lineup}
               liveTime={liveTime}
               dateLabel={dateLabel}
               cityLabel={cityLabel}
-              onPlanetClick={() => undefined}
+              onStart={() => undefined}
             />
           </div>
         </div>
@@ -287,13 +305,12 @@ export default function MissionsPage() {
             />
           )}
 
-          <SkyMap
-            mapPlanets={mapPlanets}
-            mapDso={mapDso}
+          <TonightLineup
+            items={lineup}
             liveTime={liveTime}
             dateLabel={dateLabel}
             cityLabel={cityLabel}
-            onPlanetClick={(routeId) => { if (routeId) startMission(routeId); }}
+            onStart={(routeId) => startMission(routeId)}
           />
         </div>
       </div>
@@ -349,80 +366,111 @@ export default function MissionsPage() {
             })}
           </div>
         </section>
+
+        <section className="mis-section">
+          <div className="mis-section-head">
+            <h2 className="mis-section-title">Using your telescope</h2>
+            <span className="mis-section-meta">Field-tested tips</span>
+          </div>
+          <div className="mis-tips-deck">
+            {TIPS.map((tip, i) => (
+              <article key={tip.title} className="mis-tip-card">
+                <span className="mis-tip-num">{String(i + 1).padStart(2, '0')}</span>
+                <h3 className="mis-tip-title">{tip.title}</h3>
+                <p className="mis-tip-body">{tip.body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="mis-section">
+          <div className="mis-section-head">
+            <h2 className="mis-section-title">Elsewhere in Stellar</h2>
+            <span className="mis-section-meta">{EXPLORE.length} sections</span>
+          </div>
+          <div className="mis-explore-deck">
+            {EXPLORE.map((p) => (
+              <Link key={p.href} href={p.href} className="mis-explore-card">
+                <span className="mis-explore-meta">{p.meta}</span>
+                <span className="mis-explore-name">{p.name}</span>
+                <span className="mis-explore-desc">{p.desc}</span>
+                <span className="mis-explore-arrow" aria-hidden>→</span>
+              </Link>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );
 }
 
-// ---- Sky map ----
+// ---- Tonight's lineup ----
 
-interface MapPlanet {
-  id: string;
+interface LineupItem {
   key: string;
-  x: number;
-  y: number;
-  routeId?: string;
-}
-interface MapDso {
-  id: string;
-  x: number;
-  y: number;
-  routeId?: string;
+  name: string;
+  altitude: number;
+  azimuthDir: string;
+  magnitude: number;
+  routeId: string;
+  stars: number;
 }
 
-function SkyMap({
-  mapPlanets,
-  mapDso,
+function TonightLineup({
+  items,
   liveTime,
   dateLabel,
   cityLabel,
-  onPlanetClick,
+  onStart,
 }: {
-  mapPlanets: MapPlanet[];
-  mapDso: MapDso[];
+  items: LineupItem[];
   liveTime: string;
   dateLabel: string;
   cityLabel: string;
-  onPlanetClick: (routeId: string | undefined) => void;
+  onStart: (routeId: string) => void;
 }) {
   return (
-    <div className="mis-skymap" role="region" aria-label="Night sky map">
-      <div className="mis-skymap-milkyway" aria-hidden />
-      <div className="mis-skymap-horizon" aria-hidden />
-
-      <span className="mis-skymap-compass n">N</span>
-      <span className="mis-skymap-compass s">S</span>
-      <span className="mis-skymap-compass e">E</span>
-      <span className="mis-skymap-compass w">W</span>
-
-      <div className="mis-skymap-live">
-        <span className="mis-skymap-live-dot" />
-        <span>LIVE · {liveTime}</span>
+    <div className="mis-lineup" role="region" aria-label="Tonight's visible targets">
+      <div className="mis-lineup-head">
+        <div className="mis-lineup-status">
+          <span className="mis-lineup-dot" aria-hidden />
+          <span>LIVE · {liveTime}</span>
+        </div>
+        <div className="mis-lineup-loc">{dateLabel} · {cityLabel}</div>
       </div>
-      <div className="mis-skymap-date">{dateLabel} · {cityLabel}</div>
 
-      {mapDso.map((d) => (
-        <span
-          key={d.id}
-          className={`mis-skymap-dso ${d.id}`}
-          style={{ left: `${d.x}%`, top: `${d.y}%` }}
-          aria-hidden
-        />
-      ))}
-
-      {mapPlanets.map((p) => (
-        <button
-          key={p.id}
-          type="button"
-          className="mis-skymap-planet"
-          style={{ left: `${p.x}%`, top: `${p.y}%` }}
-          onClick={() => onPlanetClick(p.routeId)}
-          aria-label={p.key}
-        >
-          <PlanetViz name={p.key} size={getMapSize(p.key)} />
-          <span className="mis-skymap-label">{p.key}</span>
-        </button>
-      ))}
+      {items.length === 0 ? (
+        <div className="mis-lineup-empty">
+          <span className="mis-lineup-empty-title">Nothing above the horizon right now</span>
+          <span className="mis-lineup-empty-sub">Check back after sunset — quizzes below earn Stars while you wait.</span>
+        </div>
+      ) : (
+        <div className="mis-lineup-list">
+          {items.map((p) => (
+            <button
+              key={p.key}
+              type="button"
+              className="mis-lineup-item"
+              onClick={() => onStart(p.routeId)}
+            >
+              <span className="mis-lineup-art">
+                <PlanetViz name={p.key} size="medium" />
+              </span>
+              <span className="mis-lineup-info">
+                <span className="mis-lineup-name">{p.name}</span>
+                <span className="mis-lineup-row">
+                  <span className="mis-lineup-stat"><b>{Math.round(p.altitude)}°</b> alt</span>
+                  <span className="mis-lineup-sep">·</span>
+                  <span className="mis-lineup-stat">{p.azimuthDir}</span>
+                  <span className="mis-lineup-sep">·</span>
+                  <span className="mis-lineup-stat">mag <b>{p.magnitude}</b></span>
+                </span>
+              </span>
+              <span className="mis-lineup-stars">+{p.stars}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -485,12 +533,44 @@ function MissionTile({
         <div className="mis-tile-foot">
           <span className="mis-tile-foot-left">
             <span className={`mis-diff ${entry.diff}`}>{entry.diffLabel}</span>
-            <span className="mis-tile-equip">{above ? entry.equip : 'Below horizon'}</span>
+            <span className="mis-tile-equip">
+              <EquipIcon kind={entry.equip} />
+              <span>{above ? entry.equip : 'Below horizon'}</span>
+            </span>
           </span>
           <span className="mis-tile-stars">+{entry.stars}</span>
         </div>
       </div>
     </button>
+  );
+}
+
+function EquipIcon({ kind }: { kind: string }) {
+  const k = kind.toLowerCase();
+  if (k.includes('telescope')) {
+    return (
+      <svg className="mis-equip-icon" width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden>
+        <path d="M2.5 6.5l8-3.5 1.5 3-8 3.5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+        <path d="M5.5 9.2L8 14.5M9 8.6L11.5 14.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        <circle cx="13.2" cy="2.8" r="1.2" stroke="currentColor" strokeWidth="1.2" />
+      </svg>
+    );
+  }
+  if (k.includes('binocular')) {
+    return (
+      <svg className="mis-equip-icon" width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden>
+        <circle cx="4" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.2" />
+        <circle cx="12" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.2" />
+        <path d="M6.5 10h3M5 7.5l1-3.5h4l1 3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  // Naked eye
+  return (
+    <svg className="mis-equip-icon" width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <path d="M1.5 8s2.5-4.5 6.5-4.5S14.5 8 14.5 8s-2.5 4.5-6.5 4.5S1.5 8 1.5 8z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+      <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.2" />
+    </svg>
   );
 }
 

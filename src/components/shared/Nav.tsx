@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { usePrivy } from '@privy-io/react-auth';
 import { useState, useEffect, useRef } from 'react';
 import {
   CloudSun, ShoppingBag, Satellite, User, Search, BookOpen,
@@ -59,23 +59,17 @@ const AVATAR_ITEMS: { href: string; label: string; icon: typeof User }[] = [
 ];
 
 function getInitials(name: string | null | undefined): string {
-  const src = (name ?? '?').trim();
-  if (!src) return '?';
+  const src = (name ?? '').trim();
+  if (!src) return '';
   const parts = src.split(/[\s._-]+/).filter(Boolean);
   if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
   return src.slice(0, 2).toUpperCase();
-}
-
-function shortAddr(addr: string | null | undefined): string {
-  if (!addr) return '';
-  return `${addr.slice(0, 4)}…${addr.slice(-4)}`;
 }
 
 export default function Nav() {
   const pathname = usePathname();
   const router = useRouter();
   const { authenticated, ready, login, logout, user } = usePrivy();
-  const { wallets } = useWallets();
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
@@ -114,14 +108,12 @@ export default function Nav() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  const solanaWallet = wallets.find(w => (w as { chainType?: string }).chainType === 'solana');
-  const walletAddress = solanaWallet?.address ?? null;
   const email =
     user?.email?.address ??
     (user?.linkedAccounts.find(a => a.type === 'email') as { address?: string } | undefined)?.address ??
     null;
-  const displayName = email ? email.split('@')[0] : (walletAddress ? shortAddr(walletAddress) : 'Astronomer');
-  const initials = getInitials(email ?? walletAddress);
+  const displayName = email ? email.split('@')[0] : 'Astronomer';
+  const initials = getInitials(email);
 
   const handleLogout = async () => {
     setAvatarOpen(false);
@@ -322,9 +314,13 @@ export default function Nav() {
                     aria-controls="avatar-menu"
                     aria-haspopup="menu"
                   >
-                    <span style={{ color: 'white', fontSize: 11, fontWeight: 500, letterSpacing: '0.02em', lineHeight: 1 }}>
-                      {initials}
-                    </span>
+                    {initials ? (
+                      <span style={{ color: 'white', fontSize: 11, fontWeight: 500, letterSpacing: '0.02em', lineHeight: 1 }}>
+                        {initials}
+                      </span>
+                    ) : (
+                      <Telescope size={14} strokeWidth={1.75} color="white" />
+                    )}
                   </button>
 
                   {avatarOpen && (
@@ -357,7 +353,7 @@ export default function Nav() {
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           color: 'white', fontSize: 11, fontWeight: 500,
                         }}>
-                          {initials}
+                          {initials || <Telescope size={14} strokeWidth={1.75} color="white" />}
                         </div>
                         <div style={{ minWidth: 0, flex: 1 }}>
                           <div style={{
@@ -367,12 +363,15 @@ export default function Nav() {
                           }}>
                             {displayName}
                           </div>
-                          <div style={{
-                            color: 'rgba(255,255,255,0.4)', fontSize: 11,
-                            fontFamily: 'var(--font-mono)',
-                          }}>
-                            {walletAddress ? shortAddr(walletAddress) : 'No wallet'}
-                          </div>
+                          {email && (
+                            <div style={{
+                              color: 'rgba(255,255,255,0.4)', fontSize: 11,
+                              fontFamily: 'var(--font-mono)',
+                              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                            }}>
+                              {email}
+                            </div>
+                          )}
                         </div>
                       </div>
 
