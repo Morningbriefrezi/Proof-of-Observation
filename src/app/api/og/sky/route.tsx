@@ -22,7 +22,7 @@ export async function GET() {
           style={{
             fontSize: 72,
             fontWeight: 'bold',
-            color: '#FFD166',
+            color: '#F4EDE0',
             letterSpacing: 4,
             lineHeight: 1,
           }}

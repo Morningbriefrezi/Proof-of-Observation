@@ -1,6 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#0A0E1A"/>
-  <g transform="translate(256 256) scale(2)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 100" width="480" height="100">
+  <g transform="translate(60, 50) scale(0.55)">
     <circle cx="0" cy="0" r="56" stroke="#F4EDE0" stroke-width="2.4" fill="none"/>
     <g transform="rotate(14)">
       <circle cx="0" cy="-21" r="21" fill="#F4EDE0"/>
@@ -9,4 +8,5 @@
       <circle cx="-21" cy="21" r="12.5" fill="#0A0E1A"/>
     </g>
   </g>
+  <text x="130" y="59" font-family="Georgia, 'Times New Roman', serif" font-size="26" font-weight="400" fill="#F4EDE0" letter-spacing="9">STELLAR</text>
 </svg>

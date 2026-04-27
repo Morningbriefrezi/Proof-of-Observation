@@ -76,7 +76,7 @@
   --stellar-border-hover: rgba(99, 102, 241, 0.20);
   --stellar-teal: #818cf8;
   --stellar-teal-glow: rgba(99, 102, 241, 0.15);
-  --stellar-brass: #FFD166;
+  --stellar-brass: #F4EDE0;
   --stellar-sol-purple: rgba(99, 102, 241, 0.08);
   --stellar-sol-green: rgba(20, 241, 149, 0.06);
   --stellar-gradient-sol: linear-gradient(135deg, rgba(99, 102, 241, 0.04) 0%, rgba(124, 58, 237, 0.06) 50%, rgba(168, 85, 247, 0.03) 100%);
@@ -150,7 +150,7 @@
   --stellar-border: rgba(15, 23, 42, 0.08);
   --stellar-border-hover: rgba(99, 102, 241, 0.20);
   --stellar-teal-glow: rgba(99, 102, 241, 0.12);
-  --stellar-brass: #B45309;
+  --stellar-brass: #0A0E1A;
 }
 
 [data-theme="light"] html,
@@ -181,7 +181,7 @@
   --color-foreground: var(--text-primary);
   --color-void: #0a0a0a;
   --color-cosmos: #0f0f0f;
-  --color-brass: #FFD166;
+  --color-brass: #F4EDE0;
   --color-cyan: #818cf8;
   --color-purple: #a855f7;
   --color-solana-purple: #9945FF;

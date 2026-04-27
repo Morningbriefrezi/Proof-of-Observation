@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
           alignItems: 'center',
           padding: '32px 48px 0',
         }}>
-          <span style={{ fontSize: 28, fontWeight: 700, color: '#FFD166', letterSpacing: 2 }}>STELLAR</span>
+          <span style={{ fontSize: 28, fontWeight: 700, color: '#F4EDE0', letterSpacing: 2 }}>STELLAR</span>
           <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)' }}>{location}</span>
         </div>
 

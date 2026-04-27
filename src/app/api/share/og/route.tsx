@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
 
         {/* Top bar */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '32px 48px 0' }}>
-          <span style={{ fontSize: 44, fontWeight: 800, color: '#818cf8', letterSpacing: '-1px' }}>
+          <span style={{ fontSize: 44, fontWeight: 800, color: '#F4EDE0', letterSpacing: '-1px' }}>
             STELLAR
           </span>
           <span style={{ fontSize: 20, color: 'rgba(255,255,255,0.35)' }}>

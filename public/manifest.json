@@ -4,11 +4,11 @@
   "description": "Observe the night sky. Earn Stars tokens. Collect discovery NFTs on Solana.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#070B14",
-  "theme_color": "#070B14",
+  "background_color": "#0A0E1A",
+  "theme_color": "#0A0E1A",
   "orientation": "portrait",
   "icons": [
-    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" },
-    { "src": "/favicon.ico", "sizes": "48x48", "type": "image/x-icon" }
+    { "src": "/brand/logo-mark.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
 }

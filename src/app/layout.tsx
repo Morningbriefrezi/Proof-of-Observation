@@ -52,7 +52,7 @@ import { Toaster } from '@/components/ui/Toast';
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0a0a0a',
+  themeColor: '#0A0E1A',
 };
 
 export const metadata: Metadata = {

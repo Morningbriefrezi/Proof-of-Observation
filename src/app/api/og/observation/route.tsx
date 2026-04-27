@@ -107,7 +107,7 @@ export async function GET(req: NextRequest) {
             position: 'absolute',
             top: 16,
             left: 20,
-            color: '#FFD166',
+            color: '#F4EDE0',
             fontSize: 14,
             fontWeight: 700,
             letterSpacing: 2,
@@ -150,7 +150,7 @@ export async function GET(req: NextRequest) {
             <div style={{ color: '#94a3b8', fontSize: 12 }}>☁️ {cc}%</div>
             <div style={{ color: '#FFD166', fontSize: 12 }}>✦ {stars}</div>
           </div>
-          <div style={{ color: '#FFD166', fontSize: 11, letterSpacing: 1 }}>STELLAR</div>
+          <div style={{ color: '#F4EDE0', fontSize: 11, letterSpacing: 1 }}>STELLAR</div>
         </div>
       </div>
     ),
