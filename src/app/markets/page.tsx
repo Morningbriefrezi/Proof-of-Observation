@@ -10,6 +10,7 @@ import {
 } from '@/lib/markets/privy-adapter';
 import { useAppState } from '@/hooks/useAppState';
 import InlineBetPanel from '@/components/markets/InlineBetPanel';
+import MyActiveBets from '@/components/markets/MyActiveBets';
 import {
   checkObserverAdvantage,
   getOracleKeyForMarketId,
@@ -478,6 +479,9 @@ export default function MarketsPage() {
         {/* Two-column layout */}
         <div className="mkt-layout">
           <div className="mkt-main">
+            <div className="mkt-my-bets" style={{ marginBottom: 18 }}>
+              <MyActiveBets variant="compact" title="My active bets" />
+            </div>
             <header className="mkt-section-header">
               <h1 className="mkt-section-title">All markets</h1>
               {!loading && (

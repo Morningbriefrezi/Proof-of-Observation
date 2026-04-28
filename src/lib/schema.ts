@@ -53,3 +53,17 @@ export const emailSubscribers = pgTable('email_subscribers', {
   email: text('email').notNull().unique(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
+
+export const marketCashouts = pgTable('market_cashouts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  wallet: text('wallet').notNull(),
+  marketId: integer('market_id').notNull(),
+  side: text('side').notNull(),
+  originalStake: integer('original_stake').notNull(),
+  refundedAmount: integer('refunded_amount').notNull(),
+  refundTx: text('refund_tx'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+}, (table) => [
+  uniqueIndex('cashouts_wallet_market_side_unique').on(table.wallet, table.marketId, table.side),
+  index('cashouts_wallet_idx').on(table.wallet),
+])

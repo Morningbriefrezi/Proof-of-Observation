@@ -16,6 +16,7 @@ import PageTransition from '@/components/ui/PageTransition';
 import PageContainer from '@/components/layout/PageContainer';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
+import MyActiveBets from '@/components/markets/MyActiveBets';
 
 export default function ProfilePage() {
   const t = useTranslations('profile');
@@ -315,6 +316,11 @@ export default function ProfilePage() {
               transition: 'width 0.4s ease',
             }} />
           </div>
+        </div>
+
+        {/* — MY ACTIVE BETS — */}
+        <div style={{ marginBottom: 28 }}>
+          <MyActiveBets variant="compact" title="My active bets" />
         </div>
 
         {/* — NETWORK STATUS — */}

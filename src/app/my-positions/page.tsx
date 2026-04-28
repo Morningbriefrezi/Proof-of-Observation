@@ -31,8 +31,17 @@ import {
   calculateBonusStars,
   type ObserverAdvantage,
 } from '@/lib/observer-advantage';
+import MyActiveBets from '@/components/markets/MyActiveBets';
 
-type Bucket = 'active' | 'won' | 'lost' | 'claimed';
+type Bucket = 'active' | 'won' | 'lost' | 'claimed' | 'cashed';
+
+interface CashoutRecord {
+  id: string;
+  marketId: number;
+  side: 'yes' | 'no';
+  originalStake: number;
+  refundedAmount: number;
+}
 
 interface ClaimResult {
   base: number;
@@ -46,6 +55,7 @@ interface Row {
   onChain: MarketOnChain | null;
   meta: MarketMetadata | null;
   bucket: Bucket;
+  cashout: CashoutRecord | null;
 }
 
 const CATEGORY_META: Record<string, { label: string; color: string; bg: string; border: string; emoji: string }> = {
@@ -110,25 +120,36 @@ export default function MyPositionsPage() {
     setError(null);
 
     const load = async () => {
-      const [cfg, positions, onChainAll] = await Promise.all([
+      const addr = signer.publicKey!.toBase58();
+      const [cfg, positions, onChainAll, cashoutResp] = await Promise.all([
         getConfig(readOnly),
         getUserPositions(readOnly, signer.publicKey!),
         getAllMarkets(readOnly),
+        fetch(`/api/markets/cashouts?address=${addr}`).then((r) => r.json()).catch(() => ({ cashouts: [] })),
       ]);
       if (cancelled) return;
       setMint(cfg?.mint ?? null);
       const onById = new Map<number, MarketOnChain>(onChainAll.map((m) => [m.marketId, m]));
+      const cashouts = (cashoutResp?.cashouts ?? []) as CashoutRecord[];
+      const cashoutByKey = new Map<string, CashoutRecord>(
+        cashouts.map((c) => [`${c.marketId}:${c.side}`, c]),
+      );
       const out: Row[] = positions.map((p) => {
         const on = onById.get(p.marketId) ?? null;
+        const cashout = cashoutByKey.get(`${p.marketId}:${p.side}`) ?? null;
+        // A cashed-out position outranks the on-chain bucket. Even if the on-chain
+        // side ends up winning, we don't want the user to hit "Claim" again.
+        const bucket: Bucket = cashout ? 'cashed' : bucketOf(p, on);
         return {
           position: p,
           onChain: on,
           meta: findMetadataByMarketId(p.marketId),
-          bucket: bucketOf(p, on),
+          bucket,
+          cashout,
         };
       });
       out.sort((a, b) => {
-        const order: Record<Bucket, number> = { won: 0, active: 1, lost: 2, claimed: 3 };
+        const order: Record<Bucket, number> = { won: 0, active: 1, cashed: 2, lost: 3, claimed: 4 };
         if (order[a.bucket] !== order[b.bucket]) return order[a.bucket] - order[b.bucket];
         return b.position.marketId - a.position.marketId;
       });
@@ -318,6 +339,9 @@ export default function MyPositionsPage() {
           <Stat label="Claimable ✦" value={fmtInt(summary.claimable)} accent />
         </div>
 
+        {/* Active bets — double down or cash out */}
+        <MyActiveBets variant="full" title="Manage open bets" />
+
         {error && (
           <div style={{ color: '#fca5a5', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
             Couldn’t load positions — {error}
@@ -360,19 +384,30 @@ export default function MyPositionsPage() {
             </Link>
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
-            {rows.map((r) => (
-              <PositionRow
-                key={`${r.position.marketId}-${r.position.side}`}
-                row={r}
-                busy={busyId === r.position.marketId}
-                status={claimStatus[r.position.marketId]}
-                advantage={advantageByMarketId[r.position.marketId]}
-                claimResult={claimResults[r.position.marketId]}
-                onClaim={() => onClaim(r.position.marketId, r.position.projectedPayout)}
-              />
-            ))}
-          </div>
+          (() => {
+            // Active rows are managed in the MyActiveBets section above. Show
+            // everything else (won / cashed / lost / claimed) here as history.
+            const historyRows = rows.filter((r) => r.bucket !== 'active');
+            if (historyRows.length === 0) return null;
+            return (
+              <div className="flex flex-col gap-2">
+                <h3 style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', margin: '4px 0 0' }}>
+                  History
+                </h3>
+                {historyRows.map((r) => (
+                  <PositionRow
+                    key={`${r.position.marketId}-${r.position.side}`}
+                    row={r}
+                    busy={busyId === r.position.marketId}
+                    status={claimStatus[r.position.marketId]}
+                    advantage={advantageByMarketId[r.position.marketId]}
+                    claimResult={claimResults[r.position.marketId]}
+                    onClaim={() => onClaim(r.position.marketId, r.position.projectedPayout)}
+                  />
+                ))}
+              </div>
+            );
+          })()
         )}
 
         <RedeemSection
@@ -416,10 +451,11 @@ function Stat({ label, value, accent = false }: { label: string; value: string; 
 }
 
 const BUCKET_META: Record<Bucket, { label: string; color: string; bg: string; border: string }> = {
-  won:     { label: 'Won',     color: 'var(--stl-gold)', bg: 'rgba(255,209,102,0.12)', border: 'rgba(255,209,102,0.30)' },
-  active:  { label: 'Active',  color: 'var(--stl-green)', bg: 'rgba(52,211,153,0.10)',  border: 'rgba(52,211,153,0.25)' },
-  lost:    { label: 'Lost',    color: '#F472B6', bg: 'rgba(244,114,182,0.10)', border: 'rgba(244,114,182,0.25)' },
-  claimed: { label: 'Claimed', color: '#94A3B8', bg: 'rgba(148,163,184,0.10)', border: 'rgba(148,163,184,0.25)' },
+  won:     { label: 'Won',         color: 'var(--stl-gold)', bg: 'rgba(255,209,102,0.12)', border: 'rgba(255,209,102,0.30)' },
+  active:  { label: 'Active',      color: 'var(--stl-green)', bg: 'rgba(52,211,153,0.10)',  border: 'rgba(52,211,153,0.25)' },
+  cashed:  { label: 'Cashed out',  color: '#FBBF24', bg: 'rgba(251,191,36,0.10)',  border: 'rgba(251,191,36,0.30)' },
+  lost:    { label: 'Lost',        color: '#F472B6', bg: 'rgba(244,114,182,0.10)', border: 'rgba(244,114,182,0.25)' },
+  claimed: { label: 'Claimed',     color: '#94A3B8', bg: 'rgba(148,163,184,0.10)', border: 'rgba(148,163,184,0.25)' },
 };
 
 function PositionRow({
@@ -580,6 +616,19 @@ function PositionRow({
               }}
             >
               No payout
+            </span>
+          )}
+          {bucket === 'cashed' && row.cashout && (
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 11,
+                color: '#FBBF24',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              Received {fmtInt(row.cashout.refundedAmount)} ✦ · forfeit{' '}
+              {fmtInt(row.cashout.originalStake - row.cashout.refundedAmount)} ✦
             </span>
           )}
         </div>
