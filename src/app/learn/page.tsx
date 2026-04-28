@@ -47,10 +47,11 @@ function PlanetModal({ planet, locale, kidsMode, onClose }: {
 
       {/* Compact modal card — centered, no scroll */}
       <div
-        className="fixed inset-x-6 z-[61] rounded-2xl"
+        className="fixed left-1/2 top-1/2 z-[61] rounded-2xl"
         style={{
-          top: '50%',
-          transform: 'translateY(-50%)',
+          width: 'calc(100% - 48px)',
+          maxWidth: '440px',
+          transform: 'translate(-50%, -50%)',
           background: '#0d1220',
           border: '1px solid rgba(255,255,255,0.1)',
           boxShadow: '0 24px 60px rgba(0,0,0,0.9)',
@@ -156,34 +157,34 @@ function PlanetsTab({ locale, kidsMode, onSelect }: { locale: Locale; kidsMode: 
       </p>
 
       {/* Planet grid */}
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-9 gap-2">
         {PLANETS.map(p => (
           <button
             key={p.key}
             onClick={() => onSelect(p)}
-            className="flex flex-col items-center gap-1.5 group text-left"
+            className="flex flex-col items-center gap-1 group text-left"
           >
-            <div className="relative w-full rounded-xl overflow-hidden" style={{ aspectRatio: '1 / 1' }}>
+            <div className="relative w-full rounded-lg overflow-hidden" style={{ aspectRatio: '1 / 1' }}>
               <Image
                 src={p.img}
                 alt={p.name[locale]}
                 fill
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
-                sizes="(max-width: 640px) 25vw, 160px"
+                sizes="(max-width: 640px) 22vw, (max-width: 768px) 14vw, 110px"
               />
-              <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                 style={{ boxShadow: `inset 0 0 0 1.5px ${p.color}70` }} />
               {(p.key === 'moon' || p.key === 'jupiter') && (
                 <div
-                  className="absolute top-1 left-1 inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[6px] uppercase tracking-wide font-bold"
+                  className="absolute top-0.5 left-0.5 inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[6px] uppercase tracking-wide font-bold"
                   style={{ background: 'rgba(255,209,102,0.25)', border: '1px solid rgba(255,209,102,0.4)', color: 'var(--stars)', backdropFilter: 'blur(4px)' }}
                 >
                   <Star size={5} />
-                  {locale === 'ka' ? '#1' : '#1'}
+                  #1
                 </div>
               )}
             </div>
-            <p className="text-white text-[11px] font-medium leading-tight text-center w-full truncate px-0.5"
+            <p className="text-white text-[10px] font-medium leading-tight text-center w-full truncate px-0.5"
               style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
               {p.name[locale]}
             </p>

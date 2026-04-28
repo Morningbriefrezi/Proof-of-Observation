@@ -80,6 +80,48 @@ const GUIDE_CARDS: GuideCard[] = [
     body: 'Both are usually the brightest "stars" that don\'t twinkle. Check the Sky page for tonight\'s positions. Point at the bright object, center in finderscope, focus — Jupiter\'s cloud bands are visible at 50×, Saturn\'s rings at 40×. These are the two most impressive beginner objects.',
     tip: 'Check the Sky page in this app before going outside so you know exactly where to look.',
   },
+  {
+    level: 'beginner', step: 7,
+    title: 'Levelling the Tripod',
+    body: 'A wobbly tripod ruins the view at any magnification. Pick the flattest spot you can find — concrete, paving stones, or hard-packed earth. Extend the inner leg sections rather than the lower flared ones (they\'re sturdier). Hang your accessory tray or a weight from the centre column to dampen vibrations. Check level — most tripod heads have a built-in bubble level.',
+    tip: 'Stand on grass instead of decking. Wooden decks transmit footsteps straight into the eyepiece.',
+  },
+  {
+    level: 'beginner', step: 8,
+    title: 'Aligning Your Finderscope',
+    body: 'Do this in DAYLIGHT before your first night. Aim the telescope at a distant object 500m+ away (a chimney, a streetlight, a mountain peak). Centre it in the main eyepiece using the lowest-power eyepiece. Then look through the finderscope and turn the 2 or 3 alignment screws until the same object is centred in the crosshairs. Now both will point at the same place at night.',
+    tip: 'A misaligned finder is the #1 reason beginners "can\'t find anything." Spend 5 minutes on this once and the whole hobby gets easier.',
+  },
+  {
+    level: 'beginner', step: 9,
+    title: 'Focusing the Image',
+    body: 'Most beginners over-focus or never reach focus at all. Aim at a bright star. Slowly turn the focuser knob in ONE direction — you\'ll see a fuzzy disc shrink to a point, then expand again. The sharpest moment is the focus point. If you ran out of inward travel, you may need to remove a Barlow or extension tube. Refocus every time you swap an eyepiece.',
+    tip: 'A Bahtinov mask (cheap accessory) gives you a star pattern that snaps into perfect focus — far easier than guessing.',
+  },
+  {
+    level: 'beginner', step: 10,
+    title: 'Let the Telescope Cool Down',
+    body: 'A warm telescope brought outside into cold air looks like it\'s under water — heat shimmer rises off the optics for 20–45 minutes. Set the telescope outside (cap on, in a safe spot) at least 30 minutes before observing. Larger reflectors (8"+) can need an hour. The bigger the aperture, the longer the cooldown.',
+    tip: 'Store the telescope in an unheated garage, shed, or balcony if possible — it\'s already at outdoor temperature.',
+  },
+  {
+    level: 'beginner', step: 11,
+    title: 'My Image Looks Bad — Why?',
+    body: 'Most "bad scope" complaints are something else: 1) Trying too high magnification (start at 30–50×, never jump to max). 2) Not focused yet — turn the knob slowly. 3) Heat shimmer from buildings, roads, or the telescope itself. 4) Dirty eyepiece (don\'t touch glass). 5) Looking through a window — never works. 6) Bad seeing tonight (check the Sky page). Move outside, lower the magnification, and refocus.',
+    tip: 'Rule of thumb: maximum useful magnification ≈ 2× your aperture in mm. A 70mm scope tops out around 140×, no matter what the box claims.',
+  },
+  {
+    level: 'beginner', step: 12,
+    title: 'Cleaning, Care & Storage',
+    body: 'Less is more. NEVER touch optics with fingers or fabric. Dust on a lens or mirror barely affects the view — leave it. If you must clean: blow with a rubber bulb blower first, then dab (don\'t wipe) with a dedicated optics cleaning solution and lint-free wipe. Store with all caps on, in a dry place. Avoid rapid temperature swings (don\'t bring a cold scope into a hot humid house — condensation will form).',
+    tip: 'Open the back of a Newtonian for 30 minutes after a session to let the inside dry before sealing the cap.',
+  },
+  {
+    level: 'beginner', step: 13,
+    title: 'Transporting the Telescope',
+    body: 'A 70–90mm refractor fits in any car back seat. A Dobsonian splits in two — the tube and the rocker box — and both fit easily in a hatchback. Always carry the tube horizontally with both hands; don\'t lift it by the focuser. Re-check the finderscope alignment if you\'ve driven on rough roads. Foam-lined cases protect optics during transport.',
+    tip: 'Wrap eyepieces in a small soft bag in your pocket — don\'t leave them rolling loose in the car.',
+  },
 
   // ─── INTERMEDIATE ────────────────────────────────────────────────────────────
   {
