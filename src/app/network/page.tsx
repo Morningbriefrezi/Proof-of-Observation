@@ -109,7 +109,7 @@ export default function NetworkPage() {
   ];
 
   return (
-    <div className="py-4 sm:py-6" style={{ background: 'var(--canvas)' }}>
+    <div className="py-4 sm:py-6">
       <style>{`
         @keyframes stl-live-pulse {
           0%, 100% { box-shadow: 0 0 0 0 rgba(94, 234, 212,0.55); }

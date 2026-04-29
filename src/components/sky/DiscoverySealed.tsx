@@ -140,14 +140,14 @@ export default function DiscoverySealed({
 
       <div
         className="relative z-[1] mx-auto flex flex-col items-center text-center"
-        style={{ maxWidth: 420, padding: '28px 20px 32px' }}
+        style={{ maxWidth: 420, padding: '14px 20px 18px' }}
       >
-        <div className="flex items-center gap-1.5 mb-3.5">
+        <div className="flex items-center gap-1.5 mb-2">
           <div className="w-1.5 h-1.5 rounded-full stl-tw" style={{ background: 'var(--stl-gold)' }} />
           <span
             style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: 10,
+              fontSize: 9,
               color: 'var(--stl-gold)',
               letterSpacing: '0.26em',
               fontWeight: 500,
@@ -163,13 +163,13 @@ export default function DiscoverySealed({
         <h1
           style={{
             fontFamily: 'var(--font-display)',
-            fontSize: 38,
+            fontSize: 26,
             color: 'var(--text)',
             fontWeight: 500,
             margin: 0,
             lineHeight: 1,
             letterSpacing: '-0.015em',
-            marginTop: 20,
+            marginTop: 12,
           }}
         >
           {mission.name}{' '}
@@ -180,17 +180,17 @@ export default function DiscoverySealed({
         <div
           style={{
             fontFamily: 'var(--font-display)',
-            fontSize: 15,
+            fontSize: 13,
             color: 'rgba(255,255,255,0.55)',
             fontStyle: 'italic',
             fontWeight: 400,
-            marginTop: 6,
+            marginTop: 4,
           }}
         >
           {tagline}
         </div>
 
-        <div className="flex items-center gap-2.5 mt-3.5">
+        <div className="flex items-center gap-2 mt-2">
           <div
             className="flex items-center px-2.5 py-1 rounded-full"
             style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
@@ -228,9 +228,9 @@ export default function DiscoverySealed({
         <div
           className="w-full relative overflow-hidden"
           style={{
-            marginTop: 24,
-            padding: '22px 20px',
-            borderRadius: 20,
+            marginTop: 12,
+            padding: '12px 16px',
+            borderRadius: 16,
             background: 'linear-gradient(145deg, rgba(232, 130, 107,0.1) 0%, rgba(232, 130, 107,0.02) 60%, transparent 100%)',
             border: '1px solid rgba(232, 130, 107,0.3)',
           }}
@@ -283,7 +283,7 @@ export default function DiscoverySealed({
             <span
               style={{
                 fontFamily: 'var(--font-display)',
-                fontSize: 64,
+                fontSize: 42,
                 color: 'var(--stl-gold)',
                 fontWeight: 600,
                 lineHeight: 1,
@@ -292,7 +292,7 @@ export default function DiscoverySealed({
             >
               +{totalStars}
             </span>
-            <svg width="32" height="32" viewBox="0 0 24 24" style={{ marginBottom: 8 }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" style={{ marginBottom: 4 }}>
               <path d="M12 2l2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5z" fill="var(--stl-gold)" />
             </svg>
           </div>
@@ -327,14 +327,14 @@ export default function DiscoverySealed({
         <div
           className="w-full relative overflow-hidden"
           style={{
-            marginTop: 14,
-            padding: 14,
-            borderRadius: 16,
+            marginTop: 10,
+            padding: 10,
+            borderRadius: 14,
             background: 'rgba(255,255,255,0.02)',
             border: '1px solid rgba(255,255,255,0.08)',
           }}
         >
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-2">
             <div className="text-left">
               <div
                 style={{
@@ -342,7 +342,7 @@ export default function DiscoverySealed({
                   fontSize: 9,
                   color: 'rgba(255,255,255,0.4)',
                   letterSpacing: '0.18em',
-                  marginBottom: 2,
+                  marginBottom: 1,
                 }}
               >
                 CERTIFICATE
@@ -350,7 +350,7 @@ export default function DiscoverySealed({
               <div
                 style={{
                   fontFamily: 'var(--font-display)',
-                  fontSize: 16,
+                  fontSize: 14,
                   color: 'var(--text)',
                   fontWeight: 500,
                   lineHeight: 1,
@@ -360,8 +360,8 @@ export default function DiscoverySealed({
               </div>
             </div>
 
-            <div className="relative" style={{ width: 50, height: 50 }}>
-              <svg width="50" height="50" viewBox="0 0 50 50" style={{ transform: 'rotate(-90deg)' }}>
+            <div className="relative" style={{ width: 40, height: 40 }}>
+              <svg width="40" height="40" viewBox="0 0 50 50" style={{ transform: 'rotate(-90deg)' }}>
                 <circle cx="25" cy="25" r="20" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
                 <circle
                   cx="25"
@@ -375,13 +375,13 @@ export default function DiscoverySealed({
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, color: '#fff', fontWeight: 700, lineHeight: 1 }}>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: 11, color: '#fff', fontWeight: 700, lineHeight: 1 }}>
                   {skyScore}
                 </span>
                 <span
                   style={{
                     fontFamily: 'var(--font-mono)',
-                    fontSize: 7,
+                    fontSize: 6,
                     color: 'rgba(255,255,255,0.5)',
                     letterSpacing: '0.1em',
                     marginTop: 1,
@@ -396,7 +396,7 @@ export default function DiscoverySealed({
           <div
             className="w-full relative overflow-hidden flex items-center justify-center"
             style={{
-              aspectRatio: '16 / 9',
+              aspectRatio: '21 / 9',
               borderRadius: 10,
               background: [
                 'radial-gradient(circle at 50% 50%, rgba(184,212,255,0.18) 0%, rgba(232, 130, 107,0.08) 35%, transparent 60%)',
@@ -410,7 +410,7 @@ export default function DiscoverySealed({
           </div>
 
           <div
-            className="flex items-center justify-between mt-2.5 pt-2.5"
+            className="flex items-center justify-between mt-2 pt-2"
             style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
           >
             <div className="flex items-center gap-1.5">
@@ -452,13 +452,13 @@ export default function DiscoverySealed({
           onClick={onViewCollection}
           className="w-full flex items-center justify-center gap-2"
           style={{
-            marginTop: 18,
-            padding: '14px 20px',
+            marginTop: 10,
+            padding: '11px 18px',
             background: 'linear-gradient(135deg, var(--terracotta) 0%, var(--terracotta) 100%)',
             color: 'var(--canvas)',
             border: 'none',
-            borderRadius: 14,
-            fontSize: 15,
+            borderRadius: 12,
+            fontSize: 14,
             fontWeight: 600,
             fontFamily: 'var(--font-display)',
             cursor: 'pointer',
@@ -468,10 +468,10 @@ export default function DiscoverySealed({
           onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
         >
           View in collection
-          <ArrowRight size={16} strokeWidth={2.5} />
+          <ArrowRight size={14} strokeWidth={2.5} />
         </button>
 
-        <div className="grid grid-cols-3 gap-2 w-full mt-2.5">
+        <div className="grid grid-cols-3 gap-2 w-full mt-2">
           <SecondaryButton icon={<Share2 size={12} />} label="Share" onClick={onShare} />
           <SecondaryButton icon={<Bookmark size={12} />} label="Save" onClick={onSave} />
           <SecondaryButton
@@ -502,12 +502,12 @@ function SecondaryButton({
       onClick={onClick}
       className="flex items-center justify-center gap-1.5 transition-all active:scale-[0.97]"
       style={{
-        padding: '11px 10px',
+        padding: '8px 8px',
         background: 'rgba(255,255,255,0.04)',
         border: '1px solid rgba(255,255,255,0.1)',
         color: 'rgba(255,255,255,0.8)',
-        borderRadius: 12,
-        fontSize: 12,
+        borderRadius: 10,
+        fontSize: 11,
         fontWeight: 500,
         fontFamily: 'var(--font-display)',
         cursor: 'pointer',
@@ -570,7 +570,7 @@ const BG_STARS: Array<{ top: string; left: string; size: number; delay: string }
 
 function SealStamp({ missionId }: { missionId: string }) {
   return (
-    <div className="relative flex items-center justify-center" style={{ width: 200, height: 200 }}>
+    <div className="relative flex items-center justify-center" style={{ width: 140, height: 140 }}>
       <div
         className="stl-seal-glow absolute inset-0"
         style={{
@@ -581,8 +581,8 @@ function SealStamp({ missionId }: { missionId: string }) {
 
       <svg
         className="stl-seal-ring absolute inset-0"
-        width="200"
-        height="200"
+        width="140"
+        height="140"
         viewBox="0 0 200 200"
       >
         <defs>
@@ -605,15 +605,15 @@ function SealStamp({ missionId }: { missionId: string }) {
       <div
         className="relative flex items-center justify-center"
         style={{
-          width: 150,
-          height: 150,
+          width: 105,
+          height: 105,
           borderRadius: '50%',
           background: [
             'radial-gradient(circle at 30% 25%, rgba(255,232,164,0.2) 0%, transparent 50%)',
             'radial-gradient(circle at 50% 50%, #1a1408 0%, #0a0a14 100%)',
           ].join(', '),
           border: '1px solid rgba(232, 130, 107,0.4)',
-          boxShadow: 'inset 0 0 40px rgba(232, 130, 107,0.12), 0 0 30px rgba(232, 130, 107,0.15)',
+          boxShadow: 'inset 0 0 30px rgba(232, 130, 107,0.12), 0 0 22px rgba(232, 130, 107,0.15)',
         }}
       >
         <NFTPreviewArt missionId={missionId} sealMode />
@@ -621,16 +621,16 @@ function SealStamp({ missionId }: { missionId: string }) {
         <div
           className="absolute flex items-center justify-center"
           style={{
-            bottom: -4,
-            right: -4,
-            width: 32,
-            height: 32,
+            bottom: -3,
+            right: -3,
+            width: 24,
+            height: 24,
             borderRadius: '50%',
             background: 'linear-gradient(135deg, var(--seafoam), #0E6E56)',
             border: '2px solid var(--canvas)',
           }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24">
+          <svg width="12" height="12" viewBox="0 0 24 24">
             <polyline
               className="stl-check-path"
               points="20 6 9 17 4 12"
@@ -648,7 +648,7 @@ function SealStamp({ missionId }: { missionId: string }) {
 }
 
 function NFTPreviewArt({ missionId, sealMode = false }: { missionId: string; sealMode?: boolean }) {
-  const size = sealMode ? 100 : 80;
+  const size = sealMode ? 70 : 64;
   const Node = NODE_MAP[missionId];
 
   if (Node) {

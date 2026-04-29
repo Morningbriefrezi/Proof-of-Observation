@@ -1,5 +1,8 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+
 interface MintAnimationProps {
   done?: boolean;
   slowMsg?: boolean;
@@ -17,14 +20,17 @@ export default function MintAnimation({
   doneTitle = 'Sealed on Solana ✦',
   doneSubtitle = 'Proof recorded on-chain',
 }: MintAnimationProps) {
-  return (
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  const overlay = (
     <div
-      className="fixed left-0 right-0 z-[60] flex flex-col items-center justify-center gap-8 px-6 text-center"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6 sm:gap-8 px-6 text-center"
       style={{
-        top: 56,
-        bottom: 'calc(96px + env(safe-area-inset-bottom))',
         background: 'rgba(7,11,20,0.96)',
         backdropFilter: 'blur(12px)',
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
       }}
     >
 
@@ -149,4 +155,7 @@ export default function MintAnimation({
 
     </div>
   );
+
+  if (!mounted) return null;
+  return createPortal(overlay, document.body);
 }

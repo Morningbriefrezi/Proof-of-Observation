@@ -123,7 +123,6 @@ export default async function StarProofPage({
       <div
         style={{
           minHeight: '100vh',
-          background: 'var(--canvas)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -149,7 +148,6 @@ export default async function StarProofPage({
     <div
       style={{
         minHeight: '100vh',
-        background: 'var(--canvas)',
         color: '#fff',
         fontFamily: 'system-ui, -apple-system, sans-serif',
       }}
