@@ -1,5 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { SkyVerification } from '@/lib/types';
+import { LOCATIONS } from '@/lib/darksky-locations';
+
+const CARDINALS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+function azimuthToCardinal(az: number): string {
+  const normalized = ((az % 360) + 360) % 360;
+  return CARDINALS[Math.round(normalized / 45) % 8];
+}
+
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// TODO: replace with a real light pollution map dataset (e.g. VIIRS DMSP).
+// For now we snap to the nearest known DarkSky location within 50km, otherwise default to 5.
+function estimateBortle(lat: number, lon: number): number {
+  let minDist = Infinity;
+  let nearest = 5;
+  for (const loc of LOCATIONS) {
+    const d = haversineKm(lat, lon, loc.lat, loc.lon);
+    if (d < minDist) {
+      minDist = d;
+      nearest = loc.bortle;
+    }
+  }
+  return minDist <= 50 ? nearest : 5;
+}
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -17,7 +51,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=cloud_cover,visibility,relative_humidity_2m,temperature_2m,wind_speed_10m&timezone=auto`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=cloud_cover,visibility,relative_humidity_2m,temperature_2m,wind_speed_10m,wind_direction_10m&timezone=auto`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Open-Meteo HTTP ${res.status}`);
     const data = await res.json();
@@ -28,6 +62,9 @@ export async function GET(req: NextRequest) {
     const humidity: number = c.relative_humidity_2m ?? 50;
     const temperature: number = c.temperature_2m ?? 12;
     const windSpeed: number = c.wind_speed_10m ?? 5;
+    const windDirDeg: number = c.wind_direction_10m ?? 270;
+    const windDirection = azimuthToCardinal(windDirDeg);
+    const bortleClass = estimateBortle(lat, lon);
 
     let visibility: 'Excellent' | 'Good' | 'Fair' | 'Poor';
     if (visMeters > 20000 && cloudCover < 20) visibility = 'Excellent';
@@ -50,10 +87,13 @@ export async function GET(req: NextRequest) {
       verified: cloudCover < 70,
       cloudCover,
       visibility,
+      visibilityMeters: visMeters,
       conditions,
       humidity,
       temperature,
       windSpeed,
+      windDirection,
+      bortleClass,
       oracleHash,
       verifiedAt: new Date().toISOString(),
     };

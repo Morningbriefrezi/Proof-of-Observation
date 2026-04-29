@@ -161,10 +161,13 @@ export default function MissionActive({ mission, onClose }: MissionActiveProps) 
           verified: true,
           cloudCover: 20,
           visibility: 'Good',
+          visibilityMeters: 15000,
           conditions: 'Sky data temporarily unavailable — using estimated conditions',
           humidity: 50,
           temperature: 12,
           windSpeed: 5,
+          windDirection: 'W',
+          bortleClass: 5,
           oracleHash: '0x' + Date.now().toString(16).padStart(40, '0'),
           verifiedAt: new Date().toISOString(),
         };

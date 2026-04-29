@@ -22,10 +22,13 @@ export interface SkyVerification {
   verified: boolean;
   cloudCover: number;
   visibility: 'Excellent' | 'Good' | 'Fair' | 'Poor';
+  visibilityMeters: number;
   conditions: string;
   humidity: number;
   temperature: number;
   windSpeed: number;
+  windDirection: string;
+  bortleClass: number;
   oracleHash: string;
   verifiedAt: string;
 }

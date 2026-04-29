@@ -11,6 +11,7 @@ import {
 
 export interface PlanetInfo {
   key: string;
+  name: string;
   altitude: number;
   azimuth: number;
   azimuthDir: string;
@@ -70,6 +71,7 @@ export function getVisiblePlanets(lat: number, lng: number, date: Date): PlanetI
 
       return [{
         key,
+        name:        key.charAt(0).toUpperCase() + key.slice(1),
         altitude:    Math.round(horiz.altitude * 10) / 10,
         azimuth:     Math.round(horiz.azimuth),
         azimuthDir:  azDir(horiz.azimuth),
@@ -77,7 +79,7 @@ export function getVisiblePlanets(lat: number, lng: number, date: Date): PlanetI
         transit,
         set,
         magnitude:   Math.round(magnitude * 10) / 10,
-        visible:     horiz.altitude > 10,
+        visible:     horiz.altitude > 0,
         constellation,
       }];
     } catch (err) {
