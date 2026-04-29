@@ -381,22 +381,18 @@ interface AnimatedScoreProps {
 }
 
 function AnimatedScore({ score }: AnimatedScoreProps) {
-  const [animated, setAnimated] = useState(0);
+  // Snap to the final score on next frame. CSS doesn't interpolate
+  // conic-gradient angles, so the previous rAF loop was 60 React renders
+  // per second to fake it — measurably bad. Worth losing the count-up
+  // motion to stop pinning a CPU core for a second on every page entry.
+  const [settled, setSettled] = useState(false);
   useEffect(() => {
-    const start = performance.now();
-    const duration = 1000;
-    let raf = 0;
-    function tick(now: number) {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setAnimated(Math.round(score * eased));
-      if (progress < 1) raf = requestAnimationFrame(tick);
-    }
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    setSettled(false);
+    const id = requestAnimationFrame(() => setSettled(true));
+    return () => cancelAnimationFrame(id);
   }, [score]);
 
+  const shown = settled ? score : 0;
   const ringColor = scoreRingColor(score);
   const tagline = scoreTagline(score);
 
@@ -406,11 +402,11 @@ function AnimatedScore({ score }: AnimatedScoreProps) {
         <div
           className="sky-score-ring2"
           style={{
-            background: `conic-gradient(${ringColor} ${animated * 3.6}deg, rgba(255,255,255,0.06) 0deg)`,
+            background: `conic-gradient(${ringColor} ${shown * 3.6}deg, rgba(255,255,255,0.06) 0deg)`,
           }}
         >
           <div className="sky-score-ring2-inner">
-            <span className="sky-score-num2">{animated}</span>
+            <span className="sky-score-num2">{shown}</span>
             <span className="sky-score-sub2">/100</span>
           </div>
         </div>
