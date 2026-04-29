@@ -60,13 +60,13 @@ export async function GET(req: NextRequest) {
         style={{
           width: 600,
           height: 600,
-          background: '#2C3E5C',
+          background: '#0F1320',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
-          border: '2px solid rgba(232, 130, 107,0.15)',
+          border: '2px solid rgba(240, 128, 92,0.15)',
           fontFamily: 'sans-serif',
           overflow: 'hidden',
         }}
@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
               width: s.size,
               height: s.size,
               borderRadius: '50%',
-              background: i % 3 === 0 ? '#E8826B' : '#ffffff',
+              background: i % 3 === 0 ? '#F0805C' : '#ffffff',
               opacity: s.opacity,
             }}
           />
@@ -107,7 +107,7 @@ export async function GET(req: NextRequest) {
             position: 'absolute',
             top: 16,
             left: 20,
-            color: '#F5F1E8',
+            color: '#F8F4EC',
             fontSize: 14,
             fontWeight: 700,
             letterSpacing: 2,
@@ -148,9 +148,9 @@ export async function GET(req: NextRequest) {
         >
           <div style={{ display: 'flex', gap: 12 }}>
             <div style={{ color: '#A8B4C8', fontSize: 12 }}>☁️ {cc}%</div>
-            <div style={{ color: '#E8826B', fontSize: 12 }}>✦ {stars}</div>
+            <div style={{ color: '#F0805C', fontSize: 12 }}>✦ {stars}</div>
           </div>
-          <div style={{ color: '#F5F1E8', fontSize: 11, letterSpacing: 1 }}>STELLAR</div>
+          <div style={{ color: '#F8F4EC', fontSize: 11, letterSpacing: 1 }}>STELLAR</div>
         </div>
       </div>
     ),

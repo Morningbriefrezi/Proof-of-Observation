@@ -21,12 +21,12 @@
   --color-nebula-teal:         var(--terracotta);
   --color-nebula-teal-hover:   var(--terracotta);
   --color-nebula-teal-pressed: var(--terracotta);
-  --color-nebula-teal-glow:    rgba(232, 130, 107, 0.15);
+  --color-nebula-teal-glow:    rgba(240, 128, 92, 0.15);
 
   /* Brand: Star Gold */
   --color-star-gold:      var(--terracotta);
   --color-star-gold-hover:var(--terracotta);
-  --color-star-gold-glow: rgba(232, 130, 107, 0.15);
+  --color-star-gold-glow: rgba(240, 128, 92, 0.15);
 
   /* Status */
   --color-aurora-green:     var(--seafoam);
@@ -52,7 +52,7 @@
   --color-bortle-9: #FF0000;
 
   /* Glass surface */
-  --glass-bg:     rgba(44, 62, 92, 0.65);
+  --glass-bg:     rgba(15, 19, 32, 0.65);
   --glass-border: var(--border);
   --glass-blur:   16px;
 
@@ -70,9 +70,9 @@
 
   /* Shadows */
   --shadow-card:      0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.4);
-  --shadow-card-hover:0 4px 12px rgba(0,0,0,0.4), 0 0 0 1px rgba(232, 130, 107,0.12);
-  --shadow-glow-teal: 0 0 20px rgba(232, 130, 107,0.20), 0 0 60px rgba(232, 130, 107,0.06);
-  --shadow-glow-gold: 0 0 20px rgba(232, 130, 107,0.15), 0 0 60px rgba(232, 130, 107,0.05);
+  --shadow-card-hover:0 4px 12px rgba(0,0,0,0.4), 0 0 0 1px rgba(240, 128, 92,0.12);
+  --shadow-glow-teal: 0 0 20px rgba(240, 128, 92,0.20), 0 0 60px rgba(240, 128, 92,0.06);
+  --shadow-glow-gold: 0 0 20px rgba(240, 128, 92,0.15), 0 0 60px rgba(240, 128, 92,0.05);
   --shadow-inner:     inset 0 1px 0 rgba(255,255,255,0.04);
 
   /* Transitions */

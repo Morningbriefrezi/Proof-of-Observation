@@ -13,7 +13,7 @@ export async function GET() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'linear-gradient(135deg, #2C3E5C 0%, #2C3E5C 100%)',
+          background: 'linear-gradient(135deg, #0F1320 0%, #0F1320 100%)',
           position: 'relative',
         }}
       >
@@ -22,7 +22,7 @@ export async function GET() {
           style={{
             fontSize: 72,
             fontWeight: 'bold',
-            color: '#F5F1E8',
+            color: '#F8F4EC',
             letterSpacing: 4,
             lineHeight: 1,
           }}

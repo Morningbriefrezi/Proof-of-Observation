@@ -24,7 +24,7 @@
   --color-text-faint:      rgba(255,255,255,0.35);
 
   --shadow-glow-teal:      0 0 24px rgba(94, 234, 212, 0.25), 0 0 48px rgba(94, 234, 212, 0.06);
-  --shadow-glow-gold-soft: 0 0 24px rgba(232, 130, 107, 0.20);
+  --shadow-glow-gold-soft: 0 0 24px rgba(240, 128, 92, 0.20);
 
   --gradient-primary:      var(--terracotta);
   --gradient-radial-teal:  radial-gradient(ellipse at 50% 0%, rgba(94, 234, 212, 0.10) 0%, rgba(94, 234, 212, 0.0) 60%);
@@ -40,7 +40,7 @@
   --stl-border-soft:    rgba(255,255,255,0.06);
   --stl-border-regular: var(--border);
   --stl-border-strong:  var(--border);
-  --stl-border-gold:    rgba(232, 130, 107, 0.22);
+  --stl-border-gold:    rgba(240, 128, 92, 0.22);
   --stl-border-teal:    rgba(94, 234, 212, 0.18);
   --stl-border-green:   rgba(94, 234, 212, 0.18);
 
@@ -72,7 +72,7 @@
   --stl-r-pill: 999px;
 
   /* Shadows (used sparingly) */
-  --stl-glow-gold: 0 0 16px rgba(232, 130, 107,0.35);
+  --stl-glow-gold: 0 0 16px rgba(240, 128, 92,0.35);
 }
 
 /* Type scale — read this once, use everywhere */
@@ -183,7 +183,7 @@
 .score-ring { animation: pulse-glow 4s ease-in-out infinite; border-radius: 50%; }
 
 /* Stars amount on tier cards — subtle gold glow, no shadow blur on layout */
-.stars-amount { text-shadow: 0 0 24px rgba(232, 130, 107, 0.30); }
+.stars-amount { text-shadow: 0 0 24px rgba(240, 128, 92, 0.30); }
 
 /* Live LED — small green dot pulsing on a 2s cadence */
 @keyframes led-pulse {
@@ -326,9 +326,9 @@
   height: 1px;
   background: linear-gradient(90deg,
     transparent 0%,
-    rgba(232, 130, 107,0.35) 20%,
+    rgba(240, 128, 92,0.35) 20%,
     rgba(94, 234, 212,0.6) 50%,
-    rgba(232, 130, 107,0.35) 80%,
+    rgba(240, 128, 92,0.35) 80%,
     transparent 100%);
   box-shadow: 0 0 8px rgba(94, 234, 212,0.3);
 }
@@ -456,7 +456,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   color: var(--stl-gold);
-  background: rgba(232, 130, 107,0.10);
+  background: rgba(240, 128, 92,0.10);
   border: 1px solid var(--stl-border-gold);
   padding: 2px 5px;
   border-radius: 4px;
@@ -622,7 +622,7 @@
   pointer-events: none;
 }
 .stl-hero-card.urgent::before {
-  background: linear-gradient(90deg, rgba(232, 130, 107,0.9), rgba(232, 130, 107,0));
+  background: linear-gradient(90deg, rgba(240, 128, 92,0.9), rgba(240, 128, 92,0));
 }
 .stl-hero-card.hot::before {
   background: linear-gradient(90deg, rgba(94, 234, 212,0.75), rgba(94, 234, 212,0));
@@ -649,8 +649,8 @@
   line-height: 1;
 }
 .stl-cat-meteor    { color: var(--seafoam); background: rgba(94, 234, 212,0.08); }
-.stl-cat-solar     { color: var(--terracotta); background: rgba(232, 130, 107,0.08); }
-.stl-cat-mission   { color: var(--terracotta); background: rgba(232, 130, 107,0.08); }
+.stl-cat-solar     { color: var(--terracotta); background: rgba(240, 128, 92,0.08); }
+.stl-cat-mission   { color: var(--terracotta); background: rgba(240, 128, 92,0.08); }
 .stl-cat-comet     { color: var(--negative); background: rgba(251, 113, 133,0.06); }
 .stl-cat-discovery { color: var(--seafoam); background: rgba(94, 234, 212,0.08); }
 .stl-cat-weather   { color: var(--text-muted); background: rgba(148,163,184,0.08); }
@@ -1046,7 +1046,7 @@
   --stl-cosmic-no:  #D6336C;
   --stl-cosmic-no-glow:  rgba(232, 90, 154, 0.35);
   --stl-sidebar-bg: #F1ECF9;
-  --stl-cosmic-aura: radial-gradient(900px 600px at 12% -8%, rgba(232, 130, 107,0.10), transparent 55%),
+  --stl-cosmic-aura: radial-gradient(900px 600px at 12% -8%, rgba(240, 128, 92,0.10), transparent 55%),
                      radial-gradient(720px 520px at 100% 0%, rgba(34,211,238,0.08), transparent 55%),
                      radial-gradient(640px 480px at 50% 110%, rgba(244,114,182,0.06), transparent 60%);
   --stl-stars: radial-gradient(1px 1px at 12% 22%, rgba(20,18,43,0.18), transparent 60%),
@@ -1071,17 +1071,17 @@
   --stl-red: #F472B6;
   --stl-red-bg: rgba(244,114,182,0.10);
   --stl-accent: #A78BFA;
-  --stl-accent-bg: rgba(232, 130, 107,0.10);
+  --stl-accent-bg: rgba(240, 128, 92,0.10);
   --stl-teal: #22D3EE;
   --stl-teal-bg: rgba(34,211,238,0.10);
   --stl-amber: var(--terracotta);
-  --stl-amber-bg: rgba(232, 130, 107,0.08);
+  --stl-amber-bg: rgba(240, 128, 92,0.08);
   --stl-cosmic-yes: var(--seafoam);
   --stl-cosmic-yes-glow: rgba(94, 234, 212,0.45);
   --stl-cosmic-no:  #F472B6;
   --stl-cosmic-no-glow:  rgba(244,114,182,0.45);
   --stl-sidebar-bg: #0E0F22;
-  --stl-cosmic-aura: radial-gradient(900px 600px at 12% -8%, rgba(232, 130, 107,0.22), transparent 55%),
+  --stl-cosmic-aura: radial-gradient(900px 600px at 12% -8%, rgba(240, 128, 92,0.22), transparent 55%),
                      radial-gradient(720px 520px at 100% 0%, rgba(34,211,238,0.16), transparent 55%),
                      radial-gradient(640px 480px at 50% 110%, rgba(244,114,182,0.14), transparent 60%);
   --stl-stars: radial-gradient(1.2px 1.2px at 12% 22%, rgba(255,255,255,0.55), transparent 60%),
@@ -1279,7 +1279,7 @@
     linear-gradient(135deg, var(--cat-bg, transparent) 0%, transparent 70%),
     var(--stl-bg-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px -10px var(--cat-fg, rgba(232, 130, 107,0.4));
+  box-shadow: 0 6px 18px -10px var(--cat-fg, rgba(240, 128, 92,0.4));
 }
 @keyframes mkt-trending-fade {
   from { opacity: 0; transform: translateY(3px); }
@@ -1383,7 +1383,7 @@
   border-radius: 50%;
   background: var(--stl-accent);
   box-shadow:
-    0 0 10px rgba(232, 130, 107,0.55),
+    0 0 10px rgba(240, 128, 92,0.55),
     -10px 4px 0 -3px var(--stl-teal),
     -16px -2px 0 -3.5px var(--stl-amber);
 }
@@ -1500,11 +1500,11 @@
 .markets-page.dark .mkt-row-icon { color: var(--cat-fg, var(--stl-text2)); }
 
 /* Category color tokens — tasteful astronomy palette */
-[data-category="meteor"]            { --cat-fg: var(--terracotta); --cat-bg: rgba(232, 130, 107,0.12); --cat-border: rgba(232, 130, 107,0.30); }
+[data-category="meteor"]            { --cat-fg: var(--terracotta); --cat-bg: rgba(240, 128, 92,0.12); --cat-border: rgba(240, 128, 92,0.30); }
 [data-category="solar"]             { --cat-fg: #F97316; --cat-bg: rgba(249,115, 22,0.12); --cat-border: rgba(249,115, 22,0.30); }
 [data-category="mission"]           { --cat-fg: #22D3EE; --cat-bg: rgba(34,211,238,0.12); --cat-border: rgba(34,211,238,0.30); }
 [data-category="comet"]             { --cat-fg: #06B6D4; --cat-bg: rgba(  6,182,212,0.12); --cat-border: rgba(  6,182,212,0.30); }
-[data-category="discovery"]         { --cat-fg: #A78BFA; --cat-bg: rgba(232, 130, 107,0.14); --cat-border: rgba(232, 130, 107,0.32); }
+[data-category="discovery"]         { --cat-fg: #A78BFA; --cat-bg: rgba(240, 128, 92,0.14); --cat-border: rgba(240, 128, 92,0.32); }
 [data-category="weather"]           { --cat-fg: #60A5FA; --cat-bg: rgba( 96,165,250,0.12); --cat-border: rgba( 96,165,250,0.30); }
 [data-category="weather_event"]     { --cat-fg: #38BDF8; --cat-bg: rgba( 56,189,248,0.12); --cat-border: rgba( 56,189,248,0.30); }
 [data-category="natural_phenomenon"]{ --cat-fg: var(--seafoam); --cat-bg: rgba( 52,211,153,0.12); --cat-border: rgba( 52,211,153,0.30); }
@@ -1558,7 +1558,7 @@
   color: var(--stl-accent);
   background: var(--stl-accent-bg);
   border: 1px solid var(--stl-accent);
-  border-color: rgba(232, 130, 107,0.30);
+  border-color: rgba(240, 128, 92,0.30);
 }
 .mkt-section-preview-count {
   color: var(--stl-accent);
@@ -1639,7 +1639,7 @@
 }
 .mkt-odds-cell.no {
   --cell-fg: var(--stl-cosmic-no);
-  --cell-bg: linear-gradient(135deg, rgba(244,114,182,0.12), rgba(232, 130, 107,0.12));
+  --cell-bg: linear-gradient(135deg, rgba(244,114,182,0.12), rgba(240, 128, 92,0.12));
   --cell-border: rgba(244,114,182,0.45);
 }
 
@@ -1652,7 +1652,7 @@
   transform: translateY(-1px);
 }
 .mkt-odds-cell.no:hover:not(:disabled) {
-  --cell-bg: linear-gradient(135deg, rgba(244,114,182,0.22), rgba(232, 130, 107,0.20));
+  --cell-bg: linear-gradient(135deg, rgba(244,114,182,0.22), rgba(240, 128, 92,0.20));
   --cell-border: rgba(244,114,182,0.7);
   box-shadow:
     0 0 0 1px var(--cell-border) inset,
@@ -1668,7 +1668,7 @@
     0 0 18px var(--stl-cosmic-yes-glow);
 }
 .mkt-odds-cell.no.active {
-  --cell-bg: linear-gradient(135deg, rgba(244,114,182,0.28), rgba(232, 130, 107,0.22));
+  --cell-bg: linear-gradient(135deg, rgba(244,114,182,0.28), rgba(240, 128, 92,0.22));
   --cell-border: rgba(244,114,182,0.85);
   box-shadow:
     0 0 0 1.5px var(--cell-border) inset,
@@ -2098,7 +2098,7 @@
   box-shadow:
     0 0 0 1px rgba(255,255,255,0.08) inset,
     0 0 0 2px var(--stl-bg2),
-    0 0 12px rgba(232, 130, 107,0.22);
+    0 0 12px rgba(240, 128, 92,0.22);
   transition: box-shadow 0.18s ease, transform 0.18s ease;
 }
 .mkt-mission-thumb img {
@@ -2125,9 +2125,9 @@
 .mkt-mission:hover .mkt-mission-thumb {
   transform: translateY(-1px);
   box-shadow:
-    0 0 0 1px rgba(232, 130, 107,0.55) inset,
+    0 0 0 1px rgba(240, 128, 92,0.55) inset,
     0 0 0 2px var(--stl-bg2),
-    0 0 18px rgba(232, 130, 107,0.55);
+    0 0 18px rgba(240, 128, 92,0.55);
 }
 .mkt-mission:hover .mkt-mission-thumb img { transform: scale(1.28); }
 .mkt-mission-body { flex: 1; min-width: 0; }
@@ -3149,9 +3149,9 @@
   gap: 5px;
   font-size: 10px;
   font-weight: 500;
-  color: rgba(232, 130, 107,0.8);
-  background: rgba(232, 130, 107,0.08);
-  border: 1px solid rgba(232, 130, 107,0.15);
+  color: rgba(240, 128, 92,0.8);
+  background: rgba(240, 128, 92,0.08);
+  border: 1px solid rgba(240, 128, 92,0.15);
   border-radius: 12px;
   padding: 3px 10px;
 }
@@ -3189,25 +3189,25 @@
   transition: all 120ms ease;
 }
 .home-astra-pill:hover {
-  border-color: rgba(232, 130, 107,0.4);
+  border-color: rgba(240, 128, 92,0.4);
   color: #C4B5FD;
-  background: rgba(232, 130, 107,0.06);
+  background: rgba(240, 128, 92,0.06);
 }
 .home-astra-cta {
   font-size: 13px;
   font-weight: 600;
   padding: 9px 20px;
   border-radius: 8px;
-  border: 1px solid rgba(232, 130, 107,0.3);
-  background: rgba(232, 130, 107,0.08);
+  border: 1px solid rgba(240, 128, 92,0.3);
+  background: rgba(240, 128, 92,0.08);
   color: #C4B5FD;
   text-decoration: none;
   margin-top: 14px;
   transition: background 120ms ease, border-color 120ms ease;
 }
 .home-astra-cta:hover {
-  background: rgba(232, 130, 107,0.15);
-  border-color: rgba(232, 130, 107,0.5);
+  background: rgba(240, 128, 92,0.15);
+  border-color: rgba(240, 128, 92,0.5);
 }
 
 .home-astra-chat {
@@ -3229,8 +3229,8 @@
 .home-astra-chat-user {
   align-self: flex-end;
   max-width: 85%;
-  background: rgba(232, 130, 107,0.1);
-  border: 1px solid rgba(232, 130, 107,0.12);
+  background: rgba(240, 128, 92,0.1);
+  border: 1px solid rgba(240, 128, 92,0.12);
   border-radius: 8px;
   font-size: 11px;
   color: rgba(255,255,255,0.7);
@@ -3252,7 +3252,7 @@
 .home-astra-chat-status {
   font-family: var(--font-mono);
   font-size: 10px;
-  color: rgba(232, 130, 107,0.4);
+  color: rgba(240, 128, 92,0.4);
   margin-top: 4px;
 }
 
@@ -3346,11 +3346,11 @@
   --sky-grn: #4ADE80;
   --sky-grn-bg: rgba(74,222,128,0.10);
   --sky-amb: var(--terracotta);
-  --sky-amb-bg: rgba(232, 130, 107,0.08);
+  --sky-amb-bg: rgba(240, 128, 92,0.08);
   --sky-red: var(--negative);
   --sky-red-bg: rgba(251,113,133,0.08);
   --sky-acc: #A78BFA;
-  --sky-acc-bg: rgba(232, 130, 107,0.08);
+  --sky-acc-bg: rgba(240, 128, 92,0.08);
 }
 
 .sky-content {
@@ -3877,7 +3877,7 @@
   background: var(--sky-acc-bg);
   border: 1px solid rgba(91,61,200,0.08);
 }
-.sky-page.dark .sky-tip { border-color: rgba(232, 130, 107,0.12); }
+.sky-page.dark .sky-tip { border-color: rgba(240, 128, 92,0.12); }
 .sky-tip-icon {
   flex-shrink: 0;
   color: var(--sky-acc);
@@ -4132,8 +4132,8 @@
   margin: 0 0 18px 0;
   padding: 12px;
   border-radius: 8px;
-  background: rgba(232, 130, 107,0.06);
-  border: 1px solid rgba(232, 130, 107,0.12);
+  background: rgba(240, 128, 92,0.06);
+  border: 1px solid rgba(240, 128, 92,0.12);
 }
 .sky-modal-actions {
   display: grid;
@@ -4195,13 +4195,13 @@
   top: 6px; right: 6px;
   width: 22px; height: 22px;
   border-radius: 50%;
-  background: rgba(232, 130, 107,0.95);
+  background: rgba(240, 128, 92,0.95);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2;
-  box-shadow: 0 2px 8px rgba(232, 130, 107,0.4);
+  box-shadow: 0 2px 8px rgba(240, 128, 92,0.4);
 }
 
 /* === Plan-for section === */
@@ -4477,9 +4477,9 @@
   --mis-grn: #4ADE80;
   --mis-grn-bg: rgba(74,222,128,0.10);
   --mis-amb: var(--terracotta);
-  --mis-amb-bg: rgba(232, 130, 107,0.08);
+  --mis-amb-bg: rgba(240, 128, 92,0.08);
   --mis-acc: #A78BFA;
-  --mis-acc-bg: rgba(232, 130, 107,0.08);
+  --mis-acc-bg: rgba(240, 128, 92,0.08);
   --mis-card: #18191D;
 }
 
@@ -4650,15 +4650,15 @@
   margin-bottom: 14px;
   cursor: pointer;
   transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
-  background: linear-gradient(135deg, rgba(232, 130, 107,0.06), rgba(94, 234, 212,0.02));
-  border: 1px solid rgba(232, 130, 107,0.12);
+  background: linear-gradient(135deg, rgba(240, 128, 92,0.06), rgba(94, 234, 212,0.02));
+  border: 1px solid rgba(240, 128, 92,0.12);
   backdrop-filter: blur(4px);
   text-align: left;
   width: 100%;
 }
 .mis-prime:hover {
-  border-color: rgba(232, 130, 107,0.25);
-  background: linear-gradient(135deg, rgba(232, 130, 107,0.1), rgba(94, 234, 212,0.04));
+  border-color: rgba(240, 128, 92,0.25);
+  background: linear-gradient(135deg, rgba(240, 128, 92,0.1), rgba(94, 234, 212,0.04));
 }
 .mis-prime-icon {
   width: 52px;
@@ -4713,7 +4713,7 @@
   border-radius: 8px;
   padding: 8px 18px;
   cursor: pointer;
-  box-shadow: 0 0 16px rgba(232, 130, 107,0.2);
+  box-shadow: 0 0 16px rgba(240, 128, 92,0.2);
   transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
   display: inline-flex;
   align-items: center;
@@ -4723,7 +4723,7 @@
 }
 .mis-prime-cta:hover {
   background: #6D28D9;
-  box-shadow: 0 0 24px rgba(232, 130, 107,0.35);
+  box-shadow: 0 0 24px rgba(240, 128, 92,0.35);
   transform: translateY(-1px);
 }
 .mis-prime-cta:active { transform: translateY(0); }
@@ -4789,8 +4789,8 @@
   transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
 }
 .mis-lineup-item:hover {
-  border-color: rgba(232, 130, 107,0.45);
-  background: rgba(232, 130, 107,0.06);
+  border-color: rgba(240, 128, 92,0.45);
+  background: rgba(240, 128, 92,0.06);
   transform: translateY(-1px);
 }
 .mis-lineup-art {
@@ -5026,7 +5026,7 @@
   border: 1px solid currentColor;
 }
 .mis-diff.easy   { color: var(--color-accent-teal);    background: rgba(94, 234, 212, 0.10); }
-.mis-diff.med    { color: var(--color-accent-gold);    background: rgba(232, 130, 107, 0.10); }
+.mis-diff.med    { color: var(--color-accent-gold);    background: rgba(240, 128, 92, 0.10); }
 .mis-diff.hard   { color: var(--color-accent-warning); background: rgba(251, 113, 133, 0.10); }
 .mis-diff.expert { color: var(--color-accent-warning); background: rgba(251, 113, 133, 0.12); }
 .mis-tile-equip {
@@ -5120,7 +5120,7 @@
   transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
 }
 .mis-explore-card:hover {
-  border-color: rgba(232, 130, 107,0.4);
+  border-color: rgba(240, 128, 92,0.4);
   transform: translateY(-1px);
   background: var(--color-bg-card-hover);
 }
@@ -5209,8 +5209,8 @@
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 .mis-qtile:hover .mis-qtile-play {
-  background: rgba(232, 130, 107,0.15);
-  border-color: rgba(232, 130, 107,0.3);
+  background: rgba(240, 128, 92,0.15);
+  border-color: rgba(240, 128, 92,0.3);
   color: rgba(255,255,255,0.7);
 }
 
@@ -5233,17 +5233,17 @@
   z-index: -1;
 }
 .mis-qtile-icon.solar-system {
-  background: rgba(232, 130, 107,0.08);
-  border: 1px solid rgba(232, 130, 107,0.12);
+  background: rgba(240, 128, 92,0.08);
+  border: 1px solid rgba(240, 128, 92,0.12);
   color: var(--terracotta);
 }
-.mis-qtile-icon.solar-system::before { background: radial-gradient(circle, rgba(232, 130, 107,0.3), transparent 70%); }
+.mis-qtile-icon.solar-system::before { background: radial-gradient(circle, rgba(240, 128, 92,0.3), transparent 70%); }
 .mis-qtile-icon.constellations {
-  background: rgba(232, 130, 107,0.08);
-  border: 1px solid rgba(232, 130, 107,0.12);
+  background: rgba(240, 128, 92,0.08);
+  border: 1px solid rgba(240, 128, 92,0.12);
   color: #A78BFA;
 }
-.mis-qtile-icon.constellations::before { background: radial-gradient(circle, rgba(232, 130, 107,0.3), transparent 70%); }
+.mis-qtile-icon.constellations::before { background: radial-gradient(circle, rgba(240, 128, 92,0.3), transparent 70%); }
 .mis-qtile-icon.telescopes {
   background: rgba(34,211,238,0.06);
   border: 1px solid rgba(34,211,238,0.1);

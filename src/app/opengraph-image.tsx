@@ -9,7 +9,7 @@ export default async function Image() {
     (
       <div
         style={{
-          background: '#2C3E5C',
+          background: '#0F1320',
           width: '100%',
           height: '100%',
           display: 'flex',
@@ -19,7 +19,7 @@ export default async function Image() {
           position: 'relative',
         }}
       >
-        <div style={{ fontSize: 32, color: '#F5F1E8', letterSpacing: 4, marginBottom: 16 }}>
+        <div style={{ fontSize: 32, color: '#F8F4EC', letterSpacing: 4, marginBottom: 16 }}>
           STELLAR
         </div>
         <div

@@ -40,7 +40,7 @@ export function SolanaWalletProvider({ children }: { children: ReactNode }) {
         loginMethods: ['email', 'sms', 'google'],
         appearance: {
           theme: 'dark',
-          accentColor: '#E8826B',
+          accentColor: '#F0805C',
           logo: '/brand/logo-mark.svg',
           loginMessage: 'Sign in to Stellar',
           showWalletLoginFirst: false,
