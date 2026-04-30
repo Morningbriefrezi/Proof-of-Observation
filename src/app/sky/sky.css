@@ -54,8 +54,8 @@
 
 /* === HERO === */
 .sky-page-v2 .hero {
-  display: grid; grid-template-columns: auto 1fr auto; gap: 24px; align-items: center;
-  padding: 20px 28px;
+  display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center;
+  padding: 14px 22px;
   background: linear-gradient(135deg, rgba(56, 240, 255, 0.04) 0%, rgba(132, 101, 203, 0.04) 100%);
   border: 1px solid rgba(56, 240, 255, 0.15);
   border-radius: 20px;
@@ -67,9 +67,9 @@
   background: radial-gradient(circle at 20% 50%, rgba(56, 240, 255, 0.08), transparent 50%);
   pointer-events: none;
 }
-.sky-page-v2 .score-ring { position: relative; width: 80px; height: 80px; flex-shrink: 0; animation: none; border-radius: 0; }
+.sky-page-v2 .score-ring { position: relative; width: 64px; height: 64px; flex-shrink: 0; animation: none; border-radius: 0; }
 .sky-page-v2 .score-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.sky-page-v2 .score-ring circle { fill: none; stroke-width: 5; }
+.sky-page-v2 .score-ring circle { fill: none; stroke-width: 4; }
 .sky-page-v2 .score-ring .track { stroke: rgba(255, 255, 255, 0.06); }
 .sky-page-v2 .score-ring .fill {
   stroke: var(--teal); stroke-linecap: round;
@@ -78,11 +78,11 @@
   transition: stroke-dashoffset 0.6s ease-out;
 }
 .sky-page-v2 .score-num { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.sky-page-v2 .score-num .n { font-family: var(--serif); font-size: 28px; font-weight: 500; line-height: 1; }
-.sky-page-v2 .score-num .d { font-family: var(--mono); font-size: 9px; color: var(--text-dim); margin-top: 1px; letter-spacing: 0.1em; }
+.sky-page-v2 .score-num .n { font-family: var(--serif); font-size: 22px; font-weight: 500; line-height: 1; }
+.sky-page-v2 .score-num .d { font-family: var(--mono); font-size: 8px; color: var(--text-dim); margin-top: 1px; letter-spacing: 0.1em; }
 .sky-page-v2 .hero-body h1 {
-  font-family: var(--serif); font-size: 24px; font-weight: 500; letter-spacing: -0.01em;
-  margin-bottom: 4px;
+  font-family: var(--serif); font-size: 20px; font-weight: 500; letter-spacing: -0.01em;
+  margin-bottom: 2px;
   display: flex; align-items: center; gap: 10px;
 }
 .sky-page-v2 .pulse {
@@ -95,11 +95,11 @@
   70% { box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
   100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
 }
-.sky-page-v2 .hero-body p { color: var(--text-muted); font-size: 13px; line-height: 1.5; }
+.sky-page-v2 .hero-body p { color: var(--text-muted); font-size: 12.5px; line-height: 1.45; }
 .sky-page-v2 .hero-meta { text-align: right; }
 .sky-page-v2 .loc { font-family: var(--mono); font-size: 11px; color: var(--text-dim); letter-spacing: 0.05em; }
-.sky-page-v2 .loc .city { color: var(--text); font-size: 13px; letter-spacing: 0; font-family: var(--sans); margin-bottom: 2px; display: block; }
-.sky-page-v2 .date { font-family: var(--serif); font-size: 16px; margin-top: 8px; color: var(--text); }
+.sky-page-v2 .loc .city { color: var(--text); font-size: 12.5px; letter-spacing: 0; font-family: var(--sans); margin-bottom: 1px; display: block; }
+.sky-page-v2 .date { font-family: var(--serif); font-size: 14px; margin-top: 4px; color: var(--text); }
 
 /* === COMPASS + LIVE OBJECTS === */
 .sky-page-v2 .observe-row { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px; }
@@ -160,10 +160,15 @@
 .sky-page-v2 .timeline-name {
   font-size: 12px; font-weight: 500;
   display: flex; align-items: center; gap: 6px;
-  padding: 8px 12px 8px 0;
+  padding: 8px 10px 8px 0;
+  min-width: 0;
 }
 .sky-page-v2 .timeline-name .dot { width: 8px; height: 8px; border-radius: 999px; flex-shrink: 0; }
-.sky-page-v2 .timeline-name .peak-time { margin-left: auto; font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: 0.04em; }
+.sky-page-v2 .timeline-name .name-text {
+  flex: 1 1 auto; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sky-page-v2 .timeline-name .peak-time { flex-shrink: 0; font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: 0.04em; }
 .sky-page-v2 .timeline-cell {
   height: 18px; margin: 1px;
   border-radius: 3px;

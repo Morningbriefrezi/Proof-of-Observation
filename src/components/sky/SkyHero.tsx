@@ -12,7 +12,7 @@ interface SkyHeroProps {
 export function SkyHero({ score, location, loading }: SkyHeroProps) {
   if (loading || !score || !location) {
     return (
-      <section className="hero" style={{ minHeight: 120 }}>
+      <section className="hero" style={{ minHeight: 92 }}>
         <div style={{ color: 'var(--text-dim)', fontSize: 13 }}>Loading sky conditions…</div>
       </section>
     );

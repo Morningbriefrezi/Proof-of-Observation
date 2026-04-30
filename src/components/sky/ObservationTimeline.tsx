@@ -10,7 +10,7 @@ interface ObservationTimelineProps {
   windowStart?: string;  // ISO timestamp of first hour cell
 }
 
-const NAME_COL_WIDTH = 130;
+const NAME_COL_WIDTH = 116;
 
 export function ObservationTimeline({ targets, windowStart }: ObservationTimelineProps) {
   const [now, setNow] = useState(() => new Date());
@@ -123,7 +123,7 @@ function TimelineRow({ target }: { target: TimelineTarget }) {
     <>
       <div className="timeline-name">
         <span className="dot" style={{ background: target.color }} />
-        {target.name}
+        <span className="name-text">{target.name}</span>
         {target.peakTime && <span className="peak-time">{target.peakTime}</span>}
       </div>
       {target.hourly.map((point, i) => {
