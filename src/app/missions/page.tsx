@@ -22,6 +22,11 @@ import {
   Telescope as LcTelescope,
   Crosshair,
   Moon as LcMoon,
+  CloudSun,
+  TrendingUp,
+  BookOpen,
+  Users,
+  Sparkles,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -78,13 +83,13 @@ const TIPS: { title: string; body: string; Icon: LucideIcon }[] = [
   },
 ];
 
-const EXPLORE: { href: string; name: string; meta: string; desc: string }[] = [
-  { href: '/sky',         name: 'Sky',      meta: 'Forecast', desc: '7-day cloud, seeing, and transparency forecast for your location.' },
-  { href: '/markets',     name: 'Markets',  meta: 'Predict',  desc: 'On-chain prediction markets on celestial events and observations.' },
-  { href: '/learn',       name: 'Learning', meta: 'Articles', desc: 'Field guides, equipment primers, and observing techniques.' },
-  { href: '/network',     name: 'Network',  meta: 'Community',desc: 'See where other Stellar observers are reporting from tonight.' },
-  { href: '/marketplace', name: 'Shop',     meta: 'Gear',     desc: 'Telescopes, eyepieces, and accessories from verified dealers.' },
-  { href: '/chat',        name: 'ASTRA AI', meta: 'Assistant',desc: 'Ask anything about the night sky or your equipment.' },
+const EXPLORE: { href: string; name: string; meta: string; desc: string; Icon: LucideIcon }[] = [
+  { href: '/sky',         name: 'Sky',      meta: 'Forecast',  desc: '7-day cloud, seeing, and transparency forecast for your location.', Icon: CloudSun },
+  { href: '/markets',     name: 'Markets',  meta: 'Predict',   desc: 'On-chain prediction markets on celestial events and observations.', Icon: TrendingUp },
+  { href: '/learn',       name: 'Learning', meta: 'Articles',  desc: 'Field guides, equipment primers, and observing techniques.',        Icon: BookOpen },
+  { href: '/network',     name: 'Network',  meta: 'Community', desc: 'See where other Stellar observers are reporting from tonight.',     Icon: Users },
+  { href: '/marketplace', name: 'Shop',     meta: 'Gear',      desc: 'Telescopes, eyepieces, and accessories from verified dealers.',     Icon: LcTelescope },
+  { href: '/chat',        name: 'ASTRA AI', meta: 'Assistant', desc: 'Ask anything about the night sky or your equipment.',                Icon: Sparkles },
 ];
 
 const LINEUP_KEYS = ['moon', 'jupiter', 'saturn', 'mars', 'venus', 'mercury'];
@@ -410,14 +415,19 @@ export default function MissionsPage() {
             <span className="mis-section-meta">{EXPLORE.length} sections</span>
           </div>
           <div className="mis-explore-deck">
-            {EXPLORE.map((p) => (
-              <Link key={p.href} href={p.href} className="mis-explore-card">
-                <span className="mis-explore-meta">{p.meta}</span>
-                <span className="mis-explore-name">{p.name}</span>
-                <span className="mis-explore-desc">{p.desc}</span>
-                <span className="mis-explore-arrow" aria-hidden>→</span>
-              </Link>
-            ))}
+            {EXPLORE.map((p) => {
+              const Icon = p.Icon;
+              return (
+                <Link key={p.href} href={p.href} className="mis-explore-card">
+                  <span className="mis-explore-icon" aria-hidden>
+                    <Icon size={22} strokeWidth={1.6} />
+                  </span>
+                  <span className="mis-explore-meta">{p.meta}</span>
+                  <span className="mis-explore-name">{p.name}</span>
+                  <span className="mis-explore-desc">{p.desc}</span>
+                </Link>
+              );
+            })}
           </div>
         </section>
       </div>

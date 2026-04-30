@@ -5189,64 +5189,61 @@
   margin: 0;
 }
 
-/* === Elsewhere in Stellar === */
+/* === Elsewhere in Stellar — 2-col compact card grid === */
 .mis-explore-deck {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
 }
-@media (max-width: 900px) { .mis-explore-deck { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 540px) { .mis-explore-deck { grid-template-columns: 1fr; } }
 .mis-explore-card {
   position: relative;
   border: 1px solid var(--color-border-subtle);
-  border-radius: 12px;
+  border-radius: 16px;
   background: var(--color-bg-card);
-  padding: 14px 14px 16px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 4px;
   text-decoration: none;
   color: inherit;
-  transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+  transition: border-color 0.18s ease, background 0.18s ease;
 }
 .mis-explore-card:hover {
-  border-color: rgba(240, 128, 92,0.4);
-  transform: translateY(-1px);
+  border-color: rgba(94, 234, 212, 0.5);
   background: var(--color-bg-card-hover);
+}
+.mis-explore-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-accent-teal);
+  margin-bottom: 6px;
 }
 .mis-explore-meta {
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--mis-t3);
+  color: var(--mis-t3, rgba(255, 255, 255, 0.5));
+  opacity: 0.5;
 }
 .mis-explore-name {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--mis-t1);
   letter-spacing: -0.005em;
 }
 .mis-explore-desc {
   font-size: 11.5px;
-  line-height: 1.5;
-  color: var(--mis-t2);
+  line-height: 1.45;
+  color: var(--mis-t2, rgba(255, 255, 255, 0.6));
+  opacity: 0.85;
   margin-top: 2px;
-}
-.mis-explore-arrow {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  color: var(--mis-t3);
-  transition: transform 0.18s ease, color 0.18s ease;
-}
-.mis-explore-card:hover .mis-explore-arrow {
-  color: var(--color-accent-purple, var(--terracotta));
-  transform: translateX(2px);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* === Quiz tile deck === */
