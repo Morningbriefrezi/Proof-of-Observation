@@ -62,13 +62,13 @@ export async function GET(req: NextRequest) {
           flex: 1,
           gap: 8,
         }}>
-          <div style={{ fontSize: 120, fontWeight: 700, color: scoreColor, lineHeight: 1, fontFamily: 'monospace' }}>
+          <div style={{ display: 'flex', fontSize: 120, fontWeight: 700, color: scoreColor, lineHeight: 1, fontFamily: 'monospace' }}>
             {score}
           </div>
-          <div style={{ fontSize: 24, color: scoreColor, fontWeight: 600 }}>
+          <div style={{ display: 'flex', fontSize: 24, color: scoreColor, fontWeight: 600 }}>
             {`${emoji} ${badge} Sky Tonight`}
           </div>
-          <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>
+          <div style={{ display: 'flex', fontSize: 14, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>
             Sky Score /100
           </div>
 
@@ -79,6 +79,7 @@ export async function GET(req: NextRequest) {
                 <div
                   key={i}
                   style={{
+                    display: 'flex',
                     background: 'rgba(255,255,255,0.05)',
                     border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: 12,
