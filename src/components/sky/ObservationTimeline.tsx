@@ -21,18 +21,11 @@ export function ObservationTimeline({ targets, windowStart }: ObservationTimelin
     return () => clearInterval(interval);
   }, []);
 
-  if (targets.length === 0) {
-    return (
-      <div className="panel timeline-panel">
-        <div style={{ color: 'var(--text-dim)', textAlign: 'center', padding: '40px 0' }}>
-          No targets to display
-        </div>
-      </div>
-    );
-  }
-
   // Use the first target's hourly array for the time axis
-  const hourLabels = targets[0].hourly.map((h) => new Date(h.hour));
+  const hourLabels = useMemo(
+    () => (targets[0]?.hourly ?? []).map((h) => new Date(h.hour)),
+    [targets],
+  );
   const hourCount = hourLabels.length;
 
   // Compute NOW line position as percentage across the grid
@@ -44,6 +37,16 @@ export function ObservationTimeline({ targets, windowStart }: ObservationTimelin
     if (t < start || t > end) return null;
     return ((t - start) / (end - start)) * 100; // percent
   }, [now, hourLabels, hourCount]);
+
+  if (targets.length === 0) {
+    return (
+      <div className="panel timeline-panel">
+        <div style={{ color: 'var(--text-dim)', textAlign: 'center', padding: '40px 0' }}>
+          No targets to display
+        </div>
+      </div>
+    );
+  }
 
   // Astronomical dark range — hardcoded for now, would come from /api/sky/sun-moon
   const darkRange = { start: '22:48', end: '04:12' };

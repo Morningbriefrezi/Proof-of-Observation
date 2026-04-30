@@ -50,9 +50,28 @@ interface Props {
 }
 
 const REFUND_BPS = 7000;
+const MS_DAY = 86_400_000;
+const MS_HOUR = 3_600_000;
+const MS_MIN = 60_000;
 
 function fmtInt(n: number): string {
   return n.toLocaleString('en-US');
+}
+
+function fmtResolveCountdown(target: Date): string {
+  const ms = target.getTime() - Date.now();
+  if (ms <= 0) return 'now';
+  const d = Math.floor(ms / MS_DAY);
+  if (d >= 2) return `${d}d`;
+  const h = Math.floor(ms / MS_HOUR);
+  if (d === 1) return `1d ${h - 24}h`;
+  if (h >= 1) return `${h}h`;
+  const m = Math.max(1, Math.floor(ms / MS_MIN));
+  return `${m}m`;
+}
+
+function fmtResolveDate(target: Date): string {
+  return target.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
 export default function MyActiveBets({ variant = 'compact', title }: Props) {
@@ -232,7 +251,7 @@ export default function MyActiveBets({ variant = 'compact', title }: Props) {
 
       <div className="mab-list">
         {visibleRows.map((row) => {
-          const { position, market, title, cashout, locked } = row;
+          const { position, market, title: rowTitle, cashout, locked } = row;
           const sideClass = position.side === 'yes' ? 'yes' : 'no';
           const cashedOut = !!cashout;
           const refundPreview = Math.floor((position.amount * REFUND_BPS) / 10000);
@@ -240,74 +259,74 @@ export default function MyActiveBets({ variant = 'compact', title }: Props) {
           const isCashOutOpen = cashOutId === position.marketId;
           const busy = busyId === position.marketId;
           const err = errors[position.marketId];
+          const resolveCountdown = fmtResolveCountdown(market.resolutionTime);
+          const resolveDate = fmtResolveDate(market.resolutionTime);
           return (
             <article
               key={`${position.marketId}-${position.side}`}
-              className={`mab-row${cashedOut ? ' cashed' : ''}`}
+              className={`mab-row${cashedOut ? ' cashed' : ''}${locked ? ' locked' : ''}`}
             >
-              <div className="mab-row-head">
+              <div className="mab-row-main">
+                <span className={`mab-row-pill ${sideClass}`}>
+                  {position.side.toUpperCase()} {fmtInt(position.amount)}
+                </span>
                 <Link
                   href={`/markets/${position.marketId}`}
                   className="mab-row-title"
+                  title={rowTitle}
                 >
-                  {title}
+                  {rowTitle}
                 </Link>
-                <span className={`mab-row-pill ${sideClass}`}>
-                  {position.side.toUpperCase()} · {fmtInt(position.amount)} ✦
+                <span className="mab-row-stat">
+                  {cashedOut
+                    ? `+${fmtInt(cashout.refundedAmount)} ✦ cashed`
+                    : locked
+                    ? 'awaiting result'
+                    : `${fmtInt(position.projectedPayout)} ✦ payout`}
                 </span>
-              </div>
-
-              <div className="mab-row-meta">
-                {cashedOut ? (
-                  <span className="mab-row-status cashed">
-                    Cashed out · received {fmtInt(cashout.refundedAmount)} ✦
-                  </span>
-                ) : locked ? (
-                  <span className="mab-row-status locked">
-                    Locked · waiting on resolution
-                  </span>
-                ) : (
-                  <span className="mab-row-status">
-                    Projected payout {fmtInt(position.projectedPayout)} ✦
-                  </span>
+                <span
+                  className="mab-row-resolve"
+                  title={`Resolves ${market.resolutionTime.toLocaleString()}`}
+                >
+                  {locked ? 'locked' : `in ${resolveCountdown}`} · {resolveDate}
+                </span>
+                {!cashedOut && !locked && (
+                  <div className="mab-row-actions">
+                    <button
+                      type="button"
+                      className={`mab-btn ghost${isDoubleDownOpen ? ' active' : ''}`}
+                      onClick={() =>
+                        setDoubleDownId((cur) =>
+                          cur === position.marketId ? null : position.marketId,
+                        )
+                      }
+                      disabled={busy}
+                      aria-expanded={isDoubleDownOpen}
+                    >
+                      {isDoubleDownOpen ? 'Close' : '+ Add'}
+                    </button>
+                    <button
+                      type="button"
+                      className={`mab-btn warn${isCashOutOpen ? ' active' : ''}`}
+                      onClick={() =>
+                        setCashOutId((cur) =>
+                          cur === position.marketId ? null : position.marketId,
+                        )
+                      }
+                      disabled={busy}
+                      aria-expanded={isCashOutOpen}
+                    >
+                      {isCashOutOpen ? 'Close' : `Cash ${fmtInt(refundPreview)} ✦`}
+                    </button>
+                  </div>
                 )}
               </div>
-
-              {!cashedOut && !locked && (
-                <div className="mab-row-actions">
-                  <button
-                    type="button"
-                    className="mab-btn ghost"
-                    onClick={() =>
-                      setDoubleDownId((cur) =>
-                        cur === position.marketId ? null : position.marketId,
-                      )
-                    }
-                    disabled={busy}
-                  >
-                    {isDoubleDownOpen ? 'Close' : 'Double down'}
-                  </button>
-                  <button
-                    type="button"
-                    className="mab-btn warn"
-                    onClick={() =>
-                      setCashOutId((cur) =>
-                        cur === position.marketId ? null : position.marketId,
-                      )
-                    }
-                    disabled={busy}
-                  >
-                    {isCashOutOpen ? 'Close' : `Cash out · ${fmtInt(refundPreview)} ✦`}
-                  </button>
-                </div>
-              )}
 
               {isCashOutOpen && !cashedOut && !locked && (
                 <div className="mab-confirm">
                   <p className="mab-confirm-text">
-                    Get {fmtInt(refundPreview)} ✦ now and walk away. You forfeit{' '}
-                    {fmtInt(position.amount - refundPreview)} ✦ as an exit fee — your
-                    on-chain stake stays in the pool and is paid to the winning side.
+                    Take {fmtInt(refundPreview)} ✦ now, forfeit{' '}
+                    {fmtInt(position.amount - refundPreview)} ✦ to the winning side.
                   </p>
                   <div className="mab-confirm-actions">
                     <button
@@ -324,7 +343,7 @@ export default function MyActiveBets({ variant = 'compact', title }: Props) {
                       onClick={() => onCashOut(position.marketId, position.side)}
                       disabled={busy}
                     >
-                      {busy ? 'Cashing out…' : `Confirm cash out`}
+                      {busy ? 'Cashing out…' : 'Confirm cash out'}
                     </button>
                   </div>
                 </div>
@@ -364,7 +383,7 @@ export default function MyActiveBets({ variant = 'compact', title }: Props) {
         .mab-section {
           display: flex;
           flex-direction: column;
-          gap: 10px;
+          gap: 8px;
         }
         .mab-section-head {
           display: flex;
@@ -373,7 +392,7 @@ export default function MyActiveBets({ variant = 'compact', title }: Props) {
         }
         .mab-section-title {
           font-family: var(--font-mono);
-          font-size: 11px;
+          font-size: 10.5px;
           font-weight: 700;
           letter-spacing: 0.14em;
           text-transform: uppercase;
@@ -395,55 +414,60 @@ export default function MyActiveBets({ variant = 'compact', title }: Props) {
           font-family: var(--font-mono);
           font-size: 12px;
           color: var(--stl-text2, rgba(255, 255, 255, 0.5));
-          padding: 14px 12px;
+          padding: 12px;
           background: var(--stl-bg2, rgba(255, 255, 255, 0.02));
           border: 1px solid var(--stl-border, rgba(255, 255, 255, 0.06));
-          border-radius: 10px;
+          border-radius: 8px;
         }
         .mab-list {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 4px;
         }
         .mab-row {
           display: flex;
           flex-direction: column;
-          gap: 8px;
-          padding: 14px 14px 12px;
-          border-radius: 12px;
+          padding: 8px 12px;
+          border-radius: 8px;
           background: var(--stl-bg2, rgba(255, 255, 255, 0.02));
           border: 1px solid var(--stl-border2, var(--stl-border, rgba(255, 255, 255, 0.08)));
-          box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
         }
         .mab-row.cashed {
-          opacity: 0.65;
+          opacity: 0.6;
         }
-        .mab-row-head {
+        .mab-row.locked .mab-row-stat {
+          color: var(--stl-amber, rgba(232, 130, 107, 0.85));
+        }
+        .mab-row-main {
           display: flex;
           align-items: center;
-          justify-content: space-between;
           gap: 10px;
-          flex-wrap: wrap;
+          min-height: 28px;
         }
         .mab-row-title {
-          font-family: var(--font-display, serif);
-          font-size: 15px;
-          font-weight: 600;
-          color: var(--stl-text1, var(--stl-text-bright, var(--text)));
+          flex: 1 1 auto;
+          min-width: 0;
+          font-family: var(--font-body, sans-serif);
+          font-size: 13px;
+          font-weight: 500;
+          color: var(--stl-text1, var(--text));
           text-decoration: none;
           line-height: 1.25;
-          letter-spacing: -0.005em;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .mab-row-title:hover {
           text-decoration: underline;
         }
         .mab-row-pill {
+          flex-shrink: 0;
           font-family: var(--font-mono);
-          font-size: 10px;
+          font-size: 9.5px;
           font-weight: 700;
-          letter-spacing: 0.12em;
-          padding: 3px 7px;
-          border-radius: 4px;
+          letter-spacing: 0.1em;
+          padding: 3px 6px;
+          border-radius: 3px;
           line-height: 1;
           white-space: nowrap;
         }
@@ -457,35 +481,39 @@ export default function MyActiveBets({ variant = 'compact', title }: Props) {
           background: var(--stl-red-bg, rgba(251, 113, 133, 0.1));
           border: 1px solid var(--stl-red, rgba(251, 113, 133, 0.45));
         }
-        .mab-row-meta {
+        .mab-row-stat {
+          flex-shrink: 0;
           font-family: var(--font-mono);
-          font-size: 11.5px;
-          color: var(--stl-text2, rgba(255, 255, 255, 0.7));
+          font-size: 11px;
+          color: var(--stl-text1, rgba(255, 255, 255, 0.85));
+          font-variant-numeric: tabular-nums;
+          white-space: nowrap;
         }
-        .mab-row-status {
-          font-weight: 500;
-        }
-        .mab-row-status.cashed {
-          color: var(--stl-amber, rgba(232, 130, 107, 0.85));
-        }
-        .mab-row-status.locked {
-          color: var(--stl-text2, rgba(255, 255, 255, 0.7));
+        .mab-row-resolve {
+          flex-shrink: 0;
+          font-family: var(--font-mono);
+          font-size: 10.5px;
+          color: var(--stl-text3, rgba(255, 255, 255, 0.55));
+          letter-spacing: 0.02em;
+          white-space: nowrap;
         }
         .mab-row-actions {
+          flex-shrink: 0;
           display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
+          gap: 4px;
         }
         .mab-btn {
           font-family: var(--font-mono);
           font-size: 10px;
           font-weight: 700;
-          letter-spacing: 0.08em;
+          letter-spacing: 0.06em;
           text-transform: uppercase;
-          padding: 8px 12px;
-          border-radius: 6px;
+          padding: 5px 8px;
+          border-radius: 4px;
           cursor: pointer;
           line-height: 1;
+          white-space: nowrap;
+          transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
         }
         .mab-btn:disabled {
           opacity: 0.5;
@@ -493,51 +521,76 @@ export default function MyActiveBets({ variant = 'compact', title }: Props) {
         }
         .mab-btn.ghost {
           background: transparent;
-          color: var(--stl-text1, rgba(255, 255, 255, 0.85));
+          color: var(--stl-text2, rgba(255, 255, 255, 0.7));
           border: 1px solid var(--stl-border2, var(--stl-border, rgba(255, 255, 255, 0.18)));
         }
-        .mab-btn.ghost:hover:not(:disabled) {
+        .mab-btn.ghost:hover:not(:disabled),
+        .mab-btn.ghost.active {
           background: var(--stl-bg-hover, rgba(255, 255, 255, 0.04));
-          border-color: var(--stl-text2, rgba(255, 255, 255, 0.3));
+          color: var(--stl-text1, var(--text));
+          border-color: var(--stl-text3, rgba(255, 255, 255, 0.3));
         }
         .mab-btn.primary {
           background: var(--stl-accent, var(--terracotta));
           color: #fff;
           border: 1px solid var(--stl-accent, rgba(232, 130, 107, 0.5));
         }
+        .mab-btn.primary:hover:not(:disabled) {
+          filter: brightness(1.05);
+        }
         .mab-btn.warn {
           background: transparent;
           color: var(--stl-red, rgba(251, 113, 133, 0.95));
           border: 1px solid var(--stl-red, rgba(251, 113, 133, 0.45));
         }
-        .mab-btn.warn:hover:not(:disabled) {
+        .mab-btn.warn:hover:not(:disabled),
+        .mab-btn.warn.active {
           background: var(--stl-red-bg, rgba(251, 113, 133, 0.08));
         }
         .mab-confirm {
-          padding: 10px;
-          border-radius: 8px;
+          margin-top: 8px;
+          padding: 8px 10px;
+          border-radius: 6px;
           background: var(--stl-red-bg, rgba(251, 113, 133, 0.06));
           border: 1px solid var(--stl-red, rgba(251, 113, 133, 0.2));
           display: flex;
-          flex-direction: column;
-          gap: 8px;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
         }
         .mab-confirm-text {
           margin: 0;
+          flex: 1 1 220px;
           font-family: var(--font-mono);
           font-size: 11px;
           color: var(--stl-text1, rgba(255, 255, 255, 0.85));
-          line-height: 1.5;
+          line-height: 1.4;
         }
         .mab-confirm-actions {
           display: flex;
           justify-content: flex-end;
-          gap: 8px;
+          gap: 6px;
         }
         .mab-bet-wrap {
-          /* InlineBetPanel brings its own styling */
+          margin-top: 8px;
+        }
+        /* The shared InlineBetPanel uses .mkt-bet-panel which is laid out for
+           the markets-page row context (negative margin + grid). Reset that
+           when it lives inside a compact bet row so it doesn't bleed out of
+           the rounded card or break its own grid. */
+        .mab-bet-wrap :global(.mkt-bet-panel) {
+          margin: 0;
+          padding: 10px 12px;
+          border-radius: 6px;
+          border: 1px solid var(--stl-border, rgba(255, 255, 255, 0.08));
+          background: var(--stl-bg, rgba(255, 255, 255, 0.02));
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px 14px;
+          align-items: center;
         }
         .mab-error {
+          margin-top: 6px;
           font-family: var(--font-mono);
           font-size: 11px;
           color: var(--stl-red, var(--negative));
@@ -545,6 +598,22 @@ export default function MyActiveBets({ variant = 'compact', title }: Props) {
         .mab-foot {
           display: flex;
           justify-content: flex-end;
+        }
+
+        @media (max-width: 720px) {
+          .mab-row-main {
+            flex-wrap: wrap;
+            row-gap: 6px;
+          }
+          .mab-row-title {
+            order: -1;
+            flex-basis: 100%;
+            white-space: normal;
+            font-size: 13.5px;
+          }
+          .mab-row-actions {
+            margin-left: auto;
+          }
         }
       `}</style>
     </section>
