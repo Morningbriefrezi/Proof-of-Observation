@@ -131,7 +131,24 @@ function findPeakTime(hourly: HourlyPoint[]): string | null {
     return null;
   }
 
-  // Find the precise peak by checking adjacent hours
-  const peakHour = new Date(hourly[maxIdx].hour);
-  return `peak ${peakHour.getHours().toString().padStart(2, '0')}:00`;
+  // Quadratic interpolation across (maxIdx-1, maxIdx, maxIdx+1) gives the peak
+  // with sub-hour precision. Vertex of y = ax² + bx + c through (-1,a)(0,b)(1,c)
+  // sits at x = (a - c) / (2 * (a - 2b + c)). Falls back to the bucketed hour if
+  // the peak is on the window boundary or the curve is not concave-down.
+  let offsetMin = 0;
+  if (maxIdx > 0 && maxIdx < hourly.length - 1) {
+    const a = hourly[maxIdx - 1].altitude;
+    const b = hourly[maxIdx].altitude;
+    const c = hourly[maxIdx + 1].altitude;
+    const denom = a - 2 * b + c;
+    if (denom < 0) {
+      const offset = (0.5 * (a - c)) / denom;
+      if (offset > -1 && offset < 1) offsetMin = Math.round(offset * 60);
+    }
+  }
+
+  const peak = new Date(new Date(hourly[maxIdx].hour).getTime() + offsetMin * 60_000);
+  const hh = String(peak.getHours()).padStart(2, '0');
+  const mm = String(peak.getMinutes()).padStart(2, '0');
+  return `peak ${hh}:${mm}`;
 }
