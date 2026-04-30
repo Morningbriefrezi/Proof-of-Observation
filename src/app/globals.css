@@ -3,7 +3,19 @@
 :root {
   /* === Unified token system ===
      Deep midnight canvas, vivid terracotta, mint seafoam.
-     Cards/surfaces are tinted-white overlays so they stay legible on the dark base. */
+     Cards/surfaces are tinted-white overlays so they stay legible on the dark base.
+
+     Design-system role map (use these in components):
+       page bg          → --canvas
+       card bg          → --surface         (hover: --surface-hover)
+       border           → --border
+       primary text     → --text-primary    (alias of --text)
+       secondary text   → --text-secondary  (alias of --text-muted)
+       primary accent   → --accent          (alias of --terracotta)  — orange, used sparingly
+       secondary accent → --accent-teal     (alias of --seafoam)     — for "visible / available"
+       error / negative → --negative
+       Markets Yes/No   → --yes / --no      (binary outcome ONLY, never decorative)
+  */
   --canvas: #0F1320;
   --terracotta: #F0805C;
   --seafoam: #5EEAD4;
@@ -13,6 +25,14 @@
   --border: rgba(255, 255, 255, 0.08);
   --surface: rgba(255, 255, 255, 0.045);
   --surface-hover: rgba(255, 255, 255, 0.085);
+
+  /* Markets Yes/No — binary outcome indicators, prediction markets only */
+  --yes: #34D399;
+  --yes-dim: rgba(52, 211, 153, 0.10);
+  --yes-border: rgba(52, 211, 153, 0.35);
+  --no: #F87171;
+  --no-dim: rgba(248, 113, 113, 0.10);
+  --no-border: rgba(248, 113, 113, 0.35);
 
   /* Backgrounds — all map to single canvas */
   --bg-void: var(--canvas);
@@ -152,6 +172,14 @@
   --warning-dim: rgba(217, 119, 6, 0.1);
   --error-dim: rgba(220, 38, 38, 0.1);
 
+  /* Markets Yes/No — darker tones for light theme contrast */
+  --yes: #059669;
+  --yes-dim: rgba(5, 150, 105, 0.10);
+  --yes-border: rgba(5, 150, 105, 0.35);
+  --no: #DC2626;
+  --no-dim: rgba(220, 38, 38, 0.10);
+  --no-border: rgba(220, 38, 38, 0.35);
+
   --shadow-card: 0 1px 4px rgba(15,23,42,0.08), 0 0 0 1px rgba(15,23,42,0.06);
   --shadow-card-hover: 0 4px 16px rgba(15,23,42,0.12), 0 0 0 1px rgba(99,102,241,0.15);
   --shadow-elevated: 0 8px 32px rgba(15,23,42,0.12), 0 0 0 1px rgba(15,23,42,0.06);
@@ -226,6 +254,8 @@
   --color-success: var(--seafoam);
   --color-warning: var(--terracotta);
   --color-error: var(--negative);
+  --color-yes: var(--yes);
+  --color-no: var(--no);
 
   /* Fonts — Fraunces display, Inter body, JetBrains Mono */
   --font-display:  var(--font-display, 'Fraunces', Georgia, serif);
