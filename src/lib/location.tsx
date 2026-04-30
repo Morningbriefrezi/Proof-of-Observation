@@ -54,10 +54,14 @@ const DEFAULT_LOCATION: UserLocation = {
   source: 'default',
 }
 
+export type GpsState = 'pending' | 'resolved' | 'denied' | 'unsupported' | 'failed'
+
 interface LocationContextValue {
   location: UserLocation
   setLocation: (loc: UserLocation) => void
   loading: boolean
+  gpsState: GpsState
+  isFallback: boolean
 }
 
 const LocationContext = createContext<LocationContextValue | null>(null)
@@ -65,17 +69,20 @@ const LocationContext = createContext<LocationContextValue | null>(null)
 export function LocationProvider({ children }: { children: React.ReactNode }) {
   const [location, setLocationState] = useState<UserLocation>(DEFAULT_LOCATION)
   const [loading, setLoading] = useState(false)
+  const [gpsState, setGpsState] = useState<GpsState>('pending')
 
   useEffect(() => {
-    // Load stored preference immediately — default (Tbilisi) is valid, no need to block
     const stored = localStorage.getItem('stellar_location')
     if (stored) {
       try { setLocationState(JSON.parse(stored)) } catch {}
-      return  // User has a preference; skip GPS
+      setGpsState('resolved')
+      return
     }
 
-    // No stored preference — silently improve to GPS, Tbilisi stays visible meanwhile
-    if (!navigator.geolocation) return
+    if (!navigator.geolocation) {
+      setGpsState('unsupported')
+      return
+    }
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -101,12 +108,13 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           }
           localStorage.setItem('stellar_location', JSON.stringify(loc))
           setLocationState(loc)
+          setGpsState('resolved')
         } catch {
-          // GPS resolved but reverse geocode failed — keep Tbilisi default
+          setGpsState('failed')
         }
       },
-      () => {
-        // GPS denied — Tbilisi default is already showing, nothing to do
+      (err) => {
+        setGpsState(err.code === err.PERMISSION_DENIED ? 'denied' : 'failed')
       },
       { timeout: 3000, maximumAge: 600000 }
     )
@@ -115,11 +123,14 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   const setLocation = useCallback((loc: UserLocation) => {
     localStorage.setItem('stellar_location', JSON.stringify(loc))
     setLocationState(loc)
+    setGpsState('resolved')
   }, [])
 
+  const isFallback = location.source === 'default' && gpsState !== 'pending' && gpsState !== 'resolved'
+
   const value = useMemo(
-    () => ({ location, setLocation, loading }),
-    [location, setLocation, loading],
+    () => ({ location, setLocation, loading, gpsState, isFallback }),
+    [location, setLocation, loading, gpsState, isFallback],
   )
 
   return (

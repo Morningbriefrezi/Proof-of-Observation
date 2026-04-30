@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Body, Illumination } from 'astronomy-engine'
 import { calculateSkyScore } from '@/lib/sky-score'
+import { fetchOpenMeteo } from '@/lib/open-meteo'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
@@ -29,10 +30,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=cloud_cover,visibility,relative_humidity_2m,wind_speed_10m&timezone=auto`
-    const res = await fetch(url, { next: { revalidate: 300 } })
-    if (!res.ok) return fallback
-
-    const data = await res.json()
+    const { data, stale } = await fetchOpenMeteo<{ current: Record<string, number> }>(url, { revalidate: 300 })
     const c = data.current
 
     const cloudCover: number = c.cloud_cover ?? 15
@@ -52,7 +50,7 @@ export async function GET(req: NextRequest) {
     const result = calculateSkyScore({ cloudCover, visibility, humidity, windSpeed, moonIllumination })
 
     return NextResponse.json(
-      { ...result, location: { lat, lon }, timestamp: new Date().toISOString() },
+      { ...result, location: { lat, lon }, timestamp: new Date().toISOString(), stale: stale || undefined },
       { headers: { 'Cache-Control': 'public, max-age=180, s-maxage=300, stale-while-revalidate=600' } }
     )
   } catch {

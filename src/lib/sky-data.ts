@@ -1,3 +1,5 @@
+import { fetchOpenMeteo } from './open-meteo';
+
 interface OpenMeteoResponse {
   hourly: {
     time: string[];
@@ -31,15 +33,10 @@ export async function fetchSkyForecast(lat: number, lng: number): Promise<SkyDay
     forecast_days: '7',
   });
 
-  const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`, {
-    next: { revalidate: 1800 },
-  });
-
-  if (!res.ok) {
-    throw new Error(`Open-Meteo error: ${res.status}`);
-  }
-
-  const data: OpenMeteoResponse = await res.json();
+  const { data } = await fetchOpenMeteo<OpenMeteoResponse>(
+    `https://api.open-meteo.com/v1/forecast?${params}`,
+    { revalidate: 1800 },
+  );
   const { time, cloud_cover, visibility, temperature_2m, relative_humidity_2m, wind_speed_10m } = data.hourly;
 
   const byDay: Record<string, SkyHour[]> = {};

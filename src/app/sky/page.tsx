@@ -11,6 +11,7 @@ import { ObservationTimeline } from '@/components/sky/ObservationTimeline';
 import { PlanetCard } from '@/components/sky/PlanetCard';
 import { ForecastRow } from '@/components/sky/ForecastRow';
 import { ConditionsDetail } from '@/components/sky/ConditionsDetail';
+import { LocationFallbackBanner } from '@/components/sky/LocationFallbackBanner';
 import { getOrbStyle } from '@/lib/planet-styles';
 import './sky.css';
 
@@ -56,6 +57,7 @@ export default function SkyPage() {
   return (
     <div className="sky-page-v2">
       <div className="sky-container">
+        <LocationFallbackBanner />
         <SkyHero score={sky.score} location={sky.location} loading={sky.loading} />
 
         <section className="section">

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Body, Illumination, Observer, Equator, Horizon, SearchRiseSet } from 'astronomy-engine'
 import { calculateSkyScore } from '@/lib/sky-score'
+import { fetchOpenMeteo } from '@/lib/open-meteo'
+import { activeMeteorShower } from '@/lib/meteor-showers'
 
 const DEFAULT_LAT = 41.72
 const DEFAULT_LON = 44.83
@@ -13,21 +15,6 @@ interface PlanetHighlight {
   name: string
   altitude: number
 }
-
-interface MeteorShower {
-  name: string
-  peak: { month: number; day: number }
-  emoji: string
-}
-
-const METEOR_SHOWERS: MeteorShower[] = [
-  { name: 'Lyrids', peak: { month: 4, day: 22 }, emoji: '☄️' },
-  { name: 'Eta Aquariids', peak: { month: 5, day: 5 }, emoji: '☄️' },
-  { name: 'Perseids', peak: { month: 8, day: 12 }, emoji: '☄️' },
-  { name: 'Orionids', peak: { month: 10, day: 21 }, emoji: '☄️' },
-  { name: 'Leonids', peak: { month: 11, day: 17 }, emoji: '☄️' },
-  { name: 'Geminids', peak: { month: 12, day: 14 }, emoji: '☄️' },
-]
 
 const PLANET_ICONS: Record<string, string> = {
   moon: '🌙',
@@ -60,20 +47,6 @@ function fmt12h(d: Date): string {
   return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
 }
 
-function nearMeteorShower(now: Date): MeteorShower | null {
-  const m = now.getMonth() + 1
-  const d = now.getDate()
-  for (const shower of METEOR_SHOWERS) {
-    const diffDays = Math.abs(
-      (new Date(now.getFullYear(), m - 1, d).getTime() -
-        new Date(now.getFullYear(), shower.peak.month - 1, shower.peak.day).getTime()) /
-        86400000
-    )
-    if (diffDays <= 3) return shower
-  }
-  return null
-}
-
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
   const lat = Number(searchParams.get('lat') ?? DEFAULT_LAT)
@@ -87,21 +60,18 @@ export async function GET(req: NextRequest) {
   let skyScoreData = { score: 50, grade: 'Fair' as string, emoji: '🌤️', factors: [] as { label: string; value: number }[] }
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=cloud_cover,visibility,relative_humidity_2m,wind_speed_10m&timezone=auto`
-    const res = await fetch(url, { next: { revalidate: 300 } })
-    if (res.ok) {
-      const d = await res.json()
-      const c = d.current
-      let moonIllumination: number | undefined
-      try { moonIllumination = Math.round(Illumination(Body.Moon, now).phase_fraction * 100) } catch { /* ignore */ }
-      const result = calculateSkyScore({
-        cloudCover: c.cloud_cover ?? 15,
-        visibility: c.visibility ?? 20000,
-        humidity: c.relative_humidity_2m ?? 50,
-        windSpeed: c.wind_speed_10m ?? 5,
-        moonIllumination,
-      })
-      skyScoreData = result
-    }
+    const { data: d } = await fetchOpenMeteo<{ current: Record<string, number> }>(url, { revalidate: 300 })
+    const c = d.current
+    let moonIllumination: number | undefined
+    try { moonIllumination = Math.round(Illumination(Body.Moon, now).phase_fraction * 100) } catch { /* ignore */ }
+    const result = calculateSkyScore({
+      cloudCover: c.cloud_cover ?? 15,
+      visibility: c.visibility ?? 20000,
+      humidity: c.relative_humidity_2m ?? 50,
+      windSpeed: c.wind_speed_10m ?? 5,
+      moonIllumination,
+    })
+    skyScoreData = result
   } catch { /* use fallback */ }
 
   // ── Sun times ────────────────────────────────────────────────────────────────
@@ -170,13 +140,16 @@ export async function GET(req: NextRequest) {
   } catch { /* ignore */ }
 
   // ── Meteor shower ────────────────────────────────────────────────────────────
-  const shower = nearMeteorShower(now)
+  const shower = activeMeteorShower(now)
   if (shower) {
+    const isPeak = Math.abs(shower.daysFromPeak) <= 1
     highlights.push({
       type: 'meteor',
       title: `${shower.name} Meteor Shower`,
-      subtitle: 'Active now — best after midnight',
-      icon: shower.emoji,
+      subtitle: isPeak
+        ? `Peaking now · ZHR ~${shower.zhr} · best after midnight`
+        : `Active · peak ${shower.peakLabel} · ZHR ~${shower.zhr}`,
+      icon: '☄️',
     })
   }
 
