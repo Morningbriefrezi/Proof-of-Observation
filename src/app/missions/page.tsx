@@ -129,14 +129,15 @@ export default function MissionsPage() {
   const cityLabel = location.city || 'Tbilisi';
 
   const skyPositions = useMemo(() => {
-    const out: Record<string, { altitude: number; azimuth: number }> = {};
+    const out: Record<string, { altitude: number; azimuth: number; rise: Date | null }> = {};
     const planets = getVisiblePlanets(lat, lon, now);
     for (const p of planets) {
-      out[p.key] = { altitude: p.altitude, azimuth: p.azimuth };
+      const rise = p.rise instanceof Date ? p.rise : null;
+      out[p.key] = { altitude: p.altitude, azimuth: p.azimuth, rise };
     }
     const ds = getChartDeepSky(lat, lon, now, 200, 100, 180);
     for (const d of ds) {
-      out[d.id] = { altitude: d.altitude, azimuth: d.azimuth };
+      out[d.id] = { altitude: d.altitude, azimuth: d.azimuth, rise: null };
     }
     return out;
   }, [lat, lon, now]);
@@ -324,13 +325,15 @@ export default function MissionsPage() {
           </div>
           <div className="mis-deck">
             {GRID.map((g) => {
-              const altitude = skyPositions[g.id]?.altitude ?? -90;
+              const pos = skyPositions[g.id];
+              const altitude = pos?.altitude ?? -90;
               return (
                 <MissionTile
                   key={g.id}
                   entry={g}
                   above={altitude > 0}
-                  onClick={() => startMission(g.routeId)}
+                  rise={pos?.rise ?? null}
+                  onStart={() => startMission(g.routeId)}
                 />
               );
             })}
@@ -505,28 +508,66 @@ function PrimeCard({
 
 // ---- Mission tile ----
 
+function fmtRiseClock(d: Date | null): string | null {
+  if (!d) return null;
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
 function MissionTile({
   entry,
   above,
-  onClick,
+  rise,
+  onStart,
 }: {
   entry: GridEntry;
   above: boolean;
-  onClick: () => void;
+  rise: Date | null;
+  onStart: () => void;
 }) {
+  const [showReminder, setShowReminder] = useState(false);
+  const riseTxt = above ? null : fmtRiseClock(rise);
+  const badgeTxt = above ? null : riseTxt ? `Rises ${riseTxt}` : 'Below horizon';
+
+  const handleActivate = () => {
+    if (above) {
+      onStart();
+      return;
+    }
+    setShowReminder((v) => !v);
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleActivate();
+    }
+  };
+
+  const onReminderClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // TODO: wire up reminder/notification system
+  };
+
   return (
-    <button
-      type="button"
+    <div
       id={`mis-card-${entry.id}`}
-      className={`mis-tile ${above ? '' : 'dim'}`}
-      onClick={onClick}
-      disabled={!above}
+      className="mis-tile"
+      role="button"
+      tabIndex={0}
+      aria-pressed={!above && showReminder ? true : undefined}
+      onClick={handleActivate}
+      onKeyDown={onKeyDown}
     >
       <div className={`mis-tile-sky theme-${entry.id}`}>
         <span className={`mis-tile-glow theme-${entry.id}`} aria-hidden />
         <span className="mis-tile-art">
           <PlanetViz name={entry.id} size="large" />
         </span>
+        {badgeTxt && (
+          <span className="mis-tile-rise-badge" aria-hidden>
+            {badgeTxt}
+          </span>
+        )}
       </div>
       <div className="mis-tile-info">
         <span className="mis-tile-name">{entry.name}</span>
@@ -536,13 +577,27 @@ function MissionTile({
             <span className={`mis-diff ${entry.diff}`}>{entry.diffLabel}</span>
             <span className="mis-tile-equip">
               <EquipIcon kind={entry.equip} />
-              <span>{above ? entry.equip : 'Below horizon'}</span>
+              <span>{entry.equip}</span>
             </span>
           </span>
           <span className="mis-tile-stars">+{entry.stars}</span>
         </div>
+        {!above && showReminder && (
+          <div className="mis-tile-reminder" onClick={(e) => e.stopPropagation()}>
+            <span className="mis-tile-reminder-text">
+              {riseTxt ? `Visible after ${riseTxt} — set a reminder?` : 'Not visible tonight — set a reminder?'}
+            </span>
+            <button
+              type="button"
+              className="mis-tile-reminder-btn"
+              onClick={onReminderClick}
+            >
+              Remind me
+            </button>
+          </div>
+        )}
       </div>
-    </button>
+    </div>
   );
 }
 
