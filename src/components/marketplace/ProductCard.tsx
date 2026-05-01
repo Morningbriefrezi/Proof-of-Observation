@@ -63,12 +63,12 @@ export default function ProductCard({ product, dealerName }: Props) {
       <p className="text-[11px] font-medium text-[#E8E6DD] leading-[1.2] truncate mb-[2px]">
         {product.name}
       </p>
-      <p className="text-[8px] tracking-[0.16em] uppercase text-[rgba(232,230,221,0.4)] mb-[6px] truncate">
+      <p className="text-[8px] tracking-[0.16em] uppercase text-[rgba(232,230,221,0.65)] mb-[6px] truncate">
         {dealerName || product.category}
       </p>
-      <div className="flex justify-between items-center pt-[6px]" style={{ borderTop: '0.5px solid rgba(232,230,221,0.06)' }}>
-        <span className="text-[11px] font-semibold text-[var(--terracotta)]">{formatPrice(product)}</span>
-        <span className="text-[8px] tracking-[0.14em] uppercase text-[rgba(232, 130, 107,0.5)]">
+      <div className="flex justify-between items-center pt-[6px]" style={{ borderTop: '0.5px solid rgba(232,230,221,0.1)' }}>
+        <span className="text-[12px] font-semibold text-[var(--terracotta)]">{formatPrice(product)}</span>
+        <span className="text-[8px] tracking-[0.14em] uppercase text-[rgba(232, 130, 107,0.75)]">
           ✦ {product.starsPrice.toLocaleString()}
         </span>
       </div>
