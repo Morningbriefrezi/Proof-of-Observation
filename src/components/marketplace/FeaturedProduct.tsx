@@ -50,7 +50,7 @@ export default function FeaturedProduct({ product, dealerName }: Props) {
 
   return (
     <div
-      className="relative grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-[14px] mb-[22px] p-4 rounded-xl overflow-hidden"
+      className="relative grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-[14px] mb-[22px] p-4 rounded-xl overflow-hidden md:max-w-[760px] md:mx-auto"
       style={{
         border: '0.5px solid rgba(255, 209, 102,0.2)',
         background:
@@ -64,7 +64,7 @@ export default function FeaturedProduct({ product, dealerName }: Props) {
       <div
         className="relative rounded-lg overflow-hidden"
         style={{
-          aspectRatio: '1.4',
+          aspectRatio: '1.1',
           background:
             'radial-gradient(ellipse at 50% 50%, rgba(255, 209, 102,0.05) 0%, transparent 70%), linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)',
           border: '0.5px solid rgba(232,230,221,0.05)',
@@ -75,8 +75,8 @@ export default function FeaturedProduct({ product, dealerName }: Props) {
             src={product.image}
             alt={product.name}
             fill
-            sizes="(max-width: 768px) 100vw, 600px"
-            style={{ objectFit: 'contain', padding: '24px' }}
+            sizes="(max-width: 768px) 100vw, 380px"
+            style={{ objectFit: 'contain', padding: '18px' }}
             unoptimized
             priority
           />
