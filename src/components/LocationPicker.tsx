@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { MapPin, ChevronDown, Navigation, Check, Search } from 'lucide-react'
 import { useLocation, getRegionForCountry, type UserLocation, type Region } from '@/lib/location'
 
@@ -317,7 +318,7 @@ export default function LocationPicker({ compact = false }: { compact?: boolean 
           style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
       </button>
 
-      {open && anchor && (
+      {open && anchor && typeof document !== 'undefined' && createPortal(
         <div
           ref={panelRef}
           style={{
@@ -468,7 +469,8 @@ export default function LocationPicker({ compact = false }: { compact?: boolean 
               {gpsLoading ? 'Detecting…' : 'Use my GPS location'}
             </button>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   )
