@@ -68,7 +68,7 @@ export default function ProductCard({ product, dealerName }: Props) {
       </p>
       <div className="flex justify-between items-center pt-[6px]" style={{ borderTop: '0.5px solid rgba(232,230,221,0.1)' }}>
         <span className="text-[12px] font-semibold text-[var(--terracotta)]">{formatPrice(product)}</span>
-        <span className="text-[8px] tracking-[0.14em] uppercase text-[rgba(232, 130, 107,0.75)]">
+        <span className="text-[9px] tracking-[0.14em] uppercase font-semibold text-[var(--seafoam)]">
           ✦ {product.starsPrice.toLocaleString()}
         </span>
       </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import type { Product } from '@/lib/dealers';
 
 const FEATURED_SPEC_KEYS = ['aperture', 'focal', 'mount', 'weight'] as const;
@@ -10,12 +11,34 @@ const formatPrice = (p: Product): string => {
   return `${n} ${p.currency}`;
 };
 
+const formatSol = (sol: number): string => {
+  if (sol >= 10) return sol.toFixed(2);
+  if (sol >= 1)  return sol.toFixed(3);
+  return sol.toFixed(4);
+};
+
 interface Props {
   product: Product;
   dealerName: string;
 }
 
 export default function FeaturedProduct({ product, dealerName }: Props) {
+  const [solPerGEL, setSolPerGEL] = useState(0);
+  const [solPriceUsd, setSolPriceUsd] = useState(0);
+  useEffect(() => {
+    fetch('/api/price/sol')
+      .then(r => r.json())
+      .then(d => {
+        setSolPerGEL(d.solPerGEL ?? 0);
+        setSolPriceUsd(d.solPrice ?? 0);
+      })
+      .catch(() => {});
+  }, []);
+
+  const solAmount =
+    product.currency === 'GEL' && solPerGEL > 0 ? product.price * solPerGEL :
+    product.currency === 'USD' && solPriceUsd > 0 ? product.price / solPriceUsd :
+    null;
   const specs = product.specs ?? {};
   const rows = FEATURED_SPEC_KEYS
     .map(k => ({ key: k, value: specs[k] }))
@@ -99,12 +122,18 @@ export default function FeaturedProduct({ product, dealerName }: Props) {
         </div>
 
         <div className="flex justify-between items-end gap-3">
-          <div>
+          <div className="flex flex-col gap-[5px]">
             <p className="text-[22px] font-bold leading-none tracking-[-0.01em] text-[var(--terracotta)]">
               {formatPrice(product)}
             </p>
-            <p className="text-[9px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.7)] mt-[4px]">
-              ✦ {product.starsPrice.toLocaleString()} stars
+            {solAmount !== null && (
+              <p className="text-[10px] tracking-[0.14em] uppercase font-medium text-[rgba(232,230,221,0.85)]">
+                ≈ <span className="text-[#E8E6DD]">{formatSol(solAmount)}</span> SOL
+              </p>
+            )}
+            <p className="inline-flex items-center gap-[5px] text-[10px] tracking-[0.14em] uppercase font-semibold text-[var(--seafoam)]">
+              <span className="text-[12px] leading-none">✦</span>
+              {product.starsPrice.toLocaleString()} stars
             </p>
           </div>
           <a

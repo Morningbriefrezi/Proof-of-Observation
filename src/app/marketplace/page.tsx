@@ -167,19 +167,31 @@ export default function MarketplacePage() {
                 Marketplace<span className="text-[var(--terracotta)]">.</span>
               </h1>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-              <span className="flex items-baseline gap-1.5 text-[10px] uppercase">
-                <span className="tracking-[0.14em] text-[rgba(232,230,221,0.65)]">Balance</span>
-                <span className="font-medium text-[var(--terracotta)]">{balance.toLocaleString()}</span>
-                <span className="text-[var(--terracotta)] opacity-80">✦</span>
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+              <span
+                className="inline-flex items-center gap-[7px] px-[14px] py-[7px] rounded-full text-[10px] uppercase backdrop-blur-md"
+                style={{
+                  background: 'rgba(94, 234, 212, 0.10)',
+                  border: '1.5px solid rgba(94, 234, 212, 0.40)',
+                }}
+              >
+                <span className="tracking-[0.14em] text-[rgba(232,230,221,0.7)]">Balance</span>
+                <span className="font-semibold text-[var(--seafoam)]">{balance.toLocaleString()}</span>
+                <span className="text-[var(--seafoam)]">✦</span>
               </span>
-              <span className="flex items-center gap-1.5 text-[10px] uppercase">
-                <span className="tracking-[0.14em] text-[rgba(232,230,221,0.65)]">Region</span>
+              <span className="inline-flex items-center gap-[7px] text-[10px] uppercase">
+                <span className="tracking-[0.14em] text-[rgba(232,230,221,0.7)]">Region</span>
                 <LocationPicker compact />
               </span>
-              <span className="flex items-baseline gap-1.5 text-[10px] uppercase">
-                <span className="tracking-[0.14em] text-[rgba(232,230,221,0.65)]">Codes</span>
-                <span className="font-medium text-[#E8E6DD]">90d</span>
+              <span
+                className="inline-flex items-center gap-[7px] px-[14px] py-[7px] rounded-full text-[10px] uppercase backdrop-blur-md"
+                style={{
+                  background: 'rgba(232,230,221,0.04)',
+                  border: '1.5px solid rgba(232,230,221,0.18)',
+                }}
+              >
+                <span className="tracking-[0.14em] text-[rgba(232,230,221,0.7)]">Codes</span>
+                <span className="font-semibold text-[#E8E6DD]">90d</span>
               </span>
             </div>
           </header>
