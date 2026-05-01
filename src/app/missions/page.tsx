@@ -119,14 +119,14 @@ export default function MissionsPage() {
   const t = useTranslations('missions');
   const { location } = useLocation();
 
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>('dark');
   const [now, setNow] = useState<Date>(() => new Date());
   const [activeQuiz, setActiveQuiz] = useState<QuizDef | null>(null);
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem(THEME_KEY);
-      if (saved === 'dark') setTheme('dark');
+      if (saved === 'light') setTheme('light');
     } catch {}
   }, []);
 

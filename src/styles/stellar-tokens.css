@@ -4488,8 +4488,8 @@
   --mis-grn-bg: #DCFCE7;
   --mis-amb: #D97706;
   --mis-amb-bg: #FEF3C7;
-  --mis-acc: #5B3DC8;
-  --mis-acc-bg: #EDE9FE;
+  --mis-acc: var(--terracotta);
+  --mis-acc-bg: rgba(240, 128, 92, 0.10);
   --mis-card: #FFFFFF;
 
   background: var(--mis-bg);
@@ -4511,7 +4511,7 @@
   --mis-grn-bg: rgba(74,222,128,0.10);
   --mis-amb: var(--terracotta);
   --mis-amb-bg: rgba(240, 128, 92,0.08);
-  --mis-acc: #A78BFA;
+  --mis-acc: var(--terracotta);
   --mis-acc-bg: rgba(240, 128, 92,0.08);
   --mis-card: #18191D;
 }
@@ -4609,8 +4609,9 @@
 .mis-stats-meta {
   font-family: var(--font-mono);
   font-size: 10px;
-  color: rgba(255,255,255,0.3);
-  letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   font-variant-numeric: tabular-nums;
 }
 .mis-stats-right {
@@ -4624,12 +4625,12 @@
   align-items: center;
   font-size: 9px;
   font-weight: 600;
-  color: #4ADE80;
-  background: rgba(74,222,128,0.08);
-  border: 1px solid rgba(74,222,128,0.12);
-  border-radius: 4px;
-  padding: 2px 7px;
-  letter-spacing: 0.04em;
+  color: var(--seafoam);
+  background: transparent;
+  border: 1px solid rgba(94, 234, 212, 0.30);
+  border-radius: 999px;
+  padding: 2px 8px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 .mis-stars-count {
@@ -4670,7 +4671,7 @@
 }
 .missions-page.dark .mis-theme-toggle::after {
   transform: translateX(18px);
-  background: #A78BFA;
+  background: var(--terracotta);
 }
 
 /* === Prime target card === */
@@ -4678,28 +4679,26 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 12px 14px;
-  border-radius: 10px;
+  padding: 14px;
+  border-radius: 16px;
   margin-bottom: 14px;
   cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
-  background: linear-gradient(135deg, rgba(240, 128, 92,0.06), rgba(94, 234, 212,0.02));
-  border: 1px solid rgba(240, 128, 92,0.12);
-  backdrop-filter: blur(4px);
+  transition: border-color 0.2s ease, background 0.2s ease;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
   text-align: left;
   width: 100%;
 }
 .mis-prime:hover {
-  border-color: rgba(240, 128, 92,0.25);
-  background: linear-gradient(135deg, rgba(240, 128, 92,0.1), rgba(94, 234, 212,0.04));
+  border-color: rgba(240, 128, 92, 0.25);
+  background: rgba(255, 255, 255, 0.06);
 }
 .mis-prime-icon {
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   border-radius: 12px;
-  background: radial-gradient(ellipse at 60% 20%, rgba(255,255,255,0.06), transparent 60%), linear-gradient(160deg, #0B1022, var(--canvas));
-  border: 1px solid rgba(255,255,255,0.06);
-  box-shadow: 0 0 20px rgba(100,140,220,0.06);
+  background: linear-gradient(160deg, #0B1022, var(--canvas));
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4718,11 +4717,11 @@
 .mis-prime-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .mis-prime-badge {
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 600;
-  color: #A78BFA;
+  color: var(--terracotta);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
 }
 .mis-prime-name {
   font-size: 15px;
@@ -4737,29 +4736,24 @@
 }
 .mis-prime-cta {
   flex-shrink: 0;
-  font-family: var(--font-display);
-  font-size: 12px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
   font-weight: 600;
-  color: #fff;
+  color: var(--canvas);
   background: var(--terracotta);
   border: 0;
-  border-radius: 8px;
-  padding: 8px 18px;
+  border-radius: 999px;
+  padding: 9px 18px;
   cursor: pointer;
-  box-shadow: 0 0 16px rgba(240, 128, 92,0.2);
-  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  transition: filter 0.15s ease, transform 0.15s ease;
   display: inline-flex;
   align-items: center;
   gap: 5px;
   letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
 }
-.mis-prime-cta:hover {
-  background: #6D28D9;
-  box-shadow: 0 0 24px rgba(240, 128, 92,0.35);
-  transform: translateY(-1px);
-}
-.mis-prime-cta:active { transform: translateY(0); }
+.mis-prime-cta:hover { filter: brightness(1.10); transform: translateY(-1px); }
+.mis-prime-cta:active { transform: translateY(0); filter: brightness(1.05); }
 
 /* === Sky map (rounded, inside hero) === */
 /* === Tonight's lineup (replaces sky map) === */
