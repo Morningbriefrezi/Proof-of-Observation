@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactElement } from 'react';
 import { MISSIONS } from '@/lib/constants';
+import HeroSkyPanel from '@/components/home/HeroSkyPanel';
 
 const HERO_MISSION_IDS = ['moon', 'jupiter', 'pleiades', 'orion', 'saturn', 'andromeda', 'crab'] as const;
 
@@ -272,65 +273,9 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* hero illustration */}
-          <div className="hidden md:flex relative h-[540px] items-center justify-center">
-            <svg viewBox="0 0 480 540" className="w-full max-w-[480px] h-auto" fill="none" strokeLinecap="round" strokeLinejoin="round">
-              {/* background stars */}
-              <g fill="#FFFFFF">
-                <circle cx="60"  cy="60"  r="1"   opacity="0.6" />
-                <circle cx="380" cy="80"  r="1.4" opacity="0.8" />
-                <circle cx="120" cy="120" r="0.8" opacity="0.5" />
-                <circle cx="420" cy="200" r="1"   opacity="0.7" />
-                <circle cx="80"  cy="240" r="0.8" opacity="0.5" />
-                <circle cx="320" cy="160" r="1.2" opacity="0.8" />
-                <circle cx="280" cy="40"  r="0.8" opacity="0.6" />
-              </g>
-
-              {/* Saturn */}
-              <g transform="translate(340, 130)">
-                <circle cx="0" cy="0" r="48" fill="rgba(255,209,102,0.08)" stroke="#FFD166" strokeWidth="1.5" />
-                <ellipse cx="0" cy="0" rx="74" ry="14" fill="none" stroke="#FFD166" strokeWidth="1.5" transform="rotate(-18)" />
-                <path d="M-30 -8 Q-15 -16 0 -8 Q15 0 30 -8" stroke="#FFD166" strokeWidth="1" opacity="0.6" fill="none" />
-                <path d="M-22 8 Q0 16 22 8" stroke="#FFD166" strokeWidth="1" opacity="0.4" fill="none" />
-              </g>
-
-              {/* Moon */}
-              <g transform="translate(90, 220)">
-                <circle cx="0" cy="0" r="22" fill="rgba(176,127,232,0.10)" stroke="#B07FE8" strokeWidth="1.5" />
-                <circle cx="-6" cy="-4" r="3" stroke="#B07FE8" strokeWidth="1" opacity="0.5" />
-                <circle cx="6"  cy="6"  r="2" stroke="#B07FE8" strokeWidth="1" opacity="0.5" />
-              </g>
-
-              {/* Telescope */}
-              <g transform="translate(160, 380) rotate(-30)">
-                <line x1="-40" y1="80"  x2="0" y2="20" stroke="#9BA3B4" strokeWidth="2.5" />
-                <line x1="40"  y1="80"  x2="0" y2="20" stroke="#9BA3B4" strokeWidth="2.5" />
-                <line x1="0"   y1="100" x2="0" y2="20" stroke="#9BA3B4" strokeWidth="2.5" />
-                <rect x="-12" y="10" width="24" height="20" rx="3" fill="#1A2240" stroke="#9BA3B4" strokeWidth="2" />
-                <rect x="-14" y="-130" width="28" height="135" rx="6" fill="#11172A" stroke="#FFD166" strokeWidth="2.2" />
-                <circle cx="0" cy="-128" r="14" fill="#0A0E1A" stroke="#FFD166" strokeWidth="2.2" />
-                <circle cx="0" cy="-128" r="9" fill="none" stroke="#FFD166" strokeWidth="1" opacity="0.6" />
-                <rect x="-5" y="-100" width="10" height="40" rx="2" fill="#11172A" stroke="#9BA3B4" strokeWidth="1.5" />
-                <rect x="-5" y="-2" width="10" height="14" rx="2" fill="#11172A" stroke="#FFD166" strokeWidth="1.5" />
-                <circle cx="14" cy="-40" r="4" fill="#11172A" stroke="#FFD166" strokeWidth="1.5" />
-              </g>
-
-              {/* horizon */}
-              <line x1="40" y1="490" x2="440" y2="490" stroke="#11172A" strokeWidth="2" opacity="0.6" />
-
-              {/* dotted lines + chain block */}
-              <path d="M260 250 L320 140" stroke="#FFD166" strokeWidth="1" strokeDasharray="3 4" opacity="0.4" fill="none" />
-              <path d="M225 265 Q280 230 305 200" stroke="#38F0FF" strokeWidth="1" strokeDasharray="2 3" opacity="0.5" fill="none" />
-
-              <g transform="translate(380, 410)">
-                <rect x="-22" y="-22" width="44" height="44" rx="8" fill="#11172A" stroke="#38F0FF" strokeWidth="1.5" />
-                <path d="M-10 -5 L0 -12 L10 -5 L10 8 L0 14 L-10 8 Z" fill="none" stroke="#38F0FF" strokeWidth="1.2" />
-                <line x1="0"   y1="-12" x2="0"   y2="14" stroke="#38F0FF" strokeWidth="1" opacity="0.5" />
-                <line x1="-10" y1="-5"  x2="10"  y2="8"  stroke="#38F0FF" strokeWidth="1" opacity="0.5" />
-                <line x1="10"  y1="-5"  x2="-10" y2="8"  stroke="#38F0FF" strokeWidth="1" opacity="0.5" />
-              </g>
-              <path d="M250 410 Q310 410 358 410" stroke="#38F0FF" strokeWidth="1" strokeDasharray="2 4" opacity="0.5" fill="none" />
-            </svg>
+          {/* hero instrument panel */}
+          <div className="hidden md:flex relative items-center justify-center">
+            <HeroSkyPanel />
           </div>
         </div>
 
