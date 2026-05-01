@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, integer, timestamp, doublePrecision, boolean, uniqueIndex, index, date } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, integer, timestamp, doublePrecision, boolean, uniqueIndex, index, date, jsonb } from 'drizzle-orm/pg-core'
 
 // Run in Neon SQL editor if migrating an existing DB:
 //   ALTER TABLE public.users ADD COLUMN IF NOT EXISTS avatar text;
@@ -87,6 +87,63 @@ export const orders = pgTable('orders', {
   index('orders_privy_idx').on(table.privyId),
   index('orders_created_at_idx').on(table.createdAt),
 ])
+
+export const feedPosts = pgTable('feed_posts', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  authorWallet: text('author_wallet').notNull(),
+  authorName: text('author_name'),
+  authorRank: text('author_rank'),
+  type: text('type').notNull(),
+  body: text('body'),
+  imageUrl: text('image_url'),
+  achievementTarget: text('achievement_target'),
+  achievementDifficulty: text('achievement_difficulty'),
+  achievementStars: integer('achievement_stars'),
+  achievementMintTx: text('achievement_mint_tx'),
+  observationTarget: text('observation_target'),
+  observationLat: text('observation_lat'),
+  observationLon: text('observation_lon'),
+  observationBortle: integer('observation_bortle'),
+  observationNftAddress: text('observation_nft_address'),
+  reactionCount: integer('reaction_count').default(0).notNull(),
+  commentCount: integer('comment_count').default(0).notNull(),
+  shareCount: integer('share_count').default(0).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index('feed_posts_created_at_idx').on(t.createdAt),
+  index('feed_posts_author_idx').on(t.authorWallet),
+])
+
+export const feedReactions = pgTable('feed_reactions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  postId: uuid('post_id').notNull(),
+  wallet: text('wallet').notNull(),
+  reaction: text('reaction').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index('feed_reactions_post_idx').on(t.postId),
+  uniqueIndex('feed_reactions_unique_user_post').on(t.postId, t.wallet),
+])
+
+export const feedComments = pgTable('feed_comments', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  postId: uuid('post_id').notNull(),
+  authorWallet: text('author_wallet').notNull(),
+  authorName: text('author_name'),
+  body: text('body').notNull(),
+  reactionCount: integer('reaction_count').default(0).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index('feed_comments_post_idx').on(t.postId),
+])
+
+export const feedShares = pgTable('feed_shares', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  postId: uuid('post_id').notNull(),
+  wallet: text('wallet').notNull(),
+  destination: text('destination').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+})
 
 export const marketCashouts = pgTable('market_cashouts', {
   id: uuid('id').primaryKey().defaultRandom(),

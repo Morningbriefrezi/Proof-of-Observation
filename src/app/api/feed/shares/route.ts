@@ -1,0 +1,42 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { eq, sql } from 'drizzle-orm'
+import { getDb } from '@/lib/db'
+import { feedPosts, feedShares } from '@/lib/schema'
+
+const ALLOWED_DESTINATIONS = ['farcaster', 'twitter', 'copy_link'] as const
+
+export async function POST(req: NextRequest) {
+  const db = getDb()
+  if (!db) return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+
+  let body: { postId?: string; wallet?: string; destination?: string }
+  try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
+
+  const postId = body.postId
+  const wallet = body.wallet
+  const destination = body.destination
+  if (!postId || !wallet || !destination) {
+    return NextResponse.json({ error: 'postId, wallet, destination required' }, { status: 400 })
+  }
+  if (!ALLOWED_DESTINATIONS.includes(destination as typeof ALLOWED_DESTINATIONS[number])) {
+    return NextResponse.json({ error: 'Invalid destination' }, { status: 400 })
+  }
+
+  await db.insert(feedShares).values({ postId, wallet, destination })
+  await db
+    .update(feedPosts)
+    .set({ shareCount: sql`${feedPosts.shareCount} + 1` })
+    .where(eq(feedPosts.id, postId))
+
+  const [post] = await db
+    .select({ shareCount: feedPosts.shareCount })
+    .from(feedPosts)
+    .where(eq(feedPosts.id, postId))
+    .limit(1)
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://stellarrclub.vercel.app'
+  return NextResponse.json({
+    shareCount: post?.shareCount ?? 0,
+    shareUrl: `${baseUrl}/feed/post/${postId}`,
+  })
+}

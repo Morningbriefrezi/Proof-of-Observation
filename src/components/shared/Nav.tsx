@@ -9,7 +9,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import {
   CloudSun, ShoppingBag, Satellite, User, Search, BookOpen,
   Trophy, Globe, Sun, Target, MessageCircle, Telescope, Gem,
-  TrendingUp, LogOut,
+  TrendingUp, LogOut, Sparkles,
 } from 'lucide-react';
 import AstroLogo from './AstroLogo';
 import SearchModal from './SearchModal';
@@ -24,6 +24,7 @@ const SECTIONS: Section[] = [
       { href: '/sky',         label: 'Sky forecast',  icon: Sun },
       { href: '/markets',     label: 'Markets',       icon: TrendingUp },
       { href: '/missions',    label: 'Missions',      icon: Target },
+      { href: '/feed',        label: 'Feed',          icon: Sparkles },
       { href: '/learn',       label: 'Learning',      icon: BookOpen },
       { href: '/network',     label: 'Network',       icon: Globe },
       { href: '/chat',        label: 'ASTRA AI',      icon: MessageCircle },
@@ -48,9 +49,9 @@ const SECTIONS: Section[] = [
 const NAV_ITEMS = [
   { href: '/sky',         label: 'Sky',       icon: CloudSun },
   { href: '/missions',    label: 'Missions',  icon: Satellite },
+  { href: '/feed',        label: 'Feed',      icon: Sparkles },
   { href: '/markets',     label: 'Markets',   icon: TrendingUp },
   { href: '/learn',       label: 'Learning',  icon: BookOpen },
-  { href: '/network',     label: 'Network',   icon: Globe },
   { href: '/marketplace', label: 'Shop',      icon: ShoppingBag },
 ];
 
