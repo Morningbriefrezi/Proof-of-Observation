@@ -274,8 +274,10 @@ export default function MyActiveBets({ variant = 'compact', title }: Props) {
     return null;
   }
 
+  const isCompact = variant === 'compact';
+
   return (
-    <section className="mab-section">
+    <section className={`mab-section${isCompact ? ' compact' : ''}`}>
       <header className="mab-section-head">
         <h3 className="mab-section-title">{title ?? 'My active bets'}</h3>
         <Link href="/my-positions" className="mab-link">
@@ -295,6 +297,28 @@ export default function MyActiveBets({ variant = 'compact', title }: Props) {
           const err = errors[position.marketId];
           const resolveCountdown = fmtResolveCountdown(market.resolutionTime);
           const resolveDate = fmtResolveDate(market.resolutionTime);
+
+          if (isCompact) {
+            return (
+              <Link
+                key={`${position.marketId}-${position.side}`}
+                href={`/markets/${position.marketId}`}
+                className={`mab-row mab-row-compact${cashedOut ? ' cashed' : ''}${locked ? ' locked' : ''}`}
+                title={rowTitle}
+              >
+                <span className={`mab-row-pill ${sideClass}`}>
+                  {position.side.toUpperCase()}
+                </span>
+                <span className="mab-row-title">{rowTitle}</span>
+                <span className="mab-row-stat">
+                  {cashedOut
+                    ? `${fmtInt(cashout.refundedAmount)} ✦`
+                    : `${fmtInt(position.projectedPayout)} ✦`}
+                </span>
+              </Link>
+            );
+          }
+
           return (
             <article
               key={`${position.marketId}-${position.side}`}
@@ -465,6 +489,47 @@ export default function MyActiveBets({ variant = 'compact', title }: Props) {
           border-radius: 8px;
           background: var(--stl-bg2, rgba(255, 255, 255, 0.02));
           border: 1px solid var(--stl-border2, var(--stl-border, rgba(255, 255, 255, 0.08)));
+        }
+        .mab-section.compact .mab-list { gap: 2px; }
+        .mab-row-compact {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 6px 8px;
+          border-radius: 6px;
+          background: transparent;
+          border: 1px solid transparent;
+          text-decoration: none;
+          min-height: 0;
+          transition: background 0.12s ease, border-color 0.12s ease;
+        }
+        .mab-row-compact:hover {
+          background: var(--stl-bg2, rgba(255, 255, 255, 0.03));
+          border-color: var(--stl-border, rgba(255, 255, 255, 0.08));
+        }
+        .mab-row-compact .mab-row-title {
+          flex: 1 1 auto;
+          min-width: 0;
+          font-size: 12px;
+          font-weight: 500;
+          color: var(--stl-text1, var(--text));
+          line-height: 1.2;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .mab-row-compact .mab-row-pill {
+          font-size: 9px;
+          padding: 2px 5px;
+          letter-spacing: 0.08em;
+        }
+        .mab-row-compact .mab-row-stat {
+          font-size: 10.5px;
+          color: var(--stl-text2, rgba(255, 255, 255, 0.7));
+        }
+        .mab-row-compact.cashed { opacity: 0.55; }
+        .mab-row-compact.locked .mab-row-stat {
+          color: var(--stl-amber, rgba(232, 130, 107, 0.85));
         }
         .mab-row.cashed {
           opacity: 0.6;
