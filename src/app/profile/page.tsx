@@ -27,7 +27,9 @@ interface OrderRow {
   productId: string;
   productName: string;
   productImage: string | null;
+  paymentMethod?: string;
   amountSol: number;
+  amountStars?: number;
   amountFiat: number;
   currency: string;
   status: string;
@@ -552,8 +554,11 @@ export default function ProfilePage() {
                 const date = new Date(o.createdAt);
                 const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                 const isPaid = o.status === 'paid';
+                const isStars = o.paymentMethod === 'stars';
                 const fiatLabel = `${o.amountFiat % 1 !== 0 ? o.amountFiat.toFixed(2) : o.amountFiat.toLocaleString()} ${o.currency}`;
-                const solLabel = `${o.amountSol >= 1 ? o.amountSol.toFixed(3) : o.amountSol.toFixed(4)} SOL`;
+                const payLabel = isStars
+                  ? `✦ ${(o.amountStars ?? 0).toLocaleString()} stars`
+                  : `${o.amountSol >= 1 ? o.amountSol.toFixed(3) : o.amountSol.toFixed(4)} SOL`;
                 return (
                   <div
                     key={o.id}
@@ -580,7 +585,7 @@ export default function ProfilePage() {
                         {o.productName}
                       </p>
                       <p className="stl-mono-data" style={{ color: 'var(--stl-text-dim)', margin: '2px 0 0', fontSize: 11 }}>
-                        {dateStr} · {fiatLabel} · {solLabel}
+                        {dateStr} · {fiatLabel} · {payLabel}
                       </p>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>

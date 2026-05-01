@@ -44,6 +44,7 @@ function CheckoutContent() {
   const router = useRouter();
   const params = useSearchParams();
   const productId = params.get('id') ?? '';
+  const mode: 'sol' | 'stars' = params.get('mode') === 'stars' ? 'stars' : 'sol';
 
   const { getAccessToken } = usePrivy();
   const { authenticated, address: stellarAddress } = useStellarUser();
@@ -88,7 +89,7 @@ function CheckoutContent() {
     !!shipping.country.trim() &&
     !!shipping.city.trim() &&
     !!shipping.address.trim() &&
-    amountSol > 0;
+    (mode === 'stars' ? !!product && product.starsPrice > 0 : amountSol > 0);
 
   const startPolling = useCallback((id: string) => {
     if (pollRef.current) clearInterval(pollRef.current);
@@ -141,7 +142,9 @@ function CheckoutContent() {
           productName: product.name,
           productImage: product.image,
           dealerId: product.dealerId,
-          amountSol: Number(amountSol.toFixed(6)),
+          paymentMethod: mode,
+          amountSol: mode === 'sol' ? Number(amountSol.toFixed(6)) : undefined,
+          amountStars: mode === 'stars' ? product.starsPrice : undefined,
           amountFiat: product.price,
           currency: product.currency,
           walletAddress,
@@ -158,15 +161,19 @@ function CheckoutContent() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Could not create order');
       setOrderId(data.orderId);
-      setPayUrl(data.url);
-      setStep('paying');
-      startPolling(data.orderId);
+      if (mode === 'stars') {
+        setStep('done');
+      } else {
+        setPayUrl(data.url);
+        setStep('paying');
+        startPolling(data.orderId);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not create order');
     } finally {
       setSubmitting(false);
     }
-  }, [product, authenticated, walletAddress, canSubmit, amountSol, shipping, getAccessToken, startPolling]);
+  }, [product, authenticated, walletAddress, canSubmit, amountSol, shipping, getAccessToken, startPolling, mode]);
 
   useEffect(() => {
     if (pendingPay && authenticated && walletAddress && step === 'form' && !submitting) {
@@ -215,7 +222,7 @@ function CheckoutContent() {
           </h1>
         </div>
         <p className="text-[11px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.7)]">
-          Pay with SOL · Devnet
+          {mode === 'stars' ? 'Redeem with stars' : 'Pay with SOL · Devnet'}
         </p>
       </header>
 
@@ -255,9 +262,11 @@ function CheckoutContent() {
                   ? 'Creating order…'
                   : pendingPay && authenticated && !walletAddress
                     ? 'Preparing wallet…'
-                    : amountSol > 0
-                      ? `Pay ${formatSol(amountSol)} SOL`
-                      : 'Loading SOL price…'}
+                    : mode === 'stars'
+                      ? `Redeem ${product.starsPrice.toLocaleString()} stars`
+                      : amountSol > 0
+                        ? `Pay ${formatSol(amountSol)} SOL`
+                        : 'Loading SOL price…'}
               </button>
               {!authenticated && (
                 <p className="text-[11px] text-[rgba(232,230,221,0.6)]">
@@ -312,9 +321,13 @@ function CheckoutContent() {
                 style={{ background: 'rgba(94, 234, 212,0.12)', border: '1px solid rgba(94, 234, 212,0.3)' }}>
                 <Check size={26} color="var(--seafoam)" strokeWidth={2.4} />
               </div>
-              <h2 className="text-[18px] font-semibold text-[#E8E6DD]">Payment confirmed</h2>
+              <h2 className="text-[18px] font-semibold text-[#E8E6DD]">
+                {mode === 'stars' ? 'Stars redeemed' : 'Payment confirmed'}
+              </h2>
               <p className="text-[12px] tracking-[0.06em] text-[rgba(232,230,221,0.7)] max-w-sm">
-                Your order is on its way. {dealer?.name ?? 'The dealer'} will reach out by phone to confirm shipping.
+                {mode === 'stars'
+                  ? `${product.starsPrice.toLocaleString()} stars redeemed. ${dealer?.name ?? 'The dealer'} will reach out by phone to confirm shipping.`
+                  : `Your order is on its way. ${dealer?.name ?? 'The dealer'} will reach out by phone to confirm shipping.`}
               </p>
               {signature && (
                 <a
@@ -375,12 +388,21 @@ function CheckoutContent() {
             <span className="text-[11px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.7)]">Price</span>
             <span className="text-[13px] font-semibold text-[var(--terracotta)]">{formatPrice(product)}</span>
           </div>
-          <div className="flex justify-between items-center mt-2">
-            <span className="text-[11px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.7)]">SOL</span>
-            <span className="text-[13px] font-semibold text-[#E8E6DD]">
-              {amountSol > 0 ? `${formatSol(amountSol)} SOL` : '—'}
-            </span>
-          </div>
+          {mode === 'stars' ? (
+            <div className="flex justify-between items-center mt-2">
+              <span className="text-[11px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.7)]">Stars</span>
+              <span className="text-[13px] font-semibold text-[var(--seafoam)]">
+                ✦ {product.starsPrice.toLocaleString()}
+              </span>
+            </div>
+          ) : (
+            <div className="flex justify-between items-center mt-2">
+              <span className="text-[11px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.7)]">SOL</span>
+              <span className="text-[13px] font-semibold text-[#E8E6DD]">
+                {amountSol > 0 ? `${formatSol(amountSol)} SOL` : '—'}
+              </span>
+            </div>
+          )}
           {orderId && (
             <p className="text-[9px] tracking-[0.16em] uppercase text-[rgba(232,230,221,0.5)] mt-3 break-all">
               Order · {orderId.slice(0, 8)}…

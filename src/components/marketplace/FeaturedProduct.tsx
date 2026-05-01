@@ -137,7 +137,7 @@ export default function FeaturedProduct({ product, dealerName }: Props) {
               {product.starsPrice.toLocaleString()} stars
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 justify-end">
             <a
               href={product.externalUrl}
               target="_blank"
@@ -147,15 +147,26 @@ export default function FeaturedProduct({ product, dealerName }: Props) {
               View
             </a>
             <Link
-              href={`/marketplace/checkout?id=${encodeURIComponent(product.id)}`}
-              className="px-[16px] py-[9px] rounded-full text-[11px] font-semibold tracking-[0.18em] uppercase transition-colors"
+              href={`/marketplace/checkout?id=${encodeURIComponent(product.id)}&mode=sol`}
+              className="px-[14px] py-[9px] rounded-full text-[11px] font-semibold tracking-[0.18em] uppercase transition-colors"
+              style={{
+                background: 'rgba(255, 209, 102, 0.10)',
+                border: '0.5px solid rgba(255, 209, 102, 0.45)',
+                color: 'var(--terracotta)',
+              }}
+            >
+              Pay SOL
+            </Link>
+            <Link
+              href={`/marketplace/checkout?id=${encodeURIComponent(product.id)}&mode=stars`}
+              className="px-[14px] py-[9px] rounded-full text-[11px] font-semibold tracking-[0.18em] uppercase transition-colors"
               style={{
                 background: 'rgba(94, 234, 212, 0.10)',
                 border: '0.5px solid rgba(94, 234, 212, 0.45)',
                 color: 'var(--seafoam)',
               }}
             >
-              Pay SOL
+              Pay Stars
             </Link>
           </div>
         </div>

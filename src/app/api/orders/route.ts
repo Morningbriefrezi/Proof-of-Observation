@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import { encodeURL } from '@solana/pay';
 import BigNumber from 'bignumber.js';
 import { PrivyClient } from '@privy-io/server-auth';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
 import { orders, users } from '@/lib/schema';
 import { isValidPublicKey } from '@/lib/validate';
+import { getStarsBalance } from '@/lib/solana';
 
 const privy = new PrivyClient(
   process.env.NEXT_PUBLIC_PRIVY_APP_ID!,
@@ -34,21 +36,21 @@ export async function POST(req: NextRequest) {
 
   const {
     productId, productName, productImage, dealerId,
-    amountSol, amountFiat, currency,
+    paymentMethod, amountSol, amountStars, amountFiat, currency,
     walletAddress,
     shipping,
   } = body as {
     productId?: string; productName?: string; productImage?: string; dealerId?: string;
-    amountSol?: number; amountFiat?: number; currency?: string;
+    paymentMethod?: 'sol' | 'stars';
+    amountSol?: number; amountStars?: number; amountFiat?: number; currency?: string;
     walletAddress?: string;
     shipping?: { name?: string; phone?: string; address?: string; city?: string; country?: string; notes?: string };
   };
 
+  const method: 'sol' | 'stars' = paymentMethod === 'stars' ? 'stars' : 'sol';
+
   if (!productId || !productName || !dealerId) {
     return NextResponse.json({ error: 'productId, productName, dealerId required' }, { status: 400 });
-  }
-  if (typeof amountSol !== 'number' || amountSol <= 0) {
-    return NextResponse.json({ error: 'amountSol must be a positive number' }, { status: 400 });
   }
   if (typeof amountFiat !== 'number' || amountFiat <= 0) {
     return NextResponse.json({ error: 'amountFiat must be a positive number' }, { status: 400 });
@@ -57,6 +59,12 @@ export async function POST(req: NextRequest) {
   if (!walletAddress || !isValidPublicKey(walletAddress)) {
     return NextResponse.json({ error: 'Valid walletAddress required' }, { status: 400 });
   }
+  if (method === 'sol' && (typeof amountSol !== 'number' || amountSol <= 0)) {
+    return NextResponse.json({ error: 'amountSol must be a positive number' }, { status: 400 });
+  }
+  if (method === 'stars' && (typeof amountStars !== 'number' || amountStars <= 0 || !Number.isInteger(amountStars))) {
+    return NextResponse.json({ error: 'amountStars must be a positive integer' }, { status: 400 });
+  }
   const s = shipping ?? {};
   for (const k of ['name', 'phone', 'address', 'city', 'country'] as const) {
     if (!s[k] || typeof s[k] !== 'string' || (s[k] as string).trim().length === 0) {
@@ -64,6 +72,63 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  const db = getDb();
+  if (!db) {
+    return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+  }
+
+  // STARS PAYMENT: verify on-chain balance against pending+paid stars orders, then mark paid immediately.
+  if (method === 'stars') {
+    const required = amountStars as number;
+    let onChainBalance = 0;
+    try { onChainBalance = await getStarsBalance(walletAddress); } catch { onChainBalance = 0; }
+    const existing = await db
+      .select({ amount: orders.amountStars })
+      .from(orders)
+      .where(and(eq(orders.walletAddress, walletAddress), eq(orders.paymentMethod, 'stars')));
+    const alreadyRedeemed = existing.reduce((sum, r) => sum + (r.amount ?? 0), 0);
+    const available = onChainBalance - alreadyRedeemed;
+    if (available < required) {
+      return NextResponse.json(
+        { error: `Not enough stars. You have ${Math.max(0, available)}, need ${required}.`, available, required },
+        { status: 400 },
+      );
+    }
+
+    const referenceStr = `stars-${randomUUID()}`;
+    const inserted = await db
+      .insert(orders)
+      .values({
+        privyId, walletAddress, productId, productName,
+        productImage: productImage ?? null, dealerId,
+        paymentMethod: 'stars',
+        amountSol: 0,
+        amountStars: required,
+        amountFiat,
+        currency,
+        paymentReference: referenceStr,
+        status: 'paid',
+        paidAt: new Date(),
+        shippingName: (s.name as string).trim(),
+        shippingPhone: (s.phone as string).trim(),
+        shippingAddress: (s.address as string).trim(),
+        shippingCity: (s.city as string).trim(),
+        shippingCountry: (s.country as string).trim(),
+        shippingNotes: s.notes ? s.notes.trim() : null,
+      })
+      .returning();
+    const order = inserted[0];
+    return NextResponse.json({
+      orderId: order.id,
+      paymentMethod: 'stars',
+      amountStars: required,
+      amountFiat,
+      currency,
+      status: 'paid',
+    });
+  }
+
+  // SOL PAYMENT: generate Solana Pay reference + URL, persist as pending.
   const merchantWallet = process.env.NEXT_PUBLIC_MERCHANT_WALLET;
   if (!merchantWallet) {
     return NextResponse.json({ error: 'Merchant wallet not configured' }, { status: 503 });
@@ -78,21 +143,14 @@ export async function POST(req: NextRequest) {
   const reference = Keypair.generate().publicKey;
   const referenceStr = reference.toBase58();
 
-  const db = getDb();
-  if (!db) {
-    return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
-  }
-
   const inserted = await db
     .insert(orders)
     .values({
-      privyId,
-      walletAddress,
-      productId,
-      productName,
-      productImage: productImage ?? null,
-      dealerId,
-      amountSol,
+      privyId, walletAddress, productId, productName,
+      productImage: productImage ?? null, dealerId,
+      paymentMethod: 'sol',
+      amountSol: amountSol as number,
+      amountStars: 0,
       amountFiat,
       currency,
       paymentReference: referenceStr,
@@ -110,7 +168,7 @@ export async function POST(req: NextRequest) {
 
   const url = encodeURL({
     recipient,
-    amount: new BigNumber(amountSol),
+    amount: new BigNumber(amountSol as number),
     reference,
     label: productName,
     memo: order.id,
@@ -119,11 +177,13 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({
     orderId: order.id,
+    paymentMethod: 'sol',
     reference: referenceStr,
     url: url.toString(),
     amountSol,
     amountFiat,
     currency,
+    status: 'pending',
   });
 }
 
