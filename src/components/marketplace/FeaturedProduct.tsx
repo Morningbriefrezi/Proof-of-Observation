@@ -52,12 +52,12 @@ export default function FeaturedProduct({ product, dealerName }: Props) {
     <div
       className="relative grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-[14px] mb-[22px] p-4 rounded-xl overflow-hidden"
       style={{
-        border: '0.5px solid rgba(232, 130, 107,0.2)',
+        border: '0.5px solid rgba(255, 209, 102,0.2)',
         background:
-          'radial-gradient(ellipse 80% 100% at 0% 50%, rgba(232, 130, 107,0.06) 0%, transparent 60%), rgba(255,255,255,0.01)',
+          'radial-gradient(ellipse 80% 100% at 0% 50%, rgba(255, 209, 102,0.06) 0%, transparent 60%), rgba(255,255,255,0.01)',
       }}
     >
-      <span className="absolute top-3 right-[14px] text-[8px] tracking-[0.3em] font-semibold text-[rgba(232, 130, 107,0.5)]">
+      <span className="absolute top-3 right-[14px] text-[8px] tracking-[0.3em] font-semibold text-[rgba(255, 209, 102,0.5)]">
         FEATURED
       </span>
 
@@ -66,7 +66,7 @@ export default function FeaturedProduct({ product, dealerName }: Props) {
         style={{
           aspectRatio: '1.4',
           background:
-            'radial-gradient(ellipse at 50% 50%, rgba(232, 130, 107,0.05) 0%, transparent 70%), linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)',
+            'radial-gradient(ellipse at 50% 50%, rgba(255, 209, 102,0.05) 0%, transparent 70%), linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)',
           border: '0.5px solid rgba(232,230,221,0.05)',
         }}
       >

@@ -529,13 +529,13 @@ export default function MyActiveBets({ variant = 'compact', title }: Props) {
         }
         .mab-row-compact.cashed { opacity: 0.55; }
         .mab-row-compact.locked .mab-row-stat {
-          color: var(--stl-amber, rgba(232, 130, 107, 0.85));
+          color: var(--stl-amber, rgba(255, 209, 102, 0.85));
         }
         .mab-row.cashed {
           opacity: 0.6;
         }
         .mab-row.locked .mab-row-stat {
-          color: var(--stl-amber, rgba(232, 130, 107, 0.85));
+          color: var(--stl-amber, rgba(255, 209, 102, 0.85));
         }
         .mab-row-main {
           display: flex;
@@ -632,7 +632,7 @@ export default function MyActiveBets({ variant = 'compact', title }: Props) {
         .mab-btn.primary {
           background: var(--stl-accent, var(--terracotta));
           color: #fff;
-          border: 1px solid var(--stl-accent, rgba(232, 130, 107, 0.5));
+          border: 1px solid var(--stl-accent, rgba(255, 209, 102, 0.5));
         }
         .mab-btn.primary:hover:not(:disabled) {
           filter: brightness(1.05);

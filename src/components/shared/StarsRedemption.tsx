@@ -37,7 +37,7 @@ export default function StarsRedemption({ starsBalance, walletAddress }: { stars
       <button
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all"
-        style={{ background: 'rgba(232, 130, 107,0.07)', border: '1px solid rgba(232, 130, 107,0.15)' }}
+        style={{ background: 'rgba(255, 209, 102,0.07)', border: '1px solid rgba(255, 209, 102,0.15)' }}
       >
         <span className="text-sm text-text-primary">
           {starsBalance === undefined
@@ -59,7 +59,7 @@ export default function StarsRedemption({ starsBalance, walletAddress }: { stars
           <div
             key={tier.label}
             className="glass-card p-4 flex flex-col gap-2"
-            style={{ border: unlocked ? '1px solid rgba(232, 130, 107,0.3)' : '1px solid rgba(255,255,255,0.06)' }}
+            style={{ border: unlocked ? '1px solid rgba(255, 209, 102,0.3)' : '1px solid rgba(255,255,255,0.06)' }}
           >
             <div className="flex items-start justify-between gap-2">
               <div>

@@ -516,7 +516,7 @@ export default function ProfilePage() {
               href="/settings#language"
               style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', borderBottom: '1px solid var(--stl-border-soft)' }}
             >
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(232, 130, 107,0.08)', border: '1px solid rgba(232, 130, 107,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255, 209, 102,0.08)', border: '1px solid rgba(255, 209, 102,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Globe size={15} color="var(--terracotta)" />
               </div>
               <p style={{ color: 'var(--stl-text-bright)', fontSize: 14, fontWeight: 500, margin: 0, flex: 1, fontFamily: 'var(--font-display)' }}>Language</p>
@@ -527,7 +527,7 @@ export default function ProfilePage() {
               href="/settings#notifications"
               style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', borderBottom: '1px solid var(--stl-border-soft)' }}
             >
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(232, 130, 107,0.08)', border: '1px solid var(--stl-border-terracotta)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255, 209, 102,0.08)', border: '1px solid var(--stl-border-terracotta)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Bell size={15} color="var(--stl-gold)" />
               </div>
               <p style={{ color: 'var(--stl-text-bright)', fontSize: 14, fontWeight: 500, margin: 0, flex: 1, fontFamily: 'var(--font-display)' }}>Notifications</p>
@@ -538,7 +538,7 @@ export default function ProfilePage() {
               href="/settings#appearance"
               style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px' }}
             >
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(232, 130, 107,0.10)', border: '1px solid rgba(232, 130, 107,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255, 209, 102,0.10)', border: '1px solid rgba(255, 209, 102,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Moon size={15} color="var(--stl-lilac)" />
               </div>
               <p style={{ color: 'var(--stl-text-bright)', fontSize: 14, fontWeight: 500, margin: 0, flex: 1, fontFamily: 'var(--font-display)' }}>Appearance</p>

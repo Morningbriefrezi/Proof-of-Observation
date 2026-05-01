@@ -22,7 +22,7 @@ export default function HeroSection() {
   const greeting = ready && authenticated ? displayName : null;
 
   return (
-    <section className="relative overflow-hidden py-20 md:py-32 bg-[radial-gradient(ellipse_at_50%_0%,rgba(232, 130, 107,0.06)_0%,transparent_60%)]">
+    <section className="relative overflow-hidden py-20 md:py-32 bg-[radial-gradient(ellipse_at_50%_0%,rgba(255, 209, 102,0.06)_0%,transparent_60%)]">
       {STARS.map((s, i) => (
         <span
           key={i}
@@ -59,7 +59,7 @@ export default function HeroSection() {
           <div className="relative w-full sm:w-auto sm:p-[6px]">
             <span
               aria-hidden
-              className="pointer-events-none absolute inset-0 hidden rounded-[14px] border-[0.5px] border-dashed border-[rgba(232, 130, 107,0.18)] sm:block"
+              className="pointer-events-none absolute inset-0 hidden rounded-[14px] border-[0.5px] border-dashed border-[rgba(255, 209, 102,0.18)] sm:block"
             />
             <Link
               href="/missions"

@@ -132,7 +132,7 @@ export default function QuizActive({ quiz, onClose }: Props) {
         {phase === 'result' ? (
           <div className="flex flex-col items-center justify-center flex-1 gap-6 text-center">
             <div className="w-20 h-20 rounded-full flex items-center justify-center text-4xl"
-              style={{ background: 'rgba(232, 130, 107,0.08)', border: '1px solid rgba(232, 130, 107,0.2)' }}>
+              style={{ background: 'rgba(255, 209, 102,0.08)', border: '1px solid rgba(255, 209, 102,0.2)' }}>
               {score >= 8 ? '🏆' : score >= 5 ? '⭐' : '🔭'}
             </div>
             <div>

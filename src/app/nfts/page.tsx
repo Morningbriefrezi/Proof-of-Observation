@@ -192,7 +192,7 @@ function NftDetailOverlay({ nft, onClose, onRetryMint, retrying }: { nft: NftAss
 
         {/* NFT certificate art — fallback only when no observation photo */}
         {!nft.photo && (
-          <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(232, 130, 107,0.12)' }}>
+          <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255, 209, 102,0.12)' }}>
             <Image
               src={nftImageUrl}
               alt={target}
@@ -248,7 +248,7 @@ function NftDetailOverlay({ nft, onClose, onRetryMint, retrying }: { nft: NftAss
           <button
             onClick={() => window.open(`https://warpcast.com/~/compose?text=${farcasterText}&embeds[]=${encodeURIComponent(appUrl)}`, '_blank')}
             className="flex-1 flex items-center justify-center gap-2 rounded-xl text-sm"
-            style={{ background: 'rgba(232, 130, 107,0.1)', border: '1px solid rgba(232, 130, 107,0.3)', color: 'var(--terracotta)', padding: '12px 0', minHeight: 44 }}
+            style={{ background: 'rgba(255, 209, 102,0.1)', border: '1px solid rgba(255, 209, 102,0.3)', color: 'var(--terracotta)', padding: '12px 0', minHeight: 44 }}
           >
             ⬡ Farcaster
           </button>
@@ -261,8 +261,8 @@ function NftDetailOverlay({ nft, onClose, onRetryMint, retrying }: { nft: NftAss
             disabled={retrying || !onRetryMint}
             className="flex items-center justify-center gap-2 rounded-xl text-sm w-full"
             style={{
-              background: retrying ? 'rgba(232, 130, 107,0.04)' : 'rgba(232, 130, 107,0.08)',
-              border: '1px solid rgba(232, 130, 107,0.25)',
+              background: retrying ? 'rgba(255, 209, 102,0.04)' : 'rgba(255, 209, 102,0.08)',
+              border: '1px solid rgba(255, 209, 102,0.25)',
               color: 'var(--warning)',
               padding: '12px 0',
               minHeight: 44,
@@ -276,8 +276,8 @@ function NftDetailOverlay({ nft, onClose, onRetryMint, retrying }: { nft: NftAss
           <div
             className="flex items-center justify-center gap-2 rounded-xl text-sm w-full"
             style={{
-              background: 'rgba(232, 130, 107,0.06)',
-              border: '1px solid rgba(232, 130, 107,0.18)',
+              background: 'rgba(255, 209, 102,0.06)',
+              border: '1px solid rgba(255, 209, 102,0.18)',
               color: 'var(--warning)',
               padding: '12px 0',
               minHeight: 44,
@@ -292,8 +292,8 @@ function NftDetailOverlay({ nft, onClose, onRetryMint, retrying }: { nft: NftAss
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 rounded-xl text-sm"
             style={{
-              background: 'rgba(232, 130, 107,0.06)',
-              border: '1px solid rgba(232, 130, 107,0.15)',
+              background: 'rgba(255, 209, 102,0.06)',
+              border: '1px solid rgba(255, 209, 102,0.15)',
               color: 'var(--terracotta)',
               textDecoration: 'none',
               padding: '12px 0',
@@ -447,7 +447,7 @@ export default function NftsPage() {
                   <Lock size={14} style={{ color: 'var(--text-secondary)' }} />
                   <span style={{ color: 'var(--text-secondary)', fontSize: 10 }}>Sign in to view</span>
                 </div>
-                <div style={{ height: 120, background: 'linear-gradient(135deg, rgba(232, 130, 107,0.06), rgba(122,95,255,0.08))' }} />
+                <div style={{ height: 120, background: 'linear-gradient(135deg, rgba(255, 209, 102,0.06), rgba(122,95,255,0.08))' }} />
                 <div className="p-3 select-none" aria-hidden="true">
                   <p style={{ color: 'var(--text-secondary)', fontSize: 12, fontWeight: 600, margin: 0, fontFamily: 'var(--font-display)' }}>{nft.name}</p>
                   <div className="flex flex-wrap gap-1 mt-2">

@@ -127,7 +127,7 @@
 }
 .sky-page-v2 .equipment-tag.eye { color: var(--green); background: rgba(52, 211, 153, 0.08); }
 .sky-page-v2 .equipment-tag.binoc { color: var(--teal); background: rgba(56, 240, 255, 0.08); }
-.sky-page-v2 .equipment-tag.scope { color: var(--accent); background: rgba(240, 128, 92, 0.10); }
+.sky-page-v2 .equipment-tag.scope { color: var(--accent); background: rgba(255, 209, 102, 0.10); }
 
 /* === TIMELINE === */
 .sky-page-v2 .timeline-panel {
@@ -316,7 +316,7 @@
   margin-bottom: 8px;
 }
 .sky-page-v2 .badge-go { background: rgba(52, 211, 153, 0.15); color: var(--green); }
-.sky-page-v2 .badge-maybe { background: rgba(240, 128, 92, 0.15); color: var(--accent); }
+.sky-page-v2 .badge-maybe { background: rgba(255, 209, 102, 0.15); color: var(--accent); }
 .sky-page-v2 .badge-skip { background: rgba(248, 113, 113, 0.15); color: var(--rose); }
 .sky-page-v2 .forecast-day .cloud { font-family: var(--mono); font-size: 11px; color: var(--text); }
 .sky-page-v2 .forecast-day .sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }

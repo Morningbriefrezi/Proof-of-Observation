@@ -15,11 +15,11 @@ interface Props {
 }
 
 const CATEGORY_ART: Record<string, { emoji: string; bg: string }> = {
-  telescope: { emoji: '🔭', bg: 'radial-gradient(ellipse at 30% 40%, rgba(232, 130, 107,0.12) 0%, rgba(10,22,40,0.95) 70%)' },
-  moonlamp:  { emoji: '🌕', bg: 'radial-gradient(ellipse at 60% 30%, rgba(232, 130, 107,0.12) 0%, rgba(26,26,46,0.95) 70%)' },
-  projector: { emoji: '✨', bg: 'radial-gradient(ellipse at 40% 60%, rgba(232, 130, 107,0.12) 0%, rgba(26,20,9,0.95) 70%)' },
+  telescope: { emoji: '🔭', bg: 'radial-gradient(ellipse at 30% 40%, rgba(255, 209, 102,0.12) 0%, rgba(10,22,40,0.95) 70%)' },
+  moonlamp:  { emoji: '🌕', bg: 'radial-gradient(ellipse at 60% 30%, rgba(255, 209, 102,0.12) 0%, rgba(26,26,46,0.95) 70%)' },
+  projector: { emoji: '✨', bg: 'radial-gradient(ellipse at 40% 60%, rgba(255, 209, 102,0.12) 0%, rgba(26,20,9,0.95) 70%)' },
   accessory: { emoji: '⚙️', bg: 'radial-gradient(ellipse at 50% 50%, rgba(100,116,139,0.1) 0%, rgba(13,17,23,0.95) 70%)' },
-  digital:   { emoji: '🗺️', bg: 'radial-gradient(ellipse at 50% 30%, rgba(232, 130, 107,0.15) 0%, rgba(21,13,46,0.95) 70%)' },
+  digital:   { emoji: '🗺️', bg: 'radial-gradient(ellipse at 50% 30%, rgba(255, 209, 102,0.15) 0%, rgba(21,13,46,0.95) 70%)' },
 };
 
 export default function ProductDetail({ product, solPerGEL, onClose }: Props) {

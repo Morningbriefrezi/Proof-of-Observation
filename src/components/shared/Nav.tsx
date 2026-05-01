@@ -234,7 +234,7 @@ export default function Nav() {
               </div>
 
               <Link href="/" title="Stellar" className="flex items-center" style={{ marginLeft: 4 }}>
-                <div style={{ filter: 'drop-shadow(0 0 18px rgba(232, 130, 107,0.6)) drop-shadow(0 0 36px rgba(232, 130, 107,0.25))' }}>
+                <div style={{ filter: 'drop-shadow(0 0 18px rgba(255, 209, 102,0.6)) drop-shadow(0 0 36px rgba(255, 209, 102,0.25))' }}>
                   <AstroLogo heightClass="h-8" size={30} />
                 </div>
               </Link>
@@ -251,12 +251,12 @@ export default function Nav() {
                     href={tab.href}
                     className={`nav-tab px-3.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 ${isActive ? 'nav-tab-active' : ''}`}
                     style={isActive ? {
-                      background: 'linear-gradient(135deg, rgba(232, 130, 107,0.3) 0%, rgba(232, 130, 107,0.18) 100%)',
-                      border: '1px solid rgba(232, 130, 107,0.3)',
-                      color: '#67e8f9',
+                      background: 'linear-gradient(135deg, rgba(255, 209, 102,0.22) 0%, rgba(255, 209, 102,0.12) 100%)',
+                      border: '1px solid rgba(255, 209, 102,0.35)',
+                      color: '#FFD166',
                       textDecoration: 'none',
-                      boxShadow: '0 0 16px rgba(232, 130, 107,0.15), inset 0 1px 0 rgba(255,255,255,0.08)',
-                      textShadow: '0 0 10px rgba(232, 130, 107,0.5)',
+                      boxShadow: '0 0 16px rgba(255, 209, 102,0.18), inset 0 1px 0 rgba(255,255,255,0.08)',
+                      textShadow: '0 0 10px rgba(255, 209, 102,0.45)',
                     } : {
                       color: 'rgba(255,255,255,0.6)',
                       border: '1px solid transparent',

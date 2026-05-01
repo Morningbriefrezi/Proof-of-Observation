@@ -28,8 +28,8 @@ const CATEGORIES: { key: CategoryFilter; label: string }[] = [
 
 const DIFFICULTY_TONE: Record<Exclude<DifficultyFilter, 'all'>, { border: string; bg: string; color: string }> = {
   beginner:     { border: 'rgba(94, 234, 212,0.4)',  bg: 'rgba(94, 234, 212,0.06)',  color: 'var(--seafoam)' },
-  intermediate: { border: 'rgba(232, 130, 107,0.4)', bg: 'rgba(232, 130, 107,0.06)', color: 'var(--terracotta)' },
-  advanced:     { border: 'rgba(232, 130, 107,0.4)', bg: 'rgba(232, 130, 107,0.06)', color: 'var(--terracotta)' },
+  intermediate: { border: 'rgba(255, 209, 102,0.4)', bg: 'rgba(255, 209, 102,0.06)', color: 'var(--terracotta)' },
+  advanced:     { border: 'rgba(255, 209, 102,0.4)', bg: 'rgba(255, 209, 102,0.06)', color: 'var(--terracotta)' },
 };
 
 const SECTION_COPY: Record<string, { label: string; sub: string; color: string }> = {
@@ -209,8 +209,8 @@ export default function MarketplacePage() {
                   key={tier.apiTier}
                   className="flex items-center gap-2.5 px-3 py-[10px] rounded-lg min-w-[180px]"
                   style={{
-                    background: unlocked ? 'rgba(232, 130, 107,0.04)' : 'rgba(255,255,255,0.015)',
-                    border: unlocked ? '0.5px solid rgba(232, 130, 107,0.4)' : '0.5px solid rgba(232,230,221,0.08)',
+                    background: unlocked ? 'rgba(255, 209, 102,0.04)' : 'rgba(255,255,255,0.015)',
+                    border: unlocked ? '0.5px solid rgba(255, 209, 102,0.4)' : '0.5px solid rgba(232,230,221,0.08)',
                   }}
                 >
                   <span className="flex items-baseline whitespace-nowrap text-[13px] font-semibold tracking-[0.02em] text-[var(--terracotta)]">
@@ -223,14 +223,14 @@ export default function MarketplacePage() {
                     <div className="h-[2px] bg-[rgba(232,230,221,0.08)] rounded-[1px] overflow-hidden mt-[3px]">
                       <div
                         className="h-full bg-[var(--terracotta)] rounded-[1px]"
-                        style={{ width: `${pct}%`, boxShadow: unlocked ? '0 0 6px rgba(232, 130, 107,0.8)' : undefined }}
+                        style={{ width: `${pct}%`, boxShadow: unlocked ? '0 0 6px rgba(255, 209, 102,0.8)' : undefined }}
                       />
                     </div>
                   </div>
                   {code ? (
                     <span
                       className="text-[9px] tracking-[0.12em] font-semibold px-[10px] py-[5px] rounded-full"
-                      style={{ background: 'rgba(232, 130, 107,0.1)', border: '0.5px solid rgba(232, 130, 107,0.4)', color: 'var(--terracotta)' }}
+                      style={{ background: 'rgba(255, 209, 102,0.1)', border: '0.5px solid rgba(255, 209, 102,0.4)', color: 'var(--terracotta)' }}
                     >
                       {code}
                     </span>
@@ -271,7 +271,7 @@ export default function MarketplacePage() {
                   }`}
                   style={
                     active
-                      ? { background: 'rgba(232, 130, 107,0.1)', color: 'var(--terracotta)' }
+                      ? { background: 'rgba(255, 209, 102,0.1)', color: 'var(--terracotta)' }
                       : { color: 'rgba(232,230,221,0.75)' }
                   }
                 >

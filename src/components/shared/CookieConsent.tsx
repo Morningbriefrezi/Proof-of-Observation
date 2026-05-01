@@ -41,7 +41,7 @@ export default function CookieConsent() {
         className="rounded-2xl p-4 sm:p-5 shadow-2xl"
         style={{
           background: '#0F1220',
-          border: '1px solid rgba(232, 130, 107,0.28)',
+          border: '1px solid rgba(255, 209, 102,0.28)',
         }}
       >
         <p

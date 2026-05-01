@@ -33,7 +33,7 @@ export default function EventBanner() {
   }
 
   return (
-    <div className="glass-card p-4 border-[var(--terracotta)]/30 relative" style={{ boxShadow: '0 0 20px rgba(232, 130, 107,0.05)' }}>
+    <div className="glass-card p-4 border-[var(--terracotta)]/30 relative" style={{ boxShadow: '0 0 20px rgba(255, 209, 102,0.05)' }}>
       <button
         onClick={dismiss}
         className="absolute top-3 right-3 text-[var(--text-dim)] hover:text-text-primary text-sm leading-none"

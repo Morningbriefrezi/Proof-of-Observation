@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
           </div>
 
           {/* Divider */}
-          <div style={{ width: 1, height: 200, background: 'rgba(240, 128, 92,0.15)' }} />
+          <div style={{ width: 1, height: 200, background: 'rgba(255, 209, 102,0.15)' }} />
 
           {/* Right — score ring + grade */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
@@ -79,17 +79,17 @@ export async function GET(req: NextRequest) {
                 width: 120,
                 height: 120,
                 borderRadius: '50%',
-                border: '6px solid #F0805C',
+                border: '6px solid #FFD166',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'rgba(240, 128, 92,0.06)',
-                boxShadow: '0 0 32px rgba(240, 128, 92,0.25)',
+                background: 'rgba(255, 209, 102,0.06)',
+                boxShadow: '0 0 32px rgba(255, 209, 102,0.25)',
               }}
             >
-              <span style={{ fontSize: 36, fontWeight: 700, color: '#F0805C', lineHeight: 1 }}>{score}</span>
-              <span style={{ fontSize: 13, color: 'rgba(240, 128, 92,0.7)', marginTop: 2 }}>/ 100</span>
+              <span style={{ fontSize: 36, fontWeight: 700, color: '#FFD166', lineHeight: 1 }}>{score}</span>
+              <span style={{ fontSize: 13, color: 'rgba(255, 209, 102,0.7)', marginTop: 2 }}>/ 100</span>
             </div>
             <span style={{ fontSize: 26, fontWeight: 600, color: '#5EEAD4' }}>{grade}</span>
           </div>
@@ -113,10 +113,10 @@ export async function GET(req: NextRequest) {
                 width: 20,
                 height: 20,
                 borderRadius: '50%',
-                background: '#F0805C',
+                background: '#FFD166',
               }}
             />
-            <span style={{ fontSize: 18, color: '#F0805C', fontWeight: 600 }}>Solana</span>
+            <span style={{ fontSize: 18, color: '#FFD166', fontWeight: 600 }}>Solana</span>
           </div>
         </div>
       </div>

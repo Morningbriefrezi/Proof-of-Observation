@@ -28,9 +28,9 @@ function getEmoji(target: string): string {
 
 function getRarityBorder(rarity: string): { color: string; glow: string } {
   switch (rarity) {
-    case 'Celestial': return { color: '#F0805C', glow: 'rgba(240, 128, 92,0.45)' };
-    case 'Astral':    return { color: '#F0805C', glow: 'rgba(240, 128, 92,0.40)' };
-    case 'Stellar':   return { color: '#F0805C', glow: 'rgba(240, 128, 92,0.35)' };
+    case 'Celestial': return { color: '#FFD166', glow: 'rgba(255, 209, 102,0.45)' };
+    case 'Astral':    return { color: '#FFD166', glow: 'rgba(255, 209, 102,0.40)' };
+    case 'Stellar':   return { color: '#FFD166', glow: 'rgba(255, 209, 102,0.35)' };
     default:          return { color: 'rgba(255,255,255,0.08)', glow: 'rgba(0,0,0,0)' };
   }
 }
@@ -204,7 +204,7 @@ export async function GET(req: NextRequest) {
               left: 0,
               right: 0,
               height: 3,
-              background: '#F0805C',
+              background: '#FFD166',
               display: 'flex',
             }}
           />
@@ -227,7 +227,7 @@ export async function GET(req: NextRequest) {
             {/* Stars */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
               <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', letterSpacing: 1 }}>STARS</span>
-              <span style={{ fontSize: 18, color: '#F0805C', fontWeight: 600 }}>+{stars}</span>
+              <span style={{ fontSize: 18, color: '#FFD166', fontWeight: 600 }}>+{stars}</span>
             </div>
             {/* Location */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>

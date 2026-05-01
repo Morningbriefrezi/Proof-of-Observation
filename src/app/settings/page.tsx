@@ -181,7 +181,7 @@ export default function SettingsPage() {
         {/* Email */}
         <Row
           icon={<Mail size={15} />}
-          iconBg="rgba(232, 130, 107,0.08)"
+          iconBg="rgba(255, 209, 102,0.08)"
           iconColor="var(--terracotta)"
           label={email ? email : 'Add Email'}
           sublabel={email ? 'Primary email' : 'Link an email address'}
@@ -208,7 +208,7 @@ export default function SettingsPage() {
         {hasGoogle && (
           <Row
             icon={<Chrome size={15} />}
-            iconBg="rgba(232, 130, 107,0.08)"
+            iconBg="rgba(255, 209, 102,0.08)"
             iconColor="var(--stars)"
             label="Google Account"
             sublabel="Connected"
@@ -222,7 +222,7 @@ export default function SettingsPage() {
         <Section title="Wallet">
           <Row
             icon={<Shield size={15} />}
-            iconBg="rgba(232, 130, 107,0.08)"
+            iconBg="rgba(255, 209, 102,0.08)"
             iconColor="var(--terracotta)"
             label={`${address.slice(0, 8)}...${address.slice(-6)}`}
             sublabel="Embedded Solana wallet"
@@ -283,7 +283,7 @@ export default function SettingsPage() {
               <Row
                 key={r.id}
                 icon={<Star size={14} />}
-                iconBg="rgba(232, 130, 107,0.1)"
+                iconBg="rgba(255, 209, 102,0.1)"
                 iconColor="var(--stars)"
                 label={r.name}
                 sublabel={r.description}
@@ -305,7 +305,7 @@ export default function SettingsPage() {
               <Row
                 key={r.id}
                 icon={<TrendingUp size={14} />}
-                iconBg="rgba(232, 130, 107,0.08)"
+                iconBg="rgba(255, 209, 102,0.08)"
                 iconColor="var(--terracotta)"
                 label={r.name}
                 sublabel={r.description}
@@ -325,7 +325,7 @@ export default function SettingsPage() {
       <Section title="Appearance">
         <Row
           icon={theme === 'dark' ? <Moon size={15} /> : <Sun size={15} />}
-          iconBg={theme === 'dark' ? 'rgba(232, 130, 107,0.08)' : 'rgba(232, 130, 107,0.1)'}
+          iconBg={theme === 'dark' ? 'rgba(255, 209, 102,0.08)' : 'rgba(255, 209, 102,0.1)'}
           iconColor={theme === 'dark' ? 'var(--terracotta)' : 'var(--terracotta)'}
           label={theme === 'dark' ? 'Dark Mode' : 'Day Mode'}
           sublabel={theme === 'dark' ? 'Deep space theme' : 'Bright daytime theme'}
@@ -364,7 +364,7 @@ export default function SettingsPage() {
       <Section title="Notifications">
         <Row
           icon={notificationsOn ? <Bell size={15} /> : <BellOff size={15} />}
-          iconBg="rgba(232, 130, 107,0.08)"
+          iconBg="rgba(255, 209, 102,0.08)"
           iconColor="var(--stars)"
           label="Sky Alerts"
           sublabel="Notify when conditions are perfect"

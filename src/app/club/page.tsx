@@ -104,7 +104,7 @@ export default function ClubPage() {
       <div className="max-w-lg mx-auto px-4 py-8">
         <BackButton />
         <Card className="p-6 mt-4 flex flex-col items-center gap-4 text-center">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(232, 130, 107,0.08)', border: '1px solid rgba(232, 130, 107,0.15)' }}>
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255, 209, 102,0.08)', border: '1px solid rgba(255, 209, 102,0.15)' }}>
             <Telescope size={26} className="text-[var(--terracotta)]" />
           </div>
           <div>
@@ -137,7 +137,7 @@ export default function ClubPage() {
           {starsEarned > 0 ? (
             <div
               className="mb-4 rounded-2xl px-4 py-3 flex items-center gap-3"
-              style={{ background: 'rgba(232, 130, 107,0.08)', border: '1px solid rgba(232, 130, 107,0.2)' }}
+              style={{ background: 'rgba(255, 209, 102,0.08)', border: '1px solid rgba(255, 209, 102,0.2)' }}
             >
               <span className="text-[var(--terracotta)] text-xl">✦</span>
               <div>
@@ -155,7 +155,7 @@ export default function ClubPage() {
           ) : null}
           <Card glow="cyan" className="p-6">
             <div className="flex items-center gap-4 mb-5">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(232, 130, 107,0.08)', border: '1px solid rgba(232, 130, 107,0.2)' }}>
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255, 209, 102,0.08)', border: '1px solid rgba(255, 209, 102,0.2)' }}>
                 <Telescope size={22} className="text-[var(--terracotta)]" />
               </div>
               <div>
@@ -185,7 +185,7 @@ export default function ClubPage() {
       <BackButton />
       <div className="mt-4">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(232, 130, 107,0.08)', border: '1px solid rgba(232, 130, 107,0.15)' }}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255, 209, 102,0.08)', border: '1px solid rgba(255, 209, 102,0.15)' }}>
             <Telescope size={20} className="text-[var(--terracotta)]" />
           </div>
           <div>

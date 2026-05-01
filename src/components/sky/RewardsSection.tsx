@@ -143,7 +143,7 @@ export default function RewardsSection() {
                         className="flex-1 px-3 py-2.5 rounded-xl text-sm font-mono tracking-widest"
                         style={{
                           background: 'rgba(7,11,20,0.8)',
-                          border: '1px solid rgba(232, 130, 107,0.2)',
+                          border: '1px solid rgba(255, 209, 102,0.2)',
                           color: 'var(--stars)',
                         }}
                       >
@@ -153,8 +153,8 @@ export default function RewardsSection() {
                         onClick={() => copyCode(r.id, r.code!)}
                         className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
                         style={{
-                          background: 'rgba(232, 130, 107,0.06)',
-                          border: '1px solid rgba(232, 130, 107,0.15)',
+                          background: 'rgba(255, 209, 102,0.06)',
+                          border: '1px solid rgba(255, 209, 102,0.15)',
                           color: copied === r.id ? 'var(--success)' : 'var(--text-muted)',
                         }}
                       >
@@ -166,8 +166,8 @@ export default function RewardsSection() {
                         rel="noopener noreferrer"
                         className="h-10 px-3 rounded-xl flex items-center text-xs font-semibold transition-all hover:opacity-80"
                         style={{
-                          background: 'linear-gradient(135deg, rgba(232, 130, 107,0.15), rgba(232, 130, 107,0.08))',
-                          border: '1px solid rgba(232, 130, 107,0.25)',
+                          background: 'linear-gradient(135deg, rgba(255, 209, 102,0.15), rgba(255, 209, 102,0.08))',
+                          border: '1px solid rgba(255, 209, 102,0.25)',
                           color: 'var(--stars)',
                         }}
                       >
