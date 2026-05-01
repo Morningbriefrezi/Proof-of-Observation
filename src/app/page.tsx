@@ -1,21 +1,930 @@
-import HeroSection from '@/components/landing/HeroSection';
-import PartnersSection from '@/components/landing/PartnersSection';
-import HowItWorksSection from '@/components/landing/HowItWorksSection';
-import MissionsSection from '@/components/landing/MissionsSection';
-import MarketplaceSection from '@/components/landing/MarketplaceSection';
-import StackSection from '@/components/landing/StackSection';
-import ClosingCtaSection from '@/components/landing/ClosingCtaSection';
+import Link from 'next/link';
+import type { ReactElement } from 'react';
+import { MISSIONS } from '@/lib/constants';
+
+const HERO_MISSION_IDS = ['moon', 'jupiter', 'pleiades', 'orion', 'saturn', 'andromeda', 'crab'] as const;
+
+const MISSION_LABEL: Record<string, { name: string; meta: string }> = {
+  moon:      { name: 'The Moon',      meta: 'Naked eye · beginner' },
+  jupiter:   { name: 'Jupiter',       meta: 'Galilean moons' },
+  pleiades:  { name: 'Pleiades',      meta: 'Star cluster · easy' },
+  orion:     { name: 'Orion Nebula',  meta: 'Deep sky · medium' },
+  saturn:    { name: 'Saturn',        meta: 'Ring system' },
+  andromeda: { name: 'Andromeda',     meta: 'Deep sky · hard' },
+  crab:      { name: 'Crab Nebula',   meta: 'Supernova · expert' },
+};
+
+const MISSION_ICONS: Record<string, ReactElement> = {
+  moon: (
+    <path d="M22 16a8 8 0 11-12-7 6 6 0 0012 7z" />
+  ),
+  jupiter: (
+    <>
+      <circle cx="16" cy="16" r="9" />
+      <ellipse cx="16" cy="16" rx="14" ry="3" transform="rotate(-15 16 16)" />
+    </>
+  ),
+  pleiades: (
+    <>
+      <circle cx="10" cy="10" r="2" />
+      <circle cx="20" cy="8"  r="1.5" />
+      <circle cx="14" cy="14" r="1.5" />
+      <circle cx="22" cy="16" r="2" />
+      <circle cx="9"  cy="20" r="1.5" />
+      <circle cx="18" cy="22" r="1.5" />
+      <circle cx="24" cy="22" r="1" />
+    </>
+  ),
+  orion: (
+    <>
+      <path d="M4 16c4-8 12-10 16-6s2 12-4 14-12-4-12-8z" />
+      <circle cx="14" cy="14" r="2" />
+      <circle cx="20" cy="18" r="1.5" />
+    </>
+  ),
+  saturn: (
+    <>
+      <circle cx="16" cy="16" r="7" />
+      <ellipse cx="16" cy="16" rx="14" ry="4" transform="rotate(-20 16 16)" />
+    </>
+  ),
+  andromeda: (
+    <>
+      <ellipse cx="16" cy="16" rx="13" ry="5" transform="rotate(-25 16 16)" />
+      <ellipse cx="16" cy="16" rx="6"  ry="3" transform="rotate(-25 16 16)" />
+      <circle cx="16" cy="16" r="1.5" />
+    </>
+  ),
+  crab: (
+    <>
+      <path d="M6 16c2-6 8-9 12-7s5 9 0 13-12-1-12-6z" />
+      <path d="M10 12c2 1 4 0 5-2M22 14c-1 2-3 3-5 2" />
+    </>
+  ),
+};
+
+const HERO_MISSIONS = HERO_MISSION_IDS.map((id) => {
+  const m = MISSIONS.find((x) => x.id === id);
+  const label = MISSION_LABEL[id];
+  return {
+    id,
+    name: label.name,
+    meta: label.meta,
+    stars: m?.stars ?? 0,
+  };
+});
+
+const TILE_BRASS = 'bg-[rgba(255,209,102,0.08)] border-[rgba(255,209,102,0.2)]';
+const TILE_PURPLE = 'bg-[rgba(176,127,232,0.08)] border-[rgba(176,127,232,0.2)]';
+const TILE_TEAL = 'bg-[rgba(56,240,255,0.08)] border-[rgba(56,240,255,0.2)]';
+
+const STROKE_BRASS = '#FFD166';
+const STROKE_PURPLE = '#B07FE8';
+const STROKE_TEAL = '#38F0FF';
+
+function IconTile({ tone, children }: { tone: 'brass' | 'purple' | 'teal'; children: React.ReactNode }) {
+  const cls = tone === 'brass' ? TILE_BRASS : tone === 'purple' ? TILE_PURPLE : TILE_TEAL;
+  return (
+    <div className={`w-14 h-14 ${cls} border rounded-xl flex items-center justify-center mb-6`}>
+      {children}
+    </div>
+  );
+}
+
+function StrokeIcon({ tone, children }: { tone: 'brass' | 'purple' | 'teal'; children: React.ReactNode }) {
+  const stroke = tone === 'brass' ? STROKE_BRASS : tone === 'purple' ? STROKE_PURPLE : STROKE_TEAL;
+  return (
+    <svg
+      className="w-7 h-7"
+      stroke={stroke}
+      fill="none"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      viewBox="0 0 32 32"
+    >
+      {children}
+    </svg>
+  );
+}
+
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="text-[14px] font-semibold tracking-[0.22em] uppercase text-[#FFD166] mb-6">
+      {children}
+    </div>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="text-[40px] md:text-[60px] font-extrabold leading-[1.05] tracking-[-0.02em] text-white mb-7">
+      {children}
+    </h2>
+  );
+}
+
+function SectionSub({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[18px] md:text-[20px] leading-[1.55] text-[#9BA3B4] max-w-[680px] mx-auto">
+      {children}
+    </p>
+  );
+}
+
+function CardTitle({ children }: { children: React.ReactNode }) {
+  return <div className="text-[22px] font-bold text-white mb-4">{children}</div>;
+}
+
+function CardBody({ children }: { children: React.ReactNode }) {
+  return <div className="text-[15px] leading-[1.65] text-[#9BA3B4]">{children}</div>;
+}
+
+function Prompt({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="bg-black/40 border-l-2 border-[#8B5CF6] rounded px-4 py-3 mb-3 font-mono text-[12px] text-[#B8BFD0] leading-[1.5] last:mb-0">
+      <span className="text-[#10B981] mr-2">&gt;</span>
+      {children}
+    </div>
+  );
+}
+
+function StarSparkle({ className = 'w-3 h-3' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 12 12" className={className} fill="#FFD166">
+      <path d="M6 1l1.5 3.5L11 5l-2.5 2L9 10.5 6 8.5 3 10.5l.5-3.5L1 5l3.5-.5z" />
+    </svg>
+  );
+}
 
 export default function HomePage() {
   return (
-    <div className="bg-[var(--canvas)] text-[#E8E6DD] overflow-x-hidden -mt-14 pt-14">
-      <HeroSection />
-      <PartnersSection />
-      <HowItWorksSection />
-      <MissionsSection />
-      <MarketplaceSection />
-      <StackSection />
-      <ClosingCtaSection />
+    <div className="bg-[#0A0E1A] text-white -mt-14 pt-14 overflow-x-hidden">
+
+      {/* ============================================================
+          HERO
+         ============================================================ */}
+      <section className="relative px-6 md:px-8 pt-20 md:pt-20 pb-24 overflow-hidden">
+        {/* radial glow */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'radial-gradient(circle at 70% 50%, rgba(255, 209, 102, 0.10) 0%, transparent 50%), radial-gradient(circle at 30% 60%, rgba(176, 127, 232, 0.08) 0%, transparent 50%)',
+          }}
+        />
+        {/* faint star field */}
+        <svg
+          className="absolute inset-0 pointer-events-none opacity-50 w-full h-full"
+          preserveAspectRatio="none"
+          viewBox="0 0 1200 700"
+        >
+          <g fill="#FFFFFF">
+            <circle cx="100"  cy="80"  r="0.8" opacity="0.6" />
+            <circle cx="240"  cy="160" r="1.2" opacity="0.8" />
+            <circle cx="380"  cy="60"  r="0.6" opacity="0.5" />
+            <circle cx="520"  cy="220" r="1.4" opacity="0.7" />
+            <circle cx="700"  cy="90"  r="0.8" opacity="0.6" />
+            <circle cx="880"  cy="180" r="1.0" opacity="0.7" />
+            <circle cx="1050" cy="120" r="0.6" opacity="0.5" />
+            <circle cx="60"   cy="320" r="1.0" opacity="0.6" />
+            <circle cx="200"  cy="420" r="0.6" opacity="0.4" />
+            <circle cx="340"  cy="500" r="1.2" opacity="0.7" />
+            <circle cx="480"  cy="380" r="0.8" opacity="0.5" />
+            <circle cx="620"  cy="540" r="1.4" opacity="0.8" />
+            <circle cx="780"  cy="440" r="0.6" opacity="0.5" />
+            <circle cx="940"  cy="500" r="1.0" opacity="0.6" />
+            <circle cx="1100" cy="380" r="0.8" opacity="0.5" />
+            <circle cx="160"  cy="600" r="0.8" opacity="0.6" />
+            <circle cx="420"  cy="660" r="0.6" opacity="0.4" />
+            <circle cx="700"  cy="640" r="1.0" opacity="0.6" />
+            <circle cx="1020" cy="640" r="0.8" opacity="0.5" />
+          </g>
+        </svg>
+
+        <div className="relative max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-[1.1fr_1fr] gap-10 md:gap-15 items-center">
+          <div>
+            <div className="inline-flex items-center gap-2.5 text-[13px] font-semibold tracking-[0.22em] uppercase text-[#FFD166] mb-7">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFD166" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z" />
+              </svg>
+              Built on Solana · Colosseum Frontier
+            </div>
+
+            <h1 className="text-[56px] md:text-[72px] font-extrabold leading-[1] tracking-[-0.025em] text-white mb-8">
+              Astronomy,
+              <br />
+              <span className="bg-gradient-to-r from-[#B07FE8] to-[#38F0FF] bg-clip-text text-transparent">
+                on chain.
+              </span>
+            </h1>
+
+            <p className="text-[17px] md:text-[18px] leading-[1.65] text-[#9BA3B4] mb-9 max-w-[540px]">
+              Stellar is the home of the night sky for telescope owners and stargazers. Forecast
+              clear nights, complete sky missions, seal your discoveries as on-chain attestations,
+              and earn rewards redeemable for real telescopes — all without seeing a wallet.
+            </p>
+
+            <div className="flex flex-wrap gap-3.5 mb-4">
+              <Link
+                href="/missions"
+                className="inline-flex items-center gap-2.5 px-7 py-4 bg-[#FFD166] text-[#0A0E1A] font-semibold text-[15px] rounded-xl hover:bg-[#FFE08A] transition-colors no-underline"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
+                </svg>
+                Start observing
+              </Link>
+              <Link
+                href="/sky"
+                className="inline-flex items-center gap-2.5 px-7 py-4 bg-[rgba(255,209,102,0.10)] text-[#FFD166] font-semibold text-[15px] rounded-xl border border-[rgba(255,209,102,0.30)] hover:bg-[rgba(255,209,102,0.18)] transition-colors no-underline"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2a8 8 0 010 16M12 2a8 8 0 100 16" />
+                </svg>
+                Tonight&apos;s sky
+              </Link>
+            </div>
+
+            <div className="flex flex-wrap gap-3.5">
+              <Link
+                href="/missions"
+                className="inline-flex items-center gap-2.5 px-5 py-3.5 bg-transparent text-white font-medium text-[14px] rounded-xl border border-white/[0.12] hover:bg-white/[0.04] transition-colors no-underline"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                  <path d="M2 17l10 5 10-5M2 12l10 5 10-5" />
+                </svg>
+                Browse missions
+              </Link>
+              <Link
+                href="/chat"
+                className="inline-flex items-center gap-2.5 px-5 py-3.5 bg-transparent text-white font-medium text-[14px] rounded-xl border border-white/[0.12] hover:bg-white/[0.04] transition-colors no-underline"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M9 9h.01M15 9h.01M9 14c.5 1 1.5 2 3 2s2.5-1 3-2" />
+                </svg>
+                Talk to ASTRA
+              </Link>
+            </div>
+          </div>
+
+          {/* hero illustration */}
+          <div className="hidden md:flex relative h-[540px] items-center justify-center">
+            <svg viewBox="0 0 480 540" className="w-full max-w-[480px] h-auto" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              {/* background stars */}
+              <g fill="#FFFFFF">
+                <circle cx="60"  cy="60"  r="1"   opacity="0.6" />
+                <circle cx="380" cy="80"  r="1.4" opacity="0.8" />
+                <circle cx="120" cy="120" r="0.8" opacity="0.5" />
+                <circle cx="420" cy="200" r="1"   opacity="0.7" />
+                <circle cx="80"  cy="240" r="0.8" opacity="0.5" />
+                <circle cx="320" cy="160" r="1.2" opacity="0.8" />
+                <circle cx="280" cy="40"  r="0.8" opacity="0.6" />
+              </g>
+
+              {/* Saturn */}
+              <g transform="translate(340, 130)">
+                <circle cx="0" cy="0" r="48" fill="rgba(255,209,102,0.08)" stroke="#FFD166" strokeWidth="1.5" />
+                <ellipse cx="0" cy="0" rx="74" ry="14" fill="none" stroke="#FFD166" strokeWidth="1.5" transform="rotate(-18)" />
+                <path d="M-30 -8 Q-15 -16 0 -8 Q15 0 30 -8" stroke="#FFD166" strokeWidth="1" opacity="0.6" fill="none" />
+                <path d="M-22 8 Q0 16 22 8" stroke="#FFD166" strokeWidth="1" opacity="0.4" fill="none" />
+              </g>
+
+              {/* Moon */}
+              <g transform="translate(90, 220)">
+                <circle cx="0" cy="0" r="22" fill="rgba(176,127,232,0.10)" stroke="#B07FE8" strokeWidth="1.5" />
+                <circle cx="-6" cy="-4" r="3" stroke="#B07FE8" strokeWidth="1" opacity="0.5" />
+                <circle cx="6"  cy="6"  r="2" stroke="#B07FE8" strokeWidth="1" opacity="0.5" />
+              </g>
+
+              {/* Telescope */}
+              <g transform="translate(160, 380) rotate(-30)">
+                <line x1="-40" y1="80"  x2="0" y2="20" stroke="#9BA3B4" strokeWidth="2.5" />
+                <line x1="40"  y1="80"  x2="0" y2="20" stroke="#9BA3B4" strokeWidth="2.5" />
+                <line x1="0"   y1="100" x2="0" y2="20" stroke="#9BA3B4" strokeWidth="2.5" />
+                <rect x="-12" y="10" width="24" height="20" rx="3" fill="#1A2240" stroke="#9BA3B4" strokeWidth="2" />
+                <rect x="-14" y="-130" width="28" height="135" rx="6" fill="#11172A" stroke="#FFD166" strokeWidth="2.2" />
+                <circle cx="0" cy="-128" r="14" fill="#0A0E1A" stroke="#FFD166" strokeWidth="2.2" />
+                <circle cx="0" cy="-128" r="9" fill="none" stroke="#FFD166" strokeWidth="1" opacity="0.6" />
+                <rect x="-5" y="-100" width="10" height="40" rx="2" fill="#11172A" stroke="#9BA3B4" strokeWidth="1.5" />
+                <rect x="-5" y="-2" width="10" height="14" rx="2" fill="#11172A" stroke="#FFD166" strokeWidth="1.5" />
+                <circle cx="14" cy="-40" r="4" fill="#11172A" stroke="#FFD166" strokeWidth="1.5" />
+              </g>
+
+              {/* horizon */}
+              <line x1="40" y1="490" x2="440" y2="490" stroke="#11172A" strokeWidth="2" opacity="0.6" />
+
+              {/* dotted lines + chain block */}
+              <path d="M260 250 L320 140" stroke="#FFD166" strokeWidth="1" strokeDasharray="3 4" opacity="0.4" fill="none" />
+              <path d="M225 265 Q280 230 305 200" stroke="#38F0FF" strokeWidth="1" strokeDasharray="2 3" opacity="0.5" fill="none" />
+
+              <g transform="translate(380, 410)">
+                <rect x="-22" y="-22" width="44" height="44" rx="8" fill="#11172A" stroke="#38F0FF" strokeWidth="1.5" />
+                <path d="M-10 -5 L0 -12 L10 -5 L10 8 L0 14 L-10 8 Z" fill="none" stroke="#38F0FF" strokeWidth="1.2" />
+                <line x1="0"   y1="-12" x2="0"   y2="14" stroke="#38F0FF" strokeWidth="1" opacity="0.5" />
+                <line x1="-10" y1="-5"  x2="10"  y2="8"  stroke="#38F0FF" strokeWidth="1" opacity="0.5" />
+                <line x1="10"  y1="-5"  x2="-10" y2="8"  stroke="#38F0FF" strokeWidth="1" opacity="0.5" />
+              </g>
+              <path d="M250 410 Q310 410 358 410" stroke="#38F0FF" strokeWidth="1" strokeDasharray="2 4" opacity="0.5" fill="none" />
+            </svg>
+          </div>
+        </div>
+
+        {/* hero stats */}
+        <div className="relative max-w-[1200px] mx-auto mt-20 grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
+          <div>
+            <div className="text-[40px] md:text-[48px] font-bold leading-none mb-2 bg-gradient-to-r from-[#B07FE8] to-[#38F0FF] bg-clip-text text-transparent">7</div>
+            <div className="text-[14px] font-medium text-[#9BA3B4]">Sky Missions</div>
+          </div>
+          <div>
+            <div className="text-[40px] md:text-[48px] font-bold leading-none mb-2 text-[#FFD166]">60K+</div>
+            <div className="text-[14px] font-medium text-[#9BA3B4]">Astroman Reach</div>
+          </div>
+          <div>
+            <div className="text-[40px] md:text-[48px] font-bold leading-none mb-2 bg-gradient-to-r from-[#B07FE8] to-[#38F0FF] bg-clip-text text-transparent">3</div>
+            <div className="text-[14px] font-medium text-[#9BA3B4]">Brand Partners</div>
+          </div>
+          <div>
+            <div className="text-[40px] md:text-[48px] font-bold leading-none mb-2 text-[#FFD166]">100%</div>
+            <div className="text-[14px] font-medium text-[#9BA3B4]">Gasless</div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          HOW IT WORKS
+         ============================================================ */}
+      <section className="px-6 md:px-8 py-20 md:py-[120px]">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="text-center mb-16 md:mb-20">
+            <Eyebrow>Get Started</Eyebrow>
+            <SectionTitle>How It Works</SectionTitle>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr] gap-4 md:gap-0 items-stretch">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-12 text-center">
+              <div className="text-[#FFD166] text-[40px] font-bold leading-none mb-7">01</div>
+              <div className="text-white text-[22px] font-bold mb-4">Sign in with email</div>
+              <div className="text-[#9BA3B4] text-[15px] leading-[1.6]">
+                Privy creates a Solana wallet silently. No seed phrase, no extension, no setup needed.
+              </div>
+            </div>
+            <div className="flex items-center justify-center px-0 md:px-6 rotate-90 md:rotate-0">
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </div>
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-12 text-center">
+              <div className="text-[#FFD166] text-[40px] font-bold leading-none mb-7">02</div>
+              <div className="text-white text-[22px] font-bold mb-4">Observe the sky</div>
+              <div className="text-[#9BA3B4] text-[15px] leading-[1.6]">
+                Photograph a target. Open-Meteo verifies sky conditions. NFT attestation minted to your wallet, gasless.
+              </div>
+            </div>
+            <div className="flex items-center justify-center px-0 md:px-6 rotate-90 md:rotate-0">
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </div>
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-12 text-center">
+              <div className="text-[#FFD166] text-[40px] font-bold leading-none mb-7">03</div>
+              <div className="text-white text-[22px] font-bold mb-4">Earn Stars, redeem real gear</div>
+              <div className="text-[#9BA3B4] text-[15px] leading-[1.6]">
+                Each verified observation earns Stars. Redeem them at Astroman for real telescopes from Bresser, Levenhuk, and Celestron.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          THREE PILLARS
+         ============================================================ */}
+      <section className="px-6 md:px-8 pb-20 md:pb-[120px]">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+              <IconTile tone="brass">
+                <StrokeIcon tone="brass">
+                  <path d="M5 27l8-8M11 21l-2 6-2-1-3 3M22 6l4 4M19 9l4 4M16 12l-2 2 4 4 2-2M22 6l-9 9 4 4 9-9" />
+                </StrokeIcon>
+              </IconTile>
+              <CardTitle>Observe with you</CardTitle>
+              <CardBody>
+                Photograph the Moon, Jupiter, Saturn, the Andromeda Galaxy. Claude verifies your image,
+                Open-Meteo verifies the sky, the chain seals the discovery.{' '}
+                <em className="not-italic text-white italic">Real telescopes. Real photos. Real proof.</em>
+              </CardBody>
+            </div>
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+              <IconTile tone="purple">
+                <StrokeIcon tone="purple">
+                  <circle cx="16" cy="16" r="12" />
+                  <circle cx="16" cy="16" r="6" />
+                  <circle cx="16" cy="16" r="1.5" fill="#B07FE8" />
+                  <path d="M16 1v3M16 28v3M1 16h3M28 16h3" />
+                </StrokeIcon>
+              </IconTile>
+              <CardTitle>Plans with you</CardTitle>
+              <CardBody>
+                7-day sky forecast, planet visibility tracker, ASTRA AI companion. Know what&apos;s up,
+                when conditions are clear, and where to look — for your exact location and equipment.
+              </CardBody>
+            </div>
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+              <IconTile tone="teal">
+                <StrokeIcon tone="teal">
+                  <path d="M16 3l3 9h9l-7 5 3 9-8-6-8 6 3-9-7-5h9z" />
+                </StrokeIcon>
+              </IconTile>
+              <CardTitle>Rewards your sky time</CardTitle>
+              <CardBody>
+                Stars for every verified observation, every quiz, every mission. Redeem for real telescopes
+                at Astroman in Tbilisi — Bresser, Levenhuk, Celestron.
+              </CardBody>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          SKY MISSIONS SHOWCASE
+         ============================================================ */}
+      <section className="px-6 md:px-8 py-20 md:py-[120px]">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="text-center mb-16 md:mb-20">
+            <Eyebrow>Sky Missions</Eyebrow>
+            <SectionTitle>
+              Seven targets,
+              <br />
+              one telescope.
+            </SectionTitle>
+            <SectionSub>
+              From the Moon to the Crab Nebula. Each verified observation mints a compressed NFT to your wallet,
+              earns Stars, and unlocks rewards.
+            </SectionSub>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+            {HERO_MISSIONS.map((m) => (
+              <Link
+                key={m.id}
+                href={`/missions/${m.id}`}
+                className="block bg-[#11172A] border border-white/[0.06] rounded-[14px] p-5 hover:border-white/[0.12] hover:-translate-y-0.5 transition-all no-underline"
+              >
+                <svg
+                  className="w-10 h-10 mb-4"
+                  stroke="#FFD166"
+                  fill="none"
+                  strokeWidth={1.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  viewBox="0 0 32 32"
+                >
+                  {MISSION_ICONS[m.id]}
+                </svg>
+                <div className="text-white text-[16px] font-bold mb-1.5">{m.name}</div>
+                <div className="text-[#9BA3B4] text-[12px] mb-4">{m.meta}</div>
+                <div className="text-[#FFD166] font-bold text-[14px] font-mono inline-flex items-center gap-1">
+                  <StarSparkle />
+                  +{m.stars}
+                </div>
+              </Link>
+            ))}
+            <Link
+              href="/missions"
+              className="block bg-gradient-to-b from-[rgba(255,209,102,0.06)] to-[#11172A] border border-[rgba(255,209,102,0.2)] rounded-[14px] p-5 hover:border-[rgba(255,209,102,0.4)] hover:-translate-y-0.5 transition-all no-underline"
+            >
+              <svg
+                className="w-10 h-10 mb-4"
+                stroke="#FFD166"
+                fill="none"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                viewBox="0 0 32 32"
+              >
+                <path d="M5 27l8-8M11 21l-2 6-2-1-3 3M22 6l4 4M19 9l4 4" />
+                <path d="M16 12l-2 2 4 4 2-2M22 6l-9 9 4 4 9-9" />
+              </svg>
+              <div className="text-[#FFD166] text-[16px] font-bold mb-1.5">All seven</div>
+              <div className="text-[#9BA3B4] text-[12px] mb-4">Reward: free telescope</div>
+              <div className="text-[#FFD166] font-bold text-[14px] font-mono">View →</div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          CAPABILITIES
+         ============================================================ */}
+      <section className="px-6 md:px-8 py-20 md:py-[120px]">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="text-center mb-16 md:mb-20">
+            <Eyebrow>Capabilities</Eyebrow>
+            <SectionTitle>Everything in one app.</SectionTitle>
+            <SectionSub>
+              A full astronomy companion built on the most consumer-friendly chain in crypto.
+            </SectionSub>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+              <IconTile tone="brass">
+                <StrokeIcon tone="brass">
+                  <path d="M3 18c4-6 8-9 13-9s9 3 13 9" />
+                  <path d="M3 18c4 6 8 9 13 9s9-3 13-9" />
+                  <circle cx="16" cy="18" r="3" />
+                </StrokeIcon>
+              </IconTile>
+              <CardTitle>7-day sky forecast</CardTitle>
+              <CardBody>
+                Cloud cover, visibility, moon phase. Each night rated Go / Maybe / Skip — synced to your
+                location via Open-Meteo.
+              </CardBody>
+            </div>
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+              <IconTile tone="purple">
+                <StrokeIcon tone="purple">
+                  <circle cx="16" cy="16" r="13" />
+                  <circle cx="16" cy="16" r="6" />
+                  <circle cx="22" cy="11" r="1" fill="#B07FE8" />
+                  <circle cx="10" cy="20" r="0.8" fill="#B07FE8" />
+                </StrokeIcon>
+              </IconTile>
+              <CardTitle>Planet tracker</CardTitle>
+              <CardBody>
+                Live altitude and rise/set times for every planet plus the Moon, calculated on your device
+                with astronomy-engine.
+              </CardBody>
+            </div>
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+              <IconTile tone="teal">
+                <StrokeIcon tone="teal">
+                  <rect x="6" y="6" width="20" height="20" rx="4" />
+                  <circle cx="12" cy="14" r="1.5" />
+                  <circle cx="20" cy="14" r="1.5" />
+                  <path d="M12 20c1 1.5 2.5 2.5 4 2.5s3-1 4-2.5" />
+                  <path d="M16 2v4M9 4l2 3M23 4l-2 3" />
+                </StrokeIcon>
+              </IconTile>
+              <CardTitle>ASTRA AI companion</CardTitle>
+              <CardBody>
+                Claude-powered. Tells you what&apos;s visible from your location, the best night this week,
+                what your telescope can resolve.
+              </CardBody>
+            </div>
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+              <IconTile tone="brass">
+                <StrokeIcon tone="brass">
+                  <circle cx="16" cy="16" r="12" />
+                  <path d="M9 16l5 5 9-9" />
+                </StrokeIcon>
+              </IconTile>
+              <CardTitle>Discovery attestations</CardTitle>
+              <CardBody>
+                Each verified observation is sealed as a compressed NFT on Solana via Bubblegum. Permanent,
+                gasless, yours forever.
+              </CardBody>
+            </div>
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+              <IconTile tone="purple">
+                <StrokeIcon tone="purple">
+                  <path d="M16 3l3 9h9l-7 5 3 9-8-6-8 6 3-9-7-5h9z" />
+                </StrokeIcon>
+              </IconTile>
+              <CardTitle>Stars rewards</CardTitle>
+              <CardBody>
+                Earn for missions, quizzes, observations. Track on-chain as a real SPL token. Redeem at
+                Astroman for real gear.
+              </CardBody>
+            </div>
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+              <IconTile tone="teal">
+                <StrokeIcon tone="teal">
+                  <circle cx="9" cy="22" r="3" />
+                  <circle cx="22" cy="22" r="3" />
+                  <path d="M3 8h4l2.5 11h12L25 11H10" />
+                  <path d="M25 11l1-4" />
+                </StrokeIcon>
+              </IconTile>
+              <CardTitle>Telescope marketplace</CardTitle>
+              <CardBody>
+                Bresser, Levenhuk, Celestron. Real inventory at Astroman.ge — Georgia&apos;s first astronomy
+                store. Stars convert to discounts and free gear.
+              </CardBody>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          REAL OBSERVERS
+         ============================================================ */}
+      <section className="px-6 md:px-8 py-20 md:py-[120px]">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="text-center mb-16 md:mb-20">
+            <Eyebrow>Real Observers</Eyebrow>
+            <SectionTitle>
+              What stargazers
+              <br />
+              are doing.
+            </SectionTitle>
+            <SectionSub>
+              From clear-night alerts to deep-sky planning — Stellar fits how astronomers actually work.
+            </SectionSub>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+              <IconTile tone="brass">
+                <StrokeIcon tone="brass">
+                  <path d="M3 22c0-7 6-13 13-13s13 6 13 13" />
+                  <circle cx="16" cy="22" r="2" />
+                  <path d="M16 22V9M11 13l5-4 5 4" />
+                </StrokeIcon>
+              </IconTile>
+              <CardTitle>Sky Forecaster</CardTitle>
+              <Prompt>&quot;Alert me at 6pm when tonight is a clear-sky &lsquo;Go&rsquo;&quot;</Prompt>
+              <Prompt>&quot;Show me the next 3 dark-sky windows in Kazbegi&quot;</Prompt>
+            </div>
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+              <IconTile tone="purple">
+                <StrokeIcon tone="purple">
+                  <circle cx="16" cy="16" r="12" />
+                  <path d="M16 4l4 8h-8z" fill="rgba(176,127,232,0.3)" />
+                  <circle cx="16" cy="16" r="4" />
+                </StrokeIcon>
+              </IconTile>
+              <CardTitle>Planet Hunter</CardTitle>
+              <Prompt>&quot;When can I see Saturn&apos;s rings tilt this year?&quot;</Prompt>
+              <Prompt>&quot;Track Jupiter&apos;s 4 moons for the next two weeks&quot;</Prompt>
+            </div>
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+              <IconTile tone="teal">
+                <StrokeIcon tone="teal">
+                  <path d="M5 25l9-9M11 19l-2 6-2-1-3 3M22 4l4 4M19 7l4 4M16 10l-2 2 4 4 2-2M22 4l-9 9 4 4 9-9" />
+                </StrokeIcon>
+              </IconTile>
+              <CardTitle>Mission Collector</CardTitle>
+              <Prompt>&quot;What&apos;s left to complete the &lsquo;All Seven&rsquo; reward?&quot;</Prompt>
+              <Prompt>&quot;Which missions are best with a 70mm refractor?&quot;</Prompt>
+            </div>
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+              <IconTile tone="brass">
+                <StrokeIcon tone="brass">
+                  <rect x="6" y="6" width="20" height="20" rx="4" />
+                  <circle cx="12" cy="14" r="1.5" />
+                  <circle cx="20" cy="14" r="1.5" />
+                  <path d="M12 20c1 1.5 2.5 2.5 4 2.5s3-1 4-2.5" />
+                </StrokeIcon>
+              </IconTile>
+              <CardTitle>ASTRA Sessions</CardTitle>
+              <Prompt>&quot;What can I see with a 70mm tonight from Tbilisi?&quot;</Prompt>
+              <Prompt>&quot;How do I find Andromeda by star-hopping?&quot;</Prompt>
+            </div>
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+              <IconTile tone="purple">
+                <StrokeIcon tone="purple">
+                  <path d="M16 3l3 9h9l-7 5 3 9-8-6-8 6 3-9-7-5h9z" />
+                </StrokeIcon>
+              </IconTile>
+              <CardTitle>Stars Stacker</CardTitle>
+              <Prompt>&quot;How many Stars until the free Moon Lamp reward?&quot;</Prompt>
+              <Prompt>&quot;Show all my unlocked Astroman discount codes&quot;</Prompt>
+            </div>
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+              <IconTile tone="teal">
+                <StrokeIcon tone="teal">
+                  <circle cx="9" cy="22" r="3" />
+                  <circle cx="22" cy="22" r="3" />
+                  <path d="M3 8h4l2.5 11h12L25 11H10" />
+                </StrokeIcon>
+              </IconTile>
+              <CardTitle>Gear Redeemer</CardTitle>
+              <Prompt>&quot;Show telescopes I can buy with 4500 Stars&quot;</Prompt>
+              <Prompt>&quot;Reserve Bresser 76/300 at Astroman, Tbilisi&quot;</Prompt>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          DISTRIBUTION (ASTROMAN)
+         ============================================================ */}
+      <section className="px-6 md:px-8 py-20 md:py-[120px]">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="text-center mb-16 md:mb-20">
+            <Eyebrow>The Distribution</Eyebrow>
+            <SectionTitle>Built on top of Astroman.</SectionTitle>
+            <SectionSub>Stellar runs anywhere, but it was made on top of one shop in particular.</SectionSub>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9 md:min-h-[240px]">
+              <IconTile tone="brass">
+                <StrokeIcon tone="brass">
+                  <path d="M5 11h22l-2 14H7zM10 11V7a6 6 0 0112 0v4" />
+                </StrokeIcon>
+              </IconTile>
+              <CardTitle>Astroman.ge</CardTitle>
+              <CardBody>
+                60K+ social followers, real telescope inventory, physical Tbilisi store. The audience already
+                exists, the logistics already work.
+              </CardBody>
+            </div>
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9 md:min-h-[240px]">
+              <IconTile tone="purple">
+                <StrokeIcon tone="purple">
+                  <circle cx="11" cy="13" r="5" />
+                  <circle cx="21" cy="13" r="5" />
+                  <path d="M5 27c0-3 2.5-6 6-6s6 3 6 6M15 27c0-3 2.5-6 6-6s6 3 6 6" />
+                </StrokeIcon>
+              </IconTile>
+              <CardTitle>Bresser · Levenhuk · Celestron</CardTitle>
+              <CardBody>
+                Three telescope-brand revenue-share partnerships. 20% commission on every unit sold through
+                the loop. No upfront inventory.
+              </CardBody>
+            </div>
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9 md:min-h-[240px]">
+              <IconTile tone="teal">
+                <StrokeIcon tone="teal">
+                  <path d="M16 3a8 8 0 018 8c0 6-8 16-8 16s-8-10-8-16a8 8 0 018-8z" />
+                  <circle cx="16" cy="11" r="3" />
+                </StrokeIcon>
+              </IconTile>
+              <CardTitle>Real margins, real inventory</CardTitle>
+              <CardBody>
+                Stars redeem for actual telescopes the user picks up in store. No drop-shipping promises, no
+                fake economy, no devnet hand-waving.
+              </CardBody>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          COMPARISON
+         ============================================================ */}
+      <section className="px-6 md:px-8 py-20 md:py-[120px]">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="text-center mb-16 md:mb-20">
+            <Eyebrow>The Difference</Eyebrow>
+            <SectionTitle>
+              Generic astronomy app
+              <br />
+              vs Stellar
+            </SectionTitle>
+            <SectionSub>
+              Plenty of apps show you the night sky. Only one closes the loop from sky to telescope to
+              discovery.
+            </SectionSub>
+          </div>
+
+          <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] overflow-hidden overflow-x-auto">
+            <table className="w-full border-collapse min-w-[640px]">
+              <thead>
+                <tr>
+                  <th className="text-left text-white text-[14px] md:text-[18px] font-bold py-4 md:py-6 px-4 md:px-8 border-b border-white/[0.06] w-[30%]">
+                    Feature
+                  </th>
+                  <th className="text-left text-white text-[14px] md:text-[18px] font-bold py-4 md:py-6 px-4 md:px-8 border-b border-white/[0.06]">
+                    Generic astronomy app
+                  </th>
+                  <th className="text-left text-white text-[14px] md:text-[18px] font-bold py-4 md:py-6 px-4 md:px-8 border-b border-white/[0.06] border-l-[3px] border-l-[#8B5CF6] bg-[rgba(139,92,246,0.06)]">
+                    Stellar
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ['Sky forecast',           ['check', 'Cloud cover, basic'],                             ['check', 'Open-Meteo · 7-day with sky quality scoring']],
+                  ['Planet tracker',         ['check', 'Static charts'],                                  ['check', 'Live altitude, rise/set, location-aware']],
+                  ['AI sky companion',       ['x',     null],                                             ['check', 'ASTRA — Claude-powered with tool calling']],
+                  ['Verified observations',  ['x',     null],                                             ['check', 'Photo + sky oracle + on-chain attestation']],
+                  ['Mission system',         ['x',     null],                                             ['check', '7 progressive targets · easy to expert']],
+                  ['Real reward redemption', ['x',     null],                                             ['check', 'Stars → telescopes at Astroman, Tbilisi']],
+                  ['Wallet onboarding',      ['x',     'No wallet involved'],                             ['check', 'Email login, embedded wallet, no seed phrase']],
+                  ['On-chain proof of discovery', ['x', null],                                            ['check', 'Compressed NFTs via Bubblegum, gasless']],
+                  ['Distribution channel',   ['x',     'App-store cold start'],                           ['check', 'Astroman: 60K+ astronomy customers']],
+                ].map(([feature, them, us], i, arr) => {
+                  const isLast = i === arr.length - 1;
+                  const [themMark, themText] = them as [string, string | null];
+                  const [usMark, usText] = us as [string, string];
+                  return (
+                    <tr key={feature as string}>
+                      <td className={`py-4 md:py-[22px] px-4 md:px-8 text-white font-medium text-[14px] md:text-[16px] ${isLast ? '' : 'border-b border-white/[0.06]'}`}>
+                        {feature}
+                      </td>
+                      <td className={`py-4 md:py-[22px] px-4 md:px-8 text-[#9BA3B4] text-[14px] md:text-[16px] ${isLast ? '' : 'border-b border-white/[0.06]'}`}>
+                        {themMark === 'check' ? (
+                          <span className="text-[#10B981] mr-2.5 font-bold">✓</span>
+                        ) : (
+                          <span className="text-[#EF4444] mr-2.5 font-bold">✗</span>
+                        )}
+                        {themText && <em className="not-italic italic">{themText}</em>}
+                      </td>
+                      <td className={`py-4 md:py-[22px] px-4 md:px-8 text-white text-[14px] md:text-[16px] border-l-[3px] border-l-[#8B5CF6] bg-[rgba(139,92,246,0.04)] ${isLast ? '' : 'border-b border-white/[0.06]'}`}>
+                        {usMark === 'check' ? (
+                          <span className="text-[#10B981] mr-2.5 font-bold">✓</span>
+                        ) : (
+                          <span className="text-[#EF4444] mr-2.5 font-bold">✗</span>
+                        )}
+                        {usText}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          VISION
+         ============================================================ */}
+      <section className="relative px-6 md:px-8 py-24 md:py-[140px] text-center overflow-hidden">
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'radial-gradient(circle at 50% 50%, rgba(176,127,232,0.10) 0%, transparent 50%)',
+          }}
+        />
+        <div className="relative max-w-[1200px] mx-auto">
+          <div className="inline-flex items-center gap-6 mb-8">
+            <svg className="w-12 h-12 md:w-14 md:h-14" viewBox="0 0 32 32" fill="none" stroke="#FFD166" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 27l8-8M11 21l-2 6-2-1-3 3M22 4l4 4M19 7l4 4M16 10l-2 2 4 4 2-2M22 4l-9 9 4 4 9-9" />
+            </svg>
+            <svg className="w-12 h-12 md:w-14 md:h-14" viewBox="0 0 32 32" fill="none" stroke="#38F0FF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 16h22M19 8l8 8-8 8" />
+            </svg>
+            <svg className="w-12 h-12 md:w-14 md:h-14" viewBox="0 0 32 32" fill="none" stroke="#B07FE8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="6" y="6" width="20" height="20" rx="4" />
+              <path d="M11 14l5-3 5 3v6l-5 3-5-3z" />
+            </svg>
+          </div>
+          <h2 className="text-[48px] md:text-[64px] font-bold mb-10 leading-none bg-gradient-to-r from-[#B07FE8] to-[#38F0FF] bg-clip-text text-transparent">
+            The Vision
+          </h2>
+          <p className="text-[18px] md:text-[20px] leading-[1.6] text-[#9BA3B4] max-w-[720px] mx-auto mb-8">
+            Every astronomy customer gets a tool that turns their telescope into a verified discovery
+            machine. <strong className="text-white font-semibold">Astroman is the shop. Stellar is the night sky&apos;s companion app.</strong> Together they make stargazing a tracked, rewarded, on-chain practice — not a hobby that disappears the moment you put the eyepiece down.
+          </p>
+          <div className="text-[16px] md:text-[18px] text-white">
+            Stellar is{' '}
+            <span className="bg-gradient-to-r from-[#B07FE8] to-[#38F0FF] bg-clip-text text-transparent font-bold">
+              the on-chain layer for the night sky
+            </span>
+            .
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          FINAL CTA
+         ============================================================ */}
+      <section className="px-6 md:px-8 py-20 md:py-[120px] text-center">
+        <div className="max-w-[1200px] mx-auto">
+          <Eyebrow>Get Started</Eyebrow>
+          <h2 className="text-[40px] md:text-[60px] font-extrabold leading-[1.1] tracking-[-0.02em] text-white mb-8">
+            The sky is open.
+            <br />
+            Take your first observation.
+          </h2>
+          <p className="text-[18px] md:text-[20px] leading-[1.6] text-[#9BA3B4] max-w-[640px] mx-auto mb-12">
+            Sign in with email. Your wallet appears silently. Browse 7 missions, check tonight&apos;s sky,
+            ask ASTRA what&apos;s visible — start with whichever speaks to you.
+          </p>
+          <div className="inline-flex flex-wrap gap-3.5 justify-center">
+            <Link
+              href="/missions"
+              className="inline-flex items-center gap-2.5 px-9 py-4.5 bg-[#FFD166] text-[#0A0E1A] font-semibold text-[17px] rounded-xl hover:bg-[#FFE08A] transition-colors no-underline"
+              style={{ paddingTop: 18, paddingBottom: 18 }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              Start observing
+            </Link>
+            <Link
+              href="/sky"
+              className="inline-flex items-center gap-2.5 px-9 bg-[rgba(255,209,102,0.10)] text-[#FFD166] font-semibold text-[17px] rounded-xl border border-[rgba(255,209,102,0.30)] hover:bg-[rgba(255,209,102,0.18)] transition-colors no-underline"
+              style={{ paddingTop: 18, paddingBottom: 18 }}
+            >
+              Tonight&apos;s sky →
+            </Link>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }
