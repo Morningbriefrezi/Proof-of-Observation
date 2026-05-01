@@ -67,30 +67,30 @@ export default function FeaturedProduct({ product, dealerName }: Props) {
             {product.name}
           </h2>
           {meta && (
-            <p className="text-[10px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.5)] mb-3">{meta}</p>
+            <p className="text-[10px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.7)] mb-3">{meta}</p>
           )}
 
           {rows.length > 0 ? (
             <div
               className="grid grid-cols-2 gap-x-[14px] gap-y-[6px] py-[10px] mb-[14px]"
               style={{
-                borderTop: '0.5px solid rgba(232,230,221,0.06)',
-                borderBottom: '0.5px solid rgba(232,230,221,0.06)',
+                borderTop: '0.5px solid rgba(232,230,221,0.1)',
+                borderBottom: '0.5px solid rgba(232,230,221,0.1)',
               }}
             >
               {rows.map(r => (
                 <div key={r.key} className="flex justify-between gap-2">
-                  <span className="text-[10px] tracking-[0.1em] uppercase text-[rgba(232,230,221,0.4)]">{r.key}</span>
+                  <span className="text-[10px] tracking-[0.1em] uppercase text-[rgba(232,230,221,0.65)]">{r.key}</span>
                   <span className="text-[10px] font-medium text-[#E8E6DD] truncate">{r.value}</span>
                 </div>
               ))}
             </div>
           ) : (
             <p
-              className="text-[11px] leading-[1.4] text-[rgba(232,230,221,0.6)] py-[10px] mb-[14px] line-clamp-3"
+              className="text-[11px] leading-[1.4] text-[rgba(232,230,221,0.8)] py-[10px] mb-[14px] line-clamp-3"
               style={{
-                borderTop: '0.5px solid rgba(232,230,221,0.06)',
-                borderBottom: '0.5px solid rgba(232,230,221,0.06)',
+                borderTop: '0.5px solid rgba(232,230,221,0.1)',
+                borderBottom: '0.5px solid rgba(232,230,221,0.1)',
               }}
             >
               {product.description}
@@ -103,7 +103,7 @@ export default function FeaturedProduct({ product, dealerName }: Props) {
             <p className="text-[22px] font-bold leading-none tracking-[-0.01em] text-[var(--terracotta)]">
               {formatPrice(product)}
             </p>
-            <p className="text-[9px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.4)] mt-[4px]">
+            <p className="text-[9px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.7)] mt-[4px]">
               ✦ {product.starsPrice.toLocaleString()} stars
             </p>
           </div>
