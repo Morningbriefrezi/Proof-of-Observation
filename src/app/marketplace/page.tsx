@@ -36,7 +36,7 @@ const SECTION_COPY: Record<string, { label: string; sub: string; color: string }
   beginner:     { label: 'Beginner',    sub: 'First telescope · easy setup',    color: 'var(--seafoam)' },
   intermediate: { label: 'Mid',         sub: 'Step up · more aperture',         color: 'var(--terracotta)' },
   advanced:     { label: 'Advanced',    sub: 'Deep sky · serious gear',         color: 'var(--terracotta)' },
-  others:       { label: 'Accessories', sub: 'Eyepieces · binoculars · gear',   color: 'rgba(232,230,221,0.5)' },
+  others:       { label: 'Accessories', sub: 'Eyepieces · binoculars · gear',   color: 'rgba(232,230,221,0.75)' },
   all:          { label: 'All',         sub: 'All gear · sorted by difficulty', color: 'var(--seafoam)' },
 };
 
@@ -155,30 +155,30 @@ export default function MarketplacePage() {
         <div className="relative z-10">
           <button
             onClick={() => router.back()}
-            className="block text-[9px] tracking-[0.22em] uppercase text-[rgba(232,230,221,0.4)] hover:text-[rgba(232,230,221,0.7)] transition-colors mb-[18px]"
+            className="block text-[9px] tracking-[0.22em] uppercase text-[rgba(232,230,221,0.65)] hover:text-[#E8E6DD] transition-colors mb-[18px]"
           >
             ‹ Back · Marketplace
           </button>
 
-          <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 pb-[14px] mb-[14px] border-b border-[rgba(232,230,221,0.1)]">
-            <div className="flex items-baseline gap-3">
+          <header className="flex flex-col items-center gap-3 pb-[14px] mb-[14px] border-b border-[rgba(232,230,221,0.1)] text-center">
+            <div className="flex items-baseline justify-center gap-3">
               <span className="text-[9px] tracking-[0.24em] uppercase text-[var(--seafoam)] font-medium">04</span>
               <h1 className="text-[22px] font-semibold tracking-[-0.01em] text-[#E8E6DD] leading-none">
                 Marketplace<span className="text-[var(--terracotta)]">.</span>
               </h1>
             </div>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
               <span className="flex items-baseline gap-1.5 text-[10px] uppercase">
-                <span className="tracking-[0.14em] text-[rgba(232,230,221,0.35)]">Balance</span>
+                <span className="tracking-[0.14em] text-[rgba(232,230,221,0.65)]">Balance</span>
                 <span className="font-medium text-[var(--terracotta)]">{balance.toLocaleString()}</span>
-                <span className="text-[var(--terracotta)] opacity-70">✦</span>
+                <span className="text-[var(--terracotta)] opacity-80">✦</span>
               </span>
               <span className="flex items-center gap-1.5 text-[10px] uppercase">
-                <span className="tracking-[0.14em] text-[rgba(232,230,221,0.35)]">Region</span>
+                <span className="tracking-[0.14em] text-[rgba(232,230,221,0.65)]">Region</span>
                 <LocationPicker compact />
               </span>
               <span className="flex items-baseline gap-1.5 text-[10px] uppercase">
-                <span className="tracking-[0.14em] text-[rgba(232,230,221,0.35)]">Codes</span>
+                <span className="tracking-[0.14em] text-[rgba(232,230,221,0.65)]">Codes</span>
                 <span className="font-medium text-[#E8E6DD]">90d</span>
               </span>
             </div>
@@ -207,8 +207,8 @@ export default function MarketplacePage() {
                   </span>
                   <div className="flex flex-col flex-1 min-w-0">
                     <span className="text-[11px] text-[#E8E6DD] truncate">{tier.reward}</span>
-                    <span className="text-[9px] tracking-[0.1em] uppercase text-[rgba(232,230,221,0.4)] truncate">{l2}</span>
-                    <div className="h-[2px] bg-[rgba(232,230,221,0.05)] rounded-[1px] overflow-hidden mt-[3px]">
+                    <span className="text-[9px] tracking-[0.1em] uppercase text-[rgba(232,230,221,0.65)] truncate">{l2}</span>
+                    <div className="h-[2px] bg-[rgba(232,230,221,0.08)] rounded-[1px] overflow-hidden mt-[3px]">
                       <div
                         className="h-full bg-[var(--terracotta)] rounded-[1px]"
                         style={{ width: `${pct}%`, boxShadow: unlocked ? '0 0 6px rgba(232, 130, 107,0.8)' : undefined }}
@@ -234,7 +234,7 @@ export default function MarketplacePage() {
                   ) : (
                     <span
                       className="text-[9px] tracking-[0.16em] uppercase font-medium px-[10px] py-[5px] rounded-full whitespace-nowrap"
-                      style={{ border: '0.5px solid rgba(232,230,221,0.1)', color: 'rgba(232,230,221,0.3)' }}
+                      style={{ border: '0.5px solid rgba(232,230,221,0.18)', color: 'rgba(232,230,221,0.55)' }}
                     >
                       Locked
                     </span>
@@ -260,7 +260,7 @@ export default function MarketplacePage() {
                   style={
                     active
                       ? { background: 'rgba(232, 130, 107,0.1)', color: 'var(--terracotta)' }
-                      : { color: 'rgba(232,230,221,0.5)' }
+                      : { color: 'rgba(232,230,221,0.75)' }
                   }
                 >
                   {c.label}
@@ -278,9 +278,9 @@ export default function MarketplacePage() {
                   onClick={() => setDifficulty(active ? 'all' : d)}
                   className="px-[10px] py-[6px] text-[9px] tracking-[0.16em] uppercase font-medium rounded-full whitespace-nowrap transition-colors"
                   style={{
-                    border: `0.5px solid ${active ? tone.border : 'rgba(232,230,221,0.08)'}`,
+                    border: `0.5px solid ${active ? tone.border : 'rgba(232,230,221,0.18)'}`,
                     background: active ? tone.bg : 'transparent',
-                    color: active ? tone.color : 'rgba(232,230,221,0.5)',
+                    color: active ? tone.color : 'rgba(232,230,221,0.75)',
                   }}
                 >
                   {label}
@@ -294,20 +294,20 @@ export default function MarketplacePage() {
           )}
 
           {sections.length === 0 ? (
-            <p className="text-center text-[11px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.5)] py-12">
+            <p className="text-center text-[11px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.7)] py-12">
               No items match these filters
             </p>
           ) : (
             sections.map(sec => (
               <section key={sec.key} className="mb-7">
-                <div className="flex items-baseline gap-3 mb-[10px] pb-2 border-b border-[rgba(232,230,221,0.06)]">
+                <div className="flex items-baseline gap-3 mb-[10px] pb-2 border-b border-[rgba(232,230,221,0.1)]">
                   <span className="text-[9px] tracking-[0.24em] uppercase font-semibold" style={{ color: sec.color }}>
                     {sec.label}
                   </span>
-                  <span className="text-[10px] tracking-[0.1em] uppercase text-[rgba(232,230,221,0.4)]">
+                  <span className="text-[10px] tracking-[0.1em] uppercase text-[rgba(232,230,221,0.65)]">
                     {sec.sub}
                   </span>
-                  <span className="ml-auto text-[9px] tracking-[0.16em] uppercase text-[rgba(232,230,221,0.35)]">
+                  <span className="ml-auto text-[9px] tracking-[0.16em] uppercase text-[rgba(232,230,221,0.6)]">
                     {sec.items.length} {sec.items.length === 1 ? 'item' : 'items'}
                   </span>
                 </div>
