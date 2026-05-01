@@ -405,14 +405,15 @@ code, pre, .mono, [class*="font-mono"] {
     transform: translateY(-1px);
   }
 }
-.product-card {
-  will-change: transform;
-}
+/* will-change set only during hover, not always — a permanent will-change
+   keeps a compositor layer alive for every product card forever, which
+   adds up across a long marketplace grid. */
 @media (min-width: 640px) {
   .product-card:hover {
     transform: translateY(-4px);
     border-color: rgba(255, 209, 102, 0.35);
     box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
+    will-change: transform;
   }
 }
 

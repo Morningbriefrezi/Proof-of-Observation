@@ -23,7 +23,10 @@ export default function StarField() {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-  const starCount = isMobile ? 14 : 30;
+  // Cut from 30/14 — at this density the difference is invisible but each
+  // animated DOM node is its own compositor candidate. Pages also have their
+  // own gradient backgrounds; the field is a subtle ambient layer.
+  const starCount = isMobile ? 10 : 18;
 
   const stars = useMemo<Star[]>(
     () =>
