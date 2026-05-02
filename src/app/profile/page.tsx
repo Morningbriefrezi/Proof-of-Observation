@@ -450,7 +450,7 @@ export default function ProfilePage() {
             <span className="stl-cat-name">My Discoveries</span>
             <span className="stl-cat-count">{photoDiscoveries.length}</span>
             <Link
-              href="/missions"
+              href="/nfts"
               className="stl-mono-data"
               style={{ marginLeft: 'auto', color: 'var(--stl-green)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 2 }}
             >
