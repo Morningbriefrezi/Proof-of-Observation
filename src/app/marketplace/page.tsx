@@ -186,7 +186,7 @@ export default function MarketplacePage() {
             </div>
           </header>
 
-          <div className="grid grid-cols-3 gap-[6px] mb-[18px] overflow-x-auto">
+          <div className="flex md:grid md:grid-cols-3 gap-[6px] mb-[18px] overflow-x-auto -mx-1 px-1 md:mx-0 md:px-0 [-webkit-overflow-scrolling:touch]">
             {REDEEM_TIERS.map(tier => {
               const code     = revealedCodes[tier.apiTier];
               const unlocked = balance >= tier.stars;
@@ -197,7 +197,7 @@ export default function MarketplacePage() {
               return (
                 <div
                   key={tier.apiTier}
-                  className="flex items-center gap-2.5 px-3 py-[10px] rounded-lg min-w-[180px]"
+                  className="flex items-center gap-2.5 px-3 py-[10px] rounded-lg min-w-[220px] md:min-w-[180px] flex-shrink-0 md:flex-shrink"
                   style={{
                     background: unlocked ? 'rgba(255, 209, 102,0.04)' : 'rgba(255,255,255,0.015)',
                     border: unlocked ? '0.5px solid rgba(255, 209, 102,0.4)' : '0.5px solid rgba(232,230,221,0.08)',

@@ -119,7 +119,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-[40px] md:text-[60px] font-extrabold leading-[1.05] tracking-[-0.02em] text-white mb-7">
+    <h2 className="text-[28px] md:text-[60px] font-extrabold leading-[1.1] md:leading-[1.05] tracking-[-0.02em] text-white mb-5 md:mb-7">
       {children}
     </h2>
   );
@@ -127,18 +127,18 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 function SectionSub({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[18px] md:text-[20px] leading-[1.55] text-[#9BA3B4] max-w-[680px] mx-auto">
+    <p className="text-[15px] md:text-[20px] leading-[1.55] text-[#9BA3B4] max-w-[680px] mx-auto">
       {children}
     </p>
   );
 }
 
 function CardTitle({ children }: { children: React.ReactNode }) {
-  return <div className="text-[22px] font-bold text-white mb-4">{children}</div>;
+  return <div className="text-[18px] md:text-[22px] font-bold text-white mb-3 md:mb-4">{children}</div>;
 }
 
 function CardBody({ children }: { children: React.ReactNode }) {
-  return <div className="text-[15px] leading-[1.65] text-[#9BA3B4]">{children}</div>;
+  return <div className="text-[14px] md:text-[15px] leading-[1.65] text-[#9BA3B4]">{children}</div>;
 }
 
 function Prompt({ children }: { children: React.ReactNode }) {
@@ -165,7 +165,7 @@ export default function HomePage() {
       {/* ============================================================
           HERO
          ============================================================ */}
-      <section className="relative px-6 md:px-8 pt-20 md:pt-20 pb-24 overflow-hidden">
+      <section className="relative px-4 md:px-8 pt-12 md:pt-20 pb-16 md:pb-24 overflow-hidden">
         {/* radial glow */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -205,7 +205,7 @@ export default function HomePage() {
 
         <div className="relative max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-[1.1fr_1fr] gap-10 md:gap-15 items-center">
           <div>
-            <h1 className="text-[56px] md:text-[72px] font-extrabold leading-[1] tracking-[-0.025em] text-white mb-8">
+            <h1 className="text-[36px] md:text-[72px] font-extrabold leading-[1.05] md:leading-[1] tracking-[-0.025em] text-white mb-5 md:mb-8">
               Astronomy,
               <br />
               <span className="bg-gradient-to-r from-[#B07FE8] to-[#38F0FF] bg-clip-text text-transparent">
@@ -213,7 +213,7 @@ export default function HomePage() {
               </span>
             </h1>
 
-            <p className="text-[17px] md:text-[18px] leading-[1.65] text-[#9BA3B4] mb-9 max-w-[480px]">
+            <p className="text-[15px] md:text-[18px] leading-[1.65] text-[#9BA3B4] mb-7 md:mb-9 max-w-[480px]">
               For anyone with a smartphone and a sky above them. Step outside, photograph the night, earn rewards you can redeem for telescopes and optics.
             </p>
 
@@ -248,22 +248,22 @@ export default function HomePage() {
         </div>
 
         {/* hero stats */}
-        <div className="relative max-w-[1200px] mx-auto mt-20 grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
+        <div className="relative max-w-[1200px] mx-auto mt-12 md:mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10 text-center">
           <div>
-            <div className="text-[40px] md:text-[48px] font-bold leading-none mb-2 bg-gradient-to-r from-[#B07FE8] to-[#38F0FF] bg-clip-text text-transparent">7</div>
-            <div className="text-[14px] font-medium text-[#9BA3B4]">Sky Missions</div>
+            <div className="text-[28px] md:text-[48px] font-bold leading-none mb-1.5 md:mb-2 bg-gradient-to-r from-[#B07FE8] to-[#38F0FF] bg-clip-text text-transparent">7</div>
+            <div className="text-[12px] md:text-[14px] font-medium text-[#9BA3B4]">Sky Missions</div>
           </div>
           <div>
-            <div className="text-[40px] md:text-[48px] font-bold leading-none mb-2 text-[#FFD166]">60K+</div>
-            <div className="text-[14px] font-medium text-[#9BA3B4]">Astroman Reach</div>
+            <div className="text-[28px] md:text-[48px] font-bold leading-none mb-1.5 md:mb-2 text-[#FFD166]">60K+</div>
+            <div className="text-[12px] md:text-[14px] font-medium text-[#9BA3B4]">Astroman Reach</div>
           </div>
           <div>
-            <div className="text-[40px] md:text-[48px] font-bold leading-none mb-2 bg-gradient-to-r from-[#B07FE8] to-[#38F0FF] bg-clip-text text-transparent">3</div>
-            <div className="text-[14px] font-medium text-[#9BA3B4]">Brand Partners</div>
+            <div className="text-[28px] md:text-[48px] font-bold leading-none mb-1.5 md:mb-2 bg-gradient-to-r from-[#B07FE8] to-[#38F0FF] bg-clip-text text-transparent">3</div>
+            <div className="text-[12px] md:text-[14px] font-medium text-[#9BA3B4]">Brand Partners</div>
           </div>
           <div>
-            <div className="text-[40px] md:text-[48px] font-bold leading-none mb-2 text-[#FFD166]">100%</div>
-            <div className="text-[14px] font-medium text-[#9BA3B4]">Gasless</div>
+            <div className="text-[28px] md:text-[48px] font-bold leading-none mb-1.5 md:mb-2 text-[#FFD166]">100%</div>
+            <div className="text-[12px] md:text-[14px] font-medium text-[#9BA3B4]">Gasless</div>
           </div>
         </div>
       </section>
@@ -271,7 +271,7 @@ export default function HomePage() {
       {/* ============================================================
           HOW IT WORKS
          ============================================================ */}
-      <section className="px-6 md:px-8 py-20 md:py-[120px]">
+      <section className="px-4 md:px-8 py-14 md:py-[120px]">
         <div className="max-w-[1200px] mx-auto">
           <div className="text-center mb-16 md:mb-20">
             <Eyebrow>Get Started</Eyebrow>
@@ -279,10 +279,10 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr] gap-4 md:gap-0 items-stretch">
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-12 text-center">
-              <div className="text-[#FFD166] text-[40px] font-bold leading-none mb-7">01</div>
-              <div className="text-white text-[22px] font-bold mb-4">Sign in with email</div>
-              <div className="text-[#9BA3B4] text-[15px] leading-[1.6]">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-6 md:p-12 text-center">
+              <div className="text-[#FFD166] text-[28px] md:text-[40px] font-bold leading-none mb-4 md:mb-7">01</div>
+              <div className="text-white text-[18px] md:text-[22px] font-bold mb-3 md:mb-4">Sign in with email</div>
+              <div className="text-[#9BA3B4] text-[14px] md:text-[15px] leading-[1.6]">
                 Privy creates a Solana wallet silently. No seed phrase, no extension, no setup needed.
               </div>
             </div>
@@ -291,10 +291,10 @@ export default function HomePage() {
                 <path d="M5 12h14M13 6l6 6-6 6" />
               </svg>
             </div>
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-12 text-center">
-              <div className="text-[#FFD166] text-[40px] font-bold leading-none mb-7">02</div>
-              <div className="text-white text-[22px] font-bold mb-4">Photograph the sky</div>
-              <div className="text-[#9BA3B4] text-[15px] leading-[1.6]">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-6 md:p-12 text-center">
+              <div className="text-[#FFD166] text-[28px] md:text-[40px] font-bold leading-none mb-4 md:mb-7">02</div>
+              <div className="text-white text-[18px] md:text-[22px] font-bold mb-3 md:mb-4">Photograph the sky</div>
+              <div className="text-[#9BA3B4] text-[14px] md:text-[15px] leading-[1.6]">
                 Point your phone — or telescope, or DSLR — at the night. Open-Meteo verifies sky conditions. NFT attestation minted to your wallet, gasless.
               </div>
             </div>
@@ -303,10 +303,10 @@ export default function HomePage() {
                 <path d="M5 12h14M13 6l6 6-6 6" />
               </svg>
             </div>
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-12 text-center">
-              <div className="text-[#FFD166] text-[40px] font-bold leading-none mb-7">03</div>
-              <div className="text-white text-[22px] font-bold mb-4">Earn Stars, redeem real optics</div>
-              <div className="text-[#9BA3B4] text-[15px] leading-[1.6]">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-6 md:p-12 text-center">
+              <div className="text-[#FFD166] text-[28px] md:text-[40px] font-bold leading-none mb-4 md:mb-7">03</div>
+              <div className="text-white text-[18px] md:text-[22px] font-bold mb-3 md:mb-4">Earn Stars, redeem real optics</div>
+              <div className="text-[#9BA3B4] text-[14px] md:text-[15px] leading-[1.6]">
                 Each verified observation earns Stars. Redeem them at Astroman for telescopes, binoculars, and accessories — Bresser, Levenhuk, Celestron.
               </div>
             </div>
@@ -317,10 +317,10 @@ export default function HomePage() {
       {/* ============================================================
           THREE PILLARS
          ============================================================ */}
-      <section className="px-6 md:px-8 pb-20 md:pb-[120px]">
+      <section className="px-4 md:px-8 pb-14 md:pb-[120px]">
         <div className="max-w-[1200px] mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-5 md:p-9">
               <IconTile tone="brass">
                 <StrokeIcon tone="brass">
                   <path d="M5 27l8-8M11 21l-2 6-2-1-3 3M22 6l4 4M19 9l4 4M16 12l-2 2 4 4 2-2M22 6l-9 9 4 4 9-9" />
@@ -333,7 +333,7 @@ export default function HomePage() {
                 <em className="not-italic text-white italic">Any camera. Real photos. Real proof.</em>
               </CardBody>
             </div>
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-5 md:p-9">
               <IconTile tone="purple">
                 <StrokeIcon tone="purple">
                   <circle cx="16" cy="16" r="12" />
@@ -348,7 +348,7 @@ export default function HomePage() {
                 when the sky is clear, and where to point — phone, binoculars, or telescope.
               </CardBody>
             </div>
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-5 md:p-9">
               <IconTile tone="teal">
                 <StrokeIcon tone="teal">
                   <path d="M16 3l3 9h9l-7 5 3 9-8-6-8 6 3-9-7-5h9z" />
@@ -367,7 +367,7 @@ export default function HomePage() {
       {/* ============================================================
           SKY MISSIONS SHOWCASE
          ============================================================ */}
-      <section className="px-6 md:px-8 py-20 md:py-[120px]">
+      <section className="px-4 md:px-8 py-14 md:py-[120px]">
         <div className="max-w-[1200px] mx-auto">
           <div className="text-center mb-16 md:mb-20">
             <Eyebrow>Sky Missions</Eyebrow>
@@ -435,7 +435,7 @@ export default function HomePage() {
       {/* ============================================================
           CAPABILITIES
          ============================================================ */}
-      <section className="px-6 md:px-8 py-20 md:py-[120px]">
+      <section className="px-4 md:px-8 py-14 md:py-[120px]">
         <div className="max-w-[1200px] mx-auto">
           <div className="text-center mb-16 md:mb-20">
             <Eyebrow>Capabilities</Eyebrow>
@@ -446,7 +446,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-5 md:p-9">
               <IconTile tone="brass">
                 <StrokeIcon tone="brass">
                   <path d="M3 18c4-6 8-9 13-9s9 3 13 9" />
@@ -460,7 +460,7 @@ export default function HomePage() {
                 location via Open-Meteo.
               </CardBody>
             </div>
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-5 md:p-9">
               <IconTile tone="purple">
                 <StrokeIcon tone="purple">
                   <circle cx="16" cy="16" r="13" />
@@ -475,7 +475,7 @@ export default function HomePage() {
                 with astronomy-engine.
               </CardBody>
             </div>
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-5 md:p-9">
               <IconTile tone="teal">
                 <StrokeIcon tone="teal">
                   <rect x="6" y="6" width="20" height="20" rx="4" />
@@ -491,7 +491,7 @@ export default function HomePage() {
                 and what you can capture with whatever&apos;s in your hand.
               </CardBody>
             </div>
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-5 md:p-9">
               <IconTile tone="brass">
                 <StrokeIcon tone="brass">
                   <circle cx="16" cy="16" r="12" />
@@ -504,7 +504,7 @@ export default function HomePage() {
                 gasless, yours forever.
               </CardBody>
             </div>
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-5 md:p-9">
               <IconTile tone="purple">
                 <StrokeIcon tone="purple">
                   <path d="M16 3l3 9h9l-7 5 3 9-8-6-8 6 3-9-7-5h9z" />
@@ -516,7 +516,7 @@ export default function HomePage() {
                 Astroman for real gear.
               </CardBody>
             </div>
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-5 md:p-9">
               <IconTile tone="teal">
                 <StrokeIcon tone="teal">
                   <circle cx="9" cy="22" r="3" />
@@ -538,7 +538,7 @@ export default function HomePage() {
       {/* ============================================================
           REAL OBSERVERS
          ============================================================ */}
-      <section className="px-6 md:px-8 py-20 md:py-[120px]">
+      <section className="px-4 md:px-8 py-14 md:py-[120px]">
         <div className="max-w-[1200px] mx-auto">
           <div className="text-center mb-16 md:mb-20">
             <Eyebrow>Real Observers</Eyebrow>
@@ -553,7 +553,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-5 md:p-9">
               <IconTile tone="brass">
                 <StrokeIcon tone="brass">
                   <path d="M3 22c0-7 6-13 13-13s13 6 13 13" />
@@ -565,7 +565,7 @@ export default function HomePage() {
               <Prompt>&quot;Alert me at 6pm when tonight is a clear-sky &lsquo;Go&rsquo;&quot;</Prompt>
               <Prompt>&quot;Show me the next 3 dark-sky windows in Kazbegi&quot;</Prompt>
             </div>
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-5 md:p-9">
               <IconTile tone="purple">
                 <StrokeIcon tone="purple">
                   <circle cx="16" cy="16" r="12" />
@@ -577,7 +577,7 @@ export default function HomePage() {
               <Prompt>&quot;When can I see Saturn&apos;s rings tilt this year?&quot;</Prompt>
               <Prompt>&quot;Track Jupiter&apos;s 4 moons for the next two weeks&quot;</Prompt>
             </div>
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-5 md:p-9">
               <IconTile tone="teal">
                 <StrokeIcon tone="teal">
                   <path d="M5 25l9-9M11 19l-2 6-2-1-3 3M22 4l4 4M19 7l4 4M16 10l-2 2 4 4 2-2M22 4l-9 9 4 4 9-9" />
@@ -587,7 +587,7 @@ export default function HomePage() {
               <Prompt>&quot;What&apos;s left to complete the &lsquo;All Seven&rsquo; reward?&quot;</Prompt>
               <Prompt>&quot;Which missions can I shoot with just my phone?&quot;</Prompt>
             </div>
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-5 md:p-9">
               <IconTile tone="brass">
                 <StrokeIcon tone="brass">
                   <rect x="6" y="6" width="20" height="20" rx="4" />
@@ -600,7 +600,7 @@ export default function HomePage() {
               <Prompt>&quot;What can I photograph with my phone tonight?&quot;</Prompt>
               <Prompt>&quot;How do I find Andromeda by star-hopping?&quot;</Prompt>
             </div>
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-5 md:p-9">
               <IconTile tone="purple">
                 <StrokeIcon tone="purple">
                   <path d="M16 3l3 9h9l-7 5 3 9-8-6-8 6 3-9-7-5h9z" />
@@ -610,7 +610,7 @@ export default function HomePage() {
               <Prompt>&quot;How many Stars until the free Moon Lamp reward?&quot;</Prompt>
               <Prompt>&quot;Show all my unlocked Astroman discount codes&quot;</Prompt>
             </div>
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-5 md:p-9">
               <IconTile tone="teal">
                 <StrokeIcon tone="teal">
                   <circle cx="9" cy="22" r="3" />
@@ -629,7 +629,7 @@ export default function HomePage() {
       {/* ============================================================
           DISTRIBUTION (ASTROMAN)
          ============================================================ */}
-      <section className="px-6 md:px-8 py-20 md:py-[120px]">
+      <section className="px-4 md:px-8 py-14 md:py-[120px]">
         <div className="max-w-[1200px] mx-auto">
           <div className="text-center mb-16 md:mb-20">
             <Eyebrow>The Distribution</Eyebrow>
@@ -638,7 +638,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9 md:min-h-[240px]">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-5 md:p-9 md:min-h-[240px]">
               <IconTile tone="brass">
                 <StrokeIcon tone="brass">
                   <path d="M5 11h22l-2 14H7zM10 11V7a6 6 0 0112 0v4" />
@@ -650,7 +650,7 @@ export default function HomePage() {
                 exists, the logistics already work.
               </CardBody>
             </div>
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9 md:min-h-[240px]">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-5 md:p-9 md:min-h-[240px]">
               <IconTile tone="purple">
                 <StrokeIcon tone="purple">
                   <circle cx="11" cy="13" r="5" />
@@ -664,7 +664,7 @@ export default function HomePage() {
                 the loop. No upfront inventory.
               </CardBody>
             </div>
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-9 md:min-h-[240px]">
+            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-5 md:p-9 md:min-h-[240px]">
               <IconTile tone="teal">
                 <StrokeIcon tone="teal">
                   <path d="M16 3a8 8 0 018 8c0 6-8 16-8 16s-8-10-8-16a8 8 0 018-8z" />
@@ -684,7 +684,7 @@ export default function HomePage() {
       {/* ============================================================
           COMPARISON
          ============================================================ */}
-      <section className="px-6 md:px-8 py-20 md:py-[120px]">
+      <section className="px-4 md:px-8 py-14 md:py-[120px]">
         <div className="max-w-[1200px] mx-auto">
           <div className="text-center mb-16 md:mb-20">
             <Eyebrow>The Difference</Eyebrow>
@@ -762,7 +762,7 @@ export default function HomePage() {
       {/* ============================================================
           VISION
          ============================================================ */}
-      <section className="relative px-6 md:px-8 py-24 md:py-[140px] text-center overflow-hidden">
+      <section className="relative px-4 md:px-8 py-16 md:py-[140px] text-center overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -783,10 +783,10 @@ export default function HomePage() {
               <path d="M11 14l5-3 5 3v6l-5 3-5-3z" />
             </svg>
           </div>
-          <h2 className="text-[48px] md:text-[64px] font-bold mb-10 leading-none bg-gradient-to-r from-[#B07FE8] to-[#38F0FF] bg-clip-text text-transparent">
+          <h2 className="text-[32px] md:text-[64px] font-bold mb-6 md:mb-10 leading-none bg-gradient-to-r from-[#B07FE8] to-[#38F0FF] bg-clip-text text-transparent">
             The Vision
           </h2>
-          <p className="text-[18px] md:text-[20px] leading-[1.6] text-[#9BA3B4] max-w-[720px] mx-auto mb-8">
+          <p className="text-[15px] md:text-[20px] leading-[1.6] text-[#9BA3B4] max-w-[720px] mx-auto mb-7 md:mb-8">
             Anyone with a smartphone and a sky above them can become an observer.
             <strong className="text-white font-semibold"> Astroman is the shop. Stellar is the night sky&apos;s companion app.</strong>{' '}
             Together they make stargazing a tracked, rewarded, on-chain practice — and turn casual sky-gazers into real telescope owners over time.
@@ -807,12 +807,12 @@ export default function HomePage() {
       <section className="px-6 md:px-8 py-20 md:py-[120px] text-center">
         <div className="max-w-[1200px] mx-auto">
           <Eyebrow>Get Started</Eyebrow>
-          <h2 className="text-[40px] md:text-[60px] font-extrabold leading-[1.1] tracking-[-0.02em] text-white mb-8">
+          <h2 className="text-[28px] md:text-[60px] font-extrabold leading-[1.1] tracking-[-0.02em] text-white mb-5 md:mb-8">
             The sky is open.
             <br />
             Take your first observation.
           </h2>
-          <p className="text-[18px] md:text-[20px] leading-[1.6] text-[#9BA3B4] max-w-[640px] mx-auto mb-12">
+          <p className="text-[15px] md:text-[20px] leading-[1.6] text-[#9BA3B4] max-w-[640px] mx-auto mb-8 md:mb-12">
             Sign in with email. Your wallet appears silently. Step outside with the phone you already have,
             check tonight&apos;s sky, ask ASTRA what&apos;s visible — start with whichever speaks to you.
           </p>

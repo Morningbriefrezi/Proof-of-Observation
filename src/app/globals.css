@@ -689,6 +689,51 @@ input, select, textarea { font-size: 16px !important; }
   button, a[role="button"], select, input { min-height: 44px; }
 }
 
+/* === MOBILE-ONLY POLISH (max-width: 767px) ===
+   This block is mobile-only and must not affect tablet/desktop. */
+@media (max-width: 767px) {
+  /* Long unbreakable strings (wallet addresses, tx hashes, NFT IDs) */
+  .font-mono, code, pre, [class*="font-mono"] {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* Slow + dim the global cosmic glow on mobile (cheaper paint) */
+  body::after {
+    opacity: 0.55;
+  }
+
+  /* Reduce expensive backdrop-filters on common surfaces */
+  .glass-nav,
+  .reaction-picker,
+  .media-badge,
+  .media-coords,
+  .post-menu-dropdown,
+  .share-sheet {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+
+  /* Bottom-nav clearance safety net for any ad-hoc page main */
+  main {
+    padding-bottom: max(88px, calc(80px + env(safe-area-inset-bottom)));
+  }
+
+  /* Top safe-area awareness for fixed nav bars */
+  nav.fixed.top-0 {
+    top: env(safe-area-inset-top);
+  }
+}
+
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  body::after { animation: none !important; }
+}
+
 /* Desktop readability — scale rem base. Page width is owned by PageContainer. */
 @media (min-width: 1024px) {
   html { font-size: 17px; }

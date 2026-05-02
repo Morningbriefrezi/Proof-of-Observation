@@ -295,7 +295,7 @@ export default function FeedPage() {
                     onChange={onPickPhoto}
                   />
                   <button className={`tool-btn ${pendingImage ? 'active' : ''}`} onClick={() => fileInputRef.current?.click()}>
-                    <ImageIcon /> Photo
+                    <ImageIcon /> <span className="tool-btn-label">Photo</span>
                   </button>
                   <button
                     className={`tool-btn ${pendingObservation ? 'active' : ''}`}
@@ -319,17 +319,17 @@ export default function FeedPage() {
                       } catch {}
                     }}
                   >
-                    <Eye /> Observation
+                    <Eye /> <span className="tool-btn-label">Observation</span>
                   </button>
                   <button className={`tool-btn ${pendingLocation ? 'active' : ''}`} onClick={requestLocation}>
-                    <MapPin /> Location
+                    <MapPin /> <span className="tool-btn-label">Location</span>
                   </button>
                   <button
                     className="tool-btn"
                     onClick={() => router.push('/nfts')}
                     title="Open your discoveries to attach an NFT"
                   >
-                    <Gem /> NFT
+                    <Gem /> <span className="tool-btn-label">NFT</span>
                   </button>
                 </div>
                 <button className="post-btn" disabled={!canPost} onClick={submitPost}>

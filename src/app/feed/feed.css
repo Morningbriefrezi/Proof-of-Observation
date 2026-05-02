@@ -872,3 +872,127 @@
   cursor: pointer;
   font-family: var(--feed-sans);
 }
+
+/* === MOBILE-ONLY POLISH (max-width: 767px) ===
+   Affects only phone-sized viewports; tablet+ desktop unchanged. */
+@media (max-width: 767px) {
+  .feed-page {
+    padding: 16px 14px 120px;
+  }
+
+  /* Composer */
+  .composer { padding: 14px; border-radius: 14px; margin-bottom: 18px; }
+  .composer-row { gap: 10px; }
+  .composer-avatar {
+    width: 36px; height: 36px; font-size: 16px;
+  }
+  .composer-input { font-size: 15px; }
+  .composer-actions { margin-top: 12px; padding-top: 12px; gap: 8px; }
+  .composer-tools { gap: 4px; flex-wrap: nowrap; }
+  /* Collapse tool buttons to icon-only on mobile */
+  .tool-btn {
+    padding: 10px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 999px;
+  }
+  .tool-btn-label { display: none; }
+  .post-btn {
+    padding: 10px 16px;
+    min-height: 44px;
+    font-size: 13px;
+  }
+  .composer-thumb { width: 80px; height: 80px; }
+  .composer-auth {
+    padding: 12px 14px;
+    border-radius: 14px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* Filter tabs */
+  .feed-filters {
+    margin-bottom: 18px;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+  .feed-filters::-webkit-scrollbar { display: none; }
+  .filter-tab {
+    padding: 10px 16px;
+    min-height: 38px;
+    font-size: 13px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Posts */
+  .feed-post {
+    padding: 14px 12px;
+    border-radius: 14px;
+    margin-bottom: 14px;
+  }
+  .post-header { margin-bottom: 12px; }
+  .post-text { font-size: 14px; margin-bottom: 14px; }
+  .post-quote { font-size: 17px; }
+  .post-media { border-radius: 10px; margin-bottom: 12px; }
+  .author-avatar { width: 36px; height: 36px; font-size: 16px; }
+  .author-name { font-size: 13px; gap: 6px; }
+  .author-meta { font-size: 9.5px; gap: 6px; }
+
+  /* Reactions */
+  .reactions-summary { padding: 8px 0; gap: 8px; }
+  .reaction-emoji { width: 20px; height: 20px; font-size: 10px; }
+
+  /* Action buttons (Stars / Comment / Share) */
+  .actions { gap: 2px; padding: 4px 0 2px; }
+  .action {
+    padding: 12px 8px;
+    gap: 6px;
+    font-size: 12.5px;
+    min-height: 44px;
+  }
+  .action svg { width: 15px; height: 15px; }
+
+  /* Disable hover-only reaction picker on mobile (single tap toggles stars) */
+  .reaction-picker { display: none !important; }
+
+  /* Comments */
+  .comment { gap: 8px; margin-bottom: 10px; }
+  .comment-avatar { width: 28px; height: 28px; font-size: 13px; }
+  .comment-content { padding: 8px 12px; border-radius: 12px; }
+  .comment-text { font-size: 12.5px; }
+  .comment-actions { gap: 12px; padding: 6px 12px 0; }
+  .comment-input-wrap { padding: 8px 12px; }
+
+  /* Achievements / sky widget cards */
+  .achievement {
+    padding: 14px;
+    gap: 12px;
+    border-radius: 12px;
+  }
+  .achievement-icon { width: 44px; height: 44px; }
+  .achievement-icon svg,
+  .achievement-icon img { transform: scale(0.85); }
+  .achievement-title { font-size: 16px; }
+  .achievement-stars { font-size: 12px; }
+
+  /* Lightbox */
+  .feed-lightbox img { max-width: 95vw; max-height: 85vh; }
+
+  /* Post media overlays */
+  .media-badge {
+    top: 10px; left: 10px;
+    padding: 5px 9px 5px 7px;
+    font-size: 9.5px;
+  }
+  .media-meta {
+    bottom: 10px; left: 10px; right: 10px;
+    gap: 8px;
+  }
+  .media-target { font-size: 16px; }
+  .media-coords { font-size: 9.5px; padding: 3px 6px; }
+}
