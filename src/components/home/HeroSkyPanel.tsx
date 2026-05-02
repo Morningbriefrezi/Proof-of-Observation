@@ -123,13 +123,27 @@ export default function HeroSkyPanel() {
             <stop offset="92%"  stopColor="#FFFFFF" stopOpacity="0.22" />
             <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
           </radialGradient>
-          {/* saturn ring stripes — tan with cassini gap */}
-          <linearGradient id="ring-grad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%"   stopColor="#9C7A4E" stopOpacity="0" />
-            <stop offset="20%"  stopColor="#D9B886" stopOpacity="0.85" />
-            <stop offset="50%"  stopColor="#F0DCA8" stopOpacity="1" />
-            <stop offset="80%"  stopColor="#D9B886" stopOpacity="0.85" />
-            <stop offset="100%" stopColor="#9C7A4E" stopOpacity="0" />
+          {/* saturn ring bands — fade at edges so the ring "recedes" into space */}
+          <linearGradient id="ring-a" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stopColor="#8A6D45" stopOpacity="0" />
+            <stop offset="18%"  stopColor="#B8945C" stopOpacity="0.7" />
+            <stop offset="50%"  stopColor="#D9B886" stopOpacity="0.95" />
+            <stop offset="82%"  stopColor="#B8945C" stopOpacity="0.7" />
+            <stop offset="100%" stopColor="#8A6D45" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="ring-b" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stopColor="#A88656" stopOpacity="0" />
+            <stop offset="15%"  stopColor="#E0C088" stopOpacity="0.85" />
+            <stop offset="50%"  stopColor="#F2DDB0" stopOpacity="1" />
+            <stop offset="85%"  stopColor="#E0C088" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#A88656" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="ring-c" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stopColor="#6B563A" stopOpacity="0" />
+            <stop offset="22%"  stopColor="#8E7551" stopOpacity="0.45" />
+            <stop offset="50%"  stopColor="#A38863" stopOpacity="0.55" />
+            <stop offset="78%"  stopColor="#8E7551" stopOpacity="0.45" />
+            <stop offset="100%" stopColor="#6B563A" stopOpacity="0" />
           </linearGradient>
 
           {/* clip paths — one per planet, anchored at (0,0) so they
@@ -144,10 +158,10 @@ export default function HeroSkyPanel() {
           </clipPath>
           {/* saturn ring half-clips */}
           <clipPath id="ring-back" clipPathUnits="userSpaceOnUse">
-            <rect x="-30" y="-15" width="60" height="15" />
+            <rect x="-40" y="-20" width="80" height="20" />
           </clipPath>
           <clipPath id="ring-front" clipPathUnits="userSpaceOnUse">
-            <rect x="-30" y="0" width="60" height="15" />
+            <rect x="-40" y="0" width="80" height="20" />
           </clipPath>
         </defs>
 
@@ -236,9 +250,13 @@ export default function HeroSkyPanel() {
 
                 {/* SATURN — back half of rings (rendered before body) */}
                 {p.rings && (
-                  <g transform="rotate(-18)" clipPath="url(#ring-back)">
-                    <ellipse cx="0" cy="0" rx={r * 2.1} ry={r * 0.55} stroke="url(#ring-grad)" strokeWidth="0.9" fill="none" />
-                    <ellipse cx="0" cy="0" rx={r * 1.85} ry={r * 0.5}  stroke="url(#ring-grad)" strokeWidth="0.55" fill="none" opacity="0.65" />
+                  <g transform="rotate(-22)" clipPath="url(#ring-back)" opacity="0.85">
+                    {/* C ring (innermost, dim) */}
+                    <ellipse cx="0" cy="0" rx={r * 1.42} ry={r * 0.38} stroke="url(#ring-c)" strokeWidth="0.7" fill="none" />
+                    {/* B ring (brightest, widest) */}
+                    <ellipse cx="0" cy="0" rx={r * 1.74} ry={r * 0.46} stroke="url(#ring-b)" strokeWidth="1.7" fill="none" />
+                    {/* A ring (outer) */}
+                    <ellipse cx="0" cy="0" rx={r * 2.08} ry={r * 0.55} stroke="url(#ring-a)" strokeWidth="1.0" fill="none" />
                   </g>
                 )}
 
@@ -275,11 +293,17 @@ export default function HeroSkyPanel() {
 
                 {/* SATURN — front half of rings */}
                 {p.rings && (
-                  <g transform="rotate(-18)" clipPath="url(#ring-front)">
-                    <ellipse cx="0" cy="0" rx={r * 2.1} ry={r * 0.55} stroke="url(#ring-grad)" strokeWidth="1.2" fill="none" />
-                    <ellipse cx="0" cy="0" rx={r * 1.85} ry={r * 0.5} stroke="url(#ring-grad)" strokeWidth="0.7" fill="none" opacity="0.7" />
-                    {/* Cassini Division */}
-                    <ellipse cx="0" cy="0" rx={r * 1.97} ry={r * 0.52} stroke="#0A0E1A" strokeWidth="0.55" fill="none" />
+                  <g transform="rotate(-22)" clipPath="url(#ring-front)">
+                    {/* C ring (innermost, dim) */}
+                    <ellipse cx="0" cy="0" rx={r * 1.42} ry={r * 0.38} stroke="url(#ring-c)" strokeWidth="0.8" fill="none" />
+                    {/* B ring (brightest) */}
+                    <ellipse cx="0" cy="0" rx={r * 1.74} ry={r * 0.46} stroke="url(#ring-b)" strokeWidth="1.9" fill="none" />
+                    {/* A ring */}
+                    <ellipse cx="0" cy="0" rx={r * 2.08} ry={r * 0.55} stroke="url(#ring-a)" strokeWidth="1.15" fill="none" />
+                    {/* Cassini Division (gap between B and A) */}
+                    <ellipse cx="0" cy="0" rx={r * 1.92} ry={r * 0.51} stroke="#0A0E1A" strokeWidth="0.55" fill="none" />
+                    {/* Encke Gap (faint dark line in A) */}
+                    <ellipse cx="0" cy="0" rx={r * 2.04} ry={r * 0.54} stroke="#1A1F2E" strokeWidth="0.25" fill="none" opacity="0.7" />
                   </g>
                 )}
 
@@ -302,21 +326,6 @@ export default function HeroSkyPanel() {
           );
         })}
 
-        {/* corner stamps */}
-        <g style={{ fontFamily: 'var(--font-mono)' }}>
-          <text x="20" y="28" fontSize="9" fill="#6B7280" letterSpacing="0.22em">ORRERY</text>
-          <text x="20" y="44" fontSize="8" fill="#4A5269" letterSpacing="0.16em">2026 · MAY · 02</text>
-
-          <text x="460" y="28" fontSize="9" fill="#6B7280" letterSpacing="0.22em" textAnchor="end">EPOCH J2026</text>
-          <text x="460" y="44" fontSize="8" fill="#4A5269" letterSpacing="0.16em" textAnchor="end">HELIOCENTRIC</text>
-
-          <text x="20" y="468" fontSize="8" fill="#3A4256" letterSpacing="0.2em">
-            ☿ ♀ ♁ ♂ ♃ ♄ ♅ ♆
-          </text>
-          <text x="460" y="468" fontSize="7" fill="#3A4256" letterSpacing="0.16em" textAnchor="end">
-            TEXTURES · SOLARSYSTEMSCOPE · CC BY 4.0
-          </text>
-        </g>
       </svg>
     </div>
   );
