@@ -1098,12 +1098,17 @@
   isolation: isolate;
   overflow: hidden;
 }
-/* Light-mode-only: light-blue page canvas with the shell as a warm-white
-   card. Dark mode keeps its cosmic aura. */
-.markets-page:not(.dark) { background: #DDE9F4; }
+/* Light-mode-only: cosmic-blue page canvas (matches site-wide --canvas) with
+   the shell as a warm-white card sitting on it. Dark mode keeps its aura. */
+.markets-page:not(.dark) { background: var(--canvas); }
 .markets-page:not(.dark)::before,
 .markets-page:not(.dark)::after { display: none; }
-.markets-page:not(.dark) .mkt-shell { background: var(--stl-bg); }
+.markets-page:not(.dark) .mkt-shell {
+  background: var(--stl-bg);
+  border-left: 1px solid rgba(255, 255, 255, 0.10);
+  border-right: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 24px 60px rgba(0, 0, 0, 0.30);
+}
 .markets-page:not(.dark) .mkt-trending-chip {
   background: var(--stl-bg2);
 }
@@ -4552,8 +4557,8 @@
 }
 
 .missions-page.dark {
-  --mis-bg: #0F1012;
-  --mis-bg2: #18191D;
+  --mis-bg: var(--canvas);
+  --mis-bg2: #14213F;
   --mis-t1: #EDEDEF;
   --mis-t2: #8E919A;
   --mis-t3: #585B66;
@@ -4587,11 +4592,11 @@
 
 /* === Cosmic hero — always dark, full-width === */
 .mis-hero {
-  background: linear-gradient(175deg, #030712 0%, #0A1628 30%, #0F1F40 55%, #152850 80%, #1A3060 100%);
+  background: var(--canvas);
   color: #fff;
   position: relative;
   overflow: hidden;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .mis-hero::before {
   content: '';
@@ -4738,8 +4743,8 @@
   margin-bottom: 14px;
   cursor: pointer;
   transition: border-color 0.2s ease, background 0.2s ease;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   text-align: left;
   width: 100%;
 }
@@ -4813,8 +4818,8 @@
 /* === Tonight's lineup (replaces sky map) === */
 .mis-lineup {
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.06);
-  background: linear-gradient(180deg, rgba(10,14,28,0.7), rgba(6,9,20,0.85));
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255, 255, 255, 0.025);
   padding: 14px 16px 16px;
   display: flex;
   flex-direction: column;
@@ -4861,8 +4866,8 @@
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 12px;
   cursor: pointer;
   text-align: left;
