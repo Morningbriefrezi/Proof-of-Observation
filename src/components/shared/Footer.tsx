@@ -82,8 +82,16 @@ export default function Footer() {
         }}
       >
         {/* Top: brand + columns */}
-        <div className="footer-top">
-          <div className="footer-brand">
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 2fr)',
+            gap: 48,
+            alignItems: 'start',
+          }}
+          className="stellar-footer-top"
+        >
+          <div>
             <AstroLogo size={28} variant="white" showWordmark />
             <p
               style={{
@@ -99,7 +107,14 @@ export default function Footer() {
             </p>
           </div>
 
-          <div className="footer-cols">
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+              gap: 32,
+            }}
+            className="stellar-footer-cols"
+          >
             {columns.map(col => (
               <div key={col.title}>
                 <p
@@ -147,32 +162,20 @@ export default function Footer() {
         </div>
       </div>
 
-      <style jsx>{`
-        .footer-top {
-          display: grid;
-          grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr);
-          gap: 48px;
-          align-items: start;
-        }
-        .footer-cols {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 32px;
-        }
+      <style>{`
         @media (max-width: 720px) {
-          .footer-top {
-            grid-template-columns: 1fr;
-            gap: 32px;
+          .stellar-footer-top {
+            grid-template-columns: 1fr !important;
+            gap: 32px !important;
           }
-          .footer-cols {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 20px;
+          .stellar-footer-cols {
+            gap: 20px !important;
           }
         }
         @media (max-width: 480px) {
-          .footer-cols {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 24px;
+          .stellar-footer-cols {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 24px !important;
           }
         }
       `}</style>

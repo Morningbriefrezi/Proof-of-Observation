@@ -12,6 +12,7 @@ import {
 interface VisibleNowProps {
   planets: PlanetData[];
   featuredTarget?: string;
+  isCurrentlyDark?: boolean;
 }
 
 const PLANET_ICONS: Record<string, { emoji: string; bg: string }> = {
@@ -23,7 +24,7 @@ const PLANET_ICONS: Record<string, { emoji: string; bg: string }> = {
   Moon: { emoji: '○', bg: 'rgba(255,255,255,0.06)' },
 };
 
-export function VisibleNow({ planets, featuredTarget }: VisibleNowProps) {
+export function VisibleNow({ planets, featuredTarget, isCurrentlyDark = true }: VisibleNowProps) {
   // Sort: visible-with-altitude first (descending), then below-horizon
   const ranked = [...planets].sort((a, b) => {
     if (a.visible && !b.visible) return -1;
@@ -44,7 +45,9 @@ export function VisibleNow({ planets, featuredTarget }: VisibleNowProps) {
           marginBottom: 14,
         }}
       >
-        <div style={{ fontFamily: 'var(--serif)', fontSize: 17 }}>Visible now</div>
+        <div style={{ fontFamily: 'var(--serif)', fontSize: 17 }}>
+          {isCurrentlyDark ? 'Visible now' : 'Visible tonight'}
+        </div>
         <div
           style={{
             fontFamily: 'var(--mono)',

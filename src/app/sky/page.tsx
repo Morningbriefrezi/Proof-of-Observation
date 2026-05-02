@@ -72,9 +72,12 @@ export default function SkyPage() {
 
         <section className="section">
           <div className="section-head">
-            <h2 className="section-title">Where to look right now</h2>
+            <h2 className="section-title">
+              {sky.isCurrentlyDark ? 'Where to look right now' : 'Where to look tonight'}
+            </h2>
             <span className="section-meta">
-              Live · {sky.refreshedAt ? sky.refreshedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '—'}
+              {sky.isCurrentlyDark ? 'Live · ' : 'Dark midpoint · '}
+              {(sky.isCurrentlyDark ? sky.refreshedAt : sky.evalTime)?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) ?? '—'}
             </span>
           </div>
           <div className="observe-row">
@@ -83,7 +86,11 @@ export default function SkyPage() {
               featuredTarget={featuredTarget}
               refreshedAt={sky.refreshedAt}
             />
-            <VisibleNow planets={sky.planets} featuredTarget={featuredTarget} />
+            <VisibleNow
+              planets={sky.planets}
+              featuredTarget={featuredTarget}
+              isCurrentlyDark={sky.isCurrentlyDark}
+            />
           </div>
         </section>
 

@@ -65,18 +65,20 @@ function marketToRow(m: Market): Row {
 
 export default function HomeMarkets() {
   const program = useReadOnlyProgram();
-  const [rows, setRows] = useState<Row[]>(() => {
+  const [rows, setRows] = useState<Row[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
     const seed = loadSeedMarkets();
     const now = Date.now();
-    return seed
+    const seedRows = seed
       .filter((m) => m.marketId !== null && !m.preResolved && m.closeTime.getTime() > now)
       .sort((a, b) => a.closeTime.getTime() - b.closeTime.getTime())
       .slice(0, 5)
       .map((m) => metadataToRow(m));
-  });
+    setRows(seedRows);
 
-  useEffect(() => {
-    let cancelled = false;
     getFullMarkets(program)
       .then((full) => {
         if (cancelled) return;

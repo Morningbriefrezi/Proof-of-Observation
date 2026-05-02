@@ -4,6 +4,7 @@ import { getDb } from '@/lib/db'
 import { feedPosts, feedShares } from '@/lib/schema'
 
 const ALLOWED_DESTINATIONS = ['farcaster', 'twitter', 'copy_link'] as const
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export async function POST(req: NextRequest) {
   const db = getDb()
@@ -20,6 +21,9 @@ export async function POST(req: NextRequest) {
   }
   if (!ALLOWED_DESTINATIONS.includes(destination as typeof ALLOWED_DESTINATIONS[number])) {
     return NextResponse.json({ error: 'Invalid destination' }, { status: 400 })
+  }
+  if (!UUID_RE.test(postId)) {
+    return NextResponse.json({ error: 'postId must be a UUID' }, { status: 400 })
   }
 
   await db.insert(feedShares).values({ postId, wallet, destination })

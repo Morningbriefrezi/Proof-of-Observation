@@ -42,6 +42,46 @@ function fmtTime(d: Date | null): Date | null {
   return d;
 }
 
+/**
+ * Sample each planet across a window (typically tonight's astronomical dark
+ * window) and return its peak altitude/azimuth during that window. Planets
+ * that never get above the horizon during the window still appear in the
+ * results so callers can decide whether to filter them out.
+ *
+ * `transit` in the returned data is overwritten with the *peak time during
+ * the window* — this is what UIs label as "peak HH:MM tonight".
+ */
+export function getWindowPlanets(
+  lat: number,
+  lng: number,
+  windowStart: Date,
+  windowEnd: Date,
+  samples: number = 9,
+): PlanetInfo[] {
+  if (samples < 2 || windowEnd.getTime() <= windowStart.getTime()) {
+    return getVisiblePlanets(lat, lng, windowStart);
+  }
+  const step = (windowEnd.getTime() - windowStart.getTime()) / (samples - 1);
+  const best = new Map<string, { info: PlanetInfo; peakAt: Date }>();
+  for (let i = 0; i < samples; i++) {
+    const t = new Date(windowStart.getTime() + step * i);
+    const planets = getVisiblePlanets(lat, lng, t);
+    for (const p of planets) {
+      const prev = best.get(p.key);
+      if (!prev || p.altitude > prev.info.altitude) {
+        best.set(p.key, { info: p, peakAt: t });
+      }
+    }
+  }
+  return Array.from(best.values())
+    .map(({ info, peakAt }) => ({
+      ...info,
+      transit: peakAt,
+      visible: info.altitude > 0,
+    }))
+    .sort((a, b) => b.altitude - a.altitude);
+}
+
 export function getVisiblePlanets(lat: number, lng: number, date: Date): PlanetInfo[] {
   const observer = new Observer(lat, lng, 0);
 
@@ -56,10 +96,15 @@ export function getVisiblePlanets(lat: number, lng: number, date: Date): PlanetI
       let magnitude = 0;
       try { magnitude = Illumination(body, date).mag; } catch { /* ignore */ }
 
+      // Anchor rise/set searches at `date` (not midnight) so the pair is
+      // coherent relative to "now": for a planet currently up, set is the
+      // upcoming set and rise is the next rise after that. For one below
+      // the horizon, rise is the upcoming rise and set is the set that
+      // follows. Either way, callers get a usable next-event timestamp.
       let rise: Date | null = null;
       let set: Date | null = null;
-      try { rise = SearchRiseSet(body, observer, +1, midnight, 1)?.date ?? null; } catch { /* ignore */ }
-      try { set  = SearchRiseSet(body, observer, -1, midnight, 1)?.date ?? null; } catch { /* ignore */ }
+      try { rise = SearchRiseSet(body, observer, +1, date, 1)?.date ?? null; } catch { /* ignore */ }
+      try { set  = SearchRiseSet(body, observer, -1, date, 1)?.date ?? null; } catch { /* ignore */ }
 
       let transit: Date | null = null;
       try {

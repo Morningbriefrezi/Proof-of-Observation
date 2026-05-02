@@ -9,7 +9,8 @@ import { useVisibleInterval } from '@/hooks/useVisibleInterval';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useLocale, useTranslations } from 'next-intl';
 import { useLocation } from '@/lib/location';
-import { getVisiblePlanets } from '@/lib/planets';
+import { getVisiblePlanets, getWindowPlanets } from '@/lib/planets';
+import { getTonightDarkWindow } from '@/lib/dark-window';
 import { getChartDeepSky } from '@/lib/sky-chart';
 import { getRank } from '@/lib/rewards';
 import { MISSIONS } from '@/lib/constants';
@@ -144,19 +145,28 @@ export default function MissionsPage() {
   const lon = location.lon ?? 44.8271;
   const cityLabel = location.city || 'Tbilisi';
 
+  const dark = useMemo(() => getTonightDarkWindow(lat, lon, now), [lat, lon, now]);
+  const evalTime = dark.evalTime;
+
+  const tonightPlanets = useMemo(() => {
+    if (dark.isCurrentlyDark || !dark.duskStart || !dark.dawnEnd) {
+      return getVisiblePlanets(lat, lon, evalTime);
+    }
+    return getWindowPlanets(lat, lon, dark.duskStart, dark.dawnEnd);
+  }, [lat, lon, evalTime, dark.isCurrentlyDark, dark.duskStart, dark.dawnEnd]);
+
   const skyPositions = useMemo(() => {
     const out: Record<string, { altitude: number; azimuth: number; rise: Date | null }> = {};
-    const planets = getVisiblePlanets(lat, lon, now);
-    for (const p of planets) {
+    for (const p of tonightPlanets) {
       const rise = p.rise instanceof Date ? p.rise : null;
       out[p.key] = { altitude: p.altitude, azimuth: p.azimuth, rise };
     }
-    const ds = getChartDeepSky(lat, lon, now, 200, 100, 180);
+    const ds = getChartDeepSky(lat, lon, evalTime, 200, 100, 180);
     for (const d of ds) {
       out[d.id] = { altitude: d.altitude, azimuth: d.azimuth, rise: null };
     }
     return out;
-  }, [lat, lon, now]);
+  }, [lat, lon, evalTime, tonightPlanets]);
 
   const completedIds = useMemo(
     () => new Set(state.completedMissions.filter((m) => m.status === 'completed').map((m) => m.id)),
@@ -203,7 +213,8 @@ export default function MissionsPage() {
     [state.completedMissions],
   );
 
-  const liveTime = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const headerTime = (dark.isCurrentlyDark ? now : evalTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const headerLabel = dark.isCurrentlyDark ? 'LIVE' : 'TONIGHT';
   const dateLabel = now.toLocaleDateString([], { month: 'short', day: 'numeric' });
 
   const startMission = useCallback((routeId: string) => {
@@ -211,8 +222,7 @@ export default function MissionsPage() {
   }, [router]);
 
   const lineup = useMemo(() => {
-    const planets = getVisiblePlanets(lat, lon, now);
-    const map = new Map(planets.map((p) => [p.key, p] as const));
+    const map = new Map(tonightPlanets.map((p) => [p.key, p] as const));
     const items: {
       key: string;
       name: string;
@@ -238,7 +248,7 @@ export default function MissionsPage() {
     }
     items.sort((a, b) => b.altitude - a.altitude);
     return items;
-  }, [lat, lon, now]);
+  }, [tonightPlanets]);
 
   // ---- Auth gate ----
   if (!authenticated) {
@@ -262,7 +272,8 @@ export default function MissionsPage() {
             </div>
             <TonightLineup
               items={lineup}
-              liveTime={liveTime}
+              headerLabel={headerLabel}
+              headerTime={headerTime}
               dateLabel={dateLabel}
               cityLabel={cityLabel}
               onStart={() => undefined}
@@ -325,7 +336,8 @@ export default function MissionsPage() {
 
           <TonightLineup
             items={lineup}
-            liveTime={liveTime}
+            headerLabel={headerLabel}
+            headerTime={headerTime}
             dateLabel={dateLabel}
             cityLabel={cityLabel}
             onStart={(routeId) => startMission(routeId)}
@@ -449,13 +461,15 @@ interface LineupItem {
 
 function TonightLineup({
   items,
-  liveTime,
+  headerLabel,
+  headerTime,
   dateLabel,
   cityLabel,
   onStart,
 }: {
   items: LineupItem[];
-  liveTime: string;
+  headerLabel: string;
+  headerTime: string;
   dateLabel: string;
   cityLabel: string;
   onStart: (routeId: string) => void;
@@ -465,14 +479,14 @@ function TonightLineup({
       <div className="mis-lineup-head">
         <div className="mis-lineup-status">
           <span className="mis-lineup-dot" aria-hidden />
-          <span>LIVE · {liveTime}</span>
+          <span>{headerLabel} · {headerTime}</span>
         </div>
         <div className="mis-lineup-loc">{dateLabel} · {cityLabel}</div>
       </div>
 
       {items.length === 0 ? (
         <div className="mis-lineup-empty">
-          <span className="mis-lineup-empty-title">Nothing above the horizon right now</span>
+          <span className="mis-lineup-empty-title">Nothing above the horizon tonight</span>
           <span className="mis-lineup-empty-sub">Check back after sunset — quizzes below earn Stars while you wait.</span>
         </div>
       ) : (

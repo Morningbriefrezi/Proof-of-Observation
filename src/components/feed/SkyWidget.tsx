@@ -4,6 +4,15 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Telescope, Clock } from 'lucide-react'
+import { getTonightDarkWindow, type TonightDarkWindow } from '@/lib/dark-window'
+
+const SSR_DARK: TonightDarkWindow = {
+  duskStart: null,
+  dawnEnd: null,
+  midpoint: null,
+  evalTime: new Date(0),
+  isCurrentlyDark: false,
+}
 
 type Forecast = Array<{ date: string; hours: Array<{ cloudCover: number }> }>
 type SunMoon = {
@@ -44,9 +53,9 @@ const PLANET_GLYPH: Record<string, string> = {
   saturn: '♄',
 }
 
-function fmtTime(value: string | null | undefined): string {
+function fmtTime(value: string | Date | null | undefined): string {
   if (!value) return '—'
-  const d = new Date(value)
+  const d = value instanceof Date ? value : new Date(value)
   if (isNaN(d.getTime())) return '—'
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
@@ -69,15 +78,21 @@ export default function SkyWidget({ lat, lon, cityLabel }: Props) {
   const [forecast, setForecast] = useState<Forecast>([])
   const [sunMoon, setSunMoon] = useState<SunMoon | null>(null)
   const [planets, setPlanets] = useState<Planet[]>([])
+  const [dark, setDark] = useState<TonightDarkWindow>(SSR_DARK)
+
+  useEffect(() => {
+    setDark(getTonightDarkWindow(lat, lon))
+  }, [lat, lon])
 
   useEffect(() => {
     const q = `lat=${lat}&lng=${lon}`
+    const planetQ = dark.isCurrentlyDark ? q : `${q}&tonight=1`
     Promise.allSettled([
       fetch(`/api/sky/forecast?${q}`).then(r => r.json()).then((d: Forecast) => setForecast(Array.isArray(d) ? d : [])),
       fetch(`/api/sky/sun-moon?${q}`).then(r => r.json()).then(setSunMoon).catch(() => {}),
-      fetch(`/api/sky/planets?${q}`).then(r => r.json()).then((d: Planet[]) => setPlanets(Array.isArray(d) ? d : [])),
+      fetch(`/api/sky/planets?${planetQ}`).then(r => r.json()).then((d: Planet[]) => setPlanets(Array.isArray(d) ? d : [])),
     ])
-  }, [lat, lon])
+  }, [lat, lon, dark.isCurrentlyDark])
 
   const visible = planets
     .filter(p => p.altitude > 5)
@@ -87,11 +102,18 @@ export default function SkyWidget({ lat, lon, cityLabel }: Props) {
   const tonightCloud = avgCloud(tonightHours)
   const cloudBadge = badgeClass(tonightCloud)
 
-  const darkWindow = sunMoon?.astronomicalDuskStart && sunMoon?.astronomicalDawnEnd
-    ? `${sunMoon.astronomicalDuskStart} → ${sunMoon.astronomicalDawnEnd}`
-    : sunMoon?.sunSet
-      ? `${fmtTime(sunMoon.sunSet)} → ${fmtTime(sunMoon.sunRise)}`
-      : null
+  const darkWindow = dark.duskStart && dark.dawnEnd
+    ? `${fmtTime(dark.duskStart)} → ${fmtTime(dark.dawnEnd)}`
+    : sunMoon?.astronomicalDuskStart && sunMoon?.astronomicalDawnEnd
+      ? `${sunMoon.astronomicalDuskStart} → ${sunMoon.astronomicalDawnEnd}`
+      : sunMoon?.sunSet
+        ? `${fmtTime(sunMoon.sunSet)} → ${fmtTime(sunMoon.sunRise)}`
+        : null
+
+  const visibleVerb = dark.isCurrentlyDark ? 'visible now' : 'visible tonight'
+  const emptyMsg = dark.isCurrentlyDark
+    ? 'No planets above the horizon'
+    : 'No planets up after dark tonight'
 
   const next7 = forecast.slice(0, 7).map((day, i) => {
     const d = new Date(day.date)
@@ -111,8 +133,8 @@ export default function SkyWidget({ lat, lon, cityLabel }: Props) {
           <Telescope size={13} className="planet-summary-icon" />
           <span className="planet-summary-text">
             {visible.length > 0
-              ? <><strong>{visible.length}</strong> visible now</>
-              : 'No planets above the horizon'}
+              ? <><strong>{visible.length}</strong> {visibleVerb}</>
+              : emptyMsg}
           </span>
           <span className={`planet-cloud-pill ${cloudBadge}`}>
             {tonightCloud}% cloud

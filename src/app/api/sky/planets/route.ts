@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getVisiblePlanets } from '@/lib/planets';
+import { getVisiblePlanets, getWindowPlanets } from '@/lib/planets';
+import { getTonightDarkWindow } from '@/lib/dark-window';
 
 export async function GET(req: NextRequest) {
   const lat = parseFloat(req.nextUrl.searchParams.get('lat') ?? '41.6941');
@@ -10,6 +11,17 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const tonight = req.nextUrl.searchParams.get('tonight') === '1';
+    if (tonight) {
+      const dark = getTonightDarkWindow(lat, lng);
+      const start = dark.duskStart ?? dark.evalTime;
+      const end = dark.dawnEnd ?? new Date(start.getTime() + 6 * 3600 * 1000);
+      const planets = getWindowPlanets(lat, lng, start, end);
+      return NextResponse.json(planets, {
+        headers: { 'Cache-Control': 'public, max-age=300, s-maxage=1800, stale-while-revalidate=3600' },
+      });
+    }
+
     const dateParam = req.nextUrl.searchParams.get('date');
     const date = dateParam ? new Date(dateParam) : new Date();
     const planets = getVisiblePlanets(lat, lng, isNaN(date.getTime()) ? new Date() : date);

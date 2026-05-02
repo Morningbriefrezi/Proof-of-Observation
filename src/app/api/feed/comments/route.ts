@@ -3,6 +3,8 @@ import { and, desc, eq, lt, sql } from 'drizzle-orm'
 import { getDb } from '@/lib/db'
 import { feedPosts, feedComments } from '@/lib/schema'
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export async function POST(req: NextRequest) {
   const db = getDb()
   if (!db) return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
@@ -15,6 +17,9 @@ export async function POST(req: NextRequest) {
   const text = (body.body ?? '').trim()
   if (!postId || !authorWallet) {
     return NextResponse.json({ error: 'postId and authorWallet required' }, { status: 400 })
+  }
+  if (!UUID_RE.test(postId)) {
+    return NextResponse.json({ error: 'postId must be a UUID' }, { status: 400 })
   }
   if (text.length < 1 || text.length > 500) {
     return NextResponse.json({ error: 'Comment must be 1–500 characters' }, { status: 400 })
@@ -40,6 +45,9 @@ export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams
   const postId = sp.get('postId')
   if (!postId) return NextResponse.json({ error: 'postId required' }, { status: 400 })
+  if (!UUID_RE.test(postId)) {
+    return NextResponse.json({ comments: [], nextCursor: null })
+  }
 
   const limit = Math.min(50, Math.max(1, parseInt(sp.get('limit') ?? '20', 10) || 20))
   const before = sp.get('before')

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { getTonightDarkWindow } from '@/lib/dark-window';
 
 export interface PlanetData {
   name: string;
@@ -69,6 +70,8 @@ export interface SkyData {
   conditions: SkyConditions | null;
   forecast: ForecastDay[];
   refreshedAt: Date | null;
+  isCurrentlyDark: boolean;
+  evalTime: Date | null;
 }
 
 interface RawPlanet {
@@ -133,14 +136,19 @@ export function useSkyData(initialCoords?: { lat: number; lon: number; city?: st
     conditions: null,
     forecast: [],
     refreshedAt: null,
+    isCurrentlyDark: false,
+    evalTime: null,
   });
 
   const fetchAll = useCallback(async () => {
     try {
       const coords = await resolveCoords(initialCoords);
 
+      const dark = getTonightDarkWindow(coords.lat, coords.lon);
+      const planetParam = dark.isCurrentlyDark ? '' : '&tonight=1';
+
       const [planetsRes, forecastRes, sunMoonRes, verifyRes, timelineRes] = await Promise.all([
-        fetch(`/api/sky/planets?lat=${coords.lat}&lon=${coords.lon}`),
+        fetch(`/api/sky/planets?lat=${coords.lat}&lon=${coords.lon}${planetParam}`),
         fetch(`/api/sky/forecast?lat=${coords.lat}&lon=${coords.lon}`),
         fetch(`/api/sky/sun-moon?lat=${coords.lat}&lon=${coords.lon}`),
         fetch(`/api/sky/verify?lat=${coords.lat}&lon=${coords.lon}`),
@@ -189,6 +197,8 @@ export function useSkyData(initialCoords?: { lat: number; lon: number; city?: st
         conditions,
         forecast,
         refreshedAt: new Date(),
+        isCurrentlyDark: dark.isCurrentlyDark,
+        evalTime: dark.evalTime,
       });
     } catch (err) {
       setData((prev) => ({

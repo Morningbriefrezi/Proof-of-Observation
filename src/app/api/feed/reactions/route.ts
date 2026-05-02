@@ -4,6 +4,7 @@ import { getDb } from '@/lib/db'
 import { feedPosts, feedReactions } from '@/lib/schema'
 
 const REACTION_TYPES = ['like', 'love', 'dislike', 'wow', 'sad'] as const
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export async function POST(req: NextRequest) {
   const db = getDb()
@@ -20,6 +21,9 @@ export async function POST(req: NextRequest) {
   }
   if (!REACTION_TYPES.includes(reaction as typeof REACTION_TYPES[number])) {
     return NextResponse.json({ error: 'Invalid reaction' }, { status: 400 })
+  }
+  if (!UUID_RE.test(postId)) {
+    return NextResponse.json({ error: 'postId must be a UUID' }, { status: 400 })
   }
 
   const existing = await db
