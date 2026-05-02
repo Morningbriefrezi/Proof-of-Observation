@@ -1,4 +1,6 @@
-export type ReactionType = 'stars' | 'moon' | 'comet' | 'galaxy' | 'supernova' | 'telescope'
+export type ReactionType = 'like' | 'love' | 'dislike' | 'wow' | 'sad'
+
+export const REACTION_TYPES: ReactionType[] = ['like', 'love', 'dislike', 'wow', 'sad']
 
 export type FeedPostType = 'text' | 'photo' | 'achievement'
 
@@ -39,37 +41,33 @@ export interface FeedPost {
 }
 
 export const REACTION_EMOJI: Record<ReactionType, string> = {
-  stars: '✦',
-  moon: '🌙',
-  comet: '☄',
-  galaxy: '🌌',
-  supernova: '💫',
-  telescope: '🔭',
+  like: '👍',
+  love: '❤️',
+  dislike: '👎',
+  wow: '😮',
+  sad: '😢',
 }
 
 export const REACTION_LABEL: Record<ReactionType, string> = {
-  stars: 'Stars',
-  moon: 'Moon',
-  comet: 'Comet',
-  galaxy: 'Galaxy',
-  supernova: 'Supernova',
-  telescope: 'Telescope',
+  like: 'Like',
+  love: 'Love',
+  dislike: 'Dislike',
+  wow: 'Wow',
+  sad: 'Sad',
 }
 
 export const REACTION_GRADIENT: Record<ReactionType, string> = {
-  stars: 'linear-gradient(135deg, #FFD166, #F472B6)',
-  moon: 'linear-gradient(135deg, #F4EDE0, #c89a3e)',
-  comet: 'linear-gradient(135deg, #38F0FF, #8465CB)',
-  galaxy: 'linear-gradient(135deg, #8465CB, #38F0FF)',
-  supernova: 'linear-gradient(135deg, #F472B6, #38F0FF)',
-  telescope: 'linear-gradient(135deg, #34D399, #38F0FF)',
+  like: 'linear-gradient(135deg, #38BDF8, #6366F1)',
+  love: 'linear-gradient(135deg, #F472B6, #EF4444)',
+  dislike: 'linear-gradient(135deg, #94A3B8, #475569)',
+  wow: 'linear-gradient(135deg, #FFD166, #F59E0B)',
+  sad: 'linear-gradient(135deg, #60A5FA, #312E81)',
 }
 
 export const REACTION_PICK_BG: Record<ReactionType, string> = {
-  stars: 'radial-gradient(circle, rgba(255,209,102,0.3), transparent 70%)',
-  moon: 'radial-gradient(circle, rgba(232,230,227,0.25), transparent 70%)',
-  comet: 'radial-gradient(circle, rgba(56,240,255,0.3), transparent 70%)',
-  galaxy: 'radial-gradient(circle, rgba(132,101,203,0.3), transparent 70%)',
-  supernova: 'radial-gradient(circle, rgba(244,114,182,0.3), transparent 70%)',
-  telescope: 'radial-gradient(circle, rgba(52,211,153,0.3), transparent 70%)',
+  like: 'radial-gradient(circle, rgba(56,189,248,0.3), transparent 70%)',
+  love: 'radial-gradient(circle, rgba(244,114,182,0.3), transparent 70%)',
+  dislike: 'radial-gradient(circle, rgba(148,163,184,0.3), transparent 70%)',
+  wow: 'radial-gradient(circle, rgba(255,209,102,0.3), transparent 70%)',
+  sad: 'radial-gradient(circle, rgba(96,165,250,0.3), transparent 70%)',
 }

@@ -4,7 +4,7 @@ import { and, desc, eq, gt, inArray, lt, sql } from 'drizzle-orm'
 import { getDb } from '@/lib/db'
 import { feedPosts, feedReactions, feedComments } from '@/lib/schema'
 
-const REACTION_TYPES = ['stars', 'moon', 'comet', 'galaxy', 'supernova', 'telescope'] as const
+const REACTION_TYPES = ['like', 'love', 'dislike', 'wow', 'sad'] as const
 type ReactionType = typeof REACTION_TYPES[number]
 
 function isValidWallet(addr: string): boolean {

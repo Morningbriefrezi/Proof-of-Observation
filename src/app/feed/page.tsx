@@ -376,6 +376,8 @@ export default function FeedPage() {
                   index={i}
                   myWallet={address}
                   myInitial={myInitial}
+                  myDisplayName={displayName}
+                  myAvatarGlyph={avatarGlyph}
                   onChange={updatePost}
                   onDelete={removePost}
                   authPrompt={() => setAuthOpen(true)}

@@ -7,12 +7,11 @@ import {
   REACTION_GRADIENT,
   REACTION_LABEL,
   REACTION_PICK_BG,
+  REACTION_TYPES,
   type FeedComment,
   type FeedPost,
   type ReactionType,
 } from '@/lib/feed/types'
-
-const REACTION_TYPES: ReactionType[] = ['stars', 'moon', 'comet', 'galaxy', 'supernova', 'telescope']
 
 const RANK_GRADIENT: Record<string, string> = {
   Stargazer: 'linear-gradient(135deg, var(--violet), var(--teal))',
@@ -58,13 +57,15 @@ interface Props {
   post: FeedPost
   myWallet: string | null
   myInitial: string
+  myDisplayName?: string | null
+  myAvatarGlyph?: string | null
   onDelete?: (postId: string) => void
   onChange: (post: FeedPost) => void
   authPrompt: () => void
   index: number
 }
 
-export default function FeedPostCard({ post, myWallet, myInitial, onDelete, onChange, authPrompt, index }: Props) {
+export default function FeedPostCard({ post, myWallet, myInitial, myDisplayName, myAvatarGlyph, onDelete, onChange, authPrompt, index }: Props) {
   const [showPicker, setShowPicker] = useState(false)
   const [showShare, setShowShare] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
@@ -88,16 +89,18 @@ export default function FeedPostCard({ post, myWallet, myInitial, onDelete, onCh
     return () => window.removeEventListener('mousedown', onClick)
   }, [showMenu, showShare])
 
-  const isMine = myWallet && myWallet === post.authorWallet
-  const displayName = post.authorName ?? shortWallet(post.authorWallet)
-  const initial = (post.authorName ?? post.authorWallet).slice(0, 1).toUpperCase()
+  const isMine = !!myWallet && myWallet === post.authorWallet
+  const liveName = isMine ? (myDisplayName?.trim() || null) : null
+  const liveGlyph = isMine ? (myAvatarGlyph ?? null) : null
+  const displayName = liveName ?? post.authorName ?? shortWallet(post.authorWallet)
+  const initial = liveGlyph ?? (liveName ?? post.authorName ?? post.authorWallet).slice(0, 1).toUpperCase()
   const rank = post.authorRank ?? 'Stargazer'
   const avatarBg = RANK_GRADIENT[rank] ?? RANK_GRADIENT.Stargazer
 
   async function react(reaction: ReactionType) {
     if (!myWallet) { authPrompt(); return }
     setShowPicker(false)
-    const prev = post.myReaction ?? null
+    const prev = myReaction ?? null
     const optimisticCount =
       prev === reaction ? Math.max(0, post.reactionCount - 1)
       : prev ? post.reactionCount
@@ -196,7 +199,10 @@ export default function FeedPostCard({ post, myWallet, myInitial, onDelete, onCh
     } catch {}
   }
 
-  const top = (post.topReactions ?? []) as ReactionType[]
+  const top = ((post.topReactions ?? []) as ReactionType[]).filter(r => r in REACTION_EMOJI)
+  const myReaction: ReactionType | null = post.myReaction && (post.myReaction as string) in REACTION_EMOJI
+    ? (post.myReaction as ReactionType)
+    : null
   const animationDelay = `${Math.min(index, 5) * 0.05}s`
 
   return (
@@ -333,15 +339,15 @@ export default function FeedPostCard({ post, myWallet, myInitial, onDelete, onCh
             </div>
           )}
           <button
-            className={`action ${post.myReaction ? 'liked' : ''}`}
-            onClick={() => react('stars')}
+            className={`action ${myReaction ? 'liked' : ''}`}
+            onClick={() => react('like')}
           >
-            {post.myReaction ? (
-              <span style={{ fontSize: 16 }}>{REACTION_EMOJI[post.myReaction]}</span>
+            {myReaction ? (
+              <span style={{ fontSize: 16 }}>{REACTION_EMOJI[myReaction]}</span>
             ) : (
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.5 7.5H22l-6 4.5 2.5 8L12 17l-6.5 5L8 14l-6-4.5h7.5z"/></svg>
+              <span style={{ fontSize: 16 }}>👍</span>
             )}
-            {post.myReaction ? REACTION_LABEL[post.myReaction] : 'Stars'}
+            {myReaction ? REACTION_LABEL[myReaction] : 'Like'}
           </button>
         </div>
         <button className="action" onClick={loadAllComments}>

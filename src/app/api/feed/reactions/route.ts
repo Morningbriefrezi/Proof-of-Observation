@@ -3,7 +3,7 @@ import { and, eq, sql } from 'drizzle-orm'
 import { getDb } from '@/lib/db'
 import { feedPosts, feedReactions } from '@/lib/schema'
 
-const REACTION_TYPES = ['stars', 'moon', 'comet', 'galaxy', 'supernova', 'telescope'] as const
+const REACTION_TYPES = ['like', 'love', 'dislike', 'wow', 'sad'] as const
 
 export async function POST(req: NextRequest) {
   const db = getDb()
