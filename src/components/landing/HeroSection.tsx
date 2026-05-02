@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useStellarUser } from '@/hooks/useStellarUser';
+import { useDisplayProfile } from '@/hooks/useDisplayProfile';
 import { AuthModal } from '@/components/auth/AuthModal';
 
 const STARS = [
@@ -16,7 +17,8 @@ const STARS = [
 ];
 
 export default function HeroSection() {
-  const { authenticated, ready, displayName } = useStellarUser();
+  const { authenticated, ready } = useStellarUser();
+  const { displayName } = useDisplayProfile();
   const [authOpen, setAuthOpen] = useState(false);
 
   const greeting = ready && authenticated ? displayName : null;

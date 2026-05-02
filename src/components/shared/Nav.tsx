@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import { useStellarUser } from '@/hooks/useStellarUser';
 import { useStellarAuth } from '@/hooks/useStellarAuth';
+import { useDisplayProfile } from '@/hooks/useDisplayProfile';
 import { AuthModal } from '@/components/auth/AuthModal';
 import {
   CloudSun, ShoppingBag, Satellite, User, Search, BookOpen,
@@ -61,18 +61,10 @@ const AVATAR_ITEMS: { href: string; label: string; icon: typeof User }[] = [
   { href: '/nfts',    label: 'My discoveries',  icon: Gem },
 ];
 
-function getInitials(name: string | null | undefined): string {
-  const src = (name ?? '').trim();
-  if (!src) return '';
-  const parts = src.split(/[\s._-]+/).filter(Boolean);
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-  return src.slice(0, 2).toUpperCase();
-}
-
 export default function Nav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { authenticated, ready, email, displayName: stellarDisplayName, address } = useStellarUser();
+  const { authenticated, ready, email, displayName, initials, avatarGlyph } = useDisplayProfile();
   const { logout } = useStellarAuth();
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -112,9 +104,6 @@ export default function Nav() {
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
-
-  const displayName = email ? email.split('@')[0] : (stellarDisplayName ?? 'Astronomer');
-  const initials = getInitials(email ?? (address ? address.slice(0, 2) : null));
 
   const handleLogout = async () => {
     setAvatarOpen(false);
@@ -313,7 +302,11 @@ export default function Nav() {
                     aria-controls="avatar-menu"
                     aria-haspopup="menu"
                   >
-                    {initials ? (
+                    {avatarGlyph ? (
+                      <span style={{ fontSize: 16, lineHeight: 1, filter: 'saturate(0.95)' }}>
+                        {avatarGlyph}
+                      </span>
+                    ) : initials ? (
                       <span style={{ color: 'white', fontSize: 11, fontWeight: 500, letterSpacing: '0.02em', lineHeight: 1 }}>
                         {initials}
                       </span>
@@ -352,7 +345,9 @@ export default function Nav() {
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           color: 'white', fontSize: 11, fontWeight: 500,
                         }}>
-                          {initials || <Telescope size={14} strokeWidth={1.75} color="white" />}
+                          {avatarGlyph ? (
+                            <span style={{ fontSize: 17, lineHeight: 1 }}>{avatarGlyph}</span>
+                          ) : initials || <Telescope size={14} strokeWidth={1.75} color="white" />}
                         </div>
                         <div style={{ minWidth: 0, flex: 1 }}>
                           <div style={{

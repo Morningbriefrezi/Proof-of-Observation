@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Cloud, Moon as MoonIcon, Clock, Eye } from 'lucide-react'
+import { Telescope, Clock } from 'lucide-react'
 
 type Forecast = Array<{ date: string; hours: Array<{ cloudCover: number }> }>
 type SunMoon = {
@@ -12,13 +12,34 @@ type SunMoon = {
   astronomicalDuskStart: string | null
   astronomicalDawnEnd: string | null
 }
-type Planet = { name: string; altitude: number; visible: boolean }
+type Planet = {
+  key?: string
+  name: string
+  altitude: number
+  azimuth?: number
+  azimuthDir?: string
+  rise?: string | null
+  transit?: string | null
+  set?: string | null
+  magnitude?: number
+  visible: boolean
+}
 
 interface Props { lat: number; lon: number; cityLabel: string }
 
-function fmtTime(iso: string | null): string {
-  if (!iso) return '—'
-  const d = new Date(iso)
+const PLANET_GLYPH: Record<string, string> = {
+  moon: '🌙',
+  mercury: '☿',
+  venus: '♀',
+  mars: '♂',
+  jupiter: '♃',
+  saturn: '♄',
+}
+
+function fmtTime(value: string | null | undefined): string {
+  if (!value) return '—'
+  const d = new Date(value)
+  if (isNaN(d.getTime())) return '—'
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
@@ -50,24 +71,19 @@ export default function SkyWidget({ lat, lon, cityLabel }: Props) {
     ])
   }, [lat, lon])
 
+  const visible = planets
+    .filter(p => p.altitude > 5)
+    .sort((a, b) => b.altitude - a.altitude)
+
   const tonightHours = forecast[0]?.hours.slice(18, 24) ?? []
   const tonightCloud = avgCloud(tonightHours)
-  const condition: 'go' | 'maybe' | 'skip' = badgeClass(tonightCloud)
-  const conditionText = condition === 'go' ? 'Excellent observing' : condition === 'maybe' ? 'Patchy clouds tonight' : 'Mostly cloudy'
-  const conditionColor = condition === 'go' ? 'var(--green)' : condition === 'maybe' ? 'var(--brass)' : 'var(--red)'
+  const cloudBadge = badgeClass(tonightCloud)
 
-  const moonPct = sunMoon ? Math.round(sunMoon.illuminationPct ?? 0) : null
-  const window = sunMoon?.astronomicalDuskStart && sunMoon?.astronomicalDawnEnd
+  const darkWindow = sunMoon?.astronomicalDuskStart && sunMoon?.astronomicalDawnEnd
     ? `${sunMoon.astronomicalDuskStart} → ${sunMoon.astronomicalDawnEnd}`
     : sunMoon?.sunSet
       ? `${fmtTime(sunMoon.sunSet)} → ${fmtTime(sunMoon.sunRise)}`
-      : '—'
-
-  const visiblePlanets = planets
-    .filter(p => p.altitude > 10 && p.name !== 'Sun' && p.name !== 'Moon')
-    .slice(0, 2)
-    .map(p => p.name)
-    .join(' · ') || '—'
+      : null
 
   const next7 = forecast.slice(0, 7).map((day, i) => {
     const d = new Date(day.date)
@@ -79,30 +95,53 @@ export default function SkyWidget({ lat, lon, cityLabel }: Props) {
   return (
     <div className="side-section">
       <div className="side-label">
-        Tonight · {cityLabel}
+        Visible tonight · {cityLabel}
         <Link href="/sky" className="side-label-link">Full sky →</Link>
       </div>
       <div className="sky-card">
-        <div className="sky-condition">
-          <div className="sky-condition-dot" style={{ background: conditionColor, boxShadow: `0 0 12px ${conditionColor}` }} />
-          <div className="sky-condition-text">{conditionText}</div>
+        <div className="planet-summary">
+          <Telescope size={13} className="planet-summary-icon" />
+          <span className="planet-summary-text">
+            {visible.length > 0
+              ? <><strong>{visible.length}</strong> visible now</>
+              : 'No planets above the horizon'}
+          </span>
+          <span className={`planet-cloud-pill ${cloudBadge}`}>
+            {tonightCloud}% cloud
+          </span>
         </div>
-        <div className="sky-row">
-          <span className="sky-row-label"><Cloud size={12} /> Cloud cover</span>
-          <span className={`sky-row-val ${condition}`}>{tonightCloud}% · {condition === 'go' ? 'clear' : condition === 'maybe' ? 'mixed' : 'cloudy'}</span>
-        </div>
-        <div className="sky-row">
-          <span className="sky-row-label"><MoonIcon size={12} /> Moon</span>
-          <span className="sky-row-val">{moonPct != null ? `${moonPct}% illuminated` : '—'}</span>
-        </div>
-        <div className="sky-row">
-          <span className="sky-row-label"><Clock size={12} /> Best window</span>
-          <span className="sky-row-val">{window}</span>
-        </div>
-        <div className="sky-row">
-          <span className="sky-row-label"><Eye size={12} /> Visible now</span>
-          <span className="sky-row-val">{visiblePlanets}</span>
-        </div>
+
+        {darkWindow && (
+          <div className="planet-dark">
+            <Clock size={11} />
+            <span>Dark sky · {darkWindow}</span>
+          </div>
+        )}
+
+        {visible.length > 0 ? (
+          <ul className="planet-list">
+            {visible.slice(0, 6).map(p => {
+              const k = (p.key ?? p.name).toLowerCase()
+              const glyph = PLANET_GLYPH[k] ?? '✦'
+              const dir = p.azimuthDir ?? ''
+              const transit = fmtTime(p.transit)
+              const setT = fmtTime(p.set)
+              return (
+                <li key={k} className="planet-row">
+                  <span className="planet-glyph" aria-hidden>{glyph}</span>
+                  <span className="planet-name">{p.name}</span>
+                  <span className="planet-alt">{Math.round(p.altitude)}°{dir ? ` ${dir}` : ''}</span>
+                  <span className="planet-time">
+                    {transit !== '—' ? `peak ${transit}` : setT !== '—' ? `set ${setT}` : ''}
+                  </span>
+                </li>
+              )
+            })}
+          </ul>
+        ) : (
+          <p className="planet-empty">Check back after sunset, or open the full sky page for a 7-day outlook.</p>
+        )}
+
         {next7.length > 0 && (
           <div className="sky-mini-forecast">
             {next7.map((d, i) => (

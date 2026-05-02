@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { useStellarUser } from '@/hooks/useStellarUser'
 import { useStellarAuth } from '@/hooks/useStellarAuth'
+import { useDisplayProfile } from '@/hooks/useDisplayProfile'
 import { AuthModal } from '@/components/auth/AuthModal'
 import { useLocation } from '@/lib/location'
 import FeedPostCard from '@/components/feed/FeedPostCard'
@@ -47,13 +48,13 @@ export default function FeedPage() {
   const searchParams = useSearchParams()
   const filter = (searchParams?.get('filter') as FilterKey) ?? 'latest'
 
-  const { authenticated, address, displayName } = useStellarUser()
+  const { authenticated, address } = useStellarUser()
   const { } = useStellarAuth()
   const { location } = useLocation()
+  const { displayName, firstName, initial: profileInitial, avatarGlyph } = useDisplayProfile()
   const [authOpen, setAuthOpen] = useState(false)
 
-  const myInitial = (displayName ?? address ?? 'A').slice(0, 1).toUpperCase()
-  const firstName = displayName ? displayName.split(/[@\s]/)[0] : null
+  const myInitial = avatarGlyph ?? profileInitial
 
   const [posts, setPosts] = useState<FeedPost[]>([])
   const [nextCursor, setNextCursor] = useState<string | null>(null)
@@ -162,7 +163,7 @@ export default function FeedPage() {
     const fallbackLon = observation?.lon ?? pendingLocation?.lon
     const payload: Record<string, unknown> = {
       authorWallet: address,
-      authorName: displayName ?? null,
+      authorName: displayName,
       authorRank: null,
       type,
       body: draft.trim() || null,
@@ -209,7 +210,7 @@ export default function FeedPage() {
   const lat = location?.lat ?? 41.7
   const lon = location?.lon ?? 44.83
 
-  const composerPlaceholder = firstName
+  const composerPlaceholder = authenticated && firstName
     ? `What did the sky show you tonight, ${firstName}?`
     : 'What did the sky show you tonight?'
 

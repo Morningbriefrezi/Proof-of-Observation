@@ -623,6 +623,96 @@
 .forecast-day-badge.maybe { background: var(--brass); }
 .forecast-day-badge.skip { background: var(--red); opacity: 0.5; }
 
+.planet-summary {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px;
+}
+.planet-summary-icon { color: var(--brass); flex-shrink: 0; }
+.planet-summary-text {
+  font-family: var(--feed-serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--bone);
+  flex: 1;
+}
+.planet-summary-text strong {
+  font-style: normal;
+  font-family: var(--feed-mono);
+  font-weight: 500;
+  color: var(--brass);
+  margin-right: 2px;
+}
+.planet-cloud-pill {
+  font-family: var(--feed-mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--hairline);
+  color: var(--slate-300);
+  white-space: nowrap;
+}
+.planet-cloud-pill.go { color: var(--green); border-color: rgba(94,234,212,0.25); }
+.planet-cloud-pill.maybe { color: var(--brass); border-color: rgba(255,209,102,0.25); }
+.planet-cloud-pill.skip { color: var(--red); border-color: rgba(255,140,140,0.25); }
+.planet-dark {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--feed-mono);
+  font-size: 10px;
+  color: var(--slate-400);
+  padding: 6px 0 10px;
+  border-bottom: 1px dashed var(--hairline);
+  margin-bottom: 6px;
+}
+.planet-dark svg { opacity: 0.6; }
+.planet-list {
+  list-style: none;
+  margin: 0; padding: 0;
+  display: flex; flex-direction: column;
+}
+.planet-row {
+  display: grid;
+  grid-template-columns: 18px 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  font-size: 11.5px;
+  border-bottom: 1px dashed var(--hairline);
+}
+.planet-row:last-child { border-bottom: none; }
+.planet-glyph {
+  font-size: 13px;
+  text-align: center;
+  color: var(--bone);
+  line-height: 1;
+}
+.planet-name {
+  color: var(--bone);
+  font-family: var(--feed-sans);
+  font-weight: 500;
+}
+.planet-alt {
+  font-family: var(--feed-mono);
+  color: var(--slate-300);
+  font-size: 10.5px;
+}
+.planet-time {
+  font-family: var(--feed-mono);
+  color: var(--slate-400);
+  font-size: 9.5px;
+  letter-spacing: 0.02em;
+  min-width: 56px;
+  text-align: right;
+}
+.planet-empty {
+  font-family: var(--feed-sans);
+  font-size: 11.5px;
+  color: var(--slate-400);
+  margin: 4px 0 0;
+  line-height: 1.5;
+}
+
 .market-row {
   display: flex; align-items: center; gap: 10px;
   padding: 10px 0;
