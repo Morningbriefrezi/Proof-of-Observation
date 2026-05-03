@@ -105,6 +105,139 @@
   border-color: transparent;
 }
 
+.ar-body__coords {
+  font-family: var(--font-mono, 'JetBrains Mono'), monospace;
+  font-size: 9px;
+  letter-spacing: 0.10em;
+  color: rgba(255,255,255,0.55);
+  white-space: nowrap;
+  margin-top: -2px;
+}
+
+.ar-body--focused .ar-body__coords {
+  color: var(--terracotta);
+}
+
+/* === Stars === */
+
+.ar-star {
+  position: absolute;
+  border-radius: 50%;
+  background: #ffffff;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  box-shadow: 0 0 4px rgba(255,255,255,0.5);
+}
+
+.ar-constellations {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* === Center reticle === */
+
+.ar-center-reticle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 80px;
+  height: 80px;
+  margin-left: -40px;
+  margin-top: -40px;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.6;
+}
+
+.ar-center-reticle__h,
+.ar-center-reticle__v {
+  position: absolute;
+}
+.ar-center-reticle__h {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  transform: translateY(-50%);
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.85) 30%, transparent 45%, transparent 55%, rgba(255,255,255,0.85) 70%, transparent 100%);
+}
+.ar-center-reticle__v {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.85) 30%, transparent 45%, transparent 55%, rgba(255,255,255,0.85) 70%, transparent 100%);
+}
+.ar-center-reticle__dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  margin-top: -2px;
+  background: var(--terracotta);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(255,209,102,0.6);
+}
+
+/* === Center readout (just below the reticle) === */
+
+.ar-center-readout {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 54px);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.ar-center-readout__line {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 5px 12px;
+  background: rgba(7,11,20,0.65);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 0.5px solid rgba(255,255,255,0.15);
+  border-radius: 999px;
+  font-family: var(--font-mono, 'JetBrains Mono'), monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.75);
+}
+
+.ar-center-readout__line strong {
+  font-weight: 600;
+  color: var(--text);
+  font-feature-settings: 'tnum' 1;
+}
+
+.ar-center-readout__nearest {
+  font-family: var(--font-mono, 'JetBrains Mono'), monospace;
+  font-size: 10px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--terracotta);
+  background: rgba(7,11,20,0.55);
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 0.5px solid rgba(255,209,102,0.30);
+}
+
+.ar-center-readout__nearest strong {
+  color: var(--terracotta);
+  font-weight: 700;
+}
+
 /* === Horizon line === */
 
 .ar-horizon-line {

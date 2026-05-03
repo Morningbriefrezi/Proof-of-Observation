@@ -19,11 +19,14 @@ import {
   shortestAzDelta,
   type SkyPointing,
 } from '@/lib/sky/ar';
+import { CONSTELLATION_LINES, positionStars, type PositionedStar } from '@/lib/sky/stars';
 import type { SkyObject } from './types';
 import './ARFinder.css';
 
 interface ARFinderProps {
   objects: SkyObject[];
+  observerLat: number;
+  observerLon: number;
   onClose: () => void;
 }
 
@@ -68,11 +71,15 @@ const COMPASS_TICKS = [
 
 const COMPASS_VISIBLE_DEG = 80;
 
+// Low-pass smoothing factor for orientation. Values near 1 = jumpy & responsive,
+// values near 0 = smooth but laggy. 0.25 strikes a balance for ~30 Hz events.
+const SMOOTH_ALPHA = 0.25;
+
 type DeviceOrientationConstructor = typeof DeviceOrientationEvent & {
   requestPermission?: () => Promise<'granted' | 'denied'>;
 };
 
-export function ARFinder({ objects, onClose }: ARFinderProps) {
+export function ARFinder({ objects, observerLat, observerLon, onClose }: ARFinderProps) {
   const t = useTranslations('sky.ar');
 
   const [phase, setPhase] = useState<Phase>('permission');
@@ -85,6 +92,24 @@ export function ARFinder({ objects, onClose }: ARFinderProps) {
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const smoothedRef = useRef<{ az: number; alt: number; init: boolean }>({
+    az: 0,
+    alt: 0,
+    init: false,
+  });
+
+  // Stars are computed once when AR opens. They drift ~0.25°/min — plenty
+  // accurate for a phone-AR session lasting a few minutes.
+  const stars = useMemo<PositionedStar[]>(() => {
+    if (phase !== 'ar') return [];
+    return positionStars(observerLat, observerLon, new Date());
+  }, [phase, observerLat, observerLon]);
+
+  const starById = useMemo(() => {
+    const map = new Map<string, PositionedStar>();
+    stars.forEach((s) => map.set(s.id, s));
+    return map;
+  }, [stars]);
 
   // Lock body scroll while overlay is open.
   useEffect(() => {
@@ -149,9 +174,6 @@ export function ARFinder({ objects, onClose }: ARFinderProps) {
       });
     };
 
-    // iOS exposes webkitCompassHeading on the regular `deviceorientation`
-    // event (not `deviceorientationabsolute`, which it doesn't fire). Listen
-    // to both so we catch whichever the platform delivers.
     window.addEventListener('deviceorientation', handle as EventListener, true);
     if ('ondeviceorientationabsolute' in window) {
       window.addEventListener('deviceorientationabsolute', handle as EventListener, true);
@@ -193,7 +215,6 @@ export function ARFinder({ objects, onClose }: ARFinderProps) {
   }, []);
 
   const handleEnable = useCallback(async () => {
-    // iOS motion permission must come from a user gesture.
     if (typeof window !== 'undefined') {
       const ctor =
         typeof DeviceOrientationEvent !== 'undefined'
@@ -220,8 +241,6 @@ export function ARFinder({ objects, onClose }: ARFinderProps) {
     streamRef.current = null;
     onClose();
   }, [onClose]);
-
-  // === Renders for the non-AR phases ===
 
   if (phase === 'permission') {
     return (
@@ -312,12 +331,13 @@ export function ARFinder({ objects, onClose }: ARFinderProps) {
     );
   }
 
-  // === AR live phase ===
-
   return (
     <ARLive
       objects={objects}
+      stars={stars}
+      starById={starById}
       orientation={orientation}
+      smoothedRef={smoothedRef}
       hasCamera={hasCamera}
       videoRef={videoRef}
       viewport={viewport}
@@ -328,61 +348,132 @@ export function ARFinder({ objects, onClose }: ARFinderProps) {
 
 interface ARLiveProps {
   objects: SkyObject[];
+  stars: PositionedStar[];
+  starById: Map<string, PositionedStar>;
   orientation: Orientation;
+  smoothedRef: React.MutableRefObject<{ az: number; alt: number; init: boolean }>;
   hasCamera: boolean;
   videoRef: React.RefObject<HTMLVideoElement | null>;
   viewport: { w: number; h: number };
   onClose: () => void;
 }
 
-function ARLive({ objects, orientation, hasCamera, videoRef, viewport, onClose }: ARLiveProps) {
+function ARLive({
+  objects,
+  stars,
+  starById,
+  orientation,
+  smoothedRef,
+  hasCamera,
+  videoRef,
+  viewport,
+  onClose,
+}: ARLiveProps) {
   const t = useTranslations('sky.ar');
 
-  const phoneAim: SkyPointing = useMemo(
-    () => deviceToSkyPointing(
+  // Low-pass filter device pointing. Azimuth uses circular smoothing so we
+  // don't average across the 0/360 wrap.
+  const phoneAim: SkyPointing = useMemo(() => {
+    const raw = deviceToSkyPointing(
       orientation.alpha,
       orientation.beta,
       orientation.gamma,
       orientation.heading,
-    ),
-    [orientation],
-  );
+    );
+    const s = smoothedRef.current;
+    if (!s.init) {
+      s.az = raw.azimuth;
+      s.alt = raw.altitude;
+      s.init = true;
+    } else {
+      const dAz = shortestAzDelta(raw.azimuth, s.az);
+      s.az = ((s.az + SMOOTH_ALPHA * dAz) % 360 + 360) % 360;
+      s.alt = s.alt + SMOOTH_ALPHA * (raw.altitude - s.alt);
+    }
+    return { azimuth: s.az, altitude: s.alt };
+  }, [orientation, smoothedRef]);
 
   const hFov = DEFAULT_HORIZONTAL_FOV;
   const vFov = DEFAULT_VERTICAL_FOV;
 
-  // For each body, compute on-screen position. Render only if within an
-  // expanded FOV box (1.2× to allow gentle entry/exit fades).
-  const bodies = useMemo(() => {
-    return objects.map((o) => {
-      const dAz = shortestAzDelta(o.azimuth, phoneAim.azimuth);
-      const dAlt = o.altitude - phoneAim.altitude;
+  const project = useCallback(
+    (az: number, alt: number) => {
+      const dAz = shortestAzDelta(az, phoneAim.azimuth);
+      const dAlt = alt - phoneAim.altitude;
       const screenX = (dAz / hFov) * viewport.w + viewport.w / 2;
       const screenY = -(dAlt / vFov) * viewport.h + viewport.h / 2;
-      const visibleX = Math.abs(dAz) <= hFov * 0.6;
-      const visibleY = Math.abs(dAlt) <= vFov * 0.6;
-      const onScreen = visibleX && visibleY;
-      const focused = Math.abs(dAz) < ON_TARGET_DEG && Math.abs(dAlt) < ON_TARGET_DEG;
-      return { obj: o, screenX, screenY, onScreen, focused, dAz, dAlt };
-    });
-  }, [objects, phoneAim, hFov, vFov, viewport]);
+      return { dAz, dAlt, screenX, screenY };
+    },
+    [phoneAim, hFov, vFov, viewport],
+  );
 
-  const focusedBody = bodies.find((b) => b.focused) ?? null;
+  const bodies = useMemo(() => {
+    return objects.map((o) => {
+      const { dAz, dAlt, screenX, screenY } = project(o.azimuth, o.altitude);
+      const onScreen = Math.abs(dAz) <= hFov * 0.6 && Math.abs(dAlt) <= vFov * 0.6;
+      const angularDist = Math.sqrt(dAz * dAz + dAlt * dAlt);
+      const focused = angularDist < ON_TARGET_DEG;
+      return { obj: o, screenX, screenY, dAz, dAlt, angularDist, onScreen, focused };
+    });
+  }, [objects, project, hFov, vFov]);
+
+  // Sort bodies so the focused one renders last (highest z-order).
+  const bodiesSortedForRender = useMemo(() => {
+    return bodies.slice().sort((a, b) => Number(a.focused) - Number(b.focused));
+  }, [bodies]);
+
+  const positionedStars = useMemo(() => {
+    return stars
+      .filter((s) => s.altitude > -2) // a touch below horizon for atmospheric refraction
+      .map((s) => {
+        const { dAz, dAlt, screenX, screenY } = project(s.azimuth, s.altitude);
+        const onScreen = Math.abs(dAz) <= hFov * 0.55 && Math.abs(dAlt) <= vFov * 0.55;
+        return { star: s, screenX, screenY, onScreen };
+      });
+  }, [stars, project, hFov, vFov]);
+
+  // The body whose angular distance from screen-center is smallest. This is
+  // what we display in the center readout.
+  const nearestBody = useMemo(() => {
+    let best: typeof bodies[number] | null = null;
+    for (const b of bodies) {
+      if (b.obj.altitude < 0) continue;
+      if (!best || b.angularDist < best.angularDist) best = b;
+    }
+    return best;
+  }, [bodies]);
 
   const horizonY = (phoneAim.altitude / vFov) * viewport.h + viewport.h / 2;
   const cardinal = azimuthToCardinal(phoneAim.azimuth);
-
   const compassPxPerDeg = viewport.w / COMPASS_VISIBLE_DEG;
 
   const tilt = orientation.beta ?? 90;
   let hint: string;
-  if (focusedBody) {
-    hint = t('found', { object: focusedBody.obj.name });
+  if (nearestBody && nearestBody.angularDist < ON_TARGET_DEG) {
+    hint = t('found', { object: nearestBody.obj.name });
   } else if (tilt < 30) {
     hint = t('liftPhone');
   } else {
     hint = t('panAround');
   }
+
+  // Constellation segments — only render if both endpoints are on-screen.
+  const constellationSegments = useMemo(() => {
+    const out: { x1: number; y1: number; x2: number; y2: number }[] = [];
+    for (const [aId, bId] of CONSTELLATION_LINES) {
+      const a = starById.get(aId);
+      const b = starById.get(bId);
+      if (!a || !b) continue;
+      if (a.altitude < -1 || b.altitude < -1) continue;
+      const pa = project(a.azimuth, a.altitude);
+      const pb = project(b.azimuth, b.altitude);
+      const aOn = Math.abs(pa.dAz) <= hFov * 0.6 && Math.abs(pa.dAlt) <= vFov * 0.6;
+      const bOn = Math.abs(pb.dAz) <= hFov * 0.6 && Math.abs(pb.dAlt) <= vFov * 0.6;
+      if (!aOn && !bOn) continue;
+      out.push({ x1: pa.screenX, y1: pa.screenY, x2: pb.screenX, y2: pb.screenY });
+    }
+    return out;
+  }, [starById, project, hFov, vFov]);
 
   return (
     <div className="ar-overlay" role="dialog" aria-modal="true" aria-label={t('title')}>
@@ -398,6 +489,51 @@ function ARLive({ objects, orientation, hasCamera, videoRef, viewport, onClose }
         <div className="ar-overlay__starfield" />
       )}
 
+      {/* Constellation lines — drawn under everything else so stars sit on top */}
+      <svg
+        className="ar-constellations"
+        width={viewport.w}
+        height={viewport.h}
+        viewBox={`0 0 ${viewport.w} ${viewport.h}`}
+      >
+        {constellationSegments.map((seg, i) => (
+          <line
+            key={i}
+            x1={seg.x1}
+            y1={seg.y1}
+            x2={seg.x2}
+            y2={seg.y2}
+            stroke="rgba(255,255,255,0.18)"
+            strokeWidth={1}
+            strokeLinecap="round"
+          />
+        ))}
+      </svg>
+
+      {/* Stars */}
+      <div className="ar-overlay__layer">
+        {positionedStars.map(({ star, screenX, screenY, onScreen }) => {
+          if (!onScreen) return null;
+          // size: brightest stars 4px, faintest 1.5px
+          const size = Math.max(1.5, 4 - star.mag * 0.6);
+          const opacity = Math.max(0.45, 1 - star.mag * 0.18);
+          return (
+            <div
+              key={star.id}
+              className="ar-star"
+              style={{
+                left: screenX,
+                top: screenY,
+                width: size,
+                height: size,
+                opacity,
+              }}
+              title={star.name}
+            />
+          );
+        })}
+      </div>
+
       {/* Horizon line */}
       <div
         className="ar-horizon-line"
@@ -408,9 +544,8 @@ function ARLive({ objects, orientation, hasCamera, videoRef, viewport, onClose }
 
       {/* Bodies */}
       <div className="ar-overlay__layer">
-        {bodies.map(({ obj, screenX, screenY, onScreen, focused }) => {
+        {bodiesSortedForRender.map(({ obj, screenX, screenY, onScreen, focused }) => {
           if (!onScreen) return null;
-          // Sun only above horizon — never label below
           return (
             <div
               key={obj.id}
@@ -418,22 +553,50 @@ function ARLive({ objects, orientation, hasCamera, videoRef, viewport, onClose }
               style={{
                 left: screenX,
                 top: screenY,
-                opacity: focused ? 1 : 0.92,
+                opacity: focused ? 1 : 0.94,
               }}
             >
               <div className="ar-body__icon">
                 <PlanetIcon
                   id={obj.id}
-                  size={focused ? 56 : 38}
+                  size={focused ? 56 : 40}
                   phase={obj.phase}
                   glow={true}
                 />
                 <div className="ar-body__crosshair" />
               </div>
               <div className="ar-body__label">{obj.name}</div>
+              <div className="ar-body__coords">
+                ALT {Math.round(obj.altitude)}° · AZ {Math.round(obj.azimuth)}°
+              </div>
             </div>
           );
         })}
+      </div>
+
+      {/* Center reticle */}
+      <div className="ar-center-reticle" aria-hidden="true">
+        <span className="ar-center-reticle__h" />
+        <span className="ar-center-reticle__v" />
+        <span className="ar-center-reticle__dot" />
+      </div>
+
+      {/* Center readout */}
+      <div className="ar-center-readout">
+        <div className="ar-center-readout__line">
+          <span>ALT</span>
+          <strong>{phoneAim.altitude >= 0 ? '+' : ''}{phoneAim.altitude.toFixed(1)}°</strong>
+          <span>·</span>
+          <span>AZ</span>
+          <strong>{phoneAim.azimuth.toFixed(1)}°</strong>
+        </div>
+        {nearestBody && nearestBody.angularDist < hFov * 0.5 && (
+          <div className="ar-center-readout__nearest">
+            {t('centeredOn')}{' '}
+            <strong>{nearestBody.obj.name}</strong>
+            <span> · {nearestBody.angularDist.toFixed(1)}° {t('off')}</span>
+          </div>
+        )}
       </div>
 
       {/* No-camera banner */}

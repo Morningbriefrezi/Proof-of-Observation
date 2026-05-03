@@ -141,7 +141,12 @@ export default function SkyPage() {
       </div>
 
       {arOpen && arBodies.length > 0 && (
-        <ARFinder objects={arBodies} onClose={() => setArOpen(false)} />
+        <ARFinder
+          objects={arBodies}
+          observerLat={location.lat}
+          observerLon={location.lon}
+          onClose={() => setArOpen(false)}
+        />
       )}
     </div>
   );

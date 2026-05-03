@@ -202,6 +202,8 @@
       "panAround": "Pan around to see the planets",
       "liftPhone": "Lift your phone toward the sky",
       "horizon": "HORIZON",
+      "centeredOn": "Centered on",
+      "off": "off",
       "fallbacks": {
         "noCamera": "Camera unavailable — using starfield",
         "noSensors": "AR works on a phone with motion sensors. On desktop, use the horizon view instead."

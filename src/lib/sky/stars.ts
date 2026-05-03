@@ -1,0 +1,173 @@
+// A small catalog of bright stars + the Big Four constellation patterns.
+// Used to give the AR overlay something more than empty sky between planets.
+//
+// Coordinates are J2000 RA (hours) / Dec (degrees) and visual magnitude.
+// 0.5°/century precession is ignored — well below the precision the user
+// can perceive in a phone-AR overlay.
+
+export interface Star {
+  id: string;
+  name: string;
+  ra: number;   // hours, 0..24
+  dec: number;  // degrees, -90..+90
+  mag: number;  // visual magnitude (lower = brighter)
+}
+
+export const BRIGHT_STARS: Star[] = [
+  { id: 'sirius',     name: 'Sirius',     ra: 6.752,  dec: -16.716, mag: -1.46 },
+  { id: 'canopus',    name: 'Canopus',    ra: 6.399,  dec: -52.696, mag: -0.74 },
+  { id: 'rigil',      name: 'Rigil Kent.',ra: 14.660, dec: -60.834, mag: -0.27 },
+  { id: 'arcturus',   name: 'Arcturus',   ra: 14.261, dec:  19.182, mag: -0.05 },
+  { id: 'vega',       name: 'Vega',       ra: 18.616, dec:  38.784, mag:  0.03 },
+  { id: 'capella',    name: 'Capella',    ra: 5.278,  dec:  45.998, mag:  0.08 },
+  { id: 'rigel',      name: 'Rigel',      ra: 5.243,  dec:  -8.202, mag:  0.13 },
+  { id: 'procyon',    name: 'Procyon',    ra: 7.655,  dec:   5.225, mag:  0.34 },
+  { id: 'achernar',   name: 'Achernar',   ra: 1.629,  dec: -57.237, mag:  0.46 },
+  { id: 'betelgeuse', name: 'Betelgeuse', ra: 5.919,  dec:   7.407, mag:  0.50 },
+  { id: 'hadar',      name: 'Hadar',      ra: 14.064, dec: -60.373, mag:  0.61 },
+  { id: 'altair',     name: 'Altair',     ra: 19.846, dec:   8.868, mag:  0.77 },
+  { id: 'aldebaran',  name: 'Aldebaran',  ra: 4.598,  dec:  16.509, mag:  0.85 },
+  { id: 'antares',    name: 'Antares',    ra: 16.490, dec: -26.432, mag:  0.96 },
+  { id: 'spica',      name: 'Spica',      ra: 13.420, dec: -11.161, mag:  0.98 },
+  { id: 'pollux',     name: 'Pollux',     ra: 7.755,  dec:  28.026, mag:  1.14 },
+  { id: 'fomalhaut',  name: 'Fomalhaut',  ra: 22.961, dec: -29.622, mag:  1.16 },
+  { id: 'deneb',      name: 'Deneb',      ra: 20.690, dec:  45.280, mag:  1.25 },
+  { id: 'mimosa',     name: 'Mimosa',     ra: 12.795, dec: -59.689, mag:  1.30 },
+  { id: 'regulus',    name: 'Regulus',    ra: 10.139, dec:  11.967, mag:  1.40 },
+  { id: 'adhara',     name: 'Adhara',     ra: 6.977,  dec: -28.972, mag:  1.50 },
+  { id: 'shaula',     name: 'Shaula',     ra: 17.560, dec: -37.104, mag:  1.62 },
+  { id: 'castor',     name: 'Castor',     ra: 7.577,  dec:  31.888, mag:  1.58 },
+  { id: 'gacrux',     name: 'Gacrux',     ra: 12.519, dec: -57.113, mag:  1.63 },
+  { id: 'bellatrix',  name: 'Bellatrix',  ra: 5.418,  dec:   6.350, mag:  1.64 },
+  { id: 'elnath',     name: 'Elnath',     ra: 5.438,  dec:  28.608, mag:  1.65 },
+  { id: 'miaplacidus',name: 'Miaplacidus',ra: 9.220,  dec: -69.717, mag:  1.69 },
+  { id: 'alnilam',    name: 'Alnilam',    ra: 5.604,  dec:  -1.202, mag:  1.69 },
+  { id: 'alnitak',    name: 'Alnitak',    ra: 5.679,  dec:  -1.943, mag:  1.74 },
+  { id: 'mintaka',    name: 'Mintaka',    ra: 5.533,  dec:  -0.299, mag:  2.25 },
+  { id: 'alnair',     name: 'Alnair',     ra: 22.137, dec: -46.961, mag:  1.74 },
+  { id: 'alioth',     name: 'Alioth',     ra: 12.900, dec:  55.960, mag:  1.77 },
+  { id: 'dubhe',      name: 'Dubhe',      ra: 11.062, dec:  61.751, mag:  1.79 },
+  { id: 'merak',      name: 'Merak',      ra: 11.031, dec:  56.382, mag:  2.37 },
+  { id: 'phecda',     name: 'Phecda',     ra: 11.897, dec:  53.694, mag:  2.44 },
+  { id: 'megrez',     name: 'Megrez',     ra: 12.257, dec:  57.033, mag:  3.32 },
+  { id: 'alkaid',     name: 'Alkaid',     ra: 13.792, dec:  49.313, mag:  1.85 },
+  { id: 'mizar',      name: 'Mizar',      ra: 13.399, dec:  54.925, mag:  2.27 },
+  { id: 'kochab',     name: 'Kochab',     ra: 14.845, dec:  74.156, mag:  2.07 },
+  { id: 'polaris',    name: 'Polaris',    ra: 2.530,  dec:  89.264, mag:  1.97 },
+  { id: 'schedar',    name: 'Schedar',    ra: 0.675,  dec:  56.537, mag:  2.24 },
+  { id: 'caph',       name: 'Caph',       ra: 0.153,  dec:  59.150, mag:  2.28 },
+  { id: 'gamma_cas',  name: 'Cih',        ra: 0.945,  dec:  60.717, mag:  2.39 },
+  { id: 'ruchbah',    name: 'Ruchbah',    ra: 1.430,  dec:  60.235, mag:  2.68 },
+  { id: 'segin',      name: 'Segin',      ra: 1.907,  dec:  63.670, mag:  3.35 },
+  { id: 'sadr',       name: 'Sadr',       ra: 20.371, dec:  40.257, mag:  2.23 },
+  { id: 'gienah',     name: 'Gienah',     ra: 20.770, dec:  33.970, mag:  2.48 },
+  { id: 'aljanah',    name: 'Aljanah',    ra: 20.770, dec:  33.971, mag:  2.46 },
+  { id: 'albireo',    name: 'Albireo',    ra: 19.512, dec:  27.960, mag:  3.05 },
+];
+
+// Stick figures — pairs of star ids drawn as line segments.
+export const CONSTELLATION_LINES: Array<[string, string]> = [
+  // Orion
+  ['betelgeuse', 'bellatrix'],
+  ['betelgeuse', 'alnitak'],
+  ['bellatrix', 'mintaka'],
+  ['mintaka', 'alnilam'],
+  ['alnilam', 'alnitak'],
+  ['alnitak', 'rigel'],
+  // Big Dipper
+  ['dubhe', 'merak'],
+  ['merak', 'phecda'],
+  ['phecda', 'megrez'],
+  ['megrez', 'alioth'],
+  ['alioth', 'mizar'],
+  ['mizar', 'alkaid'],
+  ['megrez', 'dubhe'],
+  // Cassiopeia (W)
+  ['caph', 'schedar'],
+  ['schedar', 'gamma_cas'],
+  ['gamma_cas', 'ruchbah'],
+  ['ruchbah', 'segin'],
+  // Cygnus (Northern Cross)
+  ['deneb', 'sadr'],
+  ['sadr', 'albireo'],
+  ['sadr', 'gienah'],
+  ['sadr', 'aljanah'],
+];
+
+/* === Coordinate math === */
+
+const DEG = Math.PI / 180;
+const HOUR_TO_DEG = 15;
+
+function julianDate(d: Date): number {
+  return d.getTime() / 86400000 + 2440587.5;
+}
+
+/** Greenwich Mean Sidereal Time, degrees. */
+function gmst(d: Date): number {
+  const jd = julianDate(d);
+  const t = (jd - 2451545) / 36525;
+  let g =
+    280.46061837 +
+    360.98564736629 * (jd - 2451545) +
+    0.000387933 * t * t -
+    (t * t * t) / 38710000;
+  g = ((g % 360) + 360) % 360;
+  return g;
+}
+
+/** Local Sidereal Time, degrees, given observer longitude (east-positive). */
+function lst(d: Date, lonDeg: number): number {
+  return ((gmst(d) + lonDeg) % 360 + 360) % 360;
+}
+
+export interface AzAlt {
+  azimuth: number;
+  altitude: number;
+}
+
+/**
+ * Convert an equatorial RA/Dec coordinate to local horizontal alt/az for a
+ * given observer location and time.
+ */
+export function raDecToAzAlt(
+  raHours: number,
+  decDeg: number,
+  latDeg: number,
+  lonDeg: number,
+  date: Date,
+): AzAlt {
+  const lst_deg = lst(date, lonDeg);
+  const ha_deg = ((lst_deg - raHours * HOUR_TO_DEG) % 360 + 540) % 360 - 180;
+  const ha = ha_deg * DEG;
+  const dec = decDeg * DEG;
+  const lat = latDeg * DEG;
+
+  const sinAlt = Math.sin(dec) * Math.sin(lat) + Math.cos(dec) * Math.cos(lat) * Math.cos(ha);
+  const alt = Math.asin(Math.max(-1, Math.min(1, sinAlt)));
+
+  const cosAlt = Math.cos(alt);
+  const sinAz = -Math.cos(dec) * Math.sin(ha) / cosAlt;
+  const cosAz = (Math.sin(dec) - Math.sin(alt) * Math.sin(lat)) / (cosAlt * Math.cos(lat));
+  let az = Math.atan2(sinAz, cosAz) / DEG;
+  az = ((az % 360) + 360) % 360;
+
+  return { azimuth: az, altitude: alt / DEG };
+}
+
+export interface PositionedStar extends Star {
+  azimuth: number;
+  altitude: number;
+}
+
+/** Pre-compute alt/az for every star at the given observer & time. */
+export function positionStars(
+  latDeg: number,
+  lonDeg: number,
+  date: Date,
+): PositionedStar[] {
+  return BRIGHT_STARS.map((s) => {
+    const { azimuth, altitude } = raDecToAzAlt(s.ra, s.dec, latDeg, lonDeg, date);
+    return { ...s, azimuth, altitude };
+  });
+}
