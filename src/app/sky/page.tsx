@@ -1,28 +1,25 @@
 // src/app/sky/page.tsx
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSkyData } from '@/lib/use-sky-data';
 import { useLocation } from '@/lib/location';
-import { SkyHero } from '@/components/sky/SkyHero';
-import { VisibleNow } from '@/components/sky/VisibleNow';
 import { ObservationTimeline } from '@/components/sky/ObservationTimeline';
 import { LocationFallbackBanner } from '@/components/sky/LocationFallbackBanner';
 import { DirectionHero } from '@/components/sky/finder/DirectionHero';
-import { HorizonStrip } from '@/components/sky/finder/HorizonStrip';
-import { ObjectTabs } from '@/components/sky/finder/ObjectTabs';
-import { HintCards } from '@/components/sky/finder/HintCards';
+import { SkyMap } from '@/components/sky/finder/SkyMap';
+import { BodyTable } from '@/components/sky/finder/BodyTable';
 import { ARFinder } from '@/components/sky/finder/ARFinder';
 import type { FinderResponse, ObjectId, SkyObject } from '@/components/sky/finder/types';
 import './sky.css';
 
 const FALLBACK_COORDS = { lat: 41.6941, lon: 44.8337 };
-const AUTO_ROTATE_MS = 8000;
 
 export default function SkyPage() {
   const { location } = useLocation();
   const tPage = useTranslations('sky.page');
+  const tHeader = useTranslations('sky.header');
   const tErrors = useTranslations('sky.errors');
 
   const initialCoords = useMemo(
@@ -35,9 +32,14 @@ export default function SkyPage() {
   const [finderLoading, setFinderLoading] = useState(true);
   const [finderError, setFinderError] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<ObjectId | null>(null);
-  const [autoRotate, setAutoRotate] = useState(true);
-  const [paused, setPaused] = useState(false);
   const [arOpen, setArOpen] = useState(false);
+  const [now, setNow] = useState(() => new Date());
+
+  // Tick the clock every minute so the live readout stays current.
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   const fetchFinder = useCallback(async () => {
     setFinderLoading(true);
@@ -47,7 +49,9 @@ export default function SkyPage() {
       if (!res.ok) throw new Error('fetch failed');
       const data: FinderResponse = await res.json();
       setFinder(data);
-      const visible = data.objects.filter((o) => o.visible).sort((a, b) => a.magnitude - b.magnitude);
+      const visible = data.objects
+        .filter((o) => o.visible && o.id !== 'sun')
+        .sort((a, b) => a.magnitude - b.magnitude);
       setActiveId((prev) => prev ?? (visible[0]?.id ?? null));
     } catch {
       setFinderError(tErrors('fetchFailed'));
@@ -60,39 +64,81 @@ export default function SkyPage() {
     fetchFinder();
   }, [fetchFinder]);
 
-  const visibleSorted = useMemo<SkyObject[]>(() => {
+  // Bodies for the chart and table — exclude Sun at night, include otherwise.
+  // The decision is "is the sun above the horizon" (handled in the API).
+  const tableObjects = useMemo<SkyObject[]>(() => {
     if (!finder) return [];
-    return finder.objects.filter((o) => o.visible).sort((a, b) => a.magnitude - b.magnitude);
+    const sun = finder.objects.find((o) => o.id === 'sun');
+    const sunVisible = !!sun?.visible;
+    return finder.objects.filter((o) => (o.id === 'sun' ? sunVisible : true));
   }, [finder]);
 
-  // Bodies for AR — include Sun even though the finder UI hides it (it's
-  // useful to show daytime).
+  // AR gets every body that's currently above the horizon, including Sun.
   const arBodies = useMemo<SkyObject[]>(() => {
     if (!finder) return [];
     return finder.objects.filter((o) => o.visible);
   }, [finder]);
 
-  useEffect(() => {
-    if (!autoRotate || paused || arOpen || visibleSorted.length < 2) return;
-    const interval = setInterval(() => {
-      setActiveId((current) => {
-        const idx = visibleSorted.findIndex((o) => o.id === current);
-        const next = visibleSorted[(idx + 1) % visibleSorted.length];
-        return next.id;
-      });
-    }, AUTO_ROTATE_MS);
-    return () => clearInterval(interval);
-  }, [autoRotate, paused, arOpen, visibleSorted]);
+  const visibleSorted = useMemo<SkyObject[]>(() => {
+    return tableObjects
+      .filter((o) => o.visible)
+      .sort((a, b) => b.altitude - a.altitude);
+  }, [tableObjects]);
 
   const activeObject = useMemo(() => {
     if (!finder || !activeId) return null;
     return finder.objects.find((o) => o.id === activeId) ?? null;
   }, [finder, activeId]);
 
-  const handleSelectTab = useCallback((id: ObjectId) => {
+  const handleSelect = useCallback((id: ObjectId) => {
     setActiveId(id);
-    setAutoRotate(false);
   }, []);
+
+  const verdict = useMemo(() => {
+    if (!finder) return null;
+    const visibleCount = visibleSorted.length;
+    if (visibleCount === 0) {
+      // Find the next body to rise.
+      const next = finder.objects
+        .filter((o) => !o.visible && o.riseTime)
+        .sort((a, b) => (a.riseTime ?? '').localeCompare(b.riseTime ?? ''))[0];
+      if (next?.riseTime) {
+        const t = new Date(next.riseTime);
+        const hh = String(t.getHours()).padStart(2, '0');
+        const mm = String(t.getMinutes()).padStart(2, '0');
+        return tHeader('nextRise', { object: next.name, time: `${hh}:${mm}` });
+      }
+      return tHeader('nothingUp');
+    }
+    const highest = visibleSorted[0];
+    const brightest = [...visibleSorted].sort((a, b) => a.magnitude - b.magnitude)[0];
+    if (highest.id === brightest.id) {
+      return tHeader('oneStandout', {
+        count: visibleCount,
+        object: highest.name,
+        alt: Math.round(highest.altitude),
+        compass: highest.compassDirection,
+      });
+    }
+    return tHeader('twoStandouts', {
+      count: visibleCount,
+      bright: brightest.name,
+      high: highest.name,
+      alt: Math.round(highest.altitude),
+    });
+  }, [finder, visibleSorted, tHeader]);
+
+  const dateLabel = now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+  const timeLabel = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+  const conditionsLabel =
+    finder?.conditions
+      ? `${tHeader(`conditions.${finder.conditions.quality.toLowerCase()}`)} · ${finder.conditions.cloudCoverPct}% ${tHeader('clouds')}`
+      : null;
+
+  const fallbackUsed =
+    location.source === 'default' &&
+    location.lat === FALLBACK_COORDS.lat &&
+    location.lon === FALLBACK_COORDS.lon;
 
   const darkWindowLabel = useMemo(() => {
     const dw = sky.timeline.darkWindow;
@@ -105,51 +151,87 @@ export default function SkyPage() {
   }, [sky.timeline.darkWindow]);
 
   return (
-    <div className="sky-page-v2">
-      <div className="sky-container">
+    <div className="sky-page-v2 sky-v3">
+      <div className="sky-v3__container">
         <LocationFallbackBanner />
-        <SkyHero score={sky.score} location={sky.location} loading={sky.loading} />
 
-        <FinderRegion
-          loading={finderLoading}
-          error={finderError}
-          finder={finder}
-          activeObject={activeObject}
-          activeId={activeId}
-          autoRotate={autoRotate}
-          onSelectTab={handleSelectTab}
-          onToggleAuto={() => setAutoRotate((v) => !v)}
-          onPauseChange={setPaused}
-          onRetry={fetchFinder}
-          onOpenAr={() => setArOpen(true)}
-          arDisabled={arBodies.length === 0}
-          fallbackUsed={
-            location.source === 'default' &&
-            location.lat === FALLBACK_COORDS.lat &&
-            location.lon === FALLBACK_COORDS.lon
-          }
-        />
-
-        <section className="section">
-          <div className="section-head">
-            <h2 className="section-title">{tPage('visibleTonight')}</h2>
-            <span className="section-meta">
-              {sky.refreshedAt
-                ? sky.refreshedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
-                : '—'}
-            </span>
+        {/* === Header === */}
+        <header className="sky-v3__head">
+          <div className="sky-v3__head-left">
+            <p className="sky-v3__eyebrow">{tHeader('eyebrow')}</p>
+            <h1 className="sky-v3__title">{tHeader('title')}</h1>
+            <p className="sky-v3__meta">
+              <span>{location.city ?? '—'}</span>
+              <span aria-hidden>·</span>
+              <span>{dateLabel}</span>
+              <span aria-hidden>·</span>
+              <span className="sky-v3__meta-time">{timeLabel}</span>
+              {sky.location && (
+                <>
+                  <span aria-hidden>·</span>
+                  <span>Bortle {sky.location.bortle}</span>
+                </>
+              )}
+            </p>
+            {conditionsLabel && <p className="sky-v3__conditions">{conditionsLabel}</p>}
           </div>
-          <VisibleNow
-            planets={sky.planets}
-            featuredTarget={activeObject?.name}
-            isCurrentlyDark={sky.isCurrentlyDark}
-          />
-        </section>
+          <div className="sky-v3__head-right">
+            {verdict && <p className="sky-v3__verdict">{verdict}</p>}
+            <button
+              type="button"
+              className="sky-v3__ar"
+              onClick={() => setArOpen(true)}
+              disabled={arBodies.length === 0}
+            >
+              {tHeader('openAr')}
+            </button>
+          </div>
+        </header>
 
-        <section className="section">
-          <div className="section-head">
-            <h2 className="section-title">{tPage('tonightTimeline')}</h2>
-            <span className="section-meta dark-window-meta">
+        {fallbackUsed && finder && (
+          <div className="sky-v3__fallback">
+            <span>{tErrors('locationFallback')}</span>
+            <button type="button" onClick={fetchFinder}>{tErrors('useMyLocation')}</button>
+          </div>
+        )}
+
+        {finderError && (
+          <div className="sky-v3__error">
+            <span>{finderError}</span>
+            <button type="button" onClick={fetchFinder}>{tErrors('retry')}</button>
+          </div>
+        )}
+
+        {finderLoading && !finder && (
+          <div className="sky-v3__loading">{tPage('detectingLocation')}</div>
+        )}
+
+        {/* === Chart + Table === */}
+        {finder && !finderError && (
+          <>
+            <section className="sky-v3__split">
+              <div className="sky-v3__map-wrap">
+                <SkyMap objects={tableObjects} activeId={activeId} onSelect={handleSelect} />
+                <p className="sky-v3__map-caption">{tHeader('mapCaption')}</p>
+              </div>
+              <div className="sky-v3__table-wrap">
+                <BodyTable objects={tableObjects} activeId={activeId} onSelect={handleSelect} />
+              </div>
+            </section>
+
+            {activeObject && (
+              <section className="sky-v3__active">
+                <DirectionHero object={activeObject} />
+              </section>
+            )}
+          </>
+        )}
+
+        {/* === Timeline === */}
+        <section className="sky-v3__timeline">
+          <div className="sky-v3__timeline-head">
+            <h2 className="sky-v3__h2">{tPage('tonightTimeline')}</h2>
+            <span className="sky-v3__timeline-meta">
               <span>{tPage('darkWindow')}</span>
               <span className="times">{darkWindowLabel ?? '—'}</span>
             </span>
@@ -167,191 +249,5 @@ export default function SkyPage() {
         />
       )}
     </div>
-  );
-}
-
-interface FinderRegionProps {
-  loading: boolean;
-  error: string | null;
-  finder: FinderResponse | null;
-  activeObject: SkyObject | null;
-  activeId: ObjectId | null;
-  autoRotate: boolean;
-  onSelectTab: (id: ObjectId) => void;
-  onToggleAuto: () => void;
-  onPauseChange: (paused: boolean) => void;
-  onRetry: () => void;
-  onOpenAr: () => void;
-  arDisabled: boolean;
-  fallbackUsed: boolean;
-}
-
-function FinderRegion({
-  loading,
-  error,
-  finder,
-  activeObject,
-  activeId,
-  autoRotate,
-  onSelectTab,
-  onToggleAuto,
-  onPauseChange,
-  onRetry,
-  onOpenAr,
-  arDisabled,
-  fallbackUsed,
-}: FinderRegionProps) {
-  const tPage = useTranslations('sky.page');
-  const tErrors = useTranslations('sky.errors');
-  const sectionRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const enter = () => onPauseChange(true);
-    const leave = () => onPauseChange(false);
-    el.addEventListener('mouseenter', enter);
-    el.addEventListener('mouseleave', leave);
-    el.addEventListener('focusin', enter);
-    el.addEventListener('focusout', leave);
-    return () => {
-      el.removeEventListener('mouseenter', enter);
-      el.removeEventListener('mouseleave', leave);
-      el.removeEventListener('focusin', enter);
-      el.removeEventListener('focusout', leave);
-    };
-  }, [onPauseChange]);
-
-  // Filter Sun out of the finder UI — it's daytime-only and the rest of
-  // the page is built around night-time targets. Sun stays in arBodies.
-  const finderObjects = useMemo(
-    () => (finder ? finder.objects.filter((o) => o.id !== 'sun') : []),
-    [finder],
-  );
-
-  return (
-    <section ref={sectionRef} className="finder-section">
-      <h2 className="finder-heading">{tPage('title')}</h2>
-      <p className="finder-subheading">{tPage('subtitle')}</p>
-
-      {loading && !finder && (
-        <>
-          <div className="finder-skeleton finder-skeleton--hero" />
-          <div className="finder-skeleton finder-skeleton--strip" />
-          <p style={{ marginTop: 12, fontSize: 12, color: 'var(--text-dim)' }}>
-            {tPage('detectingLocation')}
-          </p>
-        </>
-      )}
-
-      {error && (
-        <div className="finder-error">
-          <span style={{ flex: 1 }}>{error}</span>
-          <button type="button" onClick={onRetry}>{tErrors('retry')}</button>
-        </div>
-      )}
-
-      {fallbackUsed && finder && !error && (
-        <div
-          style={{
-            marginBottom: 16,
-            padding: '10px 14px',
-            background: 'rgba(255,209,102,0.06)',
-            border: '1px solid rgba(255,209,102,0.18)',
-            borderRadius: 10,
-            fontSize: 12.5,
-            color: 'var(--text-muted)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-          }}
-        >
-          <span style={{ flex: 1 }}>{tErrors('locationFallback')}</span>
-          <button
-            type="button"
-            onClick={onRetry}
-            style={{
-              padding: '5px 10px',
-              background: 'transparent',
-              border: '1px solid var(--border)',
-              borderRadius: 6,
-              color: 'var(--text)',
-              fontSize: 11,
-              cursor: 'pointer',
-              fontFamily: 'var(--mono)',
-              letterSpacing: '0.04em',
-            }}
-          >
-            {tErrors('useMyLocation')}
-          </button>
-        </div>
-      )}
-
-      {finder && !error && (
-        <>
-          <ObjectTabs
-            objects={finderObjects}
-            activeId={activeId}
-            onSelect={onSelectTab}
-            autoRotate={autoRotate}
-            onToggleAuto={onToggleAuto}
-          />
-
-          {activeObject ? (
-            <>
-              <DirectionHero object={activeObject} />
-              <HintCards object={activeObject} />
-            </>
-          ) : (
-            <div
-              style={{
-                padding: '32px 20px',
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: 16,
-                color: 'var(--text-muted)',
-                textAlign: 'center',
-                fontFamily: 'var(--serif)',
-                fontStyle: 'italic',
-                fontSize: 16,
-              }}
-            >
-              {tPage('noVisible')}
-            </div>
-          )}
-
-          <div className="finder-strip-wrap">
-            <div className="finder-strip-head">
-              <span>{tPage('horizonLabel')}</span>
-              <span>{tPage('scrollHint')}</span>
-            </div>
-            <HorizonStrip
-              objects={finderObjects}
-              highlightedId={activeId ?? undefined}
-              onObjectClick={onSelectTab}
-            />
-            <div className="finder-strip-scale">
-              <span>{tPage('altitudeScale.horizon')}</span>
-              <span>15°</span>
-              <span>30°</span>
-              <span>45°</span>
-              <span>{tPage('altitudeScale.zenith')}</span>
-            </div>
-          </div>
-
-          <div className="finder-actions">
-            <button
-              type="button"
-              className="finder-action finder-action--primary"
-              onClick={onOpenAr}
-              disabled={arDisabled}
-              aria-disabled={arDisabled}
-            >
-              {tPage('openArFinder')}
-            </button>
-          </div>
-        </>
-      )}
-    </section>
   );
 }

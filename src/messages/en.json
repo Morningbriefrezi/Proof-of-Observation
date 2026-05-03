@@ -181,6 +181,42 @@
       "fetchFailed": "Couldn't load tonight's sky data.",
       "retry": "Retry"
     },
+    "header": {
+      "eyebrow": "Live sky",
+      "title": "Tonight",
+      "clouds": "clouds",
+      "openAr": "Open AR finder",
+      "mapCaption": "Center is straight up · ring is the horizon · tap a body for details",
+      "conditions": {
+        "excellent": "Excellent",
+        "good": "Good",
+        "fair": "Fair",
+        "poor": "Poor"
+      },
+      "oneStandout": "{count} bodies above the horizon. {object} is highest at {alt}° in the {compass}.",
+      "twoStandouts": "{count} bodies up. {bright} is brightest, {high} is highest at {alt}°.",
+      "nextRise": "Nothing bright above the horizon yet. {object} rises at {time}.",
+      "nothingUp": "Nothing bright above the horizon right now."
+    },
+    "bodyTable": {
+      "label": "Visible bodies",
+      "cols": {
+        "body": "Body",
+        "bearing": "Bearing",
+        "altitude": "Altitude",
+        "mag": "Mag",
+        "event": "Tonight"
+      },
+      "tier": {
+        "eye": "Naked eye",
+        "binocs": "Binoculars",
+        "scope": "Telescope"
+      },
+      "below": "below",
+      "setsAt": "Sets {time}",
+      "risesAt": "Rises {time}",
+      "upAllNight": "Up all night"
+    },
     "ar": {
       "title": "AR Sky",
       "permissionBody": "Stellar will use your camera and motion sensors to overlay live planet positions on your sky.",
