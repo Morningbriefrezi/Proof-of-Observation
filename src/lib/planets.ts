@@ -4,6 +4,7 @@ import {
   Equator,
   Horizon,
   Illumination,
+  MoonPhase,
   SearchRiseSet,
   SearchHourAngle,
   Constellation,
@@ -21,6 +22,8 @@ export interface PlanetInfo {
   magnitude: number;
   visible: boolean;
   constellation?: string;
+  /** Moon phase as 0–1 (0 = new, 0.5 = full, 1 = next new). null for non-Moon bodies. */
+  phase?: number | null;
 }
 
 const BODIES: { body: Body; key: string }[] = [
@@ -30,6 +33,8 @@ const BODIES: { body: Body; key: string }[] = [
   { body: Body.Mars,    key: 'mars' },
   { body: Body.Jupiter, key: 'jupiter' },
   { body: Body.Saturn,  key: 'saturn' },
+  { body: Body.Uranus,  key: 'uranus' },
+  { body: Body.Neptune, key: 'neptune' },
 ];
 
 const AZ_DIRS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] as const;
@@ -114,6 +119,11 @@ export function getVisiblePlanets(lat: number, lng: number, date: Date): PlanetI
       let constellation: string | undefined;
       try { constellation = Constellation(eq.ra, eq.dec)?.name; } catch { /* ignore */ }
 
+      let phase: number | null = null;
+      if (key === 'moon') {
+        try { phase = (MoonPhase(date) % 360) / 360; } catch { /* ignore */ }
+      }
+
       return [{
         key,
         name:        key.charAt(0).toUpperCase() + key.slice(1),
@@ -126,6 +136,7 @@ export function getVisiblePlanets(lat: number, lng: number, date: Date): PlanetI
         magnitude:   Math.round(magnitude * 10) / 10,
         visible:     horiz.altitude > 0,
         constellation,
+        phase,
       }];
     } catch (err) {
       console.warn(`[planets] skipping ${key}:`, err instanceof Error ? err.message : err);

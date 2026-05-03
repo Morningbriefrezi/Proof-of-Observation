@@ -61,9 +61,126 @@
     "planets": "Planets Tonight",
     "sunRises": "Rises",
     "sunSets": "Sets",
-    "moonPhase": "Moon Phase",
     "planetHint": "Tap any planet for rise / transit / set details",
-    "next7": "Next 7 nights"
+    "next7": "Next 7 nights",
+    "page": {
+      "title": "Find it in your sky",
+      "subtitle": "Stand outside and follow the directions below.",
+      "horizonLabel": "Your horizon — looking around",
+      "scrollHint": "Scroll to pan →",
+      "altitudeScale": {
+        "horizon": "0° horizon",
+        "zenith": "60° straight up →"
+      },
+      "startObserving": "Start observing →",
+      "openArFinder": "Open AR finder",
+      "autoToggle": "Auto",
+      "detectingLocation": "Detecting your location…",
+      "visibleTonight": "Visible tonight",
+      "tonightTimeline": "Tonight's observation timeline",
+      "darkWindow": "Dark window",
+      "noVisible": "No bright objects above the horizon right now."
+    },
+    "hero": {
+      "face": "Face",
+      "thenLook": ", then look",
+      "aboveHorizon": "above the horizon.",
+      "visibleNow": "Visible now",
+      "belowHorizon": "Below horizon",
+      "rises": "Rises",
+      "nakedEye": "Naked eye",
+      "binoculars": "Binoculars",
+      "telescope": "Telescope",
+      "magnitude": "Mag",
+      "bearing": "Bearing",
+      "altitude": "Altitude",
+      "setsAt": "Sets at",
+      "staysUpAllNight": "Stays up all night",
+      "tail": {
+        "moon": "Look for the {phase} disc.",
+        "jupiter": "Jupiter is the brightest object in that part of the sky.",
+        "saturn": "Saturn looks like a steady, golden-yellow point — through binoculars you'll glimpse the rings.",
+        "mars": "Mars has a distinct red-orange tint that sets it apart from the stars around it.",
+        "venus": "Venus looks like an extremely bright \"star\" near the horizon.",
+        "mercury": "Mercury looks like a bright \"star\" near the horizon — fast-mover, never far from the Sun.",
+        "uranus": "Faint and tricky — you'll need binoculars or a small telescope to actually see it.",
+        "neptune": "Faint — binoculars or a telescope only."
+      }
+    },
+    "directions": {
+      "fists": {
+        "half": "half a fist",
+        "one": "one fist",
+        "oneAndHalf": "one and a half fists",
+        "two": "two fists",
+        "twoAndHalf": "two and a half fists",
+        "three": "three fists",
+        "threeAndHalf": "three and a half fists",
+        "four": "four fists",
+        "fourAndHalf": "four and a half fists",
+        "five": "five fists",
+        "many": "{n} fists"
+      },
+      "compass": {
+        "N": "north",
+        "NE": "northeast",
+        "E": "east",
+        "SE": "southeast",
+        "S": "south",
+        "SW": "southwest",
+        "W": "west",
+        "NW": "northwest"
+      },
+      "compassShort": {
+        "N": "N",
+        "NE": "NE",
+        "E": "E",
+        "SE": "SE",
+        "S": "S",
+        "SW": "SW",
+        "W": "W",
+        "NW": "NW"
+      }
+    },
+    "moonPhase": {
+      "new": "new",
+      "thinCrescent": "thin crescent",
+      "firstQuarter": "first quarter",
+      "waxingGibbous": "waxing gibbous",
+      "full": "full",
+      "waningGibbous": "waning gibbous",
+      "lastQuarter": "last quarter",
+      "thinWaning": "thin waning crescent"
+    },
+    "hints": {
+      "fistTrick": {
+        "label": "Fist trick",
+        "body": "One closed fist held at arm's length is roughly 10° of sky."
+      },
+      "recognize": {
+        "label": "How to recognize",
+        "moon": "{phase} disc — easy to spot.",
+        "jupiter": "Steady, golden-white. Doesn't twinkle the way stars do.",
+        "saturn": "Pale yellow. Steady. Through binoculars you might glimpse the rings.",
+        "mars": "Distinctly red-orange. Brighter than nearby stars.",
+        "venus": "Brighter than every star. Often called the evening or morning star.",
+        "mercury": "A bright point near the horizon, low in twilight.",
+        "uranus": "Pale blue-green dot — needs binoculars and a star chart.",
+        "neptune": "Pale blue dot — needs a telescope and patience."
+      },
+      "bestWindow": {
+        "label": "Best window",
+        "untilSet": "Until {time} — sets in the {direction}.",
+        "untilRise": "Rises at {time} in the {direction}.",
+        "allNight": "Up all night."
+      }
+    },
+    "errors": {
+      "locationFallback": "We couldn't determine your location — showing tonight's sky from Tbilisi instead.",
+      "useMyLocation": "Use my location",
+      "fetchFailed": "Couldn't load tonight's sky data.",
+      "retry": "Retry"
+    }
   },
   "planets": {
     "moon": "Moon",

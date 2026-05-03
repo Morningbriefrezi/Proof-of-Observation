@@ -358,3 +358,342 @@
   }
   .sky-page-v2 .timeline-item-name { font-size: 11px; }
 }
+
+/* ============================================================
+ * HORIZON FINDER — replaces the dome chart with a horizontal,
+ * panoramic view that matches what users actually see standing
+ * outside. All styles scoped under .sky-page-v2.
+ * ============================================================ */
+
+.sky-page-v2 .finder-section { margin-top: 32px; }
+
+.sky-page-v2 .finder-heading {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  margin: 0;
+}
+.sky-page-v2 .finder-subheading {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin: 4px 0 18px;
+  line-height: 1.5;
+}
+
+.sky-page-v2 .finder-tabs-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.sky-page-v2 .finder-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  width: fit-content;
+  flex-wrap: wrap;
+}
+.sky-page-v2 .finder-tab {
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-family: var(--sans);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  transition: color 0.15s, background 0.15s;
+  min-height: 32px;
+}
+.sky-page-v2 .finder-tab:hover { color: var(--text); }
+.sky-page-v2 .finder-tab--active {
+  background: rgba(255, 209, 102, 0.10);
+  color: var(--accent);
+  font-weight: 500;
+}
+.sky-page-v2 .finder-auto {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-family: var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+  min-height: 32px;
+}
+.sky-page-v2 .finder-auto:hover { color: var(--text-muted); border-color: var(--border-strong); }
+.sky-page-v2 .finder-auto--on { color: var(--teal); border-color: rgba(56, 240, 255, 0.3); background: rgba(56, 240, 255, 0.04); }
+
+/* === HERO === */
+.sky-page-v2 .finder-hero {
+  padding: 22px 24px;
+  background: linear-gradient(180deg, rgba(132,101,203,0.06) 0%, rgba(7,11,20,0) 100%);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  border-radius: 16px;
+}
+.sky-page-v2 .finder-hero__top {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  align-items: center;
+}
+.sky-page-v2 .finder-hero__planet { display: flex; align-items: center; }
+.sky-page-v2 .finder-hero__head { min-width: 0; }
+.sky-page-v2 .finder-hero__name {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.005em;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+.sky-page-v2 .finder-hero__status {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.sky-page-v2 .finder-hero__sentence {
+  font-family: var(--serif);
+  font-size: 21px;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.4;
+  letter-spacing: 0.005em;
+  color: var(--text);
+  margin: 18px 0 0;
+}
+.sky-page-v2 .finder-hero__direction {
+  color: var(--teal);
+  font-style: normal;
+  font-weight: 500;
+}
+.sky-page-v2 .finder-hero__fists {
+  color: var(--accent);
+  font-style: normal;
+  font-weight: 500;
+}
+.sky-page-v2 .finder-hero__tail {
+  display: inline;
+  font-style: italic;
+  color: var(--text);
+}
+.sky-page-v2 .finder-hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.sky-page-v2 .finder-hero__meta-item {
+  position: relative;
+}
+.sky-page-v2 .finder-hero__meta-item:not(:last-child)::after {
+  content: '·';
+  position: absolute;
+  right: -12px;
+  color: var(--text-dim);
+}
+
+/* === HORIZON STRIP === */
+.sky-page-v2 .finder-strip-wrap { margin-top: 24px; }
+.sky-page-v2 .finder-strip-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.sky-page-v2 .finder-strip {
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  background: var(--surface);
+}
+.sky-page-v2 .finder-strip__scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+}
+.sky-page-v2 .finder-strip__scroll::-webkit-scrollbar { height: 6px; }
+.sky-page-v2 .finder-strip__scroll::-webkit-scrollbar-track { background: transparent; }
+.sky-page-v2 .finder-strip__scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.08); border-radius: 3px;
+}
+.sky-page-v2 .finder-strip__inner {
+  position: relative;
+  height: 220px;
+}
+.sky-page-v2 .finder-strip__bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg,
+    rgba(56,240,255,0.04) 0%,
+    rgba(132,101,203,0.05) 60%,
+    var(--bg) 100%);
+  pointer-events: none;
+}
+.sky-page-v2 .finder-strip__horizon {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 32px;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,209,102,0.25) 8%,
+    rgba(255,209,102,0.25) 92%,
+    transparent 100%);
+}
+.sky-page-v2 .finder-strip__beam {
+  background: linear-gradient(180deg, var(--accent) 0%, transparent 100%);
+  opacity: 0.5;
+}
+.sky-page-v2 .finder-strip__compass-row {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 0;
+}
+.sky-page-v2 .finder-strip-scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding: 0 4px;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* === HINT CARDS === */
+.sky-page-v2 .finder-hints {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 24px;
+}
+.sky-page-v2 .finder-hint {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sky-page-v2 .finder-hint__label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.sky-page-v2 .finder-hint__body {
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(255,255,255,0.85);
+}
+
+/* === ACTION ROW === */
+.sky-page-v2 .finder-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+.sky-page-v2 .finder-action {
+  padding: 11px 18px;
+  border-radius: 12px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  min-height: 44px;
+  transition: all 0.15s;
+}
+.sky-page-v2 .finder-action--primary {
+  background: rgba(255,209,102,0.10);
+  border-color: rgba(255,209,102,0.3);
+  color: var(--accent);
+}
+.sky-page-v2 .finder-action--primary:hover { background: rgba(255,209,102,0.15); }
+.sky-page-v2 .finder-action--ghost { color: var(--text-muted); }
+.sky-page-v2 .finder-action--ghost:hover { color: var(--text); border-color: var(--border-strong); }
+.sky-page-v2 .finder-action[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+/* === SKELETON === */
+.sky-page-v2 .finder-skeleton {
+  background: linear-gradient(90deg, var(--surface), rgba(255,255,255,0.04), var(--surface));
+  background-size: 200% 100%;
+  animation: finderShimmer 1.6s linear infinite;
+  border-radius: 14px;
+}
+@keyframes finderShimmer {
+  0% { background-position: 0% 0%; }
+  100% { background-position: -200% 0%; }
+}
+.sky-page-v2 .finder-skeleton--hero { height: 200px; margin-bottom: 16px; }
+.sky-page-v2 .finder-skeleton--strip { height: 220px; }
+
+/* === ERROR INLINE === */
+.sky-page-v2 .finder-error {
+  padding: 16px 20px;
+  border: 1px solid rgba(248,113,113,0.25);
+  background: rgba(248,113,113,0.06);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sky-page-v2 .finder-error button {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(248,113,113,0.12);
+  border: 1px solid rgba(248,113,113,0.3);
+  color: var(--rose);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--mono);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 700px) {
+  .sky-page-v2 .finder-heading { font-size: 22px; }
+  .sky-page-v2 .finder-hero { padding: 18px 16px; border-radius: 14px; }
+  .sky-page-v2 .finder-hero__top { gap: 14px; }
+  .sky-page-v2 .finder-hero__name { font-size: 24px; }
+  .sky-page-v2 .finder-hero__sentence { font-size: 18px; line-height: 1.5; }
+  .sky-page-v2 .finder-hero__meta {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sky-page-v2 .finder-hero__meta-item:not(:last-child)::after { content: none; }
+  .sky-page-v2 .finder-hints { grid-template-columns: 1fr; }
+  .sky-page-v2 .finder-actions { flex-direction: column; }
+  .sky-page-v2 .finder-action { width: 100%; text-align: center; }
+}

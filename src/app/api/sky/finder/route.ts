@@ -1,0 +1,138 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getVisiblePlanets, type PlanetInfo } from '@/lib/planets';
+import { fetchSkyForecast } from '@/lib/sky-data';
+import { azimuthToCompass, altitudeToFists } from '@/lib/sky/directions';
+
+const ORDER = ['moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'] as const;
+type ObjectId = (typeof ORDER)[number];
+
+interface FinderObject {
+  id: ObjectId;
+  name: string;
+  altitude: number;
+  azimuth: number;
+  magnitude: number;
+  visible: boolean;
+  nakedEye: boolean;
+  compassDirection: string;
+  fistsAboveHorizon: number;
+  riseTime: string | null;
+  setTime: string | null;
+  phase: number | null;
+}
+
+interface FinderResponse {
+  observerLocation: { lat: number; lon: number; name: string | null };
+  generatedAt: string;
+  conditions: {
+    cloudCoverPct: number;
+    quality: 'Excellent' | 'Good' | 'Fair' | 'Poor';
+    summary: string;
+  };
+  objects: FinderObject[];
+}
+
+function toIso(d: Date | string | null | undefined): string | null {
+  if (!d) return null;
+  if (d instanceof Date) return d.toISOString();
+  if (typeof d === 'string') return d;
+  return null;
+}
+
+function cloudQuality(pct: number): { quality: FinderResponse['conditions']['quality']; summary: string } {
+  if (pct < 20) return { quality: 'Excellent', summary: 'Clear night — go observe' };
+  if (pct < 50) return { quality: 'Good', summary: 'Decent conditions tonight' };
+  if (pct < 75) return { quality: 'Fair', summary: 'Limited visibility — pick bright targets' };
+  return { quality: 'Poor', summary: 'Mostly clouded out tonight' };
+}
+
+function eveningCloud(forecastDay: { hours: { time: string; cloudCover: number }[] } | undefined): number {
+  if (!forecastDay?.hours?.length) return 50;
+  const evening = forecastDay.hours.filter((h) => {
+    const hr = parseInt(h.time.slice(11, 13), 10);
+    return hr >= 20 || hr <= 4;
+  });
+  const pool = evening.length ? evening : forecastDay.hours;
+  return Math.round(pool.reduce((s, h) => s + h.cloudCover, 0) / pool.length);
+}
+
+export async function GET(req: NextRequest) {
+  const latRaw = req.nextUrl.searchParams.get('lat');
+  const lonRaw = req.nextUrl.searchParams.get('lon') ?? req.nextUrl.searchParams.get('lng');
+  const lat = parseFloat(latRaw ?? '');
+  const lon = parseFloat(lonRaw ?? '');
+
+  if (!isFinite(lat) || !isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+    return NextResponse.json({ error: 'lat and lon required as query params' }, { status: 400 });
+  }
+
+  const now = new Date();
+
+  let planets: PlanetInfo[] = [];
+  try {
+    planets = getVisiblePlanets(lat, lon, now);
+  } catch (err) {
+    console.error('[api/sky/finder] planets failed:', err);
+  }
+
+  let cloudCoverPct = 50;
+  try {
+    const forecast = await fetchSkyForecast(lat, lon);
+    cloudCoverPct = eveningCloud(forecast[0]);
+  } catch (err) {
+    console.warn('[api/sky/finder] forecast failed:', err instanceof Error ? err.message : err);
+  }
+
+  const byKey = new Map<string, PlanetInfo>(planets.map((p) => [p.key.toLowerCase(), p]));
+
+  const objects: FinderObject[] = ORDER.map((id) => {
+    const p = byKey.get(id);
+    if (!p) {
+      return {
+        id,
+        name: id.charAt(0).toUpperCase() + id.slice(1),
+        altitude: 0,
+        azimuth: 0,
+        magnitude: 0,
+        visible: false,
+        nakedEye: false,
+        compassDirection: 'N',
+        fistsAboveHorizon: 0,
+        riseTime: null,
+        setTime: null,
+        phase: null,
+      };
+    }
+    return {
+      id,
+      name: p.name,
+      altitude: p.altitude,
+      azimuth: p.azimuth,
+      magnitude: p.magnitude,
+      visible: p.altitude > 0,
+      nakedEye: p.magnitude <= 6,
+      compassDirection: azimuthToCompass(p.azimuth),
+      fistsAboveHorizon: altitudeToFists(p.altitude),
+      riseTime: toIso(p.rise),
+      setTime: toIso(p.set),
+      phase: p.phase ?? null,
+    };
+  });
+
+  const cond = cloudQuality(cloudCoverPct);
+
+  const body: FinderResponse = {
+    observerLocation: { lat, lon, name: null },
+    generatedAt: now.toISOString(),
+    conditions: {
+      cloudCoverPct,
+      quality: cond.quality,
+      summary: cond.summary,
+    },
+    objects,
+  };
+
+  return NextResponse.json(body, {
+    headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' },
+  });
+}
