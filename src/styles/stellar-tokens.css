@@ -4534,29 +4534,6 @@
    ======================================================================== */
 
 .missions-page {
-  --mis-bg: #FAFBFD;
-  --mis-bg2: #F0F2F7;
-  --mis-t1: #111111;
-  --mis-t2: #555555;
-  --mis-t3: #999999;
-  --mis-bd: #E2E5EC;
-  --mis-bd2: #CCD0D8;
-  --mis-grn: #16A34A;
-  --mis-grn-bg: #DCFCE7;
-  --mis-amb: #D97706;
-  --mis-amb-bg: #FEF3C7;
-  --mis-acc: var(--terracotta);
-  --mis-acc-bg: rgba(255, 209, 102, 0.10);
-  --mis-card: #FFFFFF;
-
-  background: var(--mis-bg);
-  color: var(--mis-t1);
-  font-family: var(--font-display), -apple-system, 'Segoe UI', sans-serif;
-  min-height: calc(100vh - 56px);
-  transition: background-color 0.18s ease, color 0.18s ease;
-}
-
-.missions-page.dark {
   --mis-bg: var(--canvas);
   --mis-bg2: #14213F;
   --mis-t1: #EDEDEF;
@@ -4571,6 +4548,11 @@
   --mis-acc: var(--terracotta);
   --mis-acc-bg: rgba(255, 209, 102,0.08);
   --mis-card: #18191D;
+
+  background: var(--mis-bg);
+  color: var(--mis-t1);
+  font-family: var(--font-display), -apple-system, 'Segoe UI', sans-serif;
+  min-height: calc(100vh - 56px);
 }
 
 .mis-content {
@@ -4702,35 +4684,6 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-}
-
-/* Theme toggle pill (inside dark hero) */
-.mis-theme-toggle {
-  position: relative;
-  width: 40px;
-  height: 22px;
-  border-radius: 11px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  cursor: pointer;
-  padding: 0;
-  transition: background 0.15s ease;
-  flex-shrink: 0;
-}
-.mis-theme-toggle::after {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.55);
-  transition: transform 0.18s ease, background 0.18s ease;
-}
-.missions-page.dark .mis-theme-toggle::after {
-  transform: translateX(18px);
-  background: var(--terracotta);
 }
 
 /* === Prime target card === */

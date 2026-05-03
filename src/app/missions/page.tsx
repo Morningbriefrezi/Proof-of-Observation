@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAppState } from '@/hooks/useAppState';
@@ -30,9 +30,6 @@ import {
   Sparkles,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-
-type Theme = 'light' | 'dark';
-const THEME_KEY = 'stellar-missions-theme';
 
 type DiffClass = 'easy' | 'med' | 'hard' | 'expert';
 
@@ -120,26 +117,10 @@ export default function MissionsPage() {
   const t = useTranslations('missions');
   const { location } = useLocation();
 
-  const [theme, setTheme] = useState<Theme>('dark');
   const [now, setNow] = useState<Date>(() => new Date());
   const [activeQuiz, setActiveQuiz] = useState<QuizDef | null>(null);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(THEME_KEY);
-      if (saved === 'light') setTheme('light');
-    } catch {}
-  }, []);
-
   useVisibleInterval(() => setNow(new Date()), 60_000);
-
-  const toggleTheme = useCallback(() => {
-    setTheme((prev) => {
-      const next: Theme = prev === 'light' ? 'dark' : 'light';
-      try { localStorage.setItem(THEME_KEY, next); } catch {}
-      return next;
-    });
-  }, []);
 
   const lat = location.lat ?? 41.7151;
   const lon = location.lon ?? 44.8271;
@@ -253,21 +234,13 @@ export default function MissionsPage() {
   // ---- Auth gate ----
   if (!authenticated) {
     return (
-      <div className={`missions-page ${theme === 'dark' ? 'dark' : ''}`}>
+      <div className="missions-page">
         <div className="mis-hero">
           <div className="mis-hero-inner">
             <div className="mis-stats-bar">
               <div className="mis-stats-left">
                 <h1 className="mis-stats-title">{t('title')}</h1>
                 <span className="mis-stats-meta">Sign in to start observing</span>
-              </div>
-              <div className="mis-stats-right">
-                <button
-                  type="button"
-                  className="mis-theme-toggle"
-                  onClick={toggleTheme}
-                  aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-                />
               </div>
             </div>
             <TonightLineup
@@ -301,7 +274,7 @@ export default function MissionsPage() {
   }
 
   return (
-    <div className={`missions-page ${theme === 'dark' ? 'dark' : ''}`}>
+    <div className="missions-page">
       {activeQuiz && <QuizActive quiz={activeQuiz} onClose={() => setActiveQuiz(null)} />}
 
       {/* Cosmic hero — always dark, full-width */}
@@ -317,12 +290,6 @@ export default function MissionsPage() {
             <div className="mis-stats-right">
               <span className="mis-rank-pill">{rank.name}</span>
               <span className="mis-stars-count">{totalStars} ✦</span>
-              <button
-                type="button"
-                className="mis-theme-toggle"
-                onClick={toggleTheme}
-                aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-              />
             </div>
           </div>
 
