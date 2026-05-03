@@ -13,6 +13,7 @@ import { DirectionHero } from '@/components/sky/finder/DirectionHero';
 import { HorizonStrip } from '@/components/sky/finder/HorizonStrip';
 import { ObjectTabs } from '@/components/sky/finder/ObjectTabs';
 import { HintCards } from '@/components/sky/finder/HintCards';
+import { ARFinder } from '@/components/sky/finder/ARFinder';
 import type { FinderResponse, ObjectId, SkyObject } from '@/components/sky/finder/types';
 import './sky.css';
 
@@ -37,6 +38,7 @@ export default function SkyPage() {
   const [activeId, setActiveId] = useState<ObjectId | null>(null);
   const [autoRotate, setAutoRotate] = useState(true);
   const [paused, setPaused] = useState(false);
+  const [arOpen, setArOpen] = useState(false);
 
   const fetchFinder = useCallback(async () => {
     setFinderLoading(true);
@@ -66,7 +68,7 @@ export default function SkyPage() {
   }, [finder]);
 
   useEffect(() => {
-    if (!autoRotate || paused || visibleSorted.length < 2) return;
+    if (!autoRotate || paused || arOpen || visibleSorted.length < 2) return;
     const interval = setInterval(() => {
       setActiveId((current) => {
         const idx = visibleSorted.findIndex((o) => o.id === current);
@@ -75,7 +77,7 @@ export default function SkyPage() {
       });
     }, AUTO_ROTATE_MS);
     return () => clearInterval(interval);
-  }, [autoRotate, paused, visibleSorted]);
+  }, [autoRotate, paused, arOpen, visibleSorted]);
 
   const activeObject = useMemo(() => {
     if (!finder || !activeId) return null;
@@ -114,6 +116,8 @@ export default function SkyPage() {
           onToggleAuto={() => setAutoRotate((v) => !v)}
           onPauseChange={setPaused}
           onRetry={fetchFinder}
+          onOpenAr={() => setArOpen(true)}
+          arDisabled={visibleSorted.length === 0}
           fallbackUsed={
             location.source === 'default' &&
             location.lat === FALLBACK_COORDS.lat &&
@@ -148,6 +152,18 @@ export default function SkyPage() {
           <ObservationTimeline data={sky.timeline} />
         </section>
       </div>
+
+      {arOpen && finder && visibleSorted.length > 0 && (
+        <ARFinder
+          objects={visibleSorted}
+          initialTargetId={
+            (activeId && visibleSorted.some((o) => o.id === activeId)
+              ? activeId
+              : visibleSorted[0]?.id) as ObjectId
+          }
+          onClose={() => setArOpen(false)}
+        />
+      )}
     </div>
   );
 }
@@ -163,6 +179,8 @@ interface FinderRegionProps {
   onToggleAuto: () => void;
   onPauseChange: (paused: boolean) => void;
   onRetry: () => void;
+  onOpenAr: () => void;
+  arDisabled: boolean;
   fallbackUsed: boolean;
 }
 
@@ -177,6 +195,8 @@ function FinderRegion({
   onToggleAuto,
   onPauseChange,
   onRetry,
+  onOpenAr,
+  arDisabled,
   fallbackUsed,
 }: FinderRegionProps) {
   const tPage = useTranslations('sky.page');
@@ -317,8 +337,9 @@ function FinderRegion({
             <button
               type="button"
               className="finder-action finder-action--ghost"
-              disabled
-              aria-disabled="true"
+              onClick={onOpenAr}
+              disabled={arDisabled}
+              aria-disabled={arDisabled}
             >
               {tPage('openArFinder')}
             </button>

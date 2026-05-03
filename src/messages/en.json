@@ -180,6 +180,47 @@
       "useMyLocation": "Use my location",
       "fetchFailed": "Couldn't load tonight's sky data.",
       "retry": "Retry"
+    },
+    "ar": {
+      "title": "AR Sky Finder",
+      "permissionBody": "Stellar will use your camera and motion sensors to show where {object} is in your sky.",
+      "permissionInstructions": "Hold your phone up and slowly turn until the arrow leads you to the object.",
+      "permissionItems": {
+        "camera": "Camera (to show what's in front of you)",
+        "motion": "Motion sensors (to track which way you face)",
+        "location": "Location (already enabled)"
+      },
+      "enable": "Enable AR",
+      "cancel": "Cancel",
+      "denied": {
+        "title": "Permission denied",
+        "body": "Stellar needs camera and motion access to use the AR finder.",
+        "tryAgain": "Try again",
+        "useHorizonInstead": "Use horizon strip instead"
+      },
+      "tracking": "Tracking {object}",
+      "found": "Found {object}. Look just past your phone.",
+      "almost": "Almost there — keep adjusting.",
+      "turnHint": "Slowly turn your body until the arrow centers.",
+      "liftPhone": "Lift your phone toward the sky.",
+      "holdUpright": "Hold your phone upright.",
+      "belowHorizon": "{object} is below your horizon.",
+      "calibration": {
+        "title": "Compass needs calibrating",
+        "body": "Wave your phone in a figure-8 pattern for a few seconds to recalibrate.",
+        "ok": "Got it"
+      },
+      "fallbacks": {
+        "noCamera": "No camera available — using starfield background.",
+        "noSensors": "AR works best on a phone with motion sensors. On desktop, use the horizon strip instead.",
+        "approximateCompass": "Compass calibration is approximate on this device. The arrow may drift over time."
+      },
+      "turnRight": "Turn right ~{deg}°",
+      "turnLeft": "Turn left ~{deg}°",
+      "lookUp": "Look up ~{deg}°",
+      "lookDown": "Look down ~{deg}°",
+      "close": "Close",
+      "switchObject": "Switch object"
     }
   },
   "planets": {
