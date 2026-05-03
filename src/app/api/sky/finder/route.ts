@@ -1,10 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Body, Equator, Horizon, Observer, SearchRiseSet } from 'astronomy-engine';
 import { getVisiblePlanets, type PlanetInfo } from '@/lib/planets';
 import { fetchSkyForecast } from '@/lib/sky-data';
 import { azimuthToCompass, altitudeToFists } from '@/lib/sky/directions';
 
-const ORDER = ['moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'] as const;
+const ORDER = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'] as const;
 type ObjectId = (typeof ORDER)[number];
+
+function computeSun(lat: number, lon: number, date: Date): PlanetInfo | null {
+  try {
+    const observer = new Observer(lat, lon, 0);
+    const eq = Equator(Body.Sun, date, observer, true, true);
+    const horiz = Horizon(date, observer, eq.ra, eq.dec, 'normal');
+    let rise: Date | null = null;
+    let set: Date | null = null;
+    try { rise = SearchRiseSet(Body.Sun, observer, +1, date, 1)?.date ?? null; } catch { /* ignore */ }
+    try { set  = SearchRiseSet(Body.Sun, observer, -1, date, 1)?.date ?? null; } catch { /* ignore */ }
+    return {
+      key: 'sun',
+      name: 'Sun',
+      altitude: horiz.altitude,
+      azimuth: horiz.azimuth,
+      azimuthDir: '',
+      rise,
+      set,
+      transit: null,
+      magnitude: -26.7,
+      visible: horiz.altitude > 0,
+      phase: null,
+    };
+  } catch (err) {
+    console.error('[api/sky/finder] sun failed:', err);
+    return null;
+  }
+}
 
 interface FinderObject {
   id: ObjectId;
@@ -74,6 +103,9 @@ export async function GET(req: NextRequest) {
   } catch (err) {
     console.error('[api/sky/finder] planets failed:', err);
   }
+
+  const sun = computeSun(lat, lon, now);
+  if (sun) planets = [sun, ...planets];
 
   let cloudCoverPct = 50;
   try {

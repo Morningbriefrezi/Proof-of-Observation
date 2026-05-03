@@ -3,6 +3,7 @@
 import type { CSSProperties } from 'react';
 
 type ObjectId =
+  | 'sun'
   | 'moon'
   | 'mercury'
   | 'venus'
@@ -21,6 +22,7 @@ export interface PlanetIconProps {
 }
 
 const GRADIENTS: Record<ObjectId, string> = {
+  sun:     'radial-gradient(circle at 40% 40%, #fffbe1 0%, #ffd166 50%, #ff7b1a 90%)',
   moon:    'radial-gradient(circle at 40% 40%, #f4ede0 0%, #c8c2b5 60%, #6a665e 95%)',
   mercury: 'radial-gradient(circle at 35% 35%, #e2dccd 0%, #a89e88 55%, #58523f 95%)',
   venus:   'radial-gradient(circle at 35% 35%, #fff5d6 0%, #e7cd84 50%, #8a6b2a 95%)',
@@ -32,6 +34,7 @@ const GRADIENTS: Record<ObjectId, string> = {
 };
 
 const GLOW: Record<ObjectId, string> = {
+  sun:     '0 0 32px rgba(255,209,102,0.55), 0 0 64px rgba(255,123,26,0.35)',
   moon:    '0 0 24px rgba(244,237,224,0.30)',
   mercury: '0 0 18px rgba(232,222,200,0.20)',
   venus:   '0 0 26px rgba(255,232,160,0.30)',

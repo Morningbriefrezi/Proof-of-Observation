@@ -32,6 +32,7 @@ const COMPASS_LABELS: { dir: string; az: number }[] = [
 ];
 
 const ACCENT: Record<ObjectId, string> = {
+  sun:     '#ffd166',
   moon:    '#f4ede0',
   mercury: '#d6cdb1',
   venus:   '#f7e7a8',
@@ -43,6 +44,7 @@ const ACCENT: Record<ObjectId, string> = {
 };
 
 const GLOW: Record<ObjectId, string> = {
+  sun:     '0 0 18px rgba(255,209,102,0.70), 0 0 36px rgba(255,123,26,0.25)',
   moon:    '0 0 14px rgba(244,237,224,0.55), 0 0 28px rgba(244,237,224,0.18)',
   mercury: '0 0 10px rgba(214,205,177,0.40)',
   venus:   '0 0 14px rgba(247,231,168,0.55), 0 0 26px rgba(247,231,168,0.18)',

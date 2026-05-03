@@ -6,10 +6,9 @@ import {
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
 } from 'react';
 import { useTranslations } from 'next-intl';
-import { ArrowLeft, ChevronUp, RefreshCw, Telescope, X } from 'lucide-react';
+import { Telescope, X } from 'lucide-react';
 import { PlanetIcon } from './PlanetIcon';
 import {
   DEFAULT_HORIZONTAL_FOV,
@@ -20,12 +19,11 @@ import {
   shortestAzDelta,
   type SkyPointing,
 } from '@/lib/sky/ar';
-import type { ObjectId, SkyObject } from './types';
+import type { SkyObject } from './types';
 import './ARFinder.css';
 
 interface ARFinderProps {
   objects: SkyObject[];
-  initialTargetId: ObjectId;
   onClose: () => void;
 }
 
@@ -51,36 +49,35 @@ const INITIAL_ORIENTATION: Orientation = {
 
 const COMPASS_TICKS = [
   { deg: 0,   label: 'N',  cardinal: true },
+  { deg: 30,  label: '30', cardinal: false },
   { deg: 45,  label: 'NE', cardinal: false },
+  { deg: 60,  label: '60', cardinal: false },
   { deg: 90,  label: 'E',  cardinal: true },
+  { deg: 120, label: '120',cardinal: false },
   { deg: 135, label: 'SE', cardinal: false },
+  { deg: 150, label: '150',cardinal: false },
   { deg: 180, label: 'S',  cardinal: true },
+  { deg: 210, label: '210',cardinal: false },
   { deg: 225, label: 'SW', cardinal: false },
+  { deg: 240, label: '240',cardinal: false },
   { deg: 270, label: 'W',  cardinal: true },
+  { deg: 300, label: '300',cardinal: false },
   { deg: 315, label: 'NW', cardinal: false },
+  { deg: 330, label: '330',cardinal: false },
 ];
 
-const COMPASS_VISIBLE_DEG = 90; // total span shown across the strip
+const COMPASS_VISIBLE_DEG = 80;
 
-// Detect the iOS-style requestPermission API once at runtime.
 type DeviceOrientationConstructor = typeof DeviceOrientationEvent & {
   requestPermission?: () => Promise<'granted' | 'denied'>;
 };
 
-export function ARFinder({ objects, initialTargetId, onClose }: ARFinderProps) {
+export function ARFinder({ objects, onClose }: ARFinderProps) {
   const t = useTranslations('sky.ar');
 
-  const orderedObjects = useMemo(
-    () => objects.slice().sort((a, b) => a.magnitude - b.magnitude),
-    [objects],
-  );
-
   const [phase, setPhase] = useState<Phase>('permission');
-  const [targetId, setTargetId] = useState<ObjectId>(initialTargetId);
   const [orientation, setOrientation] = useState<Orientation>(INITIAL_ORIENTATION);
   const [hasCamera, setHasCamera] = useState<boolean>(true);
-  const [showCalibration, setShowCalibration] = useState<boolean>(false);
-  const [showApproxBanner, setShowApproxBanner] = useState<boolean>(false);
   const [viewport, setViewport] = useState({
     w: typeof window !== 'undefined' ? window.innerWidth : 360,
     h: typeof window !== 'undefined' ? window.innerHeight : 640,
@@ -88,26 +85,16 @@ export function ARFinder({ objects, initialTargetId, onClose }: ARFinderProps) {
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const azHistoryRef = useRef<{ t: number; az: number }[]>([]);
-  const calibShownAtRef = useRef<number | null>(null);
-  const calibSuppressedRef = useRef<boolean>(false);
-  const enteredArAtRef = useRef<number | null>(null);
 
-  const target = useMemo<SkyObject | null>(() => {
-    return orderedObjects.find((o) => o.id === targetId) ?? orderedObjects[0] ?? null;
-  }, [orderedObjects, targetId]);
-
-  // Lock body scroll while the overlay is open.
+  // Lock body scroll while overlay is open.
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prev;
-    };
+    return () => { document.body.style.overflow = prev; };
   }, []);
 
-  // Detect a desktop / sensorless environment up-front.
+  // Detect missing DeviceOrientationEvent up-front (desktop).
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (typeof DeviceOrientationEvent === 'undefined') {
@@ -115,7 +102,7 @@ export function ARFinder({ objects, initialTargetId, onClose }: ARFinderProps) {
     }
   }, []);
 
-  // Track viewport size for FOV → pixel math.
+  // Track viewport for FOV → pixel math.
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const onResize = () => setViewport({ w: window.innerWidth, h: window.innerHeight });
@@ -127,18 +114,16 @@ export function ARFinder({ objects, initialTargetId, onClose }: ARFinderProps) {
     };
   }, []);
 
-  // Stop the camera on unmount.
+  // Stop camera on unmount.
   useEffect(() => {
     return () => {
-      const stream = streamRef.current;
-      if (stream) {
-        stream.getTracks().forEach((trk) => trk.stop());
-      }
+      const s = streamRef.current;
+      if (s) s.getTracks().forEach((trk) => trk.stop());
       streamRef.current = null;
     };
   }, []);
 
-  // Subscribe to orientation events whenever we enter the AR phase.
+  // Subscribe to orientation events while in AR phase.
   useEffect(() => {
     if (phase !== 'ar') return;
     if (typeof window === 'undefined' || typeof DeviceOrientationEvent === 'undefined') return;
@@ -162,77 +147,28 @@ export function ARFinder({ objects, initialTargetId, onClose }: ARFinderProps) {
         accuracy,
         absolute: !!e.absolute,
       });
-      if (!e.absolute && heading === null) {
-        setShowApproxBanner(true);
-      }
     };
 
-    const absoluteSupported = 'ondeviceorientationabsolute' in window;
-    const eventName = absoluteSupported ? 'deviceorientationabsolute' : 'deviceorientation';
-    window.addEventListener(eventName, handle as EventListener);
-    enteredArAtRef.current = Date.now();
+    // iOS exposes webkitCompassHeading on the regular `deviceorientation`
+    // event (not `deviceorientationabsolute`, which it doesn't fire). Listen
+    // to both so we catch whichever the platform delivers.
+    window.addEventListener('deviceorientation', handle as EventListener, true);
+    if ('ondeviceorientationabsolute' in window) {
+      window.addEventListener('deviceorientationabsolute', handle as EventListener, true);
+    }
 
     const noSensorTimer = window.setTimeout(() => {
       if (!received) setPhase('noSensors');
-    }, 2000);
+    }, 2500);
 
     return () => {
-      window.removeEventListener(eventName, handle as EventListener);
+      window.removeEventListener('deviceorientation', handle as EventListener, true);
+      if ('ondeviceorientationabsolute' in window) {
+        window.removeEventListener('deviceorientationabsolute', handle as EventListener, true);
+      }
       window.clearTimeout(noSensorTimer);
     };
   }, [phase]);
-
-  // Compass-jitter / accuracy-driven calibration nudge.
-  useEffect(() => {
-    if (phase !== 'ar' || calibSuppressedRef.current) return;
-    const enteredAt = enteredArAtRef.current ?? Date.now();
-    if (Date.now() - enteredAt < 10_000) return;
-
-    // Track recent az samples
-    if (orientation.heading !== null || orientation.alpha !== null) {
-      const aim = deviceToSkyPointing(
-        orientation.alpha,
-        orientation.beta,
-        orientation.gamma,
-        orientation.heading,
-      );
-      const now = Date.now();
-      azHistoryRef.current.push({ t: now, az: aim.azimuth });
-      azHistoryRef.current = azHistoryRef.current.filter((s) => now - s.t < 2000);
-    }
-
-    if (orientation.accuracy !== null && orientation.accuracy > 50) {
-      setShowCalibration(true);
-      calibShownAtRef.current = Date.now();
-      return;
-    }
-
-    const samples = azHistoryRef.current;
-    if (samples.length > 8) {
-      const azs = samples.map((s) => s.az);
-      // Variance accounting for circular wrap by referencing each to the first sample.
-      const ref = azs[0];
-      const deltas = azs.map((a) => Math.abs(((a - ref + 540) % 360) - 180));
-      const max = Math.max(...deltas);
-      const min = Math.min(...deltas);
-      if (max - min > 30) {
-        setShowCalibration(true);
-        calibShownAtRef.current = Date.now();
-      }
-    }
-  }, [orientation, phase]);
-
-  // Auto-dismiss calibration after 8s.
-  useEffect(() => {
-    if (!showCalibration) return;
-    const id = window.setTimeout(() => setShowCalibration(false), 8000);
-    return () => window.clearTimeout(id);
-  }, [showCalibration]);
-
-  const dismissCalibration = useCallback(() => {
-    setShowCalibration(false);
-    calibSuppressedRef.current = true;
-  }, []);
 
   const startCamera = useCallback(async () => {
     if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
@@ -245,14 +181,10 @@ export function ARFinder({ objects, initialTargetId, onClose }: ARFinderProps) {
         audio: false,
       });
       streamRef.current = stream;
-      const videoEl = videoRef.current;
-      if (videoEl) {
-        videoEl.srcObject = stream;
-        try {
-          await videoEl.play();
-        } catch {
-          // Autoplay may be deferred; the muted/playsInline attrs cover most cases.
-        }
+      const v = videoRef.current;
+      if (v) {
+        v.srcObject = stream;
+        try { await v.play(); } catch { /* autoplay deferred */ }
       }
       setHasCamera(true);
     } catch {
@@ -261,61 +193,69 @@ export function ARFinder({ objects, initialTargetId, onClose }: ARFinderProps) {
   }, []);
 
   const handleEnable = useCallback(async () => {
-    // 1. iOS motion permission (must be from a user gesture)
+    // iOS motion permission must come from a user gesture.
     if (typeof window !== 'undefined') {
-      const ctor = (typeof DeviceOrientationEvent !== 'undefined'
-        ? (DeviceOrientationEvent as DeviceOrientationConstructor)
-        : null);
+      const ctor =
+        typeof DeviceOrientationEvent !== 'undefined'
+          ? (DeviceOrientationEvent as DeviceOrientationConstructor)
+          : null;
       const reqPerm = ctor?.requestPermission;
       if (typeof reqPerm === 'function') {
         try {
           const result = await reqPerm.call(ctor);
-          if (result !== 'granted') {
-            setPhase('denied');
-            return;
-          }
+          if (result !== 'granted') { setPhase('denied'); return; }
         } catch {
           setPhase('denied');
           return;
         }
       }
     }
-
-    // 2. Enter AR phase first so the <video> mounts; then start the camera.
     setPhase('ar');
-    // Defer camera start one tick so the video element exists in the DOM.
-    setTimeout(() => {
-      void startCamera();
-    }, 0);
+    setTimeout(() => { void startCamera(); }, 0);
   }, [startCamera]);
 
   const handleClose = useCallback(() => {
-    const stream = streamRef.current;
-    if (stream) {
-      stream.getTracks().forEach((trk) => trk.stop());
-    }
+    const s = streamRef.current;
+    if (s) s.getTracks().forEach((trk) => trk.stop());
     streamRef.current = null;
     onClose();
   }, [onClose]);
 
-  const handleSwitch = useCallback(() => {
-    if (orderedObjects.length < 2) return;
-    setTargetId((current) => {
-      const idx = orderedObjects.findIndex((o) => o.id === current);
-      const next = orderedObjects[(idx + 1) % orderedObjects.length];
-      return next.id;
-    });
-  }, [orderedObjects]);
-
-  // ============= Render =============
+  // === Renders for the non-AR phases ===
 
   if (phase === 'permission') {
     return (
-      <PermissionStage
-        targetName={target?.name ?? ''}
-        onEnable={handleEnable}
-        onCancel={onClose}
-      />
+      <div className="ar-overlay">
+        <div className="ar-card-stage">
+          <div className="ar-card">
+            <div className="ar-card__icon"><Telescope size={20} /></div>
+            <h2 className="ar-card__title">{t('title')}</h2>
+            <p className="ar-card__body">{t('permissionBody')}</p>
+            <p className="ar-card__body">{t('permissionInstructions')}</p>
+            <ul className="ar-card__list">
+              <li>{t('permissionItems.camera')}</li>
+              <li>{t('permissionItems.motion')}</li>
+              <li>{t('permissionItems.location')}</li>
+            </ul>
+            <div className="ar-card__actions">
+              <button
+                type="button"
+                className="ar-card__btn ar-card__btn--primary"
+                onClick={handleEnable}
+              >
+                {t('enable')}
+              </button>
+              <button
+                type="button"
+                className="ar-card__btn ar-card__btn--ghost"
+                onClick={onClose}
+              >
+                {t('cancel')}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -373,97 +313,76 @@ export function ARFinder({ objects, initialTargetId, onClose }: ARFinderProps) {
   }
 
   // === AR live phase ===
-  const phoneAim: SkyPointing = deviceToSkyPointing(
-    orientation.alpha,
-    orientation.beta,
-    orientation.gamma,
-    orientation.heading,
-  );
 
-  const targetAz = target?.azimuth ?? 0;
-  const targetAlt = target?.altitude ?? 0;
-  const dAz = shortestAzDelta(targetAz, phoneAim.azimuth);
-  const dAlt = targetAlt - phoneAim.altitude;
+  return (
+    <ARLive
+      objects={objects}
+      orientation={orientation}
+      hasCamera={hasCamera}
+      videoRef={videoRef}
+      viewport={viewport}
+      onClose={handleClose}
+    />
+  );
+}
+
+interface ARLiveProps {
+  objects: SkyObject[];
+  orientation: Orientation;
+  hasCamera: boolean;
+  videoRef: React.RefObject<HTMLVideoElement | null>;
+  viewport: { w: number; h: number };
+  onClose: () => void;
+}
+
+function ARLive({ objects, orientation, hasCamera, videoRef, viewport, onClose }: ARLiveProps) {
+  const t = useTranslations('sky.ar');
+
+  const phoneAim: SkyPointing = useMemo(
+    () => deviceToSkyPointing(
+      orientation.alpha,
+      orientation.beta,
+      orientation.gamma,
+      orientation.heading,
+    ),
+    [orientation],
+  );
 
   const hFov = DEFAULT_HORIZONTAL_FOV;
   const vFov = DEFAULT_VERTICAL_FOV;
-  const inViewX = Math.abs(dAz) <= hFov / 2;
-  const inViewY = Math.abs(dAlt) <= vFov / 2;
-  const onScreen = inViewX && inViewY;
-  const onTarget = Math.abs(dAz) < ON_TARGET_DEG && Math.abs(dAlt) < ON_TARGET_DEG;
 
-  // Reticle screen position
-  const screenX = (dAz / hFov) * viewport.w + viewport.w / 2;
-  const screenY = -(dAlt / vFov) * viewport.h + viewport.h / 2;
+  // For each body, compute on-screen position. Render only if within an
+  // expanded FOV box (1.2× to allow gentle entry/exit fades).
+  const bodies = useMemo(() => {
+    return objects.map((o) => {
+      const dAz = shortestAzDelta(o.azimuth, phoneAim.azimuth);
+      const dAlt = o.altitude - phoneAim.altitude;
+      const screenX = (dAz / hFov) * viewport.w + viewport.w / 2;
+      const screenY = -(dAlt / vFov) * viewport.h + viewport.h / 2;
+      const visibleX = Math.abs(dAz) <= hFov * 0.6;
+      const visibleY = Math.abs(dAlt) <= vFov * 0.6;
+      const onScreen = visibleX && visibleY;
+      const focused = Math.abs(dAz) < ON_TARGET_DEG && Math.abs(dAlt) < ON_TARGET_DEG;
+      return { obj: o, screenX, screenY, onScreen, focused, dAz, dAlt };
+    });
+  }, [objects, phoneAim, hFov, vFov, viewport]);
 
-  // Horizon line: where altitude = 0 falls on screen given current device tilt
+  const focusedBody = bodies.find((b) => b.focused) ?? null;
+
   const horizonY = (phoneAim.altitude / vFov) * viewport.h + viewport.h / 2;
+  const cardinal = azimuthToCardinal(phoneAim.azimuth);
 
-  // Off-screen arrow position: pin to the screen edge in the direction of the target.
-  const edgePadding = 32;
-  let arrowStyle: CSSProperties = {};
-  let arrowRotation = 0;
-  let arrowHint = '';
-  if (!onScreen) {
-    if (targetAlt < 0) {
-      // Below horizon entirely — arrow points down at center
-      arrowStyle = {
-        left: viewport.w / 2,
-        top: viewport.h - edgePadding - 80,
-        transform: 'translate(-50%, 0)',
-      };
-      arrowRotation = 180;
-      arrowHint = t('belowHorizon', { object: target?.name ?? '' });
-    } else {
-      // Clamp the off-screen position to a screen edge based on the larger axis.
-      const horizontalDominant = Math.abs(dAz) / hFov >= Math.abs(dAlt) / vFov;
-      if (horizontalDominant) {
-        // Pin to left or right edge
-        const onRight = dAz > 0;
-        const x = onRight ? viewport.w - edgePadding : edgePadding;
-        // Vertical position follows target Y but clamped
-        const y = Math.max(80, Math.min(viewport.h - 120, screenY));
-        arrowStyle = { left: x, top: y, transform: 'translate(-50%, -50%)' };
-        arrowRotation = onRight ? 90 : -90;
-        const deg = Math.round(Math.abs(dAz) / 5) * 5;
-        arrowHint = onRight
-          ? t('turnRight', { deg })
-          : t('turnLeft', { deg });
-      } else {
-        // Pin to top or bottom
-        const onTop = dAlt > 0;
-        const y = onTop ? edgePadding + 60 : viewport.h - edgePadding - 80;
-        const x = Math.max(60, Math.min(viewport.w - 60, screenX));
-        arrowStyle = { left: x, top: y, transform: 'translate(-50%, -50%)' };
-        arrowRotation = onTop ? 0 : 180;
-        const deg = Math.round(Math.abs(dAlt) / 5) * 5;
-        arrowHint = onTop
-          ? t('lookUp', { deg })
-          : t('lookDown', { deg });
-      }
-    }
-  }
-
-  // Bottom hint copy
-  let hintText: string;
-  let hintTone: 'default' | 'found' = 'default';
-  const tilt = orientation.beta ?? 90;
-  const roll = Math.abs(orientation.gamma ?? 0);
-  if (onTarget) {
-    hintText = t('found', { object: target?.name ?? '' });
-    hintTone = 'found';
-  } else if (roll > 70) {
-    hintText = t('holdUpright');
-  } else if (tilt < 30) {
-    hintText = t('liftPhone');
-  } else if (onScreen) {
-    hintText = t('almost');
-  } else {
-    hintText = t('turnHint');
-  }
-
-  // Compass strip rendering — each tick drifts left as phoneAz increases.
   const compassPxPerDeg = viewport.w / COMPASS_VISIBLE_DEG;
+
+  const tilt = orientation.beta ?? 90;
+  let hint: string;
+  if (focusedBody) {
+    hint = t('found', { object: focusedBody.obj.name });
+  } else if (tilt < 30) {
+    hint = t('liftPhone');
+  } else {
+    hint = t('panAround');
+  }
 
   return (
     <div className="ar-overlay" role="dialog" aria-modal="true" aria-label={t('title')}>
@@ -482,38 +401,44 @@ export function ARFinder({ objects, initialTargetId, onClose }: ARFinderProps) {
       {/* Horizon line */}
       <div
         className="ar-horizon-line"
-        style={{ top: Math.max(0, Math.min(viewport.h, horizonY)) }}
-      />
-
-      {/* Reticle or off-screen arrow */}
-      <div className="ar-overlay__layer">
-        {onScreen ? (
-          <div
-            className={`ar-reticle ${onTarget ? 'ar-reticle--found' : ''}`}
-            style={{ left: screenX, top: screenY }}
-          >
-            <div className="ar-reticle__dot" />
-            <div className="ar-reticle__label">{target?.name ?? ''}</div>
-          </div>
-        ) : (
-          <div className="ar-arrow" style={arrowStyle}>
-            <div
-              className="ar-arrow__chevron"
-              style={{ transform: `rotate(${arrowRotation}deg)` }}
-            >
-              <ChevronUp size={28} strokeWidth={2.4} />
-            </div>
-            {arrowHint && <div className="ar-arrow__hint">{arrowHint}</div>}
-          </div>
-        )}
+        style={{ top: Math.max(-1, Math.min(viewport.h + 1, horizonY)) }}
+      >
+        <span className="ar-horizon-line__label">{t('horizon')}</span>
       </div>
 
-      {/* Approximate-compass banner */}
-      {showApproxBanner && (
-        <div className="ar-banner">{t('fallbacks.approximateCompass')}</div>
-      )}
+      {/* Bodies */}
+      <div className="ar-overlay__layer">
+        {bodies.map(({ obj, screenX, screenY, onScreen, focused }) => {
+          if (!onScreen) return null;
+          // Sun only above horizon — never label below
+          return (
+            <div
+              key={obj.id}
+              className={`ar-body ${focused ? 'ar-body--focused' : ''}`}
+              style={{
+                left: screenX,
+                top: screenY,
+                opacity: focused ? 1 : 0.92,
+              }}
+            >
+              <div className="ar-body__icon">
+                <PlanetIcon
+                  id={obj.id}
+                  size={focused ? 56 : 38}
+                  phase={obj.phase}
+                  glow={true}
+                />
+                <div className="ar-body__crosshair" />
+              </div>
+              <div className="ar-body__label">{obj.name}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* No-camera banner */}
       {!hasCamera && (
-        <div className="ar-banner" style={{ top: showApproxBanner ? undefined : undefined }}>
+        <div className="ar-bottom-hint" style={{ bottom: 'auto', top: 70 }}>
           {t('fallbacks.noCamera')}
         </div>
       )}
@@ -521,13 +446,12 @@ export function ARFinder({ objects, initialTargetId, onClose }: ARFinderProps) {
       {/* Compass strip */}
       <div className="ar-compass-strip" aria-hidden="true">
         <div className="ar-compass-strip__inner">
+          <div className="ar-compass-strip__center" />
           {COMPASS_TICKS.flatMap((tick) => {
-            // Render each tick at its angular offset from the device azimuth, plus
-            // wrap copies at ±360° so labels enter/leave smoothly.
-            const positions = [-360, 0, 360].map((wrap) => {
+            return [-360, 0, 360].map((wrap) => {
               const delta = shortestAzDelta(tick.deg + wrap, phoneAim.azimuth);
+              if (Math.abs(delta) > COMPASS_VISIBLE_DEG / 2 + 5) return null;
               const x = viewport.w / 2 + delta * compassPxPerDeg;
-              if (x < -40 || x > viewport.w + 40) return null;
               return (
                 <div
                   key={`${tick.label}-${wrap}`}
@@ -539,124 +463,29 @@ export function ARFinder({ objects, initialTargetId, onClose }: ARFinderProps) {
                 </div>
               );
             });
-            return positions;
           })}
         </div>
       </div>
 
-      {/* Bottom contextual hint */}
-      <div className={`ar-bottom-hint ${hintTone === 'found' ? 'ar-bottom-hint--found' : ''}`}>
-        {hintTone === 'found' && (
-          <span style={{ color: 'var(--yes)' }}>✦</span>
-        )}
-        <span>{hintText}</span>
-      </div>
+      {/* Bottom hint */}
+      <div className="ar-bottom-hint">{hint}</div>
 
       {/* Top bar */}
       <div className="ar-overlay__topbar">
-        <div className="ar-topbar__left">
-          <button
-            type="button"
-            className="ar-topbar__btn"
-            aria-label={t('close')}
-            onClick={handleClose}
-          >
-            <ArrowLeft size={18} />
-          </button>
-          {target && (
-            <>
-              <PlanetIcon id={target.id} size={26} phase={target.phase} glow={false} />
-              <span className="ar-topbar__title">
-                {t('tracking', { object: target.name })}
-              </span>
-            </>
-          )}
-        </div>
-        <div className="ar-topbar__btns">
-          {orderedObjects.length > 1 && (
-            <button
-              type="button"
-              className="ar-topbar__btn"
-              aria-label={t('switchObject')}
-              onClick={handleSwitch}
-            >
-              <RefreshCw size={18} />
-            </button>
-          )}
-          <button
-            type="button"
-            className="ar-topbar__btn"
-            aria-label={t('close')}
-            onClick={handleClose}
-          >
-            <X size={18} />
-          </button>
-        </div>
-      </div>
-
-      {/* Calibration nudge */}
-      {showCalibration && (
-        <div className="ar-card-stage">
-          <div className="ar-card">
-            <div className="ar-card__icon"><RefreshCw size={20} /></div>
-            <h2 className="ar-card__title">{t('calibration.title')}</h2>
-            <p className="ar-card__body">{t('calibration.body')}</p>
-            <div className="ar-card__actions">
-              <button
-                type="button"
-                className="ar-card__btn ar-card__btn--primary"
-                onClick={dismissCalibration}
-              >
-                {t('calibration.ok')}
-              </button>
-            </div>
+        <div>
+          <div className="ar-topbar__title">{t('title')}</div>
+          <div className="ar-topbar__heading">
+            {cardinal} · {Math.round(phoneAim.azimuth)}°
           </div>
         </div>
-      )}
-    </div>
-  );
-}
-
-interface PermissionStageProps {
-  targetName: string;
-  onEnable: () => void;
-  onCancel: () => void;
-}
-
-function PermissionStage({ targetName, onEnable, onCancel }: PermissionStageProps) {
-  const t = useTranslations('sky.ar');
-  return (
-    <div className="ar-overlay">
-      <div className="ar-card-stage">
-        <div className="ar-card">
-          <div className="ar-card__icon"><Telescope size={20} /></div>
-          <h2 className="ar-card__title">{t('title')}</h2>
-          <p className="ar-card__body">
-            {t('permissionBody', { object: targetName })}
-          </p>
-          <p className="ar-card__body">{t('permissionInstructions')}</p>
-          <ul className="ar-card__list">
-            <li>{t('permissionItems.camera')}</li>
-            <li>{t('permissionItems.motion')}</li>
-            <li>{t('permissionItems.location')}</li>
-          </ul>
-          <div className="ar-card__actions">
-            <button
-              type="button"
-              className="ar-card__btn ar-card__btn--primary"
-              onClick={onEnable}
-            >
-              {t('enable')}
-            </button>
-            <button
-              type="button"
-              className="ar-card__btn ar-card__btn--ghost"
-              onClick={onCancel}
-            >
-              {t('cancel')}
-            </button>
-          </div>
-        </div>
+        <button
+          type="button"
+          className="ar-topbar__btn"
+          aria-label={t('close')}
+          onClick={onClose}
+        >
+          <X size={18} />
+        </button>
       </div>
     </div>
   );

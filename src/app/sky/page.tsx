@@ -6,13 +6,11 @@ import { useTranslations } from 'next-intl';
 import { useSkyData } from '@/lib/use-sky-data';
 import { useLocation } from '@/lib/location';
 import { SkyHero } from '@/components/sky/SkyHero';
-import { VisibleNow } from '@/components/sky/VisibleNow';
 import { ObservationTimeline } from '@/components/sky/ObservationTimeline';
 import { LocationFallbackBanner } from '@/components/sky/LocationFallbackBanner';
 import { DirectionHero } from '@/components/sky/finder/DirectionHero';
 import { HorizonStrip } from '@/components/sky/finder/HorizonStrip';
 import { ObjectTabs } from '@/components/sky/finder/ObjectTabs';
-import { HintCards } from '@/components/sky/finder/HintCards';
 import { ARFinder } from '@/components/sky/finder/ARFinder';
 import type { FinderResponse, ObjectId, SkyObject } from '@/components/sky/finder/types';
 import './sky.css';
@@ -31,7 +29,6 @@ export default function SkyPage() {
   );
   const sky = useSkyData(initialCoords);
 
-  // Finder state — independent of useSkyData so we can hit the dedicated endpoint.
   const [finder, setFinder] = useState<FinderResponse | null>(null);
   const [finderLoading, setFinderLoading] = useState(true);
   const [finderError, setFinderError] = useState<string | null>(null);
@@ -61,10 +58,16 @@ export default function SkyPage() {
     fetchFinder();
   }, [fetchFinder]);
 
-  // Auto-rotate through visible objects in brightness order.
   const visibleSorted = useMemo<SkyObject[]>(() => {
     if (!finder) return [];
     return finder.objects.filter((o) => o.visible).sort((a, b) => a.magnitude - b.magnitude);
+  }, [finder]);
+
+  // Bodies for AR — include Sun even though the finder UI hides it (it's
+  // useful to show daytime).
+  const arBodies = useMemo<SkyObject[]>(() => {
+    if (!finder) return [];
+    return finder.objects.filter((o) => o.visible);
   }, [finder]);
 
   useEffect(() => {
@@ -117,29 +120,13 @@ export default function SkyPage() {
           onPauseChange={setPaused}
           onRetry={fetchFinder}
           onOpenAr={() => setArOpen(true)}
-          arDisabled={visibleSorted.length === 0}
+          arDisabled={arBodies.length === 0}
           fallbackUsed={
             location.source === 'default' &&
             location.lat === FALLBACK_COORDS.lat &&
             location.lon === FALLBACK_COORDS.lon
           }
         />
-
-        <section className="section">
-          <div className="section-head">
-            <h2 className="section-title">{tPage('visibleTonight')}</h2>
-            <span className="section-meta">
-              {sky.refreshedAt
-                ? sky.refreshedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
-                : '—'}
-            </span>
-          </div>
-          <VisibleNow
-            planets={sky.planets}
-            featuredTarget={activeObject?.name}
-            isCurrentlyDark={sky.isCurrentlyDark}
-          />
-        </section>
 
         <section className="section">
           <div className="section-head">
@@ -153,16 +140,8 @@ export default function SkyPage() {
         </section>
       </div>
 
-      {arOpen && finder && visibleSorted.length > 0 && (
-        <ARFinder
-          objects={visibleSorted}
-          initialTargetId={
-            (activeId && visibleSorted.some((o) => o.id === activeId)
-              ? activeId
-              : visibleSorted[0]?.id) as ObjectId
-          }
-          onClose={() => setArOpen(false)}
-        />
+      {arOpen && arBodies.length > 0 && (
+        <ARFinder objects={arBodies} onClose={() => setArOpen(false)} />
       )}
     </div>
   );
@@ -203,7 +182,6 @@ function FinderRegion({
   const tErrors = useTranslations('sky.errors');
   const sectionRef = useRef<HTMLDivElement | null>(null);
 
-  // Pause auto-rotate while the user hovers/focuses the finder so they can read.
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
@@ -220,6 +198,13 @@ function FinderRegion({
       el.removeEventListener('focusout', leave);
     };
   }, [onPauseChange]);
+
+  // Filter Sun out of the finder UI — it's daytime-only and the rest of
+  // the page is built around night-time targets. Sun stays in arBodies.
+  const finderObjects = useMemo(
+    () => (finder ? finder.objects.filter((o) => o.id !== 'sun') : []),
+    [finder],
+  );
 
   return (
     <section ref={sectionRef} className="finder-section">
@@ -282,7 +267,7 @@ function FinderRegion({
       {finder && !error && (
         <>
           <ObjectTabs
-            objects={finder.objects}
+            objects={finderObjects}
             activeId={activeId}
             onSelect={onSelectTab}
             autoRotate={autoRotate}
@@ -315,7 +300,7 @@ function FinderRegion({
               <span>{tPage('scrollHint')}</span>
             </div>
             <HorizonStrip
-              objects={finder.objects}
+              objects={finderObjects}
               highlightedId={activeId ?? undefined}
               onObjectClick={onSelectTab}
             />
@@ -328,15 +313,10 @@ function FinderRegion({
             </div>
           </div>
 
-          {activeObject && <HintCards object={activeObject} />}
-
           <div className="finder-actions">
-            <a href="/missions" className="finder-action finder-action--primary">
-              {tPage('startObserving')}
-            </a>
             <button
               type="button"
-              className="finder-action finder-action--ghost"
+              className="finder-action finder-action--primary"
               onClick={onOpenAr}
               disabled={arDisabled}
               aria-disabled={arDisabled}

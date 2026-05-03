@@ -1,4 +1,4 @@
-// AR pointing math: turns raw DeviceOrientationEvent angles into the sky
+// AR pointing math: turns DeviceOrientationEvent angles into the sky
 // direction the back of the phone is aimed at.
 
 export interface SkyPointing {
@@ -6,27 +6,22 @@ export interface SkyPointing {
   altitude: number;  // -90 = down, 0 = horizon, +90 = zenith
 }
 
-// Reasonable defaults for a modern phone rear camera in portrait.
-// FOV varies by device; if a refinement is ever needed, surface it as a
-// per-device override rather than a runtime calibration.
-export const DEFAULT_HORIZONTAL_FOV = 65;
-export const DEFAULT_VERTICAL_FOV = 50;
+// Effective on-screen FOV after a portrait phone's rear camera is rendered
+// with `object-fit: cover`. The lens is wide (~60°), but in portrait we crop
+// the horizontal sides to fill a tall screen, so the visible horizontal FOV
+// shrinks to roughly a third of the screen height. Vertical stays close to
+// the lens's native vertical FOV. These are conservative defaults that work
+// reasonably across iPhone and modern Android.
+export const DEFAULT_HORIZONTAL_FOV = 38;
+export const DEFAULT_VERTICAL_FOV = 60;
 
-// "On target" threshold in degrees — both axes must be within this band.
-export const ON_TARGET_DEG = 3;
+// Distance below which a body is considered "centered" by the user.
+export const ON_TARGET_DEG = 4;
 
 /**
  * Convert raw device orientation angles to the (azimuth, altitude) the back
  * of the device is pointing at, assuming the user holds the phone in
  * portrait with the screen facing them.
- *
- * - On iOS Safari, prefer `webkitCompassHeading` (absolute, 0 = magnetic N).
- * - On Android Chrome with `event.absolute === true`, use `alpha` directly,
- *   inverted because alpha increases counter-clockwise as the device top
- *   rotates (so 0=north needs a sign flip to match clockwise compass).
- * - Altitude: when beta = 90 the phone is upright with the back pointing at
- *   the horizon (alt 0); beta = 180 → back points up (alt +90); beta = 0 →
- *   back points down (alt -90).
  */
 export function deviceToSkyPointing(
   alpha: number | null,
@@ -36,14 +31,20 @@ export function deviceToSkyPointing(
 ): SkyPointing {
   let azimuth: number;
   if (webkitCompassHeading !== null && !isNaN(webkitCompassHeading)) {
+    // iOS: webkitCompassHeading is 0 = magnetic north, increasing clockwise
     azimuth = webkitCompassHeading;
   } else if (alpha !== null && !isNaN(alpha)) {
+    // Android `deviceorientationabsolute`: alpha is 0 when device top points
+    // north, increases counter-clockwise → invert.
     azimuth = (360 - alpha) % 360;
   } else {
     azimuth = 0;
   }
   azimuth = ((azimuth % 360) + 360) % 360;
 
+  // beta=0 → screen flat face up, back of phone points down → alt -90
+  // beta=90 → phone upright, back points at horizon → alt 0
+  // beta=180 → phone tilted backward, back points up → alt +90
   const b = beta ?? 90;
   const altitude = Math.max(-90, Math.min(90, b - 90));
 
