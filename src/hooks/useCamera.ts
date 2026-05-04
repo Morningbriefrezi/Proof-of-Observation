@@ -2,6 +2,9 @@
 
 import { useRef, useState, useCallback } from 'react';
 
+const DIGITAL_ZOOM_MAX = 5;
+const DIGITAL_ZOOM_STEP = 0.1;
+
 function isImageBlack(canvas: HTMLCanvasElement): boolean {
   const ctx = canvas.getContext('2d');
   if (!ctx) return true;
@@ -13,11 +16,36 @@ function isImageBlack(canvas: HTMLCanvasElement): boolean {
   return total < 1000;
 }
 
+interface ZoomCapability {
+  min: number;
+  max: number;
+  step: number;
+  hardware: boolean;
+}
+
 export function useCamera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
+  const [zoom, setZoom] = useState(1);
+  const [zoomCap, setZoomCap] = useState<ZoomCapability>({
+    min: 1, max: DIGITAL_ZOOM_MAX, step: DIGITAL_ZOOM_STEP, hardware: false,
+  });
+
+  const detectZoomCapability = useCallback((s: MediaStream) => {
+    const track = s.getVideoTracks()[0];
+    if (!track || typeof track.getCapabilities !== 'function') {
+      setZoomCap({ min: 1, max: DIGITAL_ZOOM_MAX, step: DIGITAL_ZOOM_STEP, hardware: false });
+      return;
+    }
+    const caps = track.getCapabilities() as MediaTrackCapabilities & { zoom?: { min: number; max: number; step: number } };
+    if (caps.zoom && typeof caps.zoom.max === 'number' && caps.zoom.max > caps.zoom.min) {
+      setZoomCap({ min: caps.zoom.min, max: caps.zoom.max, step: caps.zoom.step ?? 0.1, hardware: true });
+    } else {
+      setZoomCap({ min: 1, max: DIGITAL_ZOOM_MAX, step: DIGITAL_ZOOM_STEP, hardware: false });
+    }
+  }, []);
 
   const startCamera = useCallback(async (facing: 'environment' | 'user' = 'environment') => {
     stream?.getTracks().forEach(t => t.stop());
@@ -46,9 +74,11 @@ export function useCamera() {
 
     setStream(s);
     setFacingMode(facing);
+    setZoom(1);
+    detectZoomCapability(s);
     if (videoRef.current) videoRef.current.srcObject = s;
     setError(null);
-  }, [stream]);
+  }, [stream, detectZoomCapability]);
 
   const flipCamera = useCallback(() => {
     const next = facingMode === 'environment' ? 'user' : 'environment';
@@ -58,15 +88,42 @@ export function useCamera() {
   const stopCamera = useCallback(() => {
     stream?.getTracks().forEach(t => t.stop());
     setStream(null);
+    setZoom(1);
   }, [stream]);
+
+  const setZoomLevel = useCallback(async (next: number) => {
+    const clamped = Math.max(zoomCap.min, Math.min(zoomCap.max, next));
+    setZoom(clamped);
+    if (zoomCap.hardware && stream) {
+      const track = stream.getVideoTracks()[0];
+      try {
+        await track.applyConstraints({ advanced: [{ zoom: clamped } as MediaTrackConstraintSet] });
+      } catch {
+        // Some browsers reject mid-stream — fall back to digital silently.
+        setZoomCap(c => ({ ...c, hardware: false, max: Math.max(c.max, DIGITAL_ZOOM_MAX) }));
+      }
+    }
+  }, [zoomCap, stream]);
 
   const capture = useCallback((_missionName: string): string | null => {
     if (videoRef.current && stream) {
+      const video = videoRef.current;
       const canvas = document.createElement('canvas');
       canvas.width = 640;
       canvas.height = 480;
       const ctx = canvas.getContext('2d')!;
-      ctx.drawImage(videoRef.current, 0, 0, 640, 480);
+
+      // Hardware zoom is already baked into the stream — draw 1:1.
+      // Digital zoom: crop the centered region from the source video and stretch it.
+      if (!zoomCap.hardware && zoom > 1) {
+        const sw = (video.videoWidth || 640) / zoom;
+        const sh = (video.videoHeight || 480) / zoom;
+        const sx = ((video.videoWidth || 640) - sw) / 2;
+        const sy = ((video.videoHeight || 480) - sh) / 2;
+        ctx.drawImage(video, sx, sy, sw, sh, 0, 0, 640, 480);
+      } else {
+        ctx.drawImage(video, 0, 0, 640, 480);
+      }
 
       if (isImageBlack(canvas)) {
         return null; // Too dark — caller must prompt user to try again
@@ -75,9 +132,13 @@ export function useCamera() {
       return canvas.toDataURL('image/jpeg', 0.85);
     }
     return null; // No camera stream — caller must show upload or retry UI
-  }, [stream]);
+  }, [stream, zoom, zoomCap.hardware]);
 
-  return { videoRef, stream, error, facingMode, startCamera, flipCamera, stopCamera, capture };
+  return {
+    videoRef, stream, error, facingMode,
+    zoom, zoomCap, setZoomLevel,
+    startCamera, flipCamera, stopCamera, capture,
+  };
 }
 
 export function generateSimPhoto(name: string): string {

@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useCamera } from '@/hooks/useCamera';
-import { RefreshCw, RotateCcw, Camera, Upload } from 'lucide-react';
+import { RefreshCw, RotateCcw, Camera, Upload, Plus, Minus } from 'lucide-react';
 
 interface CameraCaptureProps {
   missionName: string;
@@ -11,11 +11,12 @@ interface CameraCaptureProps {
 }
 
 export default function CameraCapture({ missionName, onCapture, onUpload }: CameraCaptureProps) {
-  const { videoRef, error, startCamera, flipCamera, stopCamera, capture } = useCamera();
+  const { videoRef, error, zoom, zoomCap, setZoomLevel, startCamera, flipCamera, stopCamera, capture } = useCamera();
   const [preview, setPreview] = useState<string | null>(null);
   const [flash, setFlash] = useState(false);
   const [captureError, setCaptureError] = useState<string | null>(null);
   const [isUploadPreview, setIsUploadPreview] = useState(false);
+  const pinchRef = useRef<{ baseDist: number; baseZoom: number } | null>(null);
 
   useEffect(() => {
     startCamera('environment');
@@ -57,6 +58,37 @@ export default function CameraCapture({ missionName, onCapture, onUpload }: Came
     setIsUploadPreview(false);
     startCamera('environment');
   };
+
+  const touchDistance = (touches: React.TouchList) => {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.hypot(dx, dy);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      pinchRef.current = { baseDist: touchDistance(e.touches), baseZoom: zoom };
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 2 && pinchRef.current) {
+      e.preventDefault();
+      const ratio = touchDistance(e.touches) / pinchRef.current.baseDist;
+      setZoomLevel(pinchRef.current.baseZoom * ratio);
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (e.touches.length < 2) pinchRef.current = null;
+  };
+
+  const stepZoom = (dir: 1 | -1) => {
+    const step = Math.max(zoomCap.step, 0.25);
+    setZoomLevel(zoom + dir * step);
+  };
+
+  const zoomPct = (zoom - zoomCap.min) / (zoomCap.max - zoomCap.min);
 
   // Preview screen
   if (preview) {
@@ -112,8 +144,22 @@ export default function CameraCapture({ missionName, onCapture, onUpload }: Came
   return (
     <div className="flex flex-col gap-2.5 w-full">
       {/* Viewfinder — square, fits in screen without scrolling */}
-      <div className="relative rounded-2xl overflow-hidden bg-canvas w-full mx-auto" style={{ aspectRatio: '1 / 1', maxWidth: 360 }}>
-        <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+      <div
+        className="relative rounded-2xl overflow-hidden bg-canvas w-full mx-auto touch-none select-none"
+        style={{ aspectRatio: '1 / 1', maxWidth: 360 }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
+      >
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          className="w-full h-full object-cover"
+          style={zoomCap.hardware ? undefined : { transform: `scale(${zoom})`, transformOrigin: 'center center' }}
+        />
         {flash && <div className="absolute inset-0 bg-white/30 pointer-events-none" />}
 
         {/* Corner brackets */}
@@ -152,6 +198,48 @@ export default function CameraCapture({ missionName, onCapture, onUpload }: Came
         >
           <RefreshCw size={14} className="text-text-primary/70" />
         </button>
+
+        {/* Zoom controls — left side, mirrors flip button */}
+        <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
+          <button
+            onClick={() => stepZoom(-1)}
+            disabled={zoom <= zoomCap.min + 0.001}
+            aria-label="Zoom out"
+            className="w-9 h-9 rounded-full flex items-center justify-center active:scale-90 disabled:opacity-40"
+            style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(255,255,255,0.15)' }}
+          >
+            <Minus size={14} className="text-text-primary/70" />
+          </button>
+          <span
+            className="px-2 h-7 rounded-full text-[10px] font-mono tracking-wider flex items-center justify-center min-w-[40px]"
+            style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--terracotta)' }}
+            suppressHydrationWarning
+          >
+            {zoom.toFixed(1)}×
+          </span>
+          <button
+            onClick={() => stepZoom(1)}
+            disabled={zoom >= zoomCap.max - 0.001}
+            aria-label="Zoom in"
+            className="w-9 h-9 rounded-full flex items-center justify-center active:scale-90 disabled:opacity-40"
+            style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(255,255,255,0.15)' }}
+          >
+            <Plus size={14} className="text-text-primary/70" />
+          </button>
+        </div>
+
+        {/* Zoom level indicator — right edge vertical bar */}
+        {zoom > zoomCap.min + 0.001 && (
+          <div
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-1 h-24 rounded-full overflow-hidden"
+            style={{ background: 'rgba(0,0,0,0.4)' }}
+          >
+            <div
+              className="absolute bottom-0 left-0 right-0 rounded-full"
+              style={{ height: `${Math.max(0, Math.min(100, zoomPct * 100))}%`, background: 'var(--terracotta)' }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Capture error */}
