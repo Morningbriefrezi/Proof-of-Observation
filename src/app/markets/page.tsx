@@ -460,11 +460,11 @@ export default function MarketsPage() {
         <div className="mkt-layout">
           <div className="mkt-main">
             <header className="mkt-section-header">
-              <h1 className="mkt-section-title">Stargazer Challenges</h1>
+              <h1 className="mkt-section-title">Stargazer Markets</h1>
               {!loading && (
                 <span className="mkt-section-meta mkt-section-live">
                   <span className="live-led" aria-hidden />
-                  {activeCount} live challenges on Solana
+                  {activeCount} live markets on Solana
                   {previewCount > 0 && (
                     <span className="mkt-section-preview-count"> · {previewCount} preview</span>
                   )}
@@ -472,7 +472,7 @@ export default function MarketsPage() {
               )}
             </header>
             <p className="mkt-section-intro">
-              Weekly observation challenges with stake-based leaderboards. Pick a side on a celestial event — meteor shower peaks, clear-sky windows, solar activity — stake Stars, win Stars back when the oracle resolves. Complete a related sky mission for a 1.5× payout.
+              Weekly prediction markets on celestial events with stake-based leaderboards. Pick a side — meteor shower peaks, clear-sky windows, solar activity — stake Stars, win Stars back when the oracle resolves. Complete a related sky mission for a 1.5× payout.
             </p>
 
             <div className="mkt-tabs" role="tablist">
@@ -520,8 +520,8 @@ export default function MarketsPage() {
               </div>
             ) : activeCount === 0 ? (
               <div className="mkt-state">
-                <p className="mkt-state-title">No challenges in this category</p>
-                <p>Try another filter or come back when new challenges seed.</p>
+                <p className="mkt-state-title">No markets in this category</p>
+                <p>Try another filter or come back when new markets seed.</p>
               </div>
             ) : (
               <div className="mkt-list">
@@ -794,6 +794,7 @@ function MarketRow({
         <button
           type="button"
           className={`mkt-odds-cell yes${expandedSide === 'yes' ? ' active' : ''}`}
+          style={{ ['--pct' as string]: yesPct }}
           onClick={(e) => {
             e.stopPropagation();
             if (disabledForBet) return;
@@ -808,6 +809,7 @@ function MarketRow({
         <button
           type="button"
           className={`mkt-odds-cell no${expandedSide === 'no' ? ' active' : ''}`}
+          style={{ ['--pct' as string]: noPct }}
           onClick={(e) => {
             e.stopPropagation();
             if (disabledForBet) return;
