@@ -99,6 +99,11 @@ export default function SkyPage() {
     return finder.objects.find((o) => o.id === activeId) ?? null;
   }, [finder, activeId]);
 
+  const hopAnchor = useMemo<SkyObject | null>(() => {
+    if (!finder || !activeObject?.hopFromId) return null;
+    return finder.objects.find((o) => o.id === activeObject.hopFromId) ?? null;
+  }, [finder, activeObject]);
+
   const handleSelect = useCallback((id: ObjectId) => {
     setActiveId(id);
     if (autoRotate) setAutoRotate(false);
@@ -230,7 +235,7 @@ export default function SkyPage() {
             {activeObject && (
               <section className="sky-v3__active">
                 <DirectionHero object={activeObject} />
-                <HintCards object={activeObject} />
+                <HintCards object={activeObject} hopAnchor={hopAnchor} />
               </section>
             )}
 

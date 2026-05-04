@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import type { ObjectId, SkyObject } from './types';
 
-const DOT: Record<ObjectId, string> = {
+const PLANET_COLORS: Record<string, string> = {
   sun:     '#ffd166',
   moon:    '#f4ede0',
   mercury: '#d6cdb1',
@@ -14,6 +14,22 @@ const DOT: Record<ObjectId, string> = {
   uranus:  '#9ad4d4',
   neptune: '#8db7e8',
 };
+
+function dotColor(o: SkyObject): string {
+  if (o.type === 'planet' || o.type === 'sun' || o.type === 'moon') {
+    return PLANET_COLORS[o.id] ?? '#f4ede0';
+  }
+  if (o.type === 'star' || o.type === 'double') {
+    if (o.magnitude <= -1) return '#bcd6ff';
+    if (o.magnitude <= 0)  return '#f4ede0';
+    if (o.magnitude <= 1)  return '#fff1d2';
+    return '#e8d8b6';
+  }
+  if (o.type === 'nebula') return '#e8a39e';
+  if (o.type === 'galaxy') return '#c8d4e8';
+  if (o.type === 'cluster') return '#f1e4b8';
+  return '#f4ede0';
+}
 
 interface BodyTableProps {
   objects: SkyObject[];
@@ -31,10 +47,10 @@ function fmtTime(iso: string | null): string | null {
   }
 }
 
-function equipmentTier(mag: number): 'eye' | 'binocs' | 'scope' {
-  if (mag <= 4) return 'eye';
-  if (mag <= 9) return 'binocs';
-  return 'scope';
+function tierFromInstrument(o: SkyObject): 'eye' | 'binocs' | 'scope' {
+  if (o.instrument === 'binoculars') return 'binocs';
+  if (o.instrument === 'telescope') return 'scope';
+  return 'eye';
 }
 
 export function BodyTable({ objects, activeId, onSelect }: BodyTableProps) {
@@ -62,12 +78,14 @@ export function BodyTable({ objects, activeId, onSelect }: BodyTableProps) {
           const isActive = o.id === activeId;
           const setLabel = fmtTime(o.setTime);
           const riseLabel = fmtTime(o.riseTime);
-          const tier = equipmentTier(o.magnitude);
+          const tier = tierFromInstrument(o);
           const tierLabel = t(`tier.${tier}`);
           const magStr = `${o.magnitude > 0 ? '+' : ''}${o.magnitude.toFixed(1)}`;
-          const event = o.visible
-            ? (setLabel ? t('setsAt', { time: setLabel }) : t('upAllNight'))
-            : (riseLabel ? t('risesAt', { time: riseLabel }) : '—');
+          const event = o.circumpolar
+            ? t('upAllNight')
+            : o.visible
+              ? (setLabel ? t('setsAt', { time: setLabel }) : t('upAllNight'))
+              : (riseLabel ? t('risesAt', { time: riseLabel }) : '—');
 
           return (
             <button
@@ -79,7 +97,7 @@ export function BodyTable({ objects, activeId, onSelect }: BodyTableProps) {
               onClick={() => onSelect(o.id)}
             >
               <span className="body-row__name">
-                <span className="body-row__disc" style={{ background: DOT[o.id] }} />
+                <span className="body-row__disc" style={{ background: dotColor(o) }} />
                 <span className="body-row__name-text">{o.name}</span>
                 <span className={`body-row__tier body-row__tier--${tier}`}>{tierLabel}</span>
               </span>

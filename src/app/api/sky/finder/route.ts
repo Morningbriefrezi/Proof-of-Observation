@@ -3,9 +3,17 @@ import { Body, Equator, Horizon, Observer, SearchAltitude, SearchRiseSet } from 
 import { getVisiblePlanets, type PlanetInfo } from '@/lib/planets';
 import { fetchSkyForecast } from '@/lib/sky-data';
 import { azimuthToCompass, altitudeToFists } from '@/lib/sky/directions';
+import {
+  CATALOG,
+  PLANET_META,
+  computeRiseSet,
+  raDecToAzAlt,
+  type CatalogDifficulty,
+  type CatalogInstrument,
+  type CatalogType,
+} from '@/lib/sky/catalog';
 
-const ORDER = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'] as const;
-type ObjectId = (typeof ORDER)[number];
+const PLANET_ORDER = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'] as const;
 
 function computeSun(lat: number, lon: number, date: Date): PlanetInfo | null {
   try {
@@ -36,7 +44,7 @@ function computeSun(lat: number, lon: number, date: Date): PlanetInfo | null {
 }
 
 interface FinderObject {
-  id: ObjectId;
+  id: string;
   name: string;
   altitude: number;
   azimuth: number;
@@ -48,6 +56,12 @@ interface FinderObject {
   riseTime: string | null;
   setTime: string | null;
   phase: number | null;
+  type: CatalogType;
+  difficulty: CatalogDifficulty;
+  instrument: CatalogInstrument;
+  constellation: string;
+  circumpolar?: boolean;
+  hopFromId?: string;
 }
 
 interface TwilightTimes {
@@ -72,9 +86,6 @@ interface FinderResponse {
 }
 
 function computeTwilight(observer: Observer, now: Date): TwilightTimes {
-  // For each twilight altitude, look forward up to 1 day for the next time
-  // the Sun crosses that altitude going DOWN (dusk) and up to 1 day after
-  // that for the matching dawn going UP. Falls back to null on failure.
   const lookFor = (dir: 1 | -1, alt: number, start: Date): Date | null => {
     try {
       const hit = SearchAltitude(Body.Sun, observer, dir, start, 1, alt);
@@ -123,6 +134,48 @@ function eveningCloud(forecastDay: { hours: { time: string; cloudCover: number }
   return Math.round(pool.reduce((s, h) => s + h.cloudCover, 0) / pool.length);
 }
 
+function planetObject(id: string, p: PlanetInfo | undefined): FinderObject {
+  const meta = PLANET_META[id];
+  if (!p) {
+    return {
+      id,
+      name: meta?.fallbackName ?? id,
+      altitude: 0,
+      azimuth: 0,
+      magnitude: 0,
+      visible: false,
+      nakedEye: false,
+      compassDirection: 'N',
+      fistsAboveHorizon: 0,
+      riseTime: null,
+      setTime: null,
+      phase: null,
+      type: meta?.type ?? 'planet',
+      difficulty: meta?.difficulty ?? 'easy',
+      instrument: meta?.instrument ?? 'naked',
+      constellation: '',
+    };
+  }
+  return {
+    id,
+    name: p.name,
+    altitude: p.altitude,
+    azimuth: p.azimuth,
+    magnitude: p.magnitude,
+    visible: p.altitude > 0,
+    nakedEye: p.magnitude <= 6,
+    compassDirection: azimuthToCompass(p.azimuth),
+    fistsAboveHorizon: altitudeToFists(p.altitude),
+    riseTime: toIso(p.rise),
+    setTime: toIso(p.set),
+    phase: p.phase ?? null,
+    type: meta?.type ?? 'planet',
+    difficulty: meta?.difficulty ?? 'easy',
+    instrument: meta?.instrument ?? 'naked',
+    constellation: p.constellation ?? '',
+  };
+}
+
 export async function GET(req: NextRequest) {
   const latRaw = req.nextUrl.searchParams.get('lat');
   const lonRaw = req.nextUrl.searchParams.get('lon') ?? req.nextUrl.searchParams.get('lng');
@@ -154,38 +207,31 @@ export async function GET(req: NextRequest) {
   }
 
   const byKey = new Map<string, PlanetInfo>(planets.map((p) => [p.key.toLowerCase(), p]));
+  const planetObjects: FinderObject[] = PLANET_ORDER.map((id) => planetObject(id, byKey.get(id)));
 
-  const objects: FinderObject[] = ORDER.map((id) => {
-    const p = byKey.get(id);
-    if (!p) {
-      return {
-        id,
-        name: id.charAt(0).toUpperCase() + id.slice(1),
-        altitude: 0,
-        azimuth: 0,
-        magnitude: 0,
-        visible: false,
-        nakedEye: false,
-        compassDirection: 'N',
-        fistsAboveHorizon: 0,
-        riseTime: null,
-        setTime: null,
-        phase: null,
-      };
-    }
+  // Static catalog targets — stars, doubles, clusters, nebulae, galaxies.
+  const catalogObjects: FinderObject[] = CATALOG.map((entry) => {
+    const { azimuth, altitude } = raDecToAzAlt(entry.ra, entry.dec, lat, lon, now);
+    const rs = computeRiseSet(entry.ra, entry.dec, lat, lon, now);
     return {
-      id,
-      name: p.name,
-      altitude: p.altitude,
-      azimuth: p.azimuth,
-      magnitude: p.magnitude,
-      visible: p.altitude > 0,
-      nakedEye: p.magnitude <= 6,
-      compassDirection: azimuthToCompass(p.azimuth),
-      fistsAboveHorizon: altitudeToFists(p.altitude),
-      riseTime: toIso(p.rise),
-      setTime: toIso(p.set),
-      phase: p.phase ?? null,
+      id: entry.id,
+      name: entry.fallbackName,
+      altitude: Math.round(altitude * 10) / 10,
+      azimuth: Math.round(azimuth),
+      magnitude: entry.magnitude,
+      visible: altitude > 0,
+      nakedEye: entry.magnitude <= 6,
+      compassDirection: azimuthToCompass(azimuth),
+      fistsAboveHorizon: altitudeToFists(altitude),
+      riseTime: toIso(rs.rise),
+      setTime: toIso(rs.set),
+      phase: null,
+      type: entry.type,
+      difficulty: entry.difficulty,
+      instrument: entry.instrument,
+      constellation: entry.constellation,
+      circumpolar: rs.circumpolar === 'always' ? true : undefined,
+      hopFromId: entry.hopFromId,
     };
   });
 
@@ -209,7 +255,7 @@ export async function GET(req: NextRequest) {
       quality: cond.quality,
       summary: cond.summary,
     },
-    objects,
+    objects: [...planetObjects, ...catalogObjects],
     twilight,
   };
 

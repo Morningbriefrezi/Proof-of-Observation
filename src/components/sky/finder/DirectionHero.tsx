@@ -19,11 +19,9 @@ function fmtHHmm(iso: string | null): string | null {
   }
 }
 
-function equipmentClass(mag: number): 'nakedEye' | 'binoculars' | 'telescope' {
-  if (mag <= 6) return 'nakedEye';
-  if (mag <= 10) return 'binoculars';
-  return 'telescope';
-}
+const PLANET_TAILS = new Set([
+  'sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune',
+]);
 
 export function DirectionHero({ object }: DirectionHeroProps) {
   const t = useTranslations('sky');
@@ -31,7 +29,6 @@ export function DirectionHero({ object }: DirectionHeroProps) {
 
   const compass = object.compassDirection as CompassDir;
   const fists = fistsToKey(object.fistsAboveHorizon);
-  const equip = equipmentClass(object.magnitude);
   const setLabel = fmtHHmm(object.setTime);
   const riseLabel = fmtHHmm(object.riseTime);
 
@@ -40,20 +37,34 @@ export function DirectionHero({ object }: DirectionHeroProps) {
     ? t(`directions.fists.${fists.key}`, fists.values)
     : t(`directions.fists.${fists.key}`);
 
-  const phaseText = object.id === 'moon' ? t(`moonPhase.${moonPhaseKey(object.phase ?? 0.5)}`) : '';
-  const tail =
-    object.id === 'moon'
-      ? t('hero.tail.moon', { phase: phaseText })
-      : t(`hero.tail.${object.id}`);
+  // Tail copy: planets/sun/moon have hand-written hints; catalog targets fall
+  // back to a per-type generic line.
+  let tail: string;
+  if (object.id === 'moon') {
+    const phaseText = t(`moonPhase.${moonPhaseKey(object.phase ?? 0.5)}`);
+    tail = t('hero.tail.moon', { phase: phaseText });
+  } else if (PLANET_TAILS.has(object.id)) {
+    tail = t(`hero.tail.${object.id}`);
+  } else if (object.constellation) {
+    tail = t(`hero.tailType.${object.type}WithConstellation`, { constellation: object.constellation });
+  } else {
+    tail = t(`hero.tailType.${object.type}`);
+  }
 
   const equipLabel =
-    equip === 'nakedEye' ? t('hero.nakedEye') : equip === 'binoculars' ? t('hero.binoculars') : t('hero.telescope');
+    object.instrument === 'binoculars' ? t('hero.binoculars')
+    : object.instrument === 'telescope' ? t('hero.telescope')
+    : t('hero.nakedEye');
+
+  const difficultyLabel = t(`hero.difficulty.${object.difficulty}`);
 
   const statusLine = object.visible
     ? `${t('hero.visibleNow')} · ${equipLabel} · ${t('hero.magnitude')} ${object.magnitude.toFixed(1)}`
-    : riseLabel
-      ? `${t('hero.belowHorizon')} · ${t('hero.rises')} ${riseLabel}`
-      : t('hero.belowHorizon');
+    : object.circumpolar
+      ? `${t('hero.circumpolar')} · ${equipLabel} · ${t('hero.magnitude')} ${object.magnitude.toFixed(1)}`
+      : riseLabel
+        ? `${t('hero.belowHorizon')} · ${t('hero.rises')} ${riseLabel}`
+        : t('hero.belowHorizon');
 
   const bottomMeta = object.visible
     ? [
@@ -70,9 +81,22 @@ export function DirectionHero({ object }: DirectionHeroProps) {
     <div className="finder-hero">
       <div className="finder-hero__top">
         <div className="finder-hero__planet">
-          <PlanetIcon id={object.id} size={88} phase={object.phase} />
+          <PlanetIcon
+            id={object.id}
+            type={object.type}
+            magnitude={object.magnitude}
+            size={88}
+            phase={object.phase}
+          />
         </div>
         <div className="finder-hero__head">
+          <div className="finder-hero__tags">
+            <span className={`finder-hero__tag finder-hero__tag--${object.difficulty}`}>{difficultyLabel}</span>
+            <span className="finder-hero__tag finder-hero__tag--type">{t(`hero.type.${object.type}`)}</span>
+            {object.constellation && (
+              <span className="finder-hero__tag finder-hero__tag--constellation">{object.constellation}</span>
+            )}
+          </div>
           <h2 className="finder-hero__name" lang={locale}>
             {object.name}
           </h2>

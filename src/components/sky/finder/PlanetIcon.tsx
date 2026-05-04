@@ -2,7 +2,7 @@
 
 import type { CSSProperties } from 'react';
 
-type ObjectId =
+type PlanetId =
   | 'sun'
   | 'moon'
   | 'mercury'
@@ -13,15 +13,32 @@ type ObjectId =
   | 'uranus'
   | 'neptune';
 
+export type CatalogObjectType =
+  | 'planet'
+  | 'star'
+  | 'double'
+  | 'cluster'
+  | 'nebula'
+  | 'galaxy'
+  | 'moon'
+  | 'sun';
+
 export interface PlanetIconProps {
-  id: ObjectId;
+  /** Object id — for planets/sun/moon, the body name; for catalog targets, the catalog id. */
+  id: string;
+  /** Catalog type — required for non-planet targets so the icon picks the right glyph. */
+  type?: CatalogObjectType;
+  /** Apparent magnitude — used to size star glyphs. */
+  magnitude?: number;
   size?: number;
   /** Moon phase 0–1, only used when id === 'moon'. */
   phase?: number | null;
   glow?: boolean;
 }
 
-const GRADIENTS: Record<ObjectId, string> = {
+const PLANET_IDS = new Set<PlanetId>(['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune']);
+
+const GRADIENTS: Record<PlanetId, string> = {
   sun:     'radial-gradient(circle at 40% 40%, #fffbe1 0%, #ffd166 50%, #ff7b1a 90%)',
   moon:    'radial-gradient(circle at 40% 40%, #f4ede0 0%, #c8c2b5 60%, #6a665e 95%)',
   mercury: 'radial-gradient(circle at 35% 35%, #e2dccd 0%, #a89e88 55%, #58523f 95%)',
@@ -33,7 +50,7 @@ const GRADIENTS: Record<ObjectId, string> = {
   neptune: 'radial-gradient(circle at 35% 35%, #6fa0e0 0%, #2d5a9c 55%, #142a52 95%)',
 };
 
-const GLOW: Record<ObjectId, string> = {
+const GLOW: Record<PlanetId, string> = {
   sun:     '0 0 32px rgba(255,209,102,0.55), 0 0 64px rgba(255,123,26,0.35)',
   moon:    '0 0 24px rgba(244,237,224,0.30)',
   mercury: '0 0 18px rgba(232,222,200,0.20)',
@@ -45,7 +62,7 @@ const GLOW: Record<ObjectId, string> = {
   neptune: '0 0 22px rgba(111,160,224,0.30)',
 };
 
-export function PlanetIcon({ id, size = 88, phase = null, glow = true }: PlanetIconProps) {
+export function PlanetIcon({ id, type, magnitude, size = 88, phase = null, glow = true }: PlanetIconProps) {
   const wrap: CSSProperties = {
     position: 'relative',
     width: size,
@@ -53,17 +70,28 @@ export function PlanetIcon({ id, size = 88, phase = null, glow = true }: PlanetI
     flexShrink: 0,
   };
 
+  // Resolve renderer: planets/sun/moon by id; everything else by type.
+  const isPlanet = PLANET_IDS.has(id as PlanetId);
+  if (!isPlanet && type) {
+    return (
+      <div style={wrap}>
+        <CatalogGlyph type={type} size={size} magnitude={magnitude} glow={glow} />
+      </div>
+    );
+  }
+
+  const planetId = id as PlanetId;
   const sphere: CSSProperties = {
     width: size,
     height: size,
     borderRadius: '50%',
-    background: GRADIENTS[id],
-    boxShadow: glow ? GLOW[id] : 'none',
+    background: GRADIENTS[planetId],
+    boxShadow: glow ? GLOW[planetId] : 'none',
     position: 'relative',
     overflow: 'hidden',
   };
 
-  if (id === 'moon') {
+  if (planetId === 'moon') {
     return (
       <div style={wrap}>
         <div style={sphere}>
@@ -73,7 +101,7 @@ export function PlanetIcon({ id, size = 88, phase = null, glow = true }: PlanetI
     );
   }
 
-  if (id === 'jupiter') {
+  if (planetId === 'jupiter') {
     return (
       <div style={wrap}>
         <div style={sphere}>
@@ -83,7 +111,7 @@ export function PlanetIcon({ id, size = 88, phase = null, glow = true }: PlanetI
     );
   }
 
-  if (id === 'saturn') {
+  if (planetId === 'saturn') {
     return (
       <div style={wrap}>
         <div style={sphere}>
@@ -168,6 +196,155 @@ function JupiterBands({ size, dim }: { size: number; dim?: boolean }) {
       ))}
     </>
   );
+}
+
+/**
+ * Hero glyph for catalog targets (stars, doubles, clusters, nebulae, galaxies).
+ * Aims for the same visual weight as PlanetIcon's planet sphere — sized for
+ * the DirectionHero card.
+ */
+function CatalogGlyph({
+  type,
+  size,
+  magnitude = 1,
+  glow = true,
+}: {
+  type: CatalogObjectType;
+  size: number;
+  magnitude?: number;
+  glow?: boolean;
+}) {
+  if (type === 'star' || type === 'double') {
+    // Mag-to-radius: brighter star reads larger.
+    const m = Math.max(-2, Math.min(4, magnitude));
+    const core = size * (0.13 - ((m + 2) / 6) * 0.05); // ~size * 0.13 → 0.08
+    const halo = size * 0.42;
+    const tint = m <= -1 ? '#bcd6ff' : m <= 0 ? '#f4ede0' : m <= 1 ? '#fff1d2' : '#e8d8b6';
+    const haloShadow = glow
+      ? `0 0 ${size * 0.18}px rgba(255,250,235,0.45), 0 0 ${size * 0.34}px rgba(180,205,255,0.18)`
+      : 'none';
+    return (
+      <div
+        aria-hidden="true"
+        style={{
+          width: size,
+          height: size,
+          position: 'relative',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '50%',
+            background: `radial-gradient(circle at 50% 50%, ${tint} 0%, rgba(244,237,224,0.16) ${(halo / size) * 50}%, rgba(0,0,0,0) 70%)`,
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            width: core,
+            height: core,
+            marginTop: -core / 2,
+            marginLeft: -core / 2,
+            borderRadius: '50%',
+            background: tint,
+            boxShadow: haloShadow,
+          }}
+        />
+        {type === 'double' && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              width: core * 0.55,
+              height: core * 0.55,
+              marginTop: -core * 0.275 - core * 0.85,
+              marginLeft: core * 0.55,
+              borderRadius: '50%',
+              background: '#bcd6ff',
+              opacity: 0.85,
+            }}
+          />
+        )}
+      </div>
+    );
+  }
+  if (type === 'galaxy') {
+    return (
+      <svg width={size} height={size} viewBox="0 0 100 100" aria-hidden="true">
+        <defs>
+          <radialGradient id="cg-galaxy-core" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#f4eef8" />
+            <stop offset="40%" stopColor="rgba(220,210,240,0.7)" />
+            <stop offset="100%" stopColor="rgba(170,180,220,0)" />
+          </radialGradient>
+          <radialGradient id="cg-galaxy-arms" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="rgba(216,224,248,0.85)" />
+            <stop offset="55%" stopColor="rgba(150,170,210,0.40)" />
+            <stop offset="100%" stopColor="rgba(110,130,170,0)" />
+          </radialGradient>
+        </defs>
+        <g transform="rotate(-28 50 50)">
+          <ellipse cx={50} cy={50} rx={46} ry={16} fill="url(#cg-galaxy-arms)" />
+          <ellipse cx={50} cy={50} rx={28} ry={9} fill="url(#cg-galaxy-arms)" opacity={0.8} />
+          <circle cx={50} cy={50} r={12} fill="url(#cg-galaxy-core)" />
+          <circle cx={50} cy={50} r={3.5} fill="#fdf8ff" />
+        </g>
+      </svg>
+    );
+  }
+  if (type === 'nebula') {
+    return (
+      <svg width={size} height={size} viewBox="0 0 100 100" aria-hidden="true">
+        <defs>
+          <radialGradient id="cg-nebula" cx="50%" cy="50%" r="55%">
+            <stop offset="0%" stopColor="rgba(255,205,200,0.95)" />
+            <stop offset="35%" stopColor="rgba(232,164,158,0.55)" />
+            <stop offset="80%" stopColor="rgba(150,90,120,0.18)" />
+            <stop offset="100%" stopColor="rgba(80,40,80,0)" />
+          </radialGradient>
+          <radialGradient id="cg-nebula-blue" cx="60%" cy="40%" r="40%">
+            <stop offset="0%" stopColor="rgba(180,205,255,0.55)" />
+            <stop offset="100%" stopColor="rgba(80,100,160,0)" />
+          </radialGradient>
+        </defs>
+        <circle cx={50} cy={50} r={48} fill="url(#cg-nebula)" />
+        <circle cx={58} cy={42} r={28} fill="url(#cg-nebula-blue)" />
+        <g fill="#fff8f0">
+          <circle cx={50} cy={50} r={1.6} />
+          <circle cx={42} cy={45} r={1.0} opacity={0.85} />
+          <circle cx={56} cy={56} r={1.0} opacity={0.85} />
+          <circle cx={62} cy={47} r={0.8} opacity={0.7} />
+        </g>
+      </svg>
+    );
+  }
+  if (type === 'cluster') {
+    return (
+      <svg width={size} height={size} viewBox="0 0 100 100" aria-hidden="true">
+        <defs>
+          <radialGradient id="cg-cluster-bg" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="rgba(241,228,184,0.30)" />
+            <stop offset="100%" stopColor="rgba(241,228,184,0)" />
+          </radialGradient>
+        </defs>
+        <circle cx={50} cy={50} r={42} fill="url(#cg-cluster-bg)" />
+        {/* Deterministic-ish star pattern */}
+        {[
+          [50,30,2.4],[40,40,1.6],[60,42,1.8],[35,55,1.4],[65,55,1.6],[50,55,2.0],
+          [45,48,1.2],[55,38,1.2],[50,68,1.6],[42,65,1.2],[58,65,1.2],[48,42,1.0],
+          [62,50,1.0],[38,48,1.0],[55,72,1.0],[44,72,0.9],
+        ].map(([cx, cy, r], i) => (
+          <circle key={i} cx={cx} cy={cy} r={r} fill="#fff7d8" />
+        ))}
+      </svg>
+    );
+  }
+  return null;
 }
 
 function SaturnRings({ size }: { size: number }) {

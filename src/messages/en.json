@@ -98,6 +98,7 @@
       "setsAt": "Sets at",
       "staysUpAllNight": "Stays up all night",
       "tail": {
+        "sun": "The Sun — never observe directly without a solar filter.",
         "moon": "Look for the {phase} disc.",
         "jupiter": "Jupiter is the brightest object in that part of the sky.",
         "saturn": "Saturn looks like a steady, golden-yellow point — through binoculars you'll glimpse the rings.",
@@ -107,6 +108,36 @@
         "uranus": "Faint and tricky — you'll need binoculars or a small telescope to actually see it.",
         "neptune": "Faint — binoculars or a telescope only."
       },
+      "tailType": {
+        "star": "A bright point of light — steady to the naked eye.",
+        "starWithConstellation": "The brightest point in {constellation} — steady to the naked eye.",
+        "double": "Looks like a single star to the naked eye — separates in a small telescope.",
+        "doubleWithConstellation": "A double in {constellation} — splits cleanly through a small telescope.",
+        "cluster": "A faint smudge to the eye — binoculars resolve it into many stars.",
+        "clusterWithConstellation": "A glittering knot of stars in {constellation} — binoculars are ideal.",
+        "nebula": "A soft, hazy patch — best in dark skies through binoculars or a small scope.",
+        "nebulaWithConstellation": "A hazy patch in {constellation} — best under dark skies.",
+        "galaxy": "A pale ghost of light — needs a dark sky and patient eyes.",
+        "galaxyWithConstellation": "A faint glow in {constellation} — needs a dark sky and patience.",
+        "moon": "Look for the bright disc.",
+        "sun": "The Sun — never observe directly without a solar filter."
+      },
+      "type": {
+        "planet": "Planet",
+        "star": "Star",
+        "double": "Double star",
+        "cluster": "Star cluster",
+        "nebula": "Nebula",
+        "galaxy": "Galaxy",
+        "moon": "Moon",
+        "sun": "Sun"
+      },
+      "difficulty": {
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard"
+      },
+      "circumpolar": "Up all night",
       "belowSentenceA": "is below the horizon. It will rise in the",
       "belowSentenceB": "at"
     },
@@ -162,6 +193,7 @@
       },
       "recognize": {
         "label": "How to recognize",
+        "sun": "The brightest object in the sky — observe only with a certified solar filter.",
         "moon": "{phase} disc — easy to spot.",
         "jupiter": "Steady, golden-white. Doesn't twinkle the way stars do.",
         "saturn": "Pale yellow. Steady. Through binoculars you might glimpse the rings.",
@@ -171,11 +203,27 @@
         "uranus": "Pale blue-green dot — needs binoculars and a star chart.",
         "neptune": "Pale blue dot — needs a telescope and patience."
       },
+      "recognizeType": {
+        "star": "A steady, sharp point of light. Pierces straight through.",
+        "starWithConstellation": "A steady, sharp point — the brightest in {constellation}.",
+        "double": "Looks like one star until magnified — then two appear close together.",
+        "doubleWithConstellation": "A double in {constellation} — one star to the eye, two through a small scope.",
+        "cluster": "A soft glow that breaks into many tiny stars in binoculars.",
+        "clusterWithConstellation": "A soft glow in {constellation} — binoculars resolve dozens of stars.",
+        "nebula": "A faint smear of light — soft edges, no sharp point.",
+        "nebulaWithConstellation": "A faint hazy patch in {constellation} — soft, no twinkle.",
+        "galaxy": "A pale, oval glow — easy to mistake for a smudge on the lens.",
+        "galaxyWithConstellation": "A faint oval glow in {constellation} — best with averted vision."
+      },
       "bestWindow": {
         "label": "Best window",
         "untilSet": "Until {time} — sets in the {direction}.",
         "untilRise": "Rises at {time} in the {direction}.",
         "allNight": "Up all night."
+      },
+      "hop": {
+        "label": "Star-hop",
+        "body": "Find {anchor} first — bright and easy. From there, hop {distance} to land on this target."
       }
     },
     "errors": {
@@ -253,7 +301,16 @@
       "header": "Tonight's sky · {count} visible now",
       "auto": "AUTO",
       "autoToggle": "Auto-rotate",
-      "risesAt": "rises {time}"
+      "risesAt": "rises {time}",
+      "circumpolar": "always up",
+      "tierAria": "Filter by difficulty",
+      "emptyTier": "No targets in this tier right now",
+      "tier": {
+        "all": "All",
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard"
+      }
     },
     "strip": {
       "a11y": "Live sky state",

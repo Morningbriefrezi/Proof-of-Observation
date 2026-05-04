@@ -27,7 +27,7 @@ const COMPASS_LABELS: { dir: string; az: number }[] = [
   { dir: 'N', az: 360 },
 ];
 
-const ACCENT: Record<ObjectId, string> = {
+const PLANET_ACCENT: Record<string, string> = {
   sun:     '#ffd166',
   moon:    '#f4ede0',
   mercury: '#d6cdb1',
@@ -39,7 +39,7 @@ const ACCENT: Record<ObjectId, string> = {
   neptune: '#8db7e8',
 };
 
-const GLOW: Record<ObjectId, string> = {
+const PLANET_GLOW: Record<string, string> = {
   sun:     '0 0 18px rgba(255,209,102,0.70), 0 0 36px rgba(255,123,26,0.25)',
   moon:    '0 0 14px rgba(244,237,224,0.55), 0 0 28px rgba(244,237,224,0.18)',
   mercury: '0 0 8px rgba(214,205,177,0.35)',
@@ -50,6 +50,32 @@ const GLOW: Record<ObjectId, string> = {
   uranus:  '0 0 10px rgba(154,212,212,0.40)',
   neptune: '0 0 10px rgba(141,183,232,0.40)',
 };
+
+function accentFor(o: SkyObject): string {
+  if (o.type === 'planet' || o.type === 'sun' || o.type === 'moon') {
+    return PLANET_ACCENT[o.id] ?? '#f4ede0';
+  }
+  if (o.type === 'star' || o.type === 'double') {
+    if (o.magnitude <= -1) return '#bcd6ff';
+    if (o.magnitude <= 0)  return '#f4ede0';
+    if (o.magnitude <= 1)  return '#fff1d2';
+    return '#e8d8b6';
+  }
+  if (o.type === 'nebula') return '#e8a39e';
+  if (o.type === 'galaxy') return '#c8d4e8';
+  if (o.type === 'cluster') return '#f1e4b8';
+  return '#f4ede0';
+}
+
+function glowFor(o: SkyObject): string {
+  if (o.type === 'planet' || o.type === 'sun' || o.type === 'moon') {
+    return PLANET_GLOW[o.id] ?? 'none';
+  }
+  if ((o.type === 'star' || o.type === 'double') && o.magnitude <= 0.6) {
+    return '0 0 10px rgba(244,237,224,0.45), 0 0 22px rgba(244,237,224,0.15)';
+  }
+  return 'none';
+}
 
 interface PlottedObject extends SkyObject {
   xPx: number;
@@ -62,9 +88,16 @@ const skyHeightPx = (STRIP_HEIGHT - COMPASS_BAND) * SKY_FRACTION;
 const groundHeightPx = (STRIP_HEIGHT - COMPASS_BAND) - skyHeightPx;
 const horizonY = skyHeightPx;
 
-function discSizeForMag(mag: number, active: boolean): number {
-  // Brighter = larger. Mag scale roughly -27 (Sun) … +8 (Neptune).
-  const base = mag <= -2 ? 14 : mag <= 0 ? 12 : mag <= 2 ? 10 : mag <= 4 ? 9 : 8;
+function discSizeFor(o: SkyObject, active: boolean): number {
+  let base: number;
+  if (o.type === 'planet' || o.type === 'sun' || o.type === 'moon') {
+    base = o.magnitude <= -2 ? 14 : o.magnitude <= 0 ? 12 : 10;
+  } else if (o.type === 'star' || o.type === 'double') {
+    base = o.magnitude <= -1 ? 11 : o.magnitude <= 0 ? 10 : o.magnitude <= 1 ? 9 : 8;
+  } else {
+    // DSO glyphs read better as smaller marks here.
+    base = 8;
+  }
   return active ? base + 4 : base;
 }
 
@@ -88,7 +121,7 @@ function plot(objects: SkyObject[]): PlottedObject[] {
       ...o,
       xPx,
       yPx,
-      size: discSizeForMag(o.magnitude, false),
+      size: discSizeFor(o, false),
       isAbove,
     };
   });
@@ -97,7 +130,19 @@ function plot(objects: SkyObject[]): PlottedObject[] {
 export function HorizonStrip({ objects, highlightedId, onObjectClick }: HorizonStripProps) {
   const t = useTranslations('sky.horizon');
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const plotted = useMemo(() => plot(objects), [objects]);
+
+  // Render only what reads cleanly at strip scale: planets/sun/moon, the
+  // brightest stars, and whatever's currently highlighted. Otherwise the
+  // 30+ catalog targets pile on top of each other.
+  const filtered = useMemo(() => {
+    return objects.filter((o) => {
+      if (o.id === highlightedId) return true;
+      if (o.type === 'planet' || o.type === 'sun' || o.type === 'moon') return true;
+      if (o.type === 'star' || o.type === 'double') return o.magnitude <= 1.6;
+      return false;
+    });
+  }, [objects, highlightedId]);
+  const plotted = useMemo(() => plot(filtered), [filtered]);
 
   useEffect(() => {
     if (!scrollRef.current) return;
@@ -148,7 +193,8 @@ export function HorizonStrip({ objects, highlightedId, onObjectClick }: HorizonS
           {/* Object marks */}
           {plotted.map((p) => {
             const isHl = p.id === highlightedId;
-            const accent = ACCENT[p.id];
+            const accent = accentFor(p);
+            const glow = glowFor(p);
             const radius = isHl ? p.size + 4 : p.size;
             const opacity = p.isAbove ? 1 : 0.32;
             return (
@@ -184,7 +230,7 @@ export function HorizonStrip({ objects, highlightedId, onObjectClick }: HorizonS
                     width: radius,
                     height: radius,
                     background: p.isAbove ? accent : 'rgba(255,255,255,0.45)',
-                    boxShadow: p.isAbove ? GLOW[p.id] : 'none',
+                    boxShadow: p.isAbove ? glow : 'none',
                     opacity,
                   }}
                 />

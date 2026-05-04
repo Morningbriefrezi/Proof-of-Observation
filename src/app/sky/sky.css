@@ -1718,3 +1718,167 @@
   height: 220px;
 }
 .sky-v3__skel-card--lg { height: 320px; }
+
+/* ================================================================
+   === Difficulty tier filter (TargetPicker)                    ===
+   ================================================================ */
+
+.target-picker__tiers {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+  margin-bottom: 4px;
+}
+.target-tier {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 999px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.60);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+  flex-shrink: 0;
+}
+.target-tier:hover {
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.20);
+}
+.target-tier__count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.40);
+  font-feature-settings: 'tnum' 1;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+.target-tier.is-active {
+  color: var(--text);
+  border-color: rgba(255, 209, 102, 0.45);
+  background: rgba(255, 209, 102, 0.08);
+}
+.target-tier.is-active .target-tier__count {
+  color: var(--terracotta);
+  background: rgba(255, 209, 102, 0.10);
+}
+.target-tier--easy.is-active   { border-color: rgba(120, 220, 170, 0.50); background: rgba(120, 220, 170, 0.07); }
+.target-tier--easy.is-active .target-tier__count   { color: #7ed4a8; background: rgba(120, 220, 170, 0.10); }
+.target-tier--medium.is-active { border-color: rgba(255, 209, 102, 0.50); background: rgba(255, 209, 102, 0.07); }
+.target-tier--medium.is-active .target-tier__count { color: #ffd166; background: rgba(255, 209, 102, 0.10); }
+.target-tier--hard.is-active   { border-color: rgba(220, 130, 130, 0.50); background: rgba(220, 130, 130, 0.07); }
+.target-tier--hard.is-active .target-tier__count   { color: #e89797; background: rgba(220, 130, 130, 0.10); }
+
+.target-picker__empty {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.10em;
+  color: rgba(255, 255, 255, 0.40);
+  padding: 8px 4px;
+}
+
+/* === Type glyph in chip === */
+.target-chip__glyph-svg {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.70);
+}
+.target-chip--star  .target-chip__glyph-svg,
+.target-chip--double .target-chip__glyph-svg { color: #fff1d2; }
+.target-chip--galaxy .target-chip__glyph-svg { color: #c8d4e8; }
+.target-chip--nebula .target-chip__glyph-svg { color: #e8a39e; }
+.target-chip--cluster .target-chip__glyph-svg { color: #f1e4b8; }
+.target-chip__glyph--planet {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #f4ede0;
+  flex-shrink: 0;
+}
+.target-chip__glyph--sun     { background: #ffd166; }
+.target-chip__glyph--moon    { background: #f4ede0; }
+.target-chip__glyph--mercury { background: #d6cdb1; }
+.target-chip__glyph--venus   { background: #f7e7a8; }
+.target-chip__glyph--mars    { background: #ff7b54; }
+.target-chip__glyph--jupiter { background: #fbe9b7; }
+.target-chip__glyph--saturn  { background: #d4a574; }
+.target-chip__glyph--uranus  { background: #9ad4d4; }
+.target-chip__glyph--neptune { background: #8db7e8; }
+
+/* Active chip border colour-codes by type */
+.target-chip--galaxy.is-active  { border-color: rgba(200, 212, 232, 0.55); background: rgba(200, 212, 232, 0.08); }
+.target-chip--nebula.is-active  { border-color: rgba(232, 163, 158, 0.55); background: rgba(232, 163, 158, 0.08); }
+.target-chip--cluster.is-active { border-color: rgba(241, 228, 184, 0.55); background: rgba(241, 228, 184, 0.08); }
+.target-chip--star.is-active,
+.target-chip--double.is-active { border-color: rgba(255, 241, 210, 0.55); background: rgba(255, 241, 210, 0.06); }
+
+/* ================================================================
+   === DirectionHero metadata tags                              ===
+   ================================================================ */
+
+.sky-page-v2 .finder-hero__tags {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.sky-page-v2 .finder-hero__tag {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.70);
+  background: rgba(255, 255, 255, 0.025);
+}
+.sky-page-v2 .finder-hero__tag--easy   { color: #7ed4a8; border-color: rgba(120, 220, 170, 0.35); background: rgba(120, 220, 170, 0.05); }
+.sky-page-v2 .finder-hero__tag--medium { color: #ffd166; border-color: rgba(255, 209, 102, 0.35); background: rgba(255, 209, 102, 0.05); }
+.sky-page-v2 .finder-hero__tag--hard   { color: #e89797; border-color: rgba(220, 130, 130, 0.35); background: rgba(220, 130, 130, 0.05); }
+.sky-page-v2 .finder-hero__tag--type   { color: rgba(255, 255, 255, 0.55); }
+.sky-page-v2 .finder-hero__tag--constellation { color: rgba(180, 200, 230, 0.75); }
+
+/* ================================================================
+   === Star-hop hint card                                       ===
+   ================================================================ */
+
+.sky-page-v2 .finder-hint--hop {
+  position: relative;
+  padding-bottom: 16px;
+}
+.sky-page-v2 .finder-hint__hop-diagram {
+  margin-top: 10px;
+}
+.sky-page-v2 .finder-hint__hop-caption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.10em;
+}
+.sky-page-v2 .finder-hint__hop-from {
+  color: #fff1d2;
+  text-transform: uppercase;
+}
+.sky-page-v2 .finder-hint__hop-to {
+  color: var(--terracotta);
+  text-transform: uppercase;
+}
+.sky-page-v2 .finder-hint__hop-deg {
+  color: rgba(255, 255, 255, 0.45);
+}
+
