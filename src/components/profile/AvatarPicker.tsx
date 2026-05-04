@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { AVATARS, Avatar, type AvatarId } from '@/lib/avatars';
 
@@ -14,35 +15,46 @@ type Props = {
 };
 
 export function AvatarPicker({ open, current, initial, saving, onClose, onSelect }: Props) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
+
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handler);
+      document.body.style.overflow = prevOverflow;
+    };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
+  const overlay = (
     <div
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       style={{
-        position: 'fixed', inset: 0, zIndex: 60,
-        background: 'rgba(3,6,18,0.85)',
+        position: 'fixed', inset: 0, zIndex: 9999,
+        background: 'rgba(3,6,18,0.82)',
+        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
       }}
     >
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          width: '100%', maxWidth: 460,
+          width: '100%', maxWidth: 480,
           background: 'var(--stl-bg-surface)',
           border: '1px solid var(--stl-border-regular)',
           borderRadius: 'var(--stl-r-lg)',
-          padding: '22px 22px 20px',
+          padding: '22px 22px 24px',
           position: 'relative',
+          boxShadow: '0 24px 48px rgba(0,0,0,0.55)',
         }}
       >
         <button
@@ -51,7 +63,7 @@ export function AvatarPicker({ open, current, initial, saving, onClose, onSelect
           style={{
             position: 'absolute', top: 14, right: 14,
             width: 28, height: 28, borderRadius: '50%',
-            background: 'var(--stl-bg-surface)',
+            background: 'var(--stl-bg-elevated)',
             border: '1px solid var(--stl-border-regular)',
             color: 'var(--stl-text-muted)', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
@@ -64,11 +76,9 @@ export function AvatarPicker({ open, current, initial, saving, onClose, onSelect
           <div
             style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: 10,
-              letterSpacing: '0.18em',
-              textTransform: 'uppercase',
-              color: 'var(--stl-text-dim)',
-              marginBottom: 6,
+              fontSize: 10, fontWeight: 600,
+              letterSpacing: '0.18em', textTransform: 'uppercase',
+              color: 'var(--stl-text-muted)', marginBottom: 6,
             }}
           >
             SELECT AVATAR
@@ -76,21 +86,19 @@ export function AvatarPicker({ open, current, initial, saving, onClose, onSelect
           <p
             style={{
               fontFamily: 'var(--font-serif)',
-              fontSize: 18,
-              fontWeight: 500,
+              fontSize: 19, fontWeight: 500,
               color: 'var(--stl-text-bright)',
-              margin: 0,
-              lineHeight: 1.2,
+              margin: 0, lineHeight: 1.15,
             }}
           >
-            Choose your sigil
+            Choose your way
           </p>
         </div>
 
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(76px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(82px, 1fr))',
             gap: 10,
           }}
         >
@@ -103,14 +111,14 @@ export function AvatarPicker({ open, current, initial, saving, onClose, onSelect
                 disabled={saving}
                 aria-pressed={isActive}
                 style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
                   padding: '12px 8px',
-                  background: 'var(--stl-bg-surface)',
+                  background: isActive ? 'var(--stl-bg-elevated)' : 'var(--stl-bg-surface)',
                   border: `1px solid ${isActive ? 'var(--stl-gold)' : 'var(--stl-border-regular)'}`,
                   borderRadius: 'var(--stl-r-md)',
                   cursor: saving ? 'wait' : 'pointer',
                   opacity: saving ? 0.65 : 1,
-                  boxShadow: isActive ? '0 0 0 1px var(--stl-gold)' : 'none',
+                  boxShadow: isActive ? `0 0 0 1px var(--stl-gold), 0 0 24px ${a.glow}` : 'none',
                   transition: 'background 150ms ease, border-color 150ms ease, box-shadow 150ms ease',
                 }}
                 onMouseEnter={e => {
@@ -124,15 +132,14 @@ export function AvatarPicker({ open, current, initial, saving, onClose, onSelect
                   e.currentTarget.style.borderColor = 'var(--stl-border-regular)';
                 }}
               >
-                <Avatar avatarId={a.id} initial={initial} size={44} />
+                <Avatar avatarId={a.id} initial={initial} size={48} />
                 <span
                   style={{
                     fontFamily: 'var(--font-mono)',
-                    fontSize: 9.5,
-                    letterSpacing: '0.14em',
-                    textTransform: 'uppercase',
+                    fontSize: 9.5, fontWeight: 600,
+                    letterSpacing: '0.14em', textTransform: 'uppercase',
                     color: isActive ? 'var(--stl-gold)' : 'var(--stl-text-dim)',
-                    lineHeight: 1,
+                    lineHeight: 1, textAlign: 'center',
                   }}
                 >
                   {a.label}
@@ -144,4 +151,6 @@ export function AvatarPicker({ open, current, initial, saving, onClose, onSelect
       </div>
     </div>
   );
+
+  return createPortal(overlay, document.body);
 }

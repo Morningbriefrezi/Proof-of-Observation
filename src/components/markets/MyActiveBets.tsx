@@ -359,6 +359,22 @@ export default function MyActiveBets({ variant = 'compact', title }: Props) {
                     <span className="mab-pillrow-status-dot" aria-hidden />
                     {statusLabel}
                   </span>
+                  {!cashedOut && !locked && (
+                    <button
+                      type="button"
+                      className="mab-pillrow-cashout"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedId(position.marketId);
+                        setCashOutId(position.marketId);
+                        setDoubleDownId(null);
+                      }}
+                      disabled={busy}
+                      aria-label={`Cash out ${fmtInt(refundPreview)} stars`}
+                    >
+                      CASH {fmtInt(refundPreview)} ✦
+                    </button>
+                  )}
                   <span
                     className={`mab-pillrow-caret${expanded ? ' open' : ''}`}
                     aria-hidden
@@ -670,23 +686,40 @@ export default function MyActiveBets({ variant = 'compact', title }: Props) {
         }
         .mab-pillrow-side {
           flex-shrink: 0;
-          font-family: var(--font-mono);
-          font-size: 9.5px;
-          font-weight: 700;
-          letter-spacing: 0.14em;
+          font-family: var(--font-display, var(--font-body, sans-serif));
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.08em;
           line-height: 1;
-          padding: 4px 7px;
-          border-radius: var(--stl-r-pill, 999px);
-          background: transparent;
+          padding: 7px 14px;
+          min-width: 52px;
+          text-align: center;
+          border-radius: 8px;
           white-space: nowrap;
+          text-shadow: 0 1px 0 rgba(255, 255, 255, 0.22);
+          transition: transform 120ms ease, box-shadow 120ms ease;
         }
         .mab-pillrow-side.yes {
-          color: var(--stl-green, #5EEAD4);
-          border: 1px solid var(--stl-green, rgba(94, 234, 212, 0.55));
+          color: #052E27;
+          background: linear-gradient(180deg, #7AF5DD 0%, #2DD4BF 100%);
+          border: 1px solid #2DD4BF;
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.55),
+            inset 0 -2px 0 rgba(0, 0, 0, 0.18),
+            0 2px 4px rgba(0, 0, 0, 0.35);
         }
         .mab-pillrow-side.no {
-          color: var(--stl-red, var(--negative));
-          border: 1px solid var(--stl-red, rgba(251, 113, 133, 0.55));
+          color: #2A0510;
+          background: linear-gradient(180deg, #FF8A99 0%, #E1465A 100%);
+          border: 1px solid #E1465A;
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.5),
+            inset 0 -2px 0 rgba(0, 0, 0, 0.2),
+            0 2px 4px rgba(0, 0, 0, 0.35);
+        }
+        .mab-pillrow-wrap.cashed .mab-pillrow-side,
+        .mab-pillrow-wrap.locked .mab-pillrow-side {
+          filter: saturate(0.7) brightness(0.85);
         }
         .mab-pillrow-title {
           flex: 1 1 auto;
@@ -700,6 +733,7 @@ export default function MyActiveBets({ variant = 'compact', title }: Props) {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          text-align: center;
         }
         .mab-pillrow-title:hover { text-decoration: underline; }
         .mab-pillrow-chip {
@@ -778,6 +812,42 @@ export default function MyActiveBets({ variant = 'compact', title }: Props) {
         @keyframes mabPulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.45; }
+        }
+        .mab-pillrow-cashout {
+          flex-shrink: 0;
+          font-family: var(--font-display, var(--font-body, sans-serif));
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.06em;
+          line-height: 1;
+          padding: 6px 11px;
+          border-radius: 8px;
+          color: #2A1A03;
+          background: linear-gradient(180deg, #FFE08A 0%, #F59E0B 100%);
+          border: 1px solid #E59008;
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.5),
+            inset 0 -2px 0 rgba(0, 0, 0, 0.2),
+            0 2px 4px rgba(0, 0, 0, 0.35);
+          text-shadow: 0 1px 0 rgba(255, 255, 255, 0.22);
+          cursor: pointer;
+          white-space: nowrap;
+          font-variant-numeric: tabular-nums;
+          transition: transform 120ms ease, filter 120ms ease;
+        }
+        .mab-pillrow-cashout:hover:not(:disabled) {
+          filter: brightness(1.06);
+          transform: translateY(-1px);
+        }
+        .mab-pillrow-cashout:active:not(:disabled) {
+          transform: translateY(1px);
+          box-shadow:
+            inset 0 1px 2px rgba(0, 0, 0, 0.25),
+            inset 0 -1px 0 rgba(255, 255, 255, 0.18);
+        }
+        .mab-pillrow-cashout:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
         }
         .mab-pillrow-caret {
           flex-shrink: 0;
