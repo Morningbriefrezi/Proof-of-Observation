@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { ReactElement } from 'react';
 import { MISSIONS } from '@/lib/constants';
-import HeroSkyPanel from '@/components/home/HeroSkyPanel';
+import HeroSkyPanel from '@/components/home/HeroSkyPanelLazy';
 
 const HERO_MISSION_IDS = ['moon', 'jupiter', 'pleiades', 'orion', 'saturn', 'andromeda', 'crab'] as const;
 

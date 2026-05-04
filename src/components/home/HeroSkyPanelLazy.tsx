@@ -1,0 +1,19 @@
+'use client';
+
+import dynamic from 'next/dynamic';
+
+const HeroSkyPanel = dynamic(() => import('./HeroSkyPanel'), {
+  ssr: false,
+  loading: () => (
+    <div
+      aria-hidden
+      className="w-full max-w-[480px] aspect-square mx-auto"
+      style={{
+        background:
+          'radial-gradient(circle at 50% 50%, rgba(255,209,102,0.06) 0%, rgba(176,127,232,0.04) 35%, transparent 70%)',
+      }}
+    />
+  ),
+});
+
+export default HeroSkyPanel;

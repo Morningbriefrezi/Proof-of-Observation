@@ -8,6 +8,8 @@
  * Textures: solarsystemscope.com (CC BY 4.0) via Wikimedia Commons.
  */
 
+import { useEffect, useRef, useState } from 'react';
+
 const CX = 240;
 const CY = 240;
 
@@ -56,8 +58,37 @@ const SUN_R = 16;
 const SUN_SPIN = 60;
 
 export default function HeroSkyPanel() {
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const [visible, setVisible] = useState(true);
+
+  // Pause CSS animations when the orrery scrolls off-screen — saves
+  // GPU/battery on long pages, especially on mobile.
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(
+      (entries) => setVisible(entries[0]?.isIntersecting ?? true),
+      { rootMargin: '120px' },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   return (
-    <div className="relative w-full max-w-[480px] mx-auto select-none">
+    <div
+      ref={wrapRef}
+      className="relative w-full max-w-[480px] mx-auto select-none"
+      data-paused={!visible}
+    >
+      <style jsx>{`
+        [data-paused='true'] :global(.orbit),
+        [data-paused='true'] :global(.spin),
+        [data-paused='true'] :global(.spin-rev),
+        [data-paused='true'] :global(.corona),
+        [data-paused='true'] :global(.star) {
+          animation-play-state: paused !important;
+        }
+      `}</style>
       <style jsx>{`
         @keyframes orrery-orbit {
           from { transform: rotate(var(--from, 0deg)); }
