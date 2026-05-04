@@ -217,25 +217,17 @@ export default function HomePage() {
               For anyone with a smartphone and a sky above them. Step outside, photograph the night, earn rewards you can redeem for telescopes and optics.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3.5 max-w-[440px]">
+            <div className="flex flex-col sm:flex-row gap-3 max-w-[460px]">
               <Link
                 href="/missions"
-                className="flex-1 inline-flex items-center justify-center gap-2.5 px-7 py-4 bg-[#FFD166] text-[#0A0E1A] font-semibold text-[15px] rounded-xl hover:bg-[#FFE08A] transition-colors no-underline"
+                className="flex-1 inline-flex items-center justify-center px-8 py-[18px] bg-[#FFD166] text-[#0A0E1A] font-bold text-[15px] tracking-[0.01em] rounded-[12px] shadow-[0_1px_0_rgba(255,255,255,0.35)_inset,0_10px_30px_-12px_rgba(255,209,102,0.55)] ring-1 ring-[#E8B84A]/60 hover:bg-[#FFDA85] active:translate-y-[0.5px] transition-all no-underline"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <circle cx="12" cy="12" r="3" />
-                  <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
-                </svg>
                 Start observing
               </Link>
               <Link
                 href="/sky"
-                className="flex-1 inline-flex items-center justify-center gap-2.5 px-7 py-4 bg-[rgba(255,209,102,0.10)] text-[#FFD166] font-semibold text-[15px] rounded-xl border border-[rgba(255,209,102,0.30)] hover:bg-[rgba(255,209,102,0.18)] transition-colors no-underline"
+                className="flex-1 inline-flex items-center justify-center px-8 py-[18px] bg-[#161C2D] text-white font-bold text-[15px] tracking-[0.01em] rounded-[12px] shadow-[0_1px_0_rgba(255,255,255,0.06)_inset,0_8px_24px_-12px_rgba(0,0,0,0.6)] ring-1 ring-white/10 hover:bg-[#1B2236] hover:ring-white/15 active:translate-y-[0.5px] transition-all no-underline"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2a8 8 0 010 16M12 2a8 8 0 100 16" />
-                </svg>
                 Tonight&apos;s sky
               </Link>
             </div>
@@ -254,11 +246,11 @@ export default function HomePage() {
             <div className="text-[12px] md:text-[14px] font-medium text-[#9BA3B4]">Sky Missions</div>
           </div>
           <div>
-            <div className="text-[28px] md:text-[48px] font-bold leading-none mb-1.5 md:mb-2 text-[#FFD166]">5B+</div>
-            <div className="text-[12px] md:text-[14px] font-medium text-[#9BA3B4]">Sky Cameras</div>
+            <div className="text-[28px] md:text-[48px] font-bold leading-none mb-1.5 md:mb-2 text-[#FFD166]">500M+</div>
+            <div className="text-[12px] md:text-[14px] font-medium text-[#9BA3B4]">Space Enthusiasts</div>
           </div>
           <div>
-            <div className="text-[28px] md:text-[48px] font-bold leading-none mb-1.5 md:mb-2 bg-gradient-to-r from-[#B07FE8] to-[#38F0FF] bg-clip-text text-transparent">3</div>
+            <div className="text-[28px] md:text-[48px] font-bold leading-none mb-1.5 md:mb-2 bg-gradient-to-r from-[#B07FE8] to-[#38F0FF] bg-clip-text text-transparent">4</div>
             <div className="text-[12px] md:text-[14px] font-medium text-[#9BA3B4]">Brand Partners</div>
           </div>
           <div>
