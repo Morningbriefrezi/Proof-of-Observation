@@ -126,15 +126,15 @@ Alternative if workspace conversion is risky mid-hackathon: keep `apps/field` as
 
 ## 7. Timeline (May 4 → May 11, 7 days)
 
-| Day | Work | Ship gate |
-|---|---|---|
-| **Tue May 5** | Bootstrap Expo app, install `@qvac/sdk` + `@privy-io/expo`, get Llama 3.2 1B loading on a real device with progress UI. Verify Privy login + embedded wallet work. | Local LLM responds to "Hello" on iPhone. |
-| **Wed May 6** | Build RAG corpus: scrape/format Messier + constellation + FAQ data into chunks; embed with `@qvac/embed-llamacpp`; ship the index. Wire `companion.ts` router. | Offline chat answers "What is M31?" with corpus citation. |
-| **Thu May 7** | Whisper STT integration + voice-log UI (record button, waveform, transcript review screen). Save observations to Supabase. | Voice note → typed observation → DB row, all offline. |
-| **Fri May 8** | TTS for planet/sky alerts. Integrate with existing `astronomy-engine` planet tracker. Build the "Field Mode" toggle on the home screen. | App reads "Saturn rises in 12 minutes" out loud. |
-| **Sat May 9** | Bridge to existing cNFT mint flow: voice-logged observation → Discovery Attestation on devnet. Polish onboarding (model download UX is the riskiest moment). | Full flow: airplane-mode voice note → on-chain mint when back online. |
-| **Sun May 10** | Demo video (90s, airplane-mode field shot). README rewrite. Update `STELLAR_INFO.md` and `DEMO_SCRIPT.md`. Submission text on Superteam Earn + Colosseum. | Both submissions ready. |
-| **Mon May 11** | Buffer day. Final QA, edge cases, submit before deadline. | Submitted. |
+| Day | Work | Ship gate | Status |
+|---|---|---|---|
+| **Tue May 5** | Bootstrap Expo app, install `@qvac/sdk` + `@privy-io/expo`, get Llama 3.2 1B loading on a real device with progress UI. Verify Privy login + embedded wallet work. | Local LLM responds to "Hello" on iPhone. | ✅ scaffold + typecheck; on-device verification blocked by Xcode/macOS, Android Studio path TBD off-hours |
+| **Wed May 6** | Build RAG corpus: scrape/format Messier + constellation + FAQ data into chunks; embed with `@qvac/embed-llamacpp`; ship the index. Wire `companion.ts` router. | Offline chat answers "What is M31?" with corpus citation. | ✅ 72 chunks; hybrid retrieval (cosine + keyword + season bonus); citation chips in chat UI; markdown source format documented |
+| **Thu May 7** | Whisper STT integration + voice-log UI (record button, waveform, transcript review screen). Save observations to Supabase. | Voice note → typed observation → DB row, all offline. | ⏳ |
+| **Fri May 8** | TTS for planet/sky alerts. Integrate with existing `astronomy-engine` planet tracker. Build the "Field Mode" toggle on the home screen. | App reads "Saturn rises in 12 minutes" out loud. | ⏳ |
+| **Sat May 9** | Bridge to existing cNFT mint flow: voice-logged observation → Discovery Attestation on devnet. Polish onboarding (model download UX is the riskiest moment). | Full flow: airplane-mode voice note → on-chain mint when back online. | ⏳ |
+| **Sun May 10** | Demo video (90s, airplane-mode field shot). README rewrite. Update `STELLAR_INFO.md` and `DEMO_SCRIPT.md`. Submission text on Superteam Earn + Colosseum. | Both submissions ready. | ⏳ |
+| **Mon May 11** | Buffer day. Final QA, edge cases, submit before deadline. | Submitted. | ⏳ |
 
 **Scope-cut order if behind:** drop translation (5.4) → drop TTS (5.3) → ship just LLM + RAG + voice logging. That core alone is a strong submission.
 

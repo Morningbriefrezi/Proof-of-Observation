@@ -82,8 +82,9 @@ On first run, QVAC fetches **Llama 3.2 1B (Q4_0 quantized, ~700MB)**. Progress i
 
 | Day | Feature | Status |
 |---|---|---|
-| 1 | Expo + QVAC + Privy + Supabase wiring, RAG seed corpus, chat UI | ✅ this commit |
-| 2 | Real-device verification, RAG quality pass | ⏳ |
+| 1 | Expo + QVAC + Privy + Supabase wiring, RAG seed corpus, chat UI | ✅ |
+| 2 | RAG quality pass: 72-chunk corpus, hybrid retrieval, citations in UI, build pipeline scaffold | ✅ |
+| 2.5 | Real-device verification (blocked by macOS-too-old for Xcode; Android Studio path TBD) | ⏳ |
 | 3 | Whisper voice observation logging | ⏳ |
 | 4 | TTS sky guidance | ⏳ |
 | 5 | Voice-note → cNFT mint via existing Bubblegum pipeline | ⏳ |
