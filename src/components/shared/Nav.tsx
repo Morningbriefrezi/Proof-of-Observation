@@ -7,7 +7,7 @@ import { useDisplayProfile } from '@/hooks/useDisplayProfile';
 import { AuthModal } from '@/components/auth/AuthModal';
 import {
   CloudSun, ShoppingBag, Satellite, Search, BookOpen,
-  TrendingUp, Sparkles, LayoutGrid,
+  TrendingUp, Sparkles, Telescope, Compass,
 } from 'lucide-react';
 import AstroLogo from './AstroLogo';
 import SearchModal from './SearchModal';
@@ -23,7 +23,7 @@ const NAV_ITEMS = [
 
 export default function Nav() {
   const pathname = usePathname();
-  const { authenticated, ready } = useDisplayProfile();
+  const { authenticated, ready, initials, avatarGlyph } = useDisplayProfile();
   const [searchOpen, setSearchOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
 
@@ -40,7 +40,10 @@ export default function Nav() {
         .signin-btn:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.25); color: white; }
         .hub-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: transparent; border: 1px solid transparent; cursor: pointer; padding: 0; color: rgba(255,255,255,0.7); transition: all 0.15s ease; text-decoration: none; }
         .hub-btn:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.95); }
-        .hub-btn[data-active="true"] { background: rgba(255,209,102,0.10); border-color: rgba(255,209,102,0.25); color: var(--terracotta); }
+        .hub-btn[data-active="true"] { background: rgba(255,209,102,0.10); border-color: rgba(255,209,102,0.25); color: #FFD166; }
+        .avatar-btn { width: 32px; height: 32px; min-width: 32px; min-height: 32px; aspect-ratio: 1 / 1; flex-shrink: 0; border-radius: 9999px; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden; transition: box-shadow 0.18s ease, border-color 0.18s ease; background: linear-gradient(135deg, #534AB7, #7F77DD); border: 1.5px solid rgba(255,255,255,0.15); text-decoration: none; }
+        .avatar-btn:hover { box-shadow: 0 0 0 2px rgba(127,119,221,0.2); }
+        .avatar-btn[data-active="true"] { border-color: rgba(255,209,102,0.6); box-shadow: 0 0 0 2px rgba(255,209,102,0.18); }
       `}</style>
 
       <nav
@@ -53,8 +56,16 @@ export default function Nav() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="h-14 relative flex items-center">
 
-            {/* LEFT cluster: logo */}
-            <div className="flex items-center flex-shrink-0">
+            {/* LEFT cluster: hub + logo */}
+            <div className="flex items-center flex-shrink-0 gap-2">
+              <Link
+                href="/hub"
+                className="hub-btn"
+                data-active={pathname.startsWith('/hub')}
+                aria-label="Hub"
+              >
+                <Compass size={17} strokeWidth={1.9} />
+              </Link>
               <Link href="/" title="Stellar" className="flex items-center">
                 <div style={{ filter: 'drop-shadow(0 0 18px rgba(255, 209, 102,0.6)) drop-shadow(0 0 36px rgba(255, 209, 102,0.25))' }}>
                   <AstroLogo heightClass="h-8" size={30} />
@@ -102,7 +113,7 @@ export default function Nav() {
               </button>
 
               {!ready ? (
-                <div className="w-8 h-8 rounded-lg bg-[var(--surface-hover)] animate-pulse shrink-0" />
+                <div className="w-8 h-8 rounded-full bg-[var(--surface-hover)] animate-pulse shrink-0" style={{ aspectRatio: '1 / 1' }} />
               ) : !authenticated ? (
                 <button
                   onClick={() => setAuthOpen(true)}
@@ -123,12 +134,22 @@ export default function Nav() {
                 </button>
               ) : (
                 <Link
-                  href="/hub"
-                  className="hub-btn"
-                  data-active={pathname.startsWith('/hub')}
-                  aria-label="Hub"
+                  href="/profile"
+                  className="avatar-btn"
+                  data-active={pathname.startsWith('/profile')}
+                  aria-label="Profile"
                 >
-                  <LayoutGrid size={17} strokeWidth={1.9} />
+                  {avatarGlyph ? (
+                    <span style={{ fontSize: 16, lineHeight: 1, filter: 'saturate(0.95)' }}>
+                      {avatarGlyph}
+                    </span>
+                  ) : initials ? (
+                    <span style={{ color: 'white', fontSize: 11, fontWeight: 500, letterSpacing: '0.02em', lineHeight: 1 }}>
+                      {initials}
+                    </span>
+                  ) : (
+                    <Telescope size={14} strokeWidth={1.75} color="white" />
+                  )}
                 </Link>
               )}
             </div>
