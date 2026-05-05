@@ -3,15 +3,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
- * Live compass heading from the device's orientation sensor.
+ * Live phone pointing — the (azimuth, altitude) the back of the device is
+ * aimed at, derived from DeviceOrientationEvent.
  *
- * Returned `heading` is in degrees, 0 = magnetic north, increases clockwise.
- * Smoothed with a circular-mean low-pass to kill the jitter you'd otherwise
- * see on every dome rotation.
+ * Why a quaternion path: the older code branched on `screen.orientation.angle`
+ * and read altitude from `beta` or `gamma` directly. That breaks near vertical
+ * (β > 80°) because of gimbal lock — the pitch reading wobbles by 15°+ even
+ * when the user's hand is steady, which makes high-altitude planets feel
+ * un-lockable. Building the full ZXY rotation matrix and reading the back-of-
+ * phone vector's components in world frame fixes this regardless of how the
+ * user holds the phone.
  *
- * iOS Safari requires a user-gesture-triggered permission prompt; that's
- * what `request()` is for. Android grants it automatically and you can call
- * `request()` anyway — it's a no-op there.
+ * Azimuth still prefers `webkitCompassHeading` on iOS — it's already corrected
+ * for declination and screen orientation, both of which we'd otherwise have to
+ * approximate.
  */
 export type HeadingStatus = 'idle' | 'granted' | 'denied' | 'unavailable';
 
@@ -26,7 +31,7 @@ export interface UseDeviceHeading {
   /** Has Stellar received any heading event yet? */
   live: boolean;
   status: HeadingStatus;
-  /** Best-effort accuracy in degrees from iOS, or null. */
+  /** Best-effort heading accuracy in degrees from iOS, or null. */
   accuracy: number | null;
   /** Persistent calibration nudge applied on top of the raw sensor heading. */
   offset: number;
@@ -34,6 +39,13 @@ export interface UseDeviceHeading {
   nudge: (delta: number) => void;
   /** Reset the calibration offset to zero. */
   resetCalibration: () => void;
+  /**
+   * Hint the smoother to dampen harder when the user is closing in on a
+   * target. Pass the current angular distance to the active body in degrees,
+   * or null when nothing is selected. Adaptive smoothing factor goes from
+   * ~0.22 (scanning) to ~0.07 (within 4°).
+   */
+  setProximityDeg: (deg: number | null) => void;
   /** Trigger the iOS permission prompt and start listening. Idempotent. */
   request: () => Promise<void>;
   /** Stop listening and forget the heading. */
@@ -44,8 +56,13 @@ type DeviceOrientationConstructor = typeof DeviceOrientationEvent & {
   requestPermission?: () => Promise<'granted' | 'denied'>;
 };
 
-/** Low-pass smoothing factor in [0..1]. Higher = more responsive, less smooth. */
-const SMOOTH_ALPHA = 0.18;
+/** Smoothing alpha bounds — adaptive between these. Higher = more responsive. */
+const ALPHA_FAR = 0.22;
+const ALPHA_NEAR = 0.07;
+/** Distance at which smoothing fully tightens to ALPHA_NEAR. */
+const NEAR_DEG = 4;
+/** Distance at which we begin tightening from ALPHA_FAR. */
+const FAR_DEG = 20;
 /** If we don't see an orientation event in this window after granting, fall back. */
 const FIRST_EVENT_TIMEOUT_MS = 2500;
 
@@ -66,35 +83,67 @@ function smoothAngle(prev: number | null, next: number, alpha: number): number {
 }
 
 /**
- * Current screen rotation in degrees. iOS Safari already corrects
- * `webkitCompassHeading` for screen orientation, so we only apply this for
- * the Android (`deviceorientationabsolute`) path.
+ * Back-of-phone unit vector in Earth frame (x=East, y=North, z=Up), built
+ * from intrinsic ZXY Euler angles (W3C DeviceOrientationEvent convention).
+ * The 3rd column of R = Rz(α)·Rx(β)·Ry(γ) is the device Z axis in world; the
+ * back camera is the negation of that.
  */
-function screenAngle(): number {
-  if (typeof window === 'undefined') return 0;
-  const so = (window.screen as Screen & { orientation?: { angle?: number } }).orientation;
-  if (so && typeof so.angle === 'number') return so.angle;
-  // Legacy fallback.
-  const wo = (window as Window & { orientation?: number }).orientation;
-  return typeof wo === 'number' ? wo : 0;
+function backVectorWorld(alphaDeg: number, betaDeg: number, gammaDeg: number) {
+  const a = alphaDeg * DEG;
+  const b = betaDeg * DEG;
+  const g = gammaDeg * DEG;
+  const sa = Math.sin(a), ca = Math.cos(a);
+  const sb = Math.sin(b), cb = Math.cos(b);
+  const sg = Math.sin(g), cg = Math.cos(g);
+  const zx = ca * sg + sa * sb * cg;
+  const zy = sa * sg - ca * sb * cg;
+  const zz = cb * cg;
+  return { x: -zx, y: -zy, z: -zz };
 }
 
-/** Pull a compass heading out of a DeviceOrientationEvent across browsers. */
-function eventHeading(e: DeviceOrientationEvent): number | null {
+interface PointingResult {
+  /** Compass heading in degrees, 0=N, increasing clockwise. Null if alpha was missing. */
+  heading: number | null;
+  /** Altitude in degrees, [-90, +90]. */
+  altitude: number;
+}
+
+/** Pull a stable (heading, altitude) pair out of a DeviceOrientationEvent across browsers. */
+function eventToPointing(e: DeviceOrientationEvent): PointingResult | null {
   const ev = e as unknown as { webkitCompassHeading?: number };
+  const beta = e.beta;
+  const gamma = e.gamma;
+  if (beta == null || Number.isNaN(beta) || gamma == null || Number.isNaN(gamma)) {
+    return null;
+  }
+  const alpha = e.alpha;
+  // Fall back to a usable alpha if iOS's `alpha` happens to be null but we
+  // still have webkitCompassHeading — for the matrix, alpha doesn't actually
+  // matter to compute altitude (it's a rotation around vertical, and the
+  // back-vector's z component is independent of α).
+  const aForMatrix = alpha != null && !Number.isNaN(alpha) ? alpha : 0;
+  const v = backVectorWorld(aForMatrix, beta, gamma);
+  const altitude = Math.max(-90, Math.min(90, Math.asin(Math.max(-1, Math.min(1, v.z))) / DEG));
+
+  let heading: number | null = null;
   if (typeof ev.webkitCompassHeading === 'number' && !Number.isNaN(ev.webkitCompassHeading)) {
     // iOS: 0 = true north (Apple corrects for declination), increases clockwise,
     // and is already screen-orientation corrected.
-    return ev.webkitCompassHeading;
+    heading = ev.webkitCompassHeading;
+  } else if (alpha != null && !Number.isNaN(alpha) && e.absolute) {
+    // Android `deviceorientationabsolute` — recover heading from the back-
+    // vector's horizontal projection. atan2(East, North) yields a clockwise-
+    // from-north compass heading. This is more robust than the legacy
+    // (360 - alpha) shortcut when the phone is heavily tilted.
+    const horiz = Math.hypot(v.x, v.y);
+    if (horiz > 1e-3) {
+      let h = Math.atan2(v.x, v.y) / DEG;
+      h = ((h % 360) + 360) % 360;
+      heading = h;
+    }
   }
-  if (e.alpha != null && !Number.isNaN(e.alpha) && e.absolute) {
-    // Android `deviceorientationabsolute`: alpha is 0 when device top points
-    // north, increases counter-clockwise → invert to compass and rotate by
-    // current screen orientation so landscape mode matches portrait.
-    const compass = (360 - e.alpha + screenAngle()) % 360;
-    return (compass + 360) % 360;
-  }
-  return null;
+
+  return { heading, altitude };
 }
 
 const OFFSET_KEY = 'stellar.sky.compass.offset';
@@ -118,6 +167,16 @@ function saveOffset(n: number) {
   } catch { /* ignore */ }
 }
 
+/** Map angular distance to the active target → smoothing alpha. */
+function alphaForProximity(deg: number | null): number {
+  if (deg == null) return ALPHA_FAR;
+  if (deg <= NEAR_DEG) return ALPHA_NEAR;
+  if (deg >= FAR_DEG) return ALPHA_FAR;
+  // Linear ramp between NEAR_DEG and FAR_DEG.
+  const t = (deg - NEAR_DEG) / (FAR_DEG - NEAR_DEG);
+  return ALPHA_NEAR + (ALPHA_FAR - ALPHA_NEAR) * t;
+}
+
 export function useDeviceHeading(): UseDeviceHeading {
   const [rawHeading, setRawHeading] = useState<number | null>(null);
   const [altitude, setAltitude] = useState<number | null>(null);
@@ -135,6 +194,7 @@ export function useDeviceHeading(): UseDeviceHeading {
   const smoothedAltRef = useRef<number | null>(null);
   const handlerRef = useRef<((e: DeviceOrientationEvent) => void) | null>(null);
   const timeoutRef = useRef<number | null>(null);
+  const proximityRef = useRef<number | null>(null);
 
   const detach = useCallback(() => {
     if (typeof window === 'undefined') return;
@@ -161,37 +221,23 @@ export function useDeviceHeading(): UseDeviceHeading {
     detach();
 
     const handle = (e: DeviceOrientationEvent) => {
-      const next = eventHeading(e);
-      if (next == null) return;
+      const next = eventToPointing(e);
+      if (!next) return;
       setLive(true);
-      smoothedHeadingRef.current = smoothAngle(smoothedHeadingRef.current, next, SMOOTH_ALPHA);
-      setRawHeading(smoothedHeadingRef.current);
 
-      // Pitch the back camera is aimed at depends on which axis is "up" given
-      // the current screen orientation. In portrait, beta tracks pitch and
-      // altitude = beta − 90. In landscape, the long edge is horizontal and
-      // gamma takes over; its sign flips between the two landscape rotations.
-      const beta = e.beta;
-      const gamma = e.gamma;
-      if (beta != null && !Number.isNaN(beta)) {
-        const sa = screenAngle();
-        let rawAlt: number;
-        if (sa === 90 && gamma != null && !Number.isNaN(gamma)) {
-          // Phone rotated 90° (home button on left in old phones / right edge up).
-          rawAlt = -gamma;
-        } else if ((sa === 270 || sa === -90) && gamma != null && !Number.isNaN(gamma)) {
-          rawAlt = gamma;
-        } else if (sa === 180) {
-          rawAlt = 90 - beta;
-        } else {
-          rawAlt = beta - 90;
-        }
-        rawAlt = Math.max(-90, Math.min(90, rawAlt));
-        const prev = smoothedAltRef.current;
-        const smoothed = prev == null ? rawAlt : prev * (1 - SMOOTH_ALPHA) + rawAlt * SMOOTH_ALPHA;
-        smoothedAltRef.current = smoothed;
-        setAltitude(smoothed);
+      const alphaSmooth = alphaForProximity(proximityRef.current);
+
+      if (next.heading != null) {
+        smoothedHeadingRef.current = smoothAngle(smoothedHeadingRef.current, next.heading, alphaSmooth);
+        setRawHeading(smoothedHeadingRef.current);
       }
+
+      const prevAlt = smoothedAltRef.current;
+      const smoothedAlt = prevAlt == null
+        ? next.altitude
+        : prevAlt * (1 - alphaSmooth) + next.altitude * alphaSmooth;
+      smoothedAltRef.current = smoothedAlt;
+      setAltitude(smoothedAlt);
 
       const acc = (e as unknown as { webkitCompassAccuracy?: number }).webkitCompassAccuracy;
       if (typeof acc === 'number' && acc >= 0) setAccuracy(acc);
@@ -204,11 +250,11 @@ export function useDeviceHeading(): UseDeviceHeading {
 
     timeoutRef.current = window.setTimeout(() => {
       // No usable heading after the timeout — sensor is dead or absent.
-      if (!live && smoothedHeadingRef.current === null) {
+      if (smoothedHeadingRef.current === null) {
         setStatus('unavailable');
       }
     }, FIRST_EVENT_TIMEOUT_MS);
-  }, [detach, live]);
+  }, [detach]);
 
   const request = useCallback(async () => {
     if (typeof window === 'undefined') return;
@@ -256,15 +302,47 @@ export function useDeviceHeading(): UseDeviceHeading {
     saveOffset(0);
   }, []);
 
+  const setProximityDeg = useCallback((deg: number | null) => {
+    proximityRef.current = deg;
+  }, []);
+
   useEffect(() => detach, [detach]);
 
   // Apply the calibration offset to the raw sensor heading. Wrapped to [0, 360).
   const heading = rawHeading == null ? null : ((rawHeading + offset) % 360 + 360) % 360;
 
-  return { heading, altitude, live, status, accuracy, offset, nudge, resetCalibration, request, stop };
+  return {
+    heading,
+    altitude,
+    live,
+    status,
+    accuracy,
+    offset,
+    nudge,
+    resetCalibration,
+    setProximityDeg,
+    request,
+    stop,
+  };
 }
 
 /** Signed shortest difference between two compass directions, in degrees [-180..+180]. */
 export function headingDelta(targetAz: number, fromAz: number): number {
   return ((targetAz - fromAz + 540) % 360) - 180;
+}
+
+/**
+ * Great-circle separation between two alt/az directions, in degrees.
+ * Returns 0..180. This is what to use for "is the user pointing at the
+ * target?" — single number, no zenith singularity.
+ */
+export function angularSeparation(
+  alt1: number, az1: number,
+  alt2: number, az2: number,
+): number {
+  const a1 = alt1 * DEG;
+  const a2 = alt2 * DEG;
+  const dAz = (az1 - az2) * DEG;
+  const cosD = Math.sin(a1) * Math.sin(a2) + Math.cos(a1) * Math.cos(a2) * Math.cos(dAz);
+  return Math.acos(Math.max(-1, Math.min(1, cosD))) / DEG;
 }

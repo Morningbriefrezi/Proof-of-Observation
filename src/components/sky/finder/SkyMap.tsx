@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { headingDelta, type HeadingStatus } from '@/lib/sky/use-device-heading';
+import { angularSeparation, type HeadingStatus } from '@/lib/sky/use-device-heading';
 import type { ObjectId, SkyObject } from './types';
 
 const PLANET_COLORS: Record<string, string> = {
@@ -40,11 +40,25 @@ const SIZE = 360;
 const CX = SIZE / 2;
 const CY = SIZE / 2;
 const R = 152;
-// Lock window. Azimuth holds tighter than altitude — phone pitch shake at
-// high tilts (zenith-side targets) easily exceeds 8°, which made lock
-// effectively unreachable on planets above ~60° altitude.
-const ON_TARGET_AZ_DEG = 10;
-const ON_TARGET_ALT_DEG = 12;
+
+/**
+ * Per-target lock radius (degrees of great-circle separation). Bigger for
+ * naked-eye targets where the user has a wide field of view; tighter for
+ * scope-only DSOs that need precise aiming.
+ */
+function lockRadiusDeg(obj: SkyObject): number {
+  if (obj.instrument === 'telescope') return 3;
+  if (obj.instrument === 'binoculars') return 5;
+  return 8;
+}
+
+/** Hold this long inside the lock cone before triggering a confirmed lock. */
+const HOLD_TO_LOCK_MS = 800;
+/**
+ * Compass accuracy worse than this triggers the calibration banner. iOS
+ * reports `webkitCompassAccuracy` in degrees; missing or > 15° = unreliable.
+ */
+const POOR_ACCURACY_DEG = 15;
 
 /** Bright star + its current alt/az, sized for chart rendering. */
 export interface ConstellationStar {
@@ -67,6 +81,8 @@ interface SkyMapProps {
   userAltitude?: number | null;
   /** Permission/availability state for the heading source. */
   headingStatus?: HeadingStatus;
+  /** iOS compass accuracy in degrees, or null if unknown. */
+  accuracy?: number | null;
   /** Triggered when the user taps the calibrate compass control. */
   onCalibrate?: () => void;
   /** Stick-figure stars to render at low opacity behind the bodies. */
@@ -79,6 +95,12 @@ interface SkyMapProps {
   calibrationOffset?: number;
   /** Apply ±degrees to the calibration offset. Optional — only renders the +/− pad when provided. */
   onNudge?: (delta: number) => void;
+  /**
+   * Reports the angular distance between the user's current aim and the
+   * active target whenever it changes. Used by the heading hook to dampen
+   * smoothing as the user closes in. Optional.
+   */
+  onProximityChange?: (deg: number | null) => void;
 }
 
 interface Plotted {
@@ -94,7 +116,6 @@ interface LabelPlacement {
   text: string;
 }
 
-// Approximate width of the rendered label glyphs at fontSize=9.5 mono.
 const CHAR_W = 5.2;
 const LABEL_H = 10;
 const LABEL_PAD = 2;
@@ -105,7 +126,7 @@ function labelPriority(p: Plotted, activeId: string | null): number {
   if (t === 'sun' || t === 'moon' || t === 'planet') return 1;
   if ((t === 'star' || t === 'double') && p.obj.magnitude <= 1.5) return 2;
   if (t === 'star' || t === 'double') return 5;
-  return 3; // DSOs (galaxy / nebula / cluster)
+  return 3;
 }
 
 function makeLabel(p: Plotted): LabelPlacement {
@@ -143,8 +164,6 @@ function rectsOverlap(a: { x: number; y: number; w: number; h: number }, b: type
 function project(alt: number, az: number, headingOffset: number): { x: number; y: number } {
   const altC = Math.max(0, Math.min(90, alt));
   const dist = (1 - altC / 90) * R;
-  // Subtracting the heading offset rotates the chart so the user's facing
-  // azimuth sits at the top of the dome.
   const azRad = ((az - headingOffset) * Math.PI) / 180;
   return {
     x: CX + dist * Math.sin(azRad),
@@ -159,12 +178,14 @@ export function SkyMap({
   heading = null,
   userAltitude = null,
   headingStatus = 'idle',
+  accuracy = null,
   onCalibrate,
   constellationStars = [],
   constellationLines = [],
   hopAnchor = null,
   calibrationOffset = 0,
   onNudge,
+  onProximityChange,
 }: SkyMapProps) {
   const t = useTranslations('sky.skymap');
   const liveOffset = heading ?? 0;
@@ -180,7 +201,6 @@ export function SkyMap({
       });
   }, [objects, liveOffset]);
 
-  // Render order: faintest first, brightest above, active body last.
   const drawOrder = useMemo(() => {
     return plotted.slice().sort((a, b) => {
       const aA = a.obj.id === activeId ? 1 : 0;
@@ -195,9 +215,6 @@ export function SkyMap({
     return plotted.find((p) => p.obj.id === activeId) ?? null;
   }, [plotted, activeId]);
 
-  // Label deconfliction: walk plotted bodies in priority order (active first,
-  // then planets, bright stars, DSOs) and only keep labels whose bbox doesn't
-  // collide with one already placed. Active always wins.
   const labelMap = useMemo(() => {
     const sorted = plotted.slice().sort((a, b) => {
       const pa = labelPriority(a, activeId);
@@ -233,40 +250,80 @@ export function SkyMap({
     return out;
   }, [plotted, activeId]);
 
-  // Aim geometry: signed delta from current heading→target azimuth and from
-  // current pitch→target altitude. Lock requires both axes within tolerance.
-  const aim = useMemo(() => {
-    if (!isLive || !active) return null;
-    const dAz = headingDelta(active.obj.azimuth, heading ?? 0);
-    const dAlt = hasTilt ? active.obj.altitude - (userAltitude ?? 0) : null;
-    const azOnTarget = Math.abs(dAz) <= ON_TARGET_AZ_DEG;
-    const altOnTarget = dAlt == null || Math.abs(dAlt) <= ON_TARGET_ALT_DEG;
-    const onTarget = azOnTarget && altOnTarget;
-    return { dAz, dAlt, azOnTarget, altOnTarget, onTarget };
-  }, [isLive, active, heading, hasTilt, userAltitude]);
+  // Single great-circle distance from user's aim to the active body. This is
+  // the proximity that drives every aim-feedback element below — replacing
+  // the older two-axis (Δaz, Δalt) box check that broke near zenith.
+  const proximity = useMemo(() => {
+    if (!isLive || !hasTilt || !active) return null;
+    return angularSeparation(
+      userAltitude ?? 0,
+      heading ?? 0,
+      active.obj.altitude,
+      active.obj.azimuth,
+    );
+  }, [isLive, hasTilt, active, heading, userAltitude]);
 
-  // Vibrate exactly once each time the lock transitions from off to on for
-  // the current target. Reset whenever the active id changes.
-  const lastLockedRef = useRef<{ id: string | null; locked: boolean }>({ id: null, locked: false });
-  const isLocked = aim?.onTarget ?? false;
+  // Feed proximity back to the heading hook so it can dampen smoothing as
+  // the user closes in. Optional — falls back gracefully when unset.
   useEffect(() => {
-    const prev = lastLockedRef.current;
-    if (active?.obj.id !== prev.id) {
-      lastLockedRef.current = { id: active?.obj.id ?? null, locked: false };
+    if (!onProximityChange) return;
+    onProximityChange(proximity);
+  }, [proximity, onProximityChange]);
+
+  const lockRadius = active ? lockRadiusDeg(active.obj) : 8;
+  const insideLockCone = proximity != null && proximity <= lockRadius;
+
+  // Hold-to-lock state machine. The user has to keep the aim inside the
+  // lock cone for HOLD_TO_LOCK_MS before the lock confirms — this rejects
+  // sensor wobble that otherwise flickered the lock on/off.
+  const [holdProgress, setHoldProgress] = useState(0); // 0..1
+  const [confirmedLock, setConfirmedLock] = useState(false);
+  const holdStartRef = useRef<number | null>(null);
+  const lastActiveIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    // Reset whenever the active target changes.
+    if (active?.obj.id !== lastActiveIdRef.current) {
+      lastActiveIdRef.current = active?.obj.id ?? null;
+      holdStartRef.current = null;
+      setHoldProgress(0);
+      setConfirmedLock(false);
     }
-    if (active && isLocked && !lastLockedRef.current.locked) {
-      lastLockedRef.current = { id: active.obj.id, locked: true };
-      if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
-        try { navigator.vibrate([12, 40, 12]); } catch { /* ignore */ }
+  }, [active]);
+
+  useEffect(() => {
+    if (!insideLockCone) {
+      holdStartRef.current = null;
+      if (holdProgress !== 0) setHoldProgress(0);
+      if (confirmedLock) setConfirmedLock(false);
+      return;
+    }
+    if (holdStartRef.current == null) holdStartRef.current = performance.now();
+    let raf = 0;
+    const tick = () => {
+      const start = holdStartRef.current;
+      if (start == null) return;
+      const elapsed = performance.now() - start;
+      const t = Math.min(1, elapsed / HOLD_TO_LOCK_MS);
+      setHoldProgress(t);
+      if (t >= 1) {
+        if (!confirmedLock) {
+          setConfirmedLock(true);
+          if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+            try { navigator.vibrate([12, 40, 12]); } catch { /* ignore */ }
+          }
+        }
+        return;
       }
-    } else if (!isLocked && lastLockedRef.current.locked) {
-      lastLockedRef.current = { id: lastLockedRef.current.id, locked: false };
-    }
-  }, [active, isLocked]);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [insideLockCone, confirmedLock, holdProgress]);
 
   // Where the phone is currently aimed, projected onto the rotated dome.
-  // Because the dome rotates with heading, the user's facing azimuth always
-  // sits at the top (angle 0). Their pitch becomes the radial position.
+  // Always at angle 0 (top of dome) since the chart rotates with heading;
+  // the radial position is driven by the user's pitch.
   const userAim = useMemo(() => {
     if (!isLive || !hasTilt) return null;
     const alt = Math.max(0, Math.min(90, userAltitude ?? 0));
@@ -274,8 +331,6 @@ export function SkyMap({
     return { x: CX, y: CY - dist, belowHorizon: (userAltitude ?? 0) < 0 };
   }, [isLive, hasTilt, userAltitude]);
 
-  // Deterministic starfield filling the dome — gives the background some
-  // texture without depending on a network image. Generated once.
   const starfield = useMemo(() => {
     let seed = 1729;
     const rand = () => {
@@ -287,7 +342,6 @@ export function SkyMap({
     let attempts = 0;
     while (stars.length < target && attempts < target * 8) {
       attempts++;
-      // Reject sample inside the rim circle.
       const x = rand() * SIZE;
       const y = rand() * SIZE;
       const dx = x - CX;
@@ -301,7 +355,6 @@ export function SkyMap({
     return stars;
   }, []);
 
-  // Constellation stars projected onto the rotated dome.
   const projectedStars = useMemo(() => {
     return constellationStars
       .filter((s) => s.altitude > 0)
@@ -314,9 +367,6 @@ export function SkyMap({
     return m;
   }, [projectedStars]);
 
-  // Active constellation key — the one to highlight. Chosen from the active
-  // target's hop-anchor star, then from the active target itself if it's a
-  // bright star.
   const activeConstellation = useMemo(() => {
     if (hopAnchor) {
       const a = constellationStars.find((s) => s.id === hopAnchor.id);
@@ -329,7 +379,6 @@ export function SkyMap({
     return null;
   }, [hopAnchor, active, constellationStars]);
 
-  // Hop trail endpoints in dome-screen coords.
   const hopTrail = useMemo(() => {
     if (!hopAnchor || !active) return null;
     if (hopAnchor.altitude <= 0) return null;
@@ -338,14 +387,17 @@ export function SkyMap({
     return { from, to };
   }, [hopAnchor, active, liveOffset]);
 
-  // Cardinal letters need to STAY at compass-correct positions, so we draw
-  // them in the rotating frame at their true azimuths (0/90/180/270).
   const cardinals: { dir: string; az: number }[] = [
     { dir: 'N', az: 0 },
     { dir: 'E', az: 90 },
     { dir: 'S', az: 180 },
     { dir: 'W', az: 270 },
   ];
+
+  // Compass accuracy is poor when iOS reports >15° or omits the field while
+  // the user is live. Surfaces a calibration banner so the user knows why
+  // targets might be off without blaming the math.
+  const poorAccuracy = isLive && (accuracy == null || accuracy > POOR_ACCURACY_DEG);
 
   return (
     <div className="sky-map">
@@ -378,7 +430,6 @@ export function SkyMap({
 
         <circle cx={CX} cy={CY} r={R} fill="url(#skymap-bg)" />
 
-        {/* Deterministic background starfield — clipped to dome interior. */}
         <g clipPath="url(#skymap-clip)" pointerEvents="none">
           {starfield.map((s, i) => (
             <circle
@@ -395,15 +446,13 @@ export function SkyMap({
         <circle cx={CX} cy={CY} r={R * (1 / 3)} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth={0.5} />
         <circle cx={CX} cy={CY} r={R * (2 / 3)} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth={0.5} />
 
-        {/* Cardinal grid (un-rotated visual reference) */}
         <line x1={CX} y1={CY - R} x2={CX} y2={CY + R} stroke="rgba(255,255,255,0.04)" strokeWidth={0.5} />
         <line x1={CX - R} y1={CY} x2={CX + R} y2={CY} stroke="rgba(255,255,255,0.04)" strokeWidth={0.5} />
 
         <circle cx={CX} cy={CY} r={R} fill="none" stroke="rgba(255,255,255,0.20)" strokeWidth={1} className="sky-map__rim" />
 
         {/* Constellation stick figures + bright stars (drawn under the
-            bodies so the planet glyphs sit on top). Visible by default,
-            and brightened around the active constellation. */}
+            bodies so the planet glyphs sit on top). */}
         {constellationLines.length > 0 && (
           <g pointerEvents="none">
             {constellationLines.map(([a, b], i) => {
@@ -441,7 +490,6 @@ export function SkyMap({
           </g>
         )}
 
-        {/* Star-hop trail: dashed path from anchor → active target. */}
         {hopTrail && (
           <g pointerEvents="none" className="sky-map__hop-trail">
             <line
@@ -459,10 +507,6 @@ export function SkyMap({
           </g>
         )}
 
-        {/* Live heading marker — small terracotta tick at the top of the rim,
-            indicating "this is where the user is facing." Drawn only when live. */}
-        {isLive && <FacingTick />}
-
         <circle cx={CX} cy={CY} r={1.5} fill="rgba(255,255,255,0.4)" />
 
         <text x={CX + 4} y={CY - R * (1 / 3) + 3} fill="rgba(255,255,255,0.30)" fontSize="8"
@@ -470,7 +514,6 @@ export function SkyMap({
         <text x={CX + 4} y={CY - R * (2 / 3) + 3} fill="rgba(255,255,255,0.30)" fontSize="8"
           fontFamily="var(--mono)" letterSpacing="0.05em" className="sky-map__alt-label">30°</text>
 
-        {/* Cardinals — positioned at their true azimuths after rotation. */}
         {cardinals.map((c) => {
           const angleRad = ((c.az - liveOffset) * Math.PI) / 180;
           const lx = CX + (R + 14) * Math.sin(angleRad);
@@ -493,16 +536,25 @@ export function SkyMap({
           );
         })}
 
-        {/* Aim arrow: outside the rim, points to the active target's screen
-            position when live. Pulses while off-target, locks when on-target. */}
-        {aim && active && (
-          <AimArrow x={active.x} y={active.y} onTarget={aim.onTarget} />
+        {/* Aim guide: a soft line from the user's reticle to the active
+            target while not yet locked. Replaces the rim arrow + verbal
+            "turn 12°" pill with a single visual cue — drag yourself onto
+            the target. */}
+        {isLive && active && userAim && !confirmedLock && (
+          <AimGuide from={userAim} to={{ x: active.x, y: active.y }} proximity={proximity ?? 999} />
         )}
 
-        {/* User-aim reticle: the projected position of where the phone is
-            actually pointing right now. Drives home that the user has to
-            move the phone — not just the chart — to reach the target. */}
-        {userAim && <UserAimReticle x={userAim.x} y={userAim.y} below={userAim.belowHorizon} locked={!!aim?.onTarget} />}
+        {/* User-aim reticle: where the phone is currently pointing. The
+            target glyph sits at its own (az, alt) — when the user aims
+            correctly, the two visually merge. */}
+        {userAim && (
+          <UserAimReticle
+            x={userAim.x}
+            y={userAim.y}
+            below={userAim.belowHorizon}
+            locked={confirmedLock}
+          />
+        )}
 
         {/* Bodies */}
         {drawOrder.map((p) => {
@@ -518,11 +570,15 @@ export function SkyMap({
           );
         })}
 
-        {/* Active crosshair + lock ripples last so they sit above everything. */}
+        {/* Active crosshair + lock progress arc + lock ripples last so
+            they sit above everything. */}
         {active && (
           <>
-            {aim?.onTarget && <LockRipples key={`lock-${active.obj.id}`} x={active.x} y={active.y} />}
-            <Crosshair x={active.x} y={active.y} locked={!!aim?.onTarget} />
+            {confirmedLock && <LockRipples key={`lock-${active.obj.id}`} x={active.x} y={active.y} />}
+            <Crosshair x={active.x} y={active.y} locked={confirmedLock} />
+            {isLive && hasTilt && !confirmedLock && holdProgress > 0 && (
+              <HoldArc x={active.x} y={active.y} progress={holdProgress} />
+            )}
           </>
         )}
       </svg>
@@ -530,7 +586,7 @@ export function SkyMap({
       {/* === Compass control overlay === */}
       <div className="sky-map__hud">
         {isLive ? (
-          <span className={`sky-map__facing${aim?.onTarget ? ' is-locked' : ''}`}>
+          <span className={`sky-map__facing${confirmedLock ? ' is-locked' : ''}`}>
             <span className="sky-map__facing-dot" />
             <span className="sky-map__facing-label">{t('facing')}</span>
             <span className="sky-map__facing-deg">{Math.round(((heading ?? 0) % 360 + 360) % 360)}°</span>
@@ -554,29 +610,22 @@ export function SkyMap({
             </span>
           </button>
         )}
-        {aim && (
-          <span className={`sky-map__aim-pill${aim.onTarget ? ' is-locked' : ''}`}>
-            {aim.onTarget ? (
-              t('onTarget')
-            ) : (
-              <>
-                {!aim.azOnTarget && (
-                  <span className="sky-map__aim-axis">
-                    {t(aim.dAz > 0 ? 'turnRight' : 'turnLeft', { deg: Math.abs(Math.round(aim.dAz)) })}
-                  </span>
-                )}
-                {!aim.altOnTarget && aim.dAlt != null && (
-                  <span className="sky-map__aim-axis">
-                    {t(aim.dAlt > 0 ? 'tiltUp' : 'tiltDown', { deg: Math.abs(Math.round(aim.dAlt)) })}
-                  </span>
-                )}
-              </>
-            )}
+        {active && proximity != null && (
+          <span className={`sky-map__aim-pill${confirmedLock ? ' is-locked' : insideLockCone ? ' is-acquiring' : ''}`}>
+            {confirmedLock
+              ? t('onTarget')
+              : `${Math.round(proximity)}° ${t('away')}`}
           </span>
         )}
       </div>
 
-      {/* === Calibrate nudge — only visible while compass is live === */}
+      {poorAccuracy && (
+        <div className="sky-map__accuracy" role="status">
+          <span className="sky-map__accuracy-icon" aria-hidden="true">∞</span>
+          <span>{t('poorAccuracy')}</span>
+        </div>
+      )}
+
       {isLive && onNudge && (
         <div className="sky-map__nudge" role="group" aria-label={t('nudgeAria')}>
           <button
@@ -636,8 +685,6 @@ function ObjectGlyph({ p, isActive, onSelect, label }: GlyphProps) {
       aria-label={obj.name}
     >
       {renderBody(obj, x, y, radius)}
-      {/* Invisible hit area — keeps fingertip taps reliable on tightly
-         clustered planets without enlarging the visible glyph. */}
       <circle cx={x} cy={y} r={Math.max(radius + 8, 14)} fill="transparent" />
       {label && (
         <text
@@ -719,10 +766,7 @@ function Crosshair({ x, y, locked = false }: { x: number; y: number; locked?: bo
   );
 }
 
-/**
- * Three expanding rings emanating from the lock point. CSS-driven so they
- * play exactly once on mount (key on the active id triggers a re-mount).
- */
+/** Three expanding rings emanating from the lock point. */
 function LockRipples({ x, y }: { x: number; y: number }) {
   return (
     <g pointerEvents="none" className="sky-map__lock-ripples">
@@ -733,59 +777,64 @@ function LockRipples({ x, y }: { x: number; y: number }) {
   );
 }
 
-/** Fixed terracotta tick at the top of the rim — "you are facing this way." */
-function FacingTick() {
+/**
+ * Hold-to-lock progress arc. Renders a thin terracotta arc around the
+ * crosshair that fills as the user holds aim inside the lock cone.
+ */
+function HoldArc({ x, y, progress }: { x: number; y: number; progress: number }) {
+  const r = 14;
+  const pct = Math.max(0, Math.min(1, progress));
+  const C = 2 * Math.PI * r;
   return (
     <g pointerEvents="none">
-      <line
-        x1={CX}
-        y1={CY - R - 6}
-        x2={CX}
-        y2={CY - R + 6}
+      <circle
+        cx={x}
+        cy={y}
+        r={r}
+        fill="none"
         stroke="var(--terracotta)"
-        strokeWidth={1.5}
+        strokeWidth={1.6}
         strokeLinecap="round"
+        strokeDasharray={`${C * pct} ${C}`}
+        transform={`rotate(-90 ${x} ${y})`}
+        opacity={0.9}
       />
-      <circle cx={CX} cy={CY - R} r={2.4} fill="var(--terracotta)" />
     </g>
   );
 }
 
 /**
- * Aim arrow — sits just outside the rim of the dome, pointing inward at the
- * target's screen position. The target is already projected in the rotating
- * frame, so we use its screen (x, y) directly to derive the rim point.
+ * Soft line connecting the user's reticle to the active target. Length is
+ * the screen distance; opacity fades as the user closes in so it gets out
+ * of the way once the two markers visually merge.
  */
-function AimArrow({ x, y, onTarget }: { x: number; y: number; onTarget: boolean }) {
-  const dx = x - CX;
-  const dy = y - CY;
-  const len = Math.hypot(dx, dy) || 1;
-  // Rim point along the radial line through the target.
-  const ux = dx / len;
-  const uy = dy / len;
-  const rimX = CX + (R + 16) * ux;
-  const rimY = CY + (R + 16) * uy;
-  // Triangle pointing inward at the target.
-  const tipX = CX + (R + 6) * ux;
-  const tipY = CY + (R + 6) * uy;
-  // Two base corners perpendicular to the radial.
-  const px = -uy;
-  const py = ux;
-  const baseHalf = 6;
-  const bx1 = rimX + px * baseHalf;
-  const by1 = rimY + py * baseHalf;
-  const bx2 = rimX - px * baseHalf;
-  const by2 = rimY - py * baseHalf;
-
+function AimGuide({
+  from,
+  to,
+  proximity,
+}: {
+  from: { x: number; y: number };
+  to: { x: number; y: number };
+  proximity: number;
+}) {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const len = Math.hypot(dx, dy);
+  if (len < 4) return null;
+  // Fade the guide as the user gets close — it's most useful far from target.
+  const opacity = Math.max(0.12, Math.min(0.55, proximity / 60));
   return (
-    <g
-      pointerEvents="none"
-      className={`sky-map__aim${onTarget ? ' is-locked' : ' is-pulsing'}`}
-    >
-      <polygon
-        points={`${tipX},${tipY} ${bx1},${by1} ${bx2},${by2}`}
-        fill="var(--terracotta)"
-        opacity={onTarget ? 1 : 0.85}
+    <g pointerEvents="none">
+      <line
+        x1={from.x}
+        y1={from.y}
+        x2={to.x}
+        y2={to.y}
+        stroke="var(--terracotta)"
+        strokeWidth={1}
+        strokeLinecap="round"
+        strokeDasharray="2 4"
+        opacity={opacity}
       />
     </g>
   );
@@ -802,8 +851,6 @@ function UserAimReticle({
   below: boolean;
   locked: boolean;
 }) {
-  // Phone pointed below the horizon — show a small floor cue at the bottom
-  // of the dome instead of drifting outside.
   if (below) {
     return (
       <g pointerEvents="none" opacity={0.55}>

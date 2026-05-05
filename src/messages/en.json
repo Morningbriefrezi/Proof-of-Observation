@@ -384,6 +384,8 @@
       "compassDenied": "Compass denied",
       "compassUnavailable": "No compass on this device",
       "onTarget": "On target",
+      "away": "away",
+      "poorAccuracy": "Compass uncertain — wave phone in a figure-8",
       "turnLeft": "Turn left {deg}°",
       "turnRight": "Turn right {deg}°",
       "tiltUp": "Tilt up {deg}°",

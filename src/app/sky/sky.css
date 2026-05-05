@@ -1040,10 +1040,50 @@
   from { stroke-dashoffset: 0; }
   to   { stroke-dashoffset: -14; }
 }
+.sky-map__aim-pill.is-acquiring {
+  border-color: rgba(255, 209, 102, 0.55);
+  background: rgba(255, 209, 102, 0.08);
+  color: rgba(255, 220, 140, 1);
+}
 .sky-map__aim-pill.is-locked {
   border-color: rgba(120, 220, 170, 0.60);
   background: rgba(120, 220, 170, 0.10);
   color: #7ed4a8;
+}
+
+/* Compass-accuracy banner — slides in below the dome when iOS reports
+   webkitCompassAccuracy > 15° (or omits the field while live). The user
+   can clear it with the figure-8 wave the system itself prompts for. */
+.sky-map__accuracy {
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  transform: translate(-50%, 100%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 209, 102, 0.08);
+  border: 1px solid rgba(255, 209, 102, 0.35);
+  color: rgba(255, 220, 140, 0.95);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.10em;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 3;
+}
+.sky-map__accuracy-icon {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 14px;
+  border-radius: 999px;
+  background: rgba(255, 209, 102, 0.18);
+  color: rgba(255, 220, 140, 1);
 }
 
 /* SVG aim arrow pulse + lock animations */
