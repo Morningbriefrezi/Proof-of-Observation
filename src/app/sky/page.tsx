@@ -10,8 +10,10 @@ import { CONSTELLATION_LINES, STAR_TO_CONSTELLATION, positionStars } from '@/lib
 import type { ConstellationStar } from '@/components/sky/finder/SkyMap';
 import { azimuthToCompass, altitudeToFists } from '@/lib/sky/directions';
 import { LocationFallbackBanner } from '@/components/sky/LocationFallbackBanner';
+import EventBanner from '@/components/sky/EventBanner';
 import { DirectionHero } from '@/components/sky/finder/DirectionHero';
 import { SkyMap } from '@/components/sky/finder/SkyMap';
+import { SkyHeaderStrip } from '@/components/sky/finder/SkyHeaderStrip';
 import {
   TargetBelowGrid,
   TargetFilters,
@@ -169,6 +171,7 @@ export default function SkyPage() {
     <div className="sky-page-v2 sky-v3">
       <div className="sky-v3__container">
         <LocationFallbackBanner />
+        <EventBanner />
 
         {fallbackUsed && finder && (
           <div className="sky-v3__fallback">
@@ -204,6 +207,12 @@ export default function SkyPage() {
           <>
             <section className="sky-v3__split sky-v3__split--finder">
               <div className="sky-v3__map-wrap">
+                <SkyHeaderStrip
+                  locationLabel={locationLabel}
+                  nowISO={finder.generatedAt}
+                  visibleCount={tableObjects.filter((o) => o.visible && o.id !== 'sun').length}
+                  activeName={activeObject?.name ?? null}
+                />
                 <SkyMap
                   objects={tableObjects}
                   activeId={activeId}

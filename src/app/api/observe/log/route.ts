@@ -6,6 +6,8 @@ import { PublicKey } from '@solana/web3.js'
 import { awardStarsOnChain, DAILY_STARS_CAP } from '@/lib/stars'
 import { createHmac } from 'crypto'
 import { verifyRateLimit, checkRateLimit } from '@/lib/rate-limit'
+import { eventsForTarget } from '@/lib/astro-events'
+import { EVENT_BONUS_MULTIPLIER } from '@/lib/constants'
 
 // Server-side stars calculation — mirrors REWARD_TABLE in observe/verify
 const STARS_BY_CONFIDENCE: Record<string, { base: number; rare_bonus: number }> = {
@@ -101,7 +103,21 @@ export async function POST(req: NextRequest) {
   const identifiedForRare = (body.identifiedObject ?? target).toLowerCase();
   const isRare = RARE_OBJECTS.some(r => identifiedForRare.includes(r));
   const reward = STARS_BY_CONFIDENCE[confidence] ?? { base: 0, rare_bonus: 0 };
-  const stars = reward.base + (isRare ? reward.rare_bonus : 0);
+  const baseStars = reward.base + (isRare ? reward.rare_bonus : 0);
+
+  // Event-window 2x bonus: when the observation timestamp is within ±24h of
+  // an AstroEvent matching this target, double the Stars award.
+  const matchedEvents = eventsForTarget(identifiedForRare || target, new Date());
+  const eventBonusApplied = baseStars > 0 && matchedEvents.length > 0;
+  const stars = eventBonusApplied ? baseStars * EVENT_BONUS_MULTIPLIER : baseStars;
+  if (eventBonusApplied) {
+    console.log('[observe/log] 2x event bonus', {
+      target: identifiedForRare || target,
+      baseStars,
+      bonus: EVENT_BONUS_MULTIPLIER,
+      eventName: matchedEvents[0]?.name,
+    });
+  }
 
   try {
     // Idempotency: reject duplicate submissions within 60s

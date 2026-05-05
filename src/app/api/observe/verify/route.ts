@@ -11,6 +11,8 @@ import { checkReverseImage } from '@/lib/reverse-image';
 import { classifyDevice, type DeviceTier } from '@/lib/device-tier';
 import { getDb } from '@/lib/db';
 import { observationLog } from '@/lib/schema';
+import { eventsForTarget } from '@/lib/astro-events';
+import { EVENT_BONUS_MULTIPLIER } from '@/lib/constants';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -446,7 +448,17 @@ Return ONLY valid JSON, no markdown, no preamble:
     rareObjects.some(r => analysis.identifiedObject.toLowerCase().includes(r)) ||
     analysis.target === 'deep_sky';
   const reward = REWARD_TABLE[confidence];
-  const starsAwarded = reward.base + (isRare ? reward.rare_bonus : 0);
+  const baseStarsAwarded = reward.base + (isRare ? reward.rare_bonus : 0);
+
+  // Mirror the 2x event-window bonus from /api/observe/log so the UI estimate
+  // matches what the mint will actually award.
+  const capturedAtDate = capturedAt ? new Date(capturedAt) : new Date();
+  const eventMatches = eventsForTarget(
+    analysis.identifiedObject || analysis.target,
+    isNaN(capturedAtDate.getTime()) ? new Date() : capturedAtDate,
+  );
+  const eventBonusApplied = baseStarsAwarded > 0 && eventMatches.length > 0;
+  const starsAwarded = eventBonusApplied ? baseStarsAwarded * EVENT_BONUS_MULTIPLIER : baseStarsAwarded;
 
   // Generate verification token — signs identifiedObject + confidence + new
   // device/EXIF fields so the /api/observe/log route can confirm none of these
@@ -484,6 +496,7 @@ Return ONLY valid JSON, no markdown, no preamble:
       sharpness: analysis.sharpness,
     },
     starsEstimate: starsAwarded,
+    ...(eventBonusApplied ? { eventBonus: { multiplier: EVENT_BONUS_MULTIPLIER, eventName: eventMatches[0]?.name ?? '' } } : {}),
     metadata: {
       fileHash,
       capturedAt: capturedAt || new Date().toISOString(),

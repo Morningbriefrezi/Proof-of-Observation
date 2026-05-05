@@ -15,6 +15,8 @@ import { getChartDeepSky } from '@/lib/sky-chart';
 import { QUIZZES } from '@/lib/quizzes';
 import { PlanetViz } from '@/components/sky/PlanetViz';
 import QuizActive from '@/components/sky/QuizActive';
+import EventInfoSheet from '@/components/sky/EventInfoSheet';
+import { getUpcomingEvents, type AstroEvent } from '@/lib/astro-events';
 import type { QuizDef } from '@/lib/quizzes';
 import {
   Snowflake,
@@ -116,6 +118,9 @@ export default function MissionsPage() {
 
   const [now, setNow] = useState<Date>(() => new Date());
   const [activeQuiz, setActiveQuiz] = useState<QuizDef | null>(null);
+  const [activeEvent, setActiveEvent] = useState<AstroEvent | null>(null);
+
+  const upcomingEvents = useMemo(() => getUpcomingEvents(new Date(), 30), []);
 
   useVisibleInterval(() => setNow(new Date()), 60_000);
 
@@ -337,6 +342,20 @@ export default function MissionsPage() {
           </div>
         </section>
 
+        {upcomingEvents.length > 0 && (
+          <section className="mis-section">
+            <div className="mis-section-head">
+              <h2 className="mis-section-title">Upcoming events this month</h2>
+              <span className="mis-section-meta">{upcomingEvents.length} event{upcomingEvents.length !== 1 ? 's' : ''}</span>
+            </div>
+            <div className="mis-events-deck">
+              {upcomingEvents.map(ev => (
+                <EventRow key={`${ev.date}-${ev.name}`} event={ev} onOpen={() => setActiveEvent(ev)} />
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="mis-section">
           <div className="mis-section-head">
             <h2 className="mis-section-title">Knowledge quizzes</h2>
@@ -412,7 +431,97 @@ export default function MissionsPage() {
           </div>
         </section>
       </div>
+
+      <EventInfoSheet
+        open={!!activeEvent}
+        event={activeEvent}
+        onClose={() => setActiveEvent(null)}
+      />
     </div>
+  );
+}
+
+// ---- Upcoming event row ----
+
+const EVENT_TYPE_LABEL: Record<AstroEvent['type'], string> = {
+  'eclipse-lunar': 'Lunar eclipse',
+  'eclipse-solar': 'Solar eclipse',
+  'conjunction': 'Conjunction',
+  'comet': 'Comet',
+  'opposition': 'Opposition',
+  'meteor-shower': 'Meteor shower',
+};
+
+const EVENT_DIFFICULTY_COLOR: Record<AstroEvent['difficulty'], string> = {
+  'naked-eye': 'var(--seafoam)',
+  'binoculars': 'var(--terracotta)',
+  'telescope': 'var(--terracotta)',
+  'expert': 'var(--negative)',
+};
+
+function daysFromToday(dateStr: string): number {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const event = new Date(dateStr + 'T12:00:00');
+  event.setHours(0, 0, 0, 0);
+  return Math.round((event.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function EventRow({ event, onOpen }: { event: AstroEvent; onOpen: () => void }) {
+  const days = daysFromToday(event.date);
+  const dateLabel = new Date(event.date + 'T12:00:00').toLocaleDateString(undefined, {
+    month: 'short', day: 'numeric',
+  });
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="mis-event-row"
+      style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        padding: '12px 14px',
+        background: 'var(--stl-bg-surface)',
+        border: '1px solid var(--stl-border-regular)',
+        borderRadius: 'var(--stl-r-md)',
+        textAlign: 'left',
+        width: '100%',
+        cursor: 'pointer',
+      }}
+    >
+      <div style={{ minWidth: 64 }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--stl-text-bright)', margin: 0, fontWeight: 600 }}>
+          {dateLabel}
+        </p>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--stl-text-dim)', margin: '2px 0 0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+          {days === 0 ? 'today' : days === 1 ? 'tomorrow' : `in ${days}d`}
+        </p>
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ color: 'var(--stl-text-bright)', fontSize: 14, fontWeight: 500, margin: 0 }}>
+          {event.name}
+        </p>
+        <p style={{ color: 'var(--stl-text-muted)', fontSize: 11, margin: '2px 0 0', fontFamily: 'var(--font-mono)' }}>
+          {EVENT_TYPE_LABEL[event.type]} · {event.visibilityRegion}
+        </p>
+      </div>
+      <span
+        style={{
+          flexShrink: 0,
+          padding: '4px 8px',
+          borderRadius: 999,
+          fontSize: 10,
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+          color: EVENT_DIFFICULTY_COLOR[event.difficulty],
+          border: `1px solid ${EVENT_DIFFICULTY_COLOR[event.difficulty]}55`,
+          background: `${EVENT_DIFFICULTY_COLOR[event.difficulty]}1A`,
+        }}
+      >
+        {event.difficulty}
+      </span>
+      <span aria-hidden style={{ color: 'var(--stl-text-dim)', fontSize: 14, lineHeight: 1, marginLeft: 4 }}>i</span>
+    </button>
   );
 }
 

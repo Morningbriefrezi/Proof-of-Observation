@@ -93,6 +93,7 @@ export interface PhotoVerificationResult {
     sharpness: 'high' | 'medium' | 'low'
   }
   starsEstimate: number
+  eventBonus?: { multiplier: number; eventName: string }
   verificationToken?: string
   verificationFailed?: boolean
   metadata: {
