@@ -206,10 +206,10 @@ export default function HomePage() {
         <div className="relative max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-[1.1fr_1fr] gap-10 md:gap-15 items-center">
           <div>
             <h1 className="text-[36px] md:text-[72px] font-extrabold leading-[1.05] md:leading-[1] tracking-[-0.025em] text-white mb-5 md:mb-8">
-              Astronomy,
+              Plan
               <br />
               <span className="bg-gradient-to-r from-[#B07FE8] to-[#38F0FF] bg-clip-text text-transparent">
-                on chain.
+                tonight&rsquo;s sky.
               </span>
             </h1>
 
