@@ -1593,7 +1593,7 @@
 }
 .target-card__name {
   font-family: var(--font-body, var(--font-display));
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 500;
   color: var(--text);
   white-space: nowrap;
@@ -1606,14 +1606,14 @@
 }
 .target-card__primary {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11.5px;
   letter-spacing: 0.06em;
   color: rgba(255, 255, 255, 0.78);
   font-feature-settings: 'tnum' 1;
 }
 .target-card__secondary {
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: 10.5px;
   letter-spacing: 0.10em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.40);
@@ -2108,8 +2108,8 @@
 @media (max-width: 760px) {
   /* Tighter shell so we can fit the dome above the fold. */
   .sky-v3 .sky-v3__container {
-    padding: 12px 14px 80px;
-    gap: 14px;
+    padding: 0 14px 80px;
+    gap: 12px;
   }
 
   /* Map first (edge-to-edge hero), then chip row, then filters, then cards.
@@ -2675,13 +2675,13 @@
     border-radius: 10px;
   }
   .target-cards--visible .target-card__name {
-    font-size: 14px;
+    font-size: 15.5px;
   }
   .target-cards--visible .target-card__primary {
-    font-size: 11px;
+    font-size: 12px;
   }
   .target-cards--visible .target-card__secondary {
-    font-size: 10px;
+    font-size: 10.5px;
   }
 
   /* === Below-horizon row (full width, under the split) === */

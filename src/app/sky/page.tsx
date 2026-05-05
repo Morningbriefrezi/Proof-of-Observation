@@ -12,7 +12,6 @@ import { azimuthToCompass, altitudeToFists } from '@/lib/sky/directions';
 import { LocationFallbackBanner } from '@/components/sky/LocationFallbackBanner';
 import { DirectionHero } from '@/components/sky/finder/DirectionHero';
 import { SkyMap } from '@/components/sky/finder/SkyMap';
-import { SkyStateStrip } from '@/components/sky/finder/SkyStateStrip';
 import {
   TargetBelowGrid,
   TargetFilters,
@@ -170,15 +169,6 @@ export default function SkyPage() {
     <div className="sky-page-v2 sky-v3">
       <div className="sky-v3__container">
         <LocationFallbackBanner />
-
-        {/* === Live status strip === */}
-        <SkyStateStrip
-          finder={finder}
-          locationLabel={locationLabel}
-          fallbackLocation={fallbackUsed}
-          lat={location.lat}
-          lon={location.lon}
-        />
 
         {fallbackUsed && finder && (
           <div className="sky-v3__fallback">

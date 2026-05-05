@@ -556,6 +556,9 @@ function ObjectGlyph({ p, isActive, onSelect }: GlyphProps) {
       aria-label={obj.name}
     >
       {renderBody(obj, x, y, radius)}
+      {/* Invisible hit area — keeps fingertip taps reliable on tightly
+         clustered planets without enlarging the visible glyph. */}
+      <circle cx={x} cy={y} r={Math.max(radius + 8, 14)} fill="transparent" />
       {showLabel && (
         <text
           x={lx}
