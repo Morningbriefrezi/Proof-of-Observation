@@ -8,43 +8,10 @@ import { useDisplayProfile } from '@/hooks/useDisplayProfile';
 import { AuthModal } from '@/components/auth/AuthModal';
 import {
   CloudSun, ShoppingBag, Satellite, User, Search, BookOpen,
-  Trophy, Globe, Sun, Target, MessageCircle, Telescope, Gem,
-  TrendingUp, LogOut, Sparkles,
+  Telescope, Gem, TrendingUp, LogOut, Sparkles, LayoutGrid,
 } from 'lucide-react';
 import AstroLogo from './AstroLogo';
 import SearchModal from './SearchModal';
-
-type SectionLink = { href: string; label: string; icon: typeof CloudSun };
-type Section = { label: string; links: SectionLink[] };
-
-const SECTIONS: Section[] = [
-  {
-    label: 'Explore',
-    links: [
-      { href: '/sky',         label: 'Sky forecast',  icon: Sun },
-      { href: '/markets',     label: 'Markets',       icon: TrendingUp },
-      { href: '/missions',    label: 'Missions',      icon: Target },
-      { href: '/feed',        label: 'Feed',          icon: Sparkles },
-      { href: '/learn',       label: 'Learning',      icon: BookOpen },
-      { href: '/network',     label: 'Network',       icon: Globe },
-      { href: '/chat',        label: 'ASTRA AI',      icon: MessageCircle },
-    ],
-  },
-  {
-    label: 'Community',
-    links: [
-      { href: '/leaderboard', label: 'Leaderboard',   icon: Trophy },
-      { href: '/nfts',        label: 'Discoveries',   icon: Gem },
-      { href: '/club',        label: 'My telescope',  icon: Telescope },
-    ],
-  },
-  {
-    label: 'Shop',
-    links: [
-      { href: '/marketplace', label: 'Marketplace',   icon: ShoppingBag },
-    ],
-  },
-];
 
 const NAV_ITEMS = [
   { href: '/sky',         label: 'Sky',       icon: CloudSun },
@@ -67,29 +34,25 @@ export default function Nav() {
   const { authenticated, ready, email, displayName, initials, avatarGlyph } = useDisplayProfile();
   const { logout } = useStellarAuth();
   const [searchOpen, setSearchOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
 
-  const menuWrapRef = useRef<HTMLDivElement>(null);
   const avatarWrapRef = useRef<HTMLDivElement>(null);
-  const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const avatarTriggerRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => { setSearchOpen(false); setMenuOpen(false); setAvatarOpen(false); }, [pathname]);
+  useEffect(() => { setSearchOpen(false); setAvatarOpen(false); }, [pathname]);
 
   useEffect(() => {
-    if (!menuOpen && !avatarOpen) return;
+    if (!avatarOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (menuOpen) { setMenuOpen(false); menuTriggerRef.current?.focus(); }
-        if (avatarOpen) { setAvatarOpen(false); avatarTriggerRef.current?.focus(); }
+        setAvatarOpen(false);
+        avatarTriggerRef.current?.focus();
       }
     };
     const onClick = (e: MouseEvent) => {
       const t = e.target as Node;
-      if (menuOpen && menuWrapRef.current && !menuWrapRef.current.contains(t)) setMenuOpen(false);
-      if (avatarOpen && avatarWrapRef.current && !avatarWrapRef.current.contains(t)) setAvatarOpen(false);
+      if (avatarWrapRef.current && !avatarWrapRef.current.contains(t)) setAvatarOpen(false);
     };
     window.addEventListener('keydown', onKey);
     window.addEventListener('mousedown', onClick);
@@ -97,10 +60,10 @@ export default function Nav() {
       window.removeEventListener('keydown', onKey);
       window.removeEventListener('mousedown', onClick);
     };
-  }, [menuOpen, avatarOpen]);
+  }, [avatarOpen]);
 
   useEffect(() => {
-    const onResize = () => { if (window.innerWidth < 768) { setMenuOpen(false); setAvatarOpen(false); } };
+    const onResize = () => { if (window.innerWidth < 768) setAvatarOpen(false); };
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
@@ -123,15 +86,12 @@ export default function Nav() {
         .signin-btn:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.25); color: white; }
         .dd-link { transition: background 0.15s ease; text-decoration: none; }
         .dd-link:hover { background: rgba(255,255,255,0.04); }
-        .hamburger-hline { display: block; height: 1.5px; width: 18px; border-radius: 2px; background: rgba(255,255,255,0.7); transition: all 0.22s cubic-bezier(0.22,1,0.36,1); transform-origin: center; }
-        .hamburger-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: transparent; border: 1px solid transparent; cursor: pointer; padding: 0; transition: all 0.15s ease; }
-        .hamburger-btn:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); }
-        .hamburger-btn[data-open="true"] { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); }
+        .hub-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: transparent; border: 1px solid transparent; cursor: pointer; padding: 0; color: rgba(255,255,255,0.7); transition: all 0.15s ease; text-decoration: none; }
+        .hub-btn:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.95); }
+        .hub-btn[data-active="true"] { background: rgba(255,209,102,0.10); border-color: rgba(255,209,102,0.25); color: var(--terracotta); }
         .avatar-btn { width: 32px; height: 32px; min-width: 32px; min-height: 32px; aspect-ratio: 1 / 1; flex-shrink: 0; border-radius: 9999px; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden; transition: box-shadow 0.18s ease; background: linear-gradient(135deg, #534AB7, #7F77DD); border: 1.5px solid rgba(255,255,255,0.15); }
         .avatar-btn:hover { box-shadow: 0 0 0 2px rgba(127,119,221,0.2); }
         .avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .menu-dropdown { width: 240px; }
-        @media (max-width: 480px) { .menu-dropdown { width: calc(100vw - 32px); } }
       `}</style>
 
       <nav
@@ -144,84 +104,16 @@ export default function Nav() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="h-14 relative flex items-center">
 
-            {/* LEFT cluster: hamburger + logo */}
+            {/* LEFT cluster: hub + logo */}
             <div className="flex items-center gap-2.5 flex-shrink-0">
-              <div ref={menuWrapRef} className="relative">
-                <button
-                  ref={menuTriggerRef}
-                  onClick={() => setMenuOpen(v => !v)}
-                  className="hamburger-btn"
-                  data-open={menuOpen}
-                  aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-                  aria-expanded={menuOpen}
-                  aria-controls="primary-menu"
-                  aria-haspopup="menu"
-                >
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', width: 18 }}>
-                    <span className="hamburger-hline" style={{ transform: menuOpen ? 'translateY(5.5px) rotate(45deg)' : 'none' }} />
-                    <span className="hamburger-hline" style={{ opacity: menuOpen ? 0 : 1 }} />
-                    <span className="hamburger-hline" style={{ transform: menuOpen ? 'translateY(-5.5px) rotate(-45deg)' : 'none' }} />
-                  </div>
-                </button>
-
-                {menuOpen && (
-                  <div
-                    id="primary-menu"
-                    role="menu"
-                    className="menu-dropdown absolute z-[60]"
-                    style={{
-                      top: 'calc(100% + 8px)',
-                      left: 0,
-                      animation: 'dropIn 0.15s cubic-bezier(0.22,1,0.36,1)',
-                      background: '#0d1424',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: 10,
-                      padding: 8,
-                      boxShadow: '0 16px 40px rgba(0,0,0,0.5)',
-                    }}
-                  >
-                    {SECTIONS.map((section, si) => (
-                      <div key={section.label}>
-                        <p style={{
-                          fontSize: 10,
-                          fontWeight: 600,
-                          letterSpacing: '0.08em',
-                          textTransform: 'uppercase',
-                          color: 'rgba(255,255,255,0.35)',
-                          margin: si === 0 ? '8px 12px 6px' : '12px 12px 6px',
-                          fontFamily: 'var(--font-display)',
-                        }}>
-                          {section.label}
-                        </p>
-                        {section.links.map(link => {
-                          const Icon = link.icon;
-                          const isActive = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href);
-                          return (
-                            <Link
-                              key={link.href}
-                              href={link.href}
-                              role="menuitem"
-                              onClick={() => setMenuOpen(false)}
-                              className="dd-link flex items-center"
-                              style={{
-                                gap: 10,
-                                padding: '8px 12px',
-                                color: isActive ? 'var(--terracotta)' : 'rgba(255,255,255,0.85)',
-                                fontSize: 13,
-                                borderRadius: 6,
-                                fontFamily: 'var(--font-display)',
-                              }}
-                            >
-                              <Icon size={14} strokeWidth={1.75} />
-                              <span>{link.label}</span>
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <Link
+                href="/hub"
+                className="hub-btn"
+                data-active={pathname.startsWith('/hub')}
+                aria-label="Hub"
+              >
+                <LayoutGrid size={17} strokeWidth={1.9} />
+              </Link>
 
               <Link href="/" title="Stellar" className="flex items-center" style={{ marginLeft: 4 }}>
                 <div style={{ filter: 'drop-shadow(0 0 18px rgba(255, 209, 102,0.6)) drop-shadow(0 0 36px rgba(255, 209, 102,0.25))' }}>
