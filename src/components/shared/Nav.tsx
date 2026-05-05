@@ -96,9 +96,9 @@ export default function Nav() {
         .hub-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: transparent; border: 1px solid transparent; cursor: pointer; padding: 0; color: rgba(255,255,255,0.7); transition: all 0.15s ease; text-decoration: none; }
         .hub-btn:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.95); }
         .hub-btn[data-active="true"] { background: rgba(255,209,102,0.10); border-color: rgba(255,209,102,0.25); color: #FFD166; }
-        .avatar-btn { width: 32px; height: 32px; min-width: 32px; min-height: 32px; aspect-ratio: 1 / 1; flex-shrink: 0; border-radius: 9999px; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden; transition: box-shadow 0.18s ease, border-color 0.18s ease; background: linear-gradient(135deg, #534AB7, #7F77DD); border: 1.5px solid rgba(255,255,255,0.15); }
-        .avatar-btn:hover { box-shadow: 0 0 0 2px rgba(127,119,221,0.2); }
-        .avatar-btn[data-active="true"] { border-color: rgba(255,209,102,0.6); box-shadow: 0 0 0 2px rgba(255,209,102,0.18); }
+        .avatar-btn { width: 32px; height: 32px; min-width: 32px; min-height: 32px; aspect-ratio: 1 / 1; flex-shrink: 0; border-radius: 9999px; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden; transition: box-shadow 0.18s ease, border-color 0.18s ease; background: #0B0E17; border: 1px solid rgba(255,255,255,0.12); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -8px 16px rgba(0,0,0,0.35); }
+        .avatar-btn:hover { border-color: rgba(255,255,255,0.22); }
+        .avatar-btn[data-active="true"] { border-color: rgba(255,209,102,0.55); box-shadow: 0 0 0 1.5px rgba(255,209,102,0.18), inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -8px 16px rgba(0,0,0,0.35); }
         .dd-link { transition: background 0.15s ease; text-decoration: none; }
         .dd-link:hover { background: rgba(255,255,255,0.04); }
       `}</style>
@@ -117,7 +117,7 @@ export default function Nav() {
             <div className="flex items-center flex-shrink-0 gap-2">
               <Link
                 href="/hub"
-                className="hub-btn"
+                className="hub-btn hidden md:flex"
                 data-active={pathname.startsWith('/hub')}
                 aria-label="Hub"
               >
@@ -229,8 +229,9 @@ export default function Nav() {
                       }}>
                         <div style={{
                           width: 36, height: 36, borderRadius: 9999, flexShrink: 0,
-                          background: 'linear-gradient(135deg, #534AB7, #7F77DD)',
-                          border: '1.5px solid rgba(255,255,255,0.15)',
+                          background: '#0B0E17',
+                          border: '1px solid rgba(255,255,255,0.12)',
+                          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -8px 16px rgba(0,0,0,0.35)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           color: 'white', overflow: 'hidden',
                         }}>

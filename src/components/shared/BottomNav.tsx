@@ -2,26 +2,21 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CloudSun, LayoutGrid, TrendingUp, Home, User } from 'lucide-react';
+import { CloudSun, Satellite, Home, Sparkles, LayoutGrid } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { useDisplayProfile } from '@/hooks/useDisplayProfile';
-import { avatarById } from '@/lib/avatars';
 
-type Tab = { href: string; label: string; icon: LucideIcon | 'profile' };
+type Tab = { href: string; label: string; icon: LucideIcon };
 
 const TABS: Tab[] = [
-  { href: '/hub',      label: 'Hub',     icon: LayoutGrid },
-  { href: '/sky',      label: 'Sky',     icon: CloudSun },
-  { href: '/',         label: 'Home',    icon: Home },
-  { href: '/markets',  label: 'Markets', icon: TrendingUp },
-  { href: '/profile',  label: 'Profile', icon: 'profile' },
+  { href: '/sky',      label: 'Sky',      icon: CloudSun },
+  { href: '/missions', label: 'Missions', icon: Satellite },
+  { href: '/',         label: 'Home',     icon: Home },
+  { href: '/feed',     label: 'Feed',     icon: Sparkles },
+  { href: '/hub',      label: 'Hub',      icon: LayoutGrid },
 ];
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const { authenticated, initials, avatarId } = useDisplayProfile();
-  const avatarDef = avatarId ? avatarById(avatarId) : null;
-  const showAvatarIcon = avatarDef && avatarDef.id !== 'initial';
 
   return (
     <nav
@@ -41,8 +36,7 @@ export default function BottomNav() {
       >
         {TABS.map(tab => {
           const isActive = tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);
-          const isProfile = tab.icon === 'profile';
-          const Icon = isProfile ? null : (tab.icon as LucideIcon);
+          const Icon = tab.icon;
 
           return (
             <Link
@@ -93,69 +87,15 @@ export default function BottomNav() {
                     }}
                   />
                 )}
-                {isProfile ? (
-                  authenticated && showAvatarIcon && avatarDef ? (
-                    <span
-                      style={{
-                        width: 26,
-                        height: 26,
-                        borderRadius: 9999,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        overflow: 'hidden',
-                        background: 'linear-gradient(135deg, #534AB7, #7F77DD)',
-                        border: isActive ? '1.5px solid rgba(255,209,102,0.6)' : '1.5px solid rgba(255,255,255,0.15)',
-                        filter: isActive ? 'drop-shadow(0 0 6px rgba(255, 209, 102,0.45))' : 'none',
-                        transition: 'border-color 0.2s ease, filter 0.2s ease',
-                      }}
-                    >
-                      <avatarDef.Icon size={18} tint={avatarDef.tint} />
-                    </span>
-                  ) : authenticated && initials ? (
-                    <span
-                      style={{
-                        width: 26,
-                        height: 26,
-                        borderRadius: 9999,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: 'linear-gradient(135deg, #534AB7, #7F77DD)',
-                        border: isActive ? '1.5px solid rgba(255,209,102,0.6)' : '1.5px solid rgba(255,255,255,0.15)',
-                        color: 'white',
-                        fontSize: 10,
-                        fontWeight: 500,
-                        letterSpacing: '0.02em',
-                        lineHeight: 1,
-                        filter: isActive ? 'drop-shadow(0 0 6px rgba(255, 209, 102,0.45))' : 'none',
-                        transition: 'border-color 0.2s ease, filter 0.2s ease',
-                      }}
-                    >
-                      {initials}
-                    </span>
-                  ) : (
-                    <User
-                      size={22}
-                      strokeWidth={isActive ? 2.2 : 1.7}
-                      color={isActive ? 'var(--stl-gold)' : 'rgba(255,255,255,0.42)'}
-                      style={{
-                        filter: isActive ? 'drop-shadow(0 0 6px rgba(255, 209, 102,0.45))' : 'none',
-                        transition: 'color 0.2s ease, filter 0.2s ease',
-                      }}
-                    />
-                  )
-                ) : Icon ? (
-                  <Icon
-                    size={22}
-                    strokeWidth={isActive ? 2.2 : 1.7}
-                    color={isActive ? 'var(--stl-gold)' : 'rgba(255,255,255,0.42)'}
-                    style={{
-                      filter: isActive ? 'drop-shadow(0 0 6px rgba(255, 209, 102,0.45))' : 'none',
-                      transition: 'color 0.2s ease, filter 0.2s ease',
-                    }}
-                  />
-                ) : null}
+                <Icon
+                  size={22}
+                  strokeWidth={isActive ? 2.2 : 1.7}
+                  color={isActive ? 'var(--stl-gold)' : 'rgba(255,255,255,0.42)'}
+                  style={{
+                    filter: isActive ? 'drop-shadow(0 0 6px rgba(255, 209, 102,0.45))' : 'none',
+                    transition: 'color 0.2s ease, filter 0.2s ease',
+                  }}
+                />
               </div>
 
               <span
