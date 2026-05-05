@@ -7,13 +7,11 @@ import { useAppState } from '@/hooks/useAppState';
 import { useStellarUser } from '@/hooks/useStellarUser';
 import { useVisibleInterval } from '@/hooks/useVisibleInterval';
 import { AuthModal } from '@/components/auth/AuthModal';
-import { useLocale, useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 import { useLocation } from '@/lib/location';
 import { getVisiblePlanets, getWindowPlanets } from '@/lib/planets';
 import { getTonightDarkWindow } from '@/lib/dark-window';
 import { getChartDeepSky } from '@/lib/sky-chart';
-import { getRank } from '@/lib/rewards';
-import { MISSIONS } from '@/lib/constants';
 import { QUIZZES } from '@/lib/quizzes';
 import { PlanetViz } from '@/components/sky/PlanetViz';
 import QuizActive from '@/components/sky/QuizActive';
@@ -114,7 +112,6 @@ export default function MissionsPage() {
   const { authenticated } = useStellarUser();
   const [authOpen, setAuthOpen] = useState(false);
   const locale = useLocale() === 'ka' ? 'ka' : 'en';
-  const t = useTranslations('missions');
   const { location } = useLocation();
 
   const [now, setNow] = useState<Date>(() => new Date());
@@ -198,11 +195,6 @@ export default function MissionsPage() {
     [skyPositions],
   );
 
-  const completedCount = useMemo(
-    () => GRID.filter((g) => completedIds.has(g.id)).length,
-    [completedIds],
-  );
-
   const primeEntry = useMemo(() => {
     const visible = GRID
       .filter((g) => !completedIds.has(g.id))
@@ -211,22 +203,6 @@ export default function MissionsPage() {
     visible.sort((a, b) => (skyPositions[b.id]?.altitude ?? -90) - (skyPositions[a.id]?.altitude ?? -90));
     return visible[0];
   }, [completedIds, skyPositions]);
-
-  const totalStars = useMemo(() => {
-    const missionStars = state.completedMissions
-      .filter((m) => m.status === 'completed')
-      .reduce((sum, m) => {
-        const mission = MISSIONS.find((x) => x.id === m.id);
-        return sum + (mission?.stars ?? 0);
-      }, 0);
-    const quizStars = (state.completedQuizzes ?? []).reduce((sum, r) => sum + (r.stars ?? 0), 0);
-    return missionStars + quizStars;
-  }, [state.completedMissions, state.completedQuizzes]);
-
-  const rank = useMemo(
-    () => getRank(state.completedMissions.filter((m) => m.status === 'completed').length),
-    [state.completedMissions],
-  );
 
   const headerTime = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   const dateLabel = now.toLocaleDateString([], { month: 'short', day: 'numeric' });
@@ -282,12 +258,6 @@ export default function MissionsPage() {
       <div className="missions-page">
         <div className="mis-hero">
           <div className="mis-hero-inner">
-            <div className="mis-stats-bar">
-              <div className="mis-stats-left">
-                <h1 className="mis-stats-title">{t('title')}</h1>
-                <span className="mis-stats-meta">Sign in to start observing</span>
-              </div>
-            </div>
             <TonightLineup
               items={lineup}
               liveStatus={liveStatus}
@@ -325,19 +295,6 @@ export default function MissionsPage() {
       {/* Cosmic hero — always dark, full-width */}
       <div className="mis-hero">
         <div className="mis-hero-inner">
-          <div className="mis-stats-bar">
-            <div className="mis-stats-left">
-              <h1 className="mis-stats-title">Missions</h1>
-              <span className="mis-stats-meta">
-                {completedCount}/{GRID.length} completed · {visibleCount} visible
-              </span>
-            </div>
-            <div className="mis-stats-right">
-              <span className="mis-rank-pill">{rank.name}</span>
-              <span className="mis-stars-count">{totalStars} ✦</span>
-            </div>
-          </div>
-
           {primeEntry && (
             <PrimeCard
               entry={primeEntry}
@@ -486,21 +443,29 @@ function TonightLineup({
   cityLabel: string;
   onStart: (routeId: string) => void;
 }) {
-  const empty =
+  const emptyTitle =
     liveStatus === 'daytime'
-      ? {
-          title: 'Daylight — sky is too bright',
-          sub: 'The LIVE feed wakes up after astronomical dusk. See "Missions tonight" below for what the sky will offer.',
-        }
+      ? 'Daylight — sky too bright'
       : liveStatus === 'cloudy'
-        ? {
-            title: 'Overcast — nothing observable right now',
-            sub: 'Cloud cover is blocking the sky. "Missions tonight" still shows what would be up if it cleared.',
-          }
-        : {
-            title: 'Nothing above the horizon right now',
-            sub: 'Check back later tonight — targets rise and set throughout the night.',
-          };
+        ? 'Overcast — nothing observable'
+        : 'Nothing above the horizon';
+
+  if (items.length === 0) {
+    return (
+      <div
+        className={`mis-status-chip mis-status-chip--${liveStatus}`}
+        role="status"
+        aria-label="Live sky status"
+      >
+        <span className="mis-status-chip-dot" aria-hidden />
+        <span className="mis-status-chip-label">{emptyTitle}</span>
+        <span className="mis-status-chip-sep" aria-hidden>·</span>
+        <span className="mis-status-chip-meta">
+          {headerTime} · {dateLabel} · {cityLabel}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div className="mis-lineup" role="region" aria-label="Live visible targets">
@@ -512,38 +477,31 @@ function TonightLineup({
         <div className="mis-lineup-loc">{dateLabel} · {cityLabel}</div>
       </div>
 
-      {items.length === 0 ? (
-        <div className="mis-lineup-empty">
-          <span className="mis-lineup-empty-title">{empty.title}</span>
-          <span className="mis-lineup-empty-sub">{empty.sub}</span>
-        </div>
-      ) : (
-        <div className="mis-lineup-list">
-          {items.map((p) => (
-            <button
-              key={p.key}
-              type="button"
-              className="mis-lineup-item"
-              onClick={() => onStart(p.routeId)}
-            >
-              <span className="mis-lineup-art">
-                <PlanetViz name={p.key} size="medium" />
+      <div className="mis-lineup-list">
+        {items.map((p) => (
+          <button
+            key={p.key}
+            type="button"
+            className="mis-lineup-item"
+            onClick={() => onStart(p.routeId)}
+          >
+            <span className="mis-lineup-art">
+              <PlanetViz name={p.key} size="medium" />
+            </span>
+            <span className="mis-lineup-info">
+              <span className="mis-lineup-name">{p.name}</span>
+              <span className="mis-lineup-row">
+                <span className="mis-lineup-stat"><b>{Math.round(p.altitude)}°</b> alt</span>
+                <span className="mis-lineup-sep">·</span>
+                <span className="mis-lineup-stat">{p.azimuthDir}</span>
+                <span className="mis-lineup-sep">·</span>
+                <span className="mis-lineup-stat">mag <b>{p.magnitude}</b></span>
               </span>
-              <span className="mis-lineup-info">
-                <span className="mis-lineup-name">{p.name}</span>
-                <span className="mis-lineup-row">
-                  <span className="mis-lineup-stat"><b>{Math.round(p.altitude)}°</b> alt</span>
-                  <span className="mis-lineup-sep">·</span>
-                  <span className="mis-lineup-stat">{p.azimuthDir}</span>
-                  <span className="mis-lineup-sep">·</span>
-                  <span className="mis-lineup-stat">mag <b>{p.magnitude}</b></span>
-                </span>
-              </span>
-              <span className="mis-lineup-stars">+{p.stars}</span>
-            </button>
-          ))}
-        </div>
-      )}
+            </span>
+            <span className="mis-lineup-stars">+{p.stars}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

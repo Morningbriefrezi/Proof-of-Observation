@@ -4822,6 +4822,68 @@
   color: rgba(255,255,255,0.35);
 }
 
+/* === Compact status chip — replaces the large empty lineup card === */
+.mis-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 auto;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mis-status-chip-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #4ADE80;
+  box-shadow: 0 0 6px rgba(74,222,128,0.6);
+  animation: home-pulse-dot 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.mis-status-chip--daytime .mis-status-chip-dot,
+.mis-status-chip--cloudy .mis-status-chip-dot {
+  background: rgba(255,255,255,0.30);
+  box-shadow: none;
+  animation: none;
+}
+.mis-status-chip-label {
+  color: rgba(255,255,255,0.78);
+  font-weight: 600;
+}
+.mis-status-chip-sep { color: rgba(255,255,255,0.20); }
+.mis-status-chip-meta {
+  color: rgba(255,255,255,0.40);
+  font-variant-numeric: tabular-nums;
+}
+/* The chip lives directly inside .mis-hero-inner (TonightLineup early-returns).
+   Center it without forcing flex on the hero (would shrink the live card). */
+.missions-page .mis-hero-inner > .mis-status-chip {
+  display: flex;
+  width: max-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (max-width: 540px) {
+  .mis-status-chip {
+    font-size: 10px;
+    padding: 5px 12px;
+    gap: 6px;
+  }
+  .mis-status-chip-meta {
+    /* drop the location/date on tight screens — keep the status */
+    display: none;
+  }
+  .mis-status-chip-sep { display: none; }
+}
+
 /* === Section header === */
 .mis-section-head {
   display: flex;
