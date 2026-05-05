@@ -9,10 +9,19 @@ import { ExternalLink, ArrowLeft, Check } from 'lucide-react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useStellarUser } from '@/hooks/useStellarUser';
 import { useAppState } from '@/hooks/useAppState';
+import { useWallets as usePrivySolanaWallets } from '@privy-io/react-auth/solana';
 import { AuthModal } from '@/components/auth/AuthModal';
 import PageContainer from '@/components/layout/PageContainer';
 import { getProductById, getDealerById } from '@/lib/dealers';
 import type { Product } from '@/lib/dealers';
+import {
+  STARS_PER_GEL,
+  BURN_INCREMENT,
+  MAX_BURN_RATIO,
+  computeMaxBurn,
+  starsToGEL,
+} from '@/lib/stars-economy';
+import { executeBurn } from '@/lib/stars-burn-client';
 
 type Step = 'form' | 'paying' | 'done';
 
@@ -49,6 +58,7 @@ function CheckoutContent() {
   const { getAccessToken } = usePrivy();
   const { authenticated, address: stellarAddress } = useStellarUser();
   const { state } = useAppState();
+  const { wallets: privyWallets } = usePrivySolanaWallets();
   const walletAddress = stellarAddress ?? state.walletAddress ?? null;
 
   const product = useMemo(() => getProductById(productId), [productId]);
@@ -80,6 +90,41 @@ function CheckoutContent() {
   const [signature, setSignature] = useState<string | null>(null);
   const [pendingPay, setPendingPay] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // §4: Stars-for-discount. Only available for SOL-paid GEL products.
+  const burnEligible = mode === 'sol' && product?.currency === 'GEL';
+  const [starsBalance, setStarsBalance] = useState<number>(0);
+  const [burnStars, setBurnStars] = useState<number>(0);
+  const [burning, setBurning] = useState(false);
+  const [burnSig, setBurnSig] = useState<string | null>(null);
+
+  // Pull on-chain Stars balance once we know the wallet.
+  useEffect(() => {
+    if (!walletAddress || !burnEligible) return;
+    fetch(`/api/stars-balance?address=${encodeURIComponent(walletAddress)}`)
+      .then(r => r.json())
+      .then(d => setStarsBalance(d.balance ?? 0))
+      .catch(() => {});
+  }, [walletAddress, burnEligible]);
+
+  const maxBurnable = useMemo(() => {
+    if (!product || !burnEligible) return 0;
+    return computeMaxBurn(product.price, starsBalance);
+  }, [product, burnEligible, starsBalance]);
+
+  // Snap any out-of-range burn back to the new max when balance / product changes.
+  useEffect(() => {
+    if (burnStars > maxBurnable) setBurnStars(maxBurnable);
+  }, [burnStars, maxBurnable]);
+
+  const gelDiscount = burnStars > 0 ? starsToGEL(burnStars) : 0;
+  const discountedFiat = product ? Math.max(0, product.price - gelDiscount) : 0;
+  const discountedSol = useMemo(() => {
+    if (!product) return 0;
+    if (product.currency === 'GEL' && solPerGEL > 0) return discountedFiat * solPerGEL;
+    if (product.currency === 'USD' && solPriceUsd > 0) return discountedFiat / solPriceUsd;
+    return amountSol;
+  }, [product, discountedFiat, solPerGEL, solPriceUsd, amountSol]);
 
   useEffect(() => () => { if (pollRef.current) clearInterval(pollRef.current); }, []);
 
@@ -143,10 +188,11 @@ function CheckoutContent() {
           productImage: product.image,
           dealerId: product.dealerId,
           paymentMethod: mode,
-          amountSol: mode === 'sol' ? Number(amountSol.toFixed(6)) : undefined,
+          amountSol: mode === 'sol' ? Number(discountedSol.toFixed(6)) : undefined,
           amountStars: mode === 'stars' ? product.starsPrice : undefined,
           amountFiat: product.price,
           currency: product.currency,
+          burnStars: burnEligible && burnStars > 0 ? burnStars : undefined,
           walletAddress,
           shipping: {
             name: shipping.name,
@@ -161,6 +207,32 @@ function CheckoutContent() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Could not create order');
       setOrderId(data.orderId);
+
+      // §4: if the order committed Stars for a discount, burn them BEFORE
+      // showing the SOL pay QR. /api/orders/confirm refuses to mark the
+      // order paid until burn_signature is set on the row.
+      if (data.requiresBurn) {
+        const wallet = privyWallets[0];
+        if (!wallet?.address) {
+          throw new Error('Stars wallet not ready — sign in and retry');
+        }
+        setBurning(true);
+        try {
+          const result = await executeBurn({
+            privyToken: token,
+            wallet: wallet as unknown as Parameters<typeof executeBurn>[0]['wallet'],
+            amount: data.burnStars ?? burnStars,
+            kind: 'discount-burn',
+            orderId: data.orderId,
+          });
+          setBurnSig(result.signature);
+        } catch (e) {
+          throw new Error(`Stars burn failed: ${e instanceof Error ? e.message : 'unknown error'}`);
+        } finally {
+          setBurning(false);
+        }
+      }
+
       if (mode === 'stars') {
         setStep('done');
       } else {
@@ -173,7 +245,7 @@ function CheckoutContent() {
     } finally {
       setSubmitting(false);
     }
-  }, [product, authenticated, walletAddress, canSubmit, amountSol, shipping, getAccessToken, startPolling, mode]);
+  }, [product, authenticated, walletAddress, canSubmit, discountedSol, burnEligible, burnStars, privyWallets, shipping, getAccessToken, startPolling, mode]);
 
   useEffect(() => {
     if (pendingPay && authenticated && walletAddress && step === 'form' && !submitting) {
@@ -249,24 +321,38 @@ function CheckoutContent() {
                 </p>
               )}
 
+              {burnEligible && maxBurnable > 0 && (
+                <BurnSlider
+                  balance={starsBalance}
+                  maxBurn={maxBurnable}
+                  burnStars={burnStars}
+                  setBurnStars={setBurnStars}
+                  priceGEL={product.price}
+                  burning={burning}
+                  burnSig={burnSig}
+                />
+              )}
+
               {error && (
                 <p className="text-[12px] text-[var(--terracotta)] tracking-[0.06em]">{error}</p>
               )}
 
               <button
                 onClick={handlePay}
-                disabled={!canSubmit || submitting || pendingPay}
+                disabled={!canSubmit || submitting || pendingPay || burning}
                 className="bg-[var(--terracotta)] text-[#1a1208] px-[20px] py-[12px] rounded-full text-[12px] font-bold tracking-[0.18em] uppercase transition-opacity disabled:opacity-50"
               >
-                {submitting
-                  ? 'Creating order…'
-                  : pendingPay && authenticated && !walletAddress
-                    ? 'Preparing wallet…'
-                    : mode === 'stars'
-                      ? `Redeem ${product.starsPrice.toLocaleString()} stars`
-                      : amountSol > 0
-                        ? `Pay ${formatSol(amountSol)} SOL`
-                        : 'Loading SOL price…'}
+                {burning
+                  ? 'Burning Stars…'
+                  : submitting
+                    ? 'Creating order…'
+                    : pendingPay && authenticated && !walletAddress
+                      ? 'Preparing wallet…'
+                      : mode === 'stars'
+                        ? `Redeem ${product.starsPrice.toLocaleString()} stars`
+                        : discountedSol > 0
+                          ? `Pay ${formatSol(discountedSol)} SOL`
+                          : 'Loading SOL price…'}
               </button>
               {!authenticated && (
                 <p className="text-[11px] text-[rgba(232,230,221,0.6)]">
@@ -388,6 +474,26 @@ function CheckoutContent() {
             <span className="text-[11px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.7)]">Price</span>
             <span className="text-[13px] font-semibold text-[var(--terracotta)]">{formatPrice(product)}</span>
           </div>
+          {burnEligible && burnStars > 0 && (
+            <>
+              <div className="flex justify-between items-center mt-2">
+                <span className="text-[11px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.7)]">
+                  Stars burned
+                </span>
+                <span className="text-[13px] font-semibold text-[var(--seafoam)]">
+                  ✦ {burnStars.toLocaleString()}
+                </span>
+              </div>
+              <div className="flex justify-between items-center mt-1">
+                <span className="text-[11px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.7)]">
+                  Discount
+                </span>
+                <span className="text-[13px] font-semibold text-[var(--seafoam)]">
+                  −{gelDiscount.toFixed(2)} ₾
+                </span>
+              </div>
+            </>
+          )}
           {mode === 'stars' ? (
             <div className="flex justify-between items-center mt-2">
               <span className="text-[11px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.7)]">Stars</span>
@@ -399,7 +505,7 @@ function CheckoutContent() {
             <div className="flex justify-between items-center mt-2">
               <span className="text-[11px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.7)]">SOL</span>
               <span className="text-[13px] font-semibold text-[#E8E6DD]">
-                {amountSol > 0 ? `${formatSol(amountSol)} SOL` : '—'}
+                {discountedSol > 0 ? `${formatSol(discountedSol)} SOL` : '—'}
               </span>
             </div>
           )}
@@ -413,6 +519,84 @@ function CheckoutContent() {
 
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </PageContainer>
+  );
+}
+
+interface BurnSliderProps {
+  balance: number;
+  maxBurn: number;
+  burnStars: number;
+  setBurnStars: (n: number) => void;
+  priceGEL: number;
+  burning: boolean;
+  burnSig: string | null;
+}
+
+function BurnSlider({
+  balance, maxBurn, burnStars, setBurnStars, priceGEL, burning, burnSig,
+}: BurnSliderProps) {
+  const cluster = process.env.NEXT_PUBLIC_SOLANA_CLUSTER ?? 'devnet';
+  const gelOff = burnStars / STARS_PER_GEL;
+  const newTotal = Math.max(0, priceGEL - gelOff);
+  const sliderMax = maxBurn;
+
+  return (
+    <div
+      className="rounded-md p-4 flex flex-col gap-2"
+      style={{
+        background: 'rgba(94, 234, 212, 0.04)',
+        border: '0.5px solid rgba(94, 234, 212, 0.18)',
+      }}
+    >
+      <div className="flex items-baseline justify-between">
+        <span className="text-[10px] tracking-[0.18em] uppercase text-[var(--seafoam)] font-medium">
+          Burn Stars · up to {Math.round(MAX_BURN_RATIO * 100)}% off
+        </span>
+        <span className="text-[10px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.55)] font-mono">
+          Balance ✦ {balance.toLocaleString()}
+        </span>
+      </div>
+
+      <input
+        type="range"
+        min={0}
+        max={sliderMax}
+        step={BURN_INCREMENT}
+        value={burnStars}
+        onChange={e => setBurnStars(Number(e.target.value))}
+        disabled={burning || !!burnSig}
+        className="w-full"
+        style={{ accentColor: 'var(--seafoam)' }}
+      />
+
+      <div className="flex items-center justify-between text-[12px] font-mono">
+        <span style={{ color: 'rgba(232,230,221,0.7)' }}>
+          ✦ {burnStars.toLocaleString()} burning
+        </span>
+        <span style={{ color: 'var(--seafoam)', fontWeight: 600 }}>
+          −{gelOff.toFixed(2)} ₾
+        </span>
+      </div>
+
+      <div className="flex items-center justify-between text-[11px] font-mono pt-1 border-t border-[rgba(232,230,221,0.08)]">
+        <span style={{ color: 'rgba(232,230,221,0.55)' }}>New total</span>
+        <span style={{ color: 'var(--stl-text-bright)', fontWeight: 600 }}>
+          {newTotal.toFixed(2)} ₾
+        </span>
+      </div>
+
+      {burnSig && (
+        <a
+          href={`https://explorer.solana.com/tx/${burnSig}?cluster=${cluster}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[10px] tracking-[0.14em] uppercase mt-1"
+          style={{ color: 'var(--seafoam)' }}
+        >
+          Burn confirmed → view on Solana Explorer
+        </a>
+      )}
+    </div>
   );
 }
 

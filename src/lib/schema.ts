@@ -14,6 +14,45 @@ import { pgTable, uuid, text, integer, timestamp, doublePrecision, boolean, uniq
 //     ON feed_follows (follower_wallet);
 //   CREATE INDEX IF NOT EXISTS feed_follows_followed_idx
 //     ON feed_follows (followed_wallet);
+//
+// §4 (burn Stars for marketplace discount) — required SQL:
+//   ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS burn_stars integer NOT NULL DEFAULT 0;
+//   ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS burn_signature text;
+//   ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS gel_discount double precision NOT NULL DEFAULT 0;
+//   CREATE TABLE IF NOT EXISTS stars_burns (
+//     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+//     order_id uuid,
+//     redeem_code_id uuid,
+//     wallet_address text NOT NULL,
+//     amount integer NOT NULL,
+//     kind text NOT NULL,
+//     signature text NOT NULL,
+//     created_at timestamptz NOT NULL DEFAULT now()
+//   );
+//   -- Idempotency: one discount-burn per order, one shop-purchase-burn per order.
+//   CREATE UNIQUE INDEX IF NOT EXISTS stars_burns_order_kind_unique
+//     ON stars_burns (order_id, kind) WHERE order_id IS NOT NULL;
+//   CREATE INDEX IF NOT EXISTS stars_burns_wallet_idx
+//     ON stars_burns (wallet_address);
+//
+// §5 (redeem-at-Astroman codes) — required SQL:
+//   CREATE TABLE IF NOT EXISTS redeem_codes (
+//     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+//     code text NOT NULL UNIQUE,
+//     stars_burned integer NOT NULL,
+//     gel_value double precision NOT NULL,
+//     wallet_address text NOT NULL,
+//     burn_signature text,
+//     status text NOT NULL DEFAULT 'active',
+//     created_at timestamptz NOT NULL DEFAULT now(),
+//     expires_at timestamptz NOT NULL,
+//     spent_at timestamptz,
+//     spent_by text
+//   );
+//   CREATE INDEX IF NOT EXISTS redeem_codes_wallet_idx
+//     ON redeem_codes (wallet_address);
+//   CREATE INDEX IF NOT EXISTS redeem_codes_status_idx
+//     ON redeem_codes (status);
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
   privyId: text('privy_id').unique().notNull(),
@@ -93,6 +132,12 @@ export const orders = pgTable('orders', {
   amountStars: integer('amount_stars').notNull().default(0),
   amountFiat: doublePrecision('amount_fiat').notNull(),
   currency: text('currency').notNull(),
+  // §4: optional Stars-for-discount burn applied at order creation; the
+  // actual SPL burn is signed at /api/orders/confirm and recorded in
+  // stars_burns. burn_stars and gel_discount are 0 for orders without burn.
+  burnStars: integer('burn_stars').notNull().default(0),
+  burnSignature: text('burn_signature'),
+  gelDiscount: doublePrecision('gel_discount').notNull().default(0),
   paymentReference: text('payment_reference').notNull(),
   signature: text('signature'),
   status: text('status').notNull().default('pending'),
@@ -109,6 +154,46 @@ export const orders = pgTable('orders', {
   index('orders_wallet_idx').on(table.walletAddress),
   index('orders_privy_idx').on(table.privyId),
   index('orders_created_at_idx').on(table.createdAt),
+])
+
+// §4: server-side log of every SPL Stars burn — discount on a marketplace
+// order (kind='discount-burn'), in-app Star Shop purchase
+// (kind='shop-purchase'), or one-time Astroman till redemption
+// (kind='redeem-code'). The unique (order_id, kind) index prevents
+// double-burning when /api/orders/confirm is retried.
+export const starsBurns = pgTable('stars_burns', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  orderId: uuid('order_id'),
+  redeemCodeId: uuid('redeem_code_id'),
+  walletAddress: text('wallet_address').notNull(),
+  amount: integer('amount').notNull(),
+  kind: text('kind').notNull(),
+  signature: text('signature').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  uniqueIndex('stars_burns_order_kind_unique').on(t.orderId, t.kind),
+  index('stars_burns_wallet_idx').on(t.walletAddress),
+])
+
+// §5: one-time codes the user generates by burning Stars; redeemed by the
+// Astroman cashier via /api/redeem-code/validate. 7-day expiry; status
+// transitions are 'active' → 'spent' (validate) or 'active' → 'expired'
+// (computed lazily on read).
+export const redeemCodes = pgTable('redeem_codes', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  code: text('code').notNull().unique(),
+  starsBurned: integer('stars_burned').notNull(),
+  gelValue: doublePrecision('gel_value').notNull(),
+  walletAddress: text('wallet_address').notNull(),
+  burnSignature: text('burn_signature'),
+  status: text('status').notNull().default('active'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  spentAt: timestamp('spent_at', { withTimezone: true }),
+  spentBy: text('spent_by'),
+}, (t) => [
+  index('redeem_codes_wallet_idx').on(t.walletAddress),
+  index('redeem_codes_status_idx').on(t.status),
 ])
 
 export const feedPosts = pgTable('feed_posts', {

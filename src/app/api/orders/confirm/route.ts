@@ -61,6 +61,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ confirmed: false });
   }
 
+  // §4: orders that committed Stars for a discount cannot be marked paid
+  // until the SPL burn lands on chain. The client signs + submits the burn
+  // via /api/stars/burn, which writes order.burn_signature.
+  if (order.burnStars > 0 && !order.burnSignature) {
+    return NextResponse.json({
+      confirmed: false,
+      paymentFound: true,
+      pending: 'burn',
+      error: 'Awaiting Stars burn confirmation',
+    });
+  }
+
   const updated = await db
     .update(orders)
     .set({ status: 'paid', signature, paidAt: new Date() })

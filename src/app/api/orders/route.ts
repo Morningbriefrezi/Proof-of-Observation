@@ -9,6 +9,7 @@ import { getDb } from '@/lib/db';
 import { orders, users } from '@/lib/schema';
 import { isValidPublicKey } from '@/lib/validate';
 import { getStarsBalance } from '@/lib/solana';
+import { computeMaxBurn, validateBurn, starsToGEL } from '@/lib/stars-economy';
 
 const privy = new PrivyClient(
   process.env.NEXT_PUBLIC_PRIVY_APP_ID!,
@@ -39,12 +40,14 @@ export async function POST(req: NextRequest) {
     paymentMethod, amountSol, amountStars, amountFiat, currency,
     walletAddress,
     shipping,
+    burnStars: burnStarsRaw,
   } = body as {
     productId?: string; productName?: string; productImage?: string; dealerId?: string;
     paymentMethod?: 'sol' | 'stars';
     amountSol?: number; amountStars?: number; amountFiat?: number; currency?: string;
     walletAddress?: string;
     shipping?: { name?: string; phone?: string; address?: string; city?: string; country?: string; notes?: string };
+    burnStars?: number;
   };
 
   const method: 'sol' | 'stars' = paymentMethod === 'stars' ? 'stars' : 'sol';
@@ -76,6 +79,41 @@ export async function POST(req: NextRequest) {
   if (!db) {
     return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
   }
+
+  // ─── Optional Stars-for-discount burn (§4) ────────────────────────────────
+  // Only valid for SOL-paid GEL-priced products. Discount is computed here so
+  // the resulting order row already carries the discounted amountFiat /
+  // amountSol; the actual SPL burn is signed via /api/stars/burn after order
+  // creation, before /api/orders/confirm marks the order paid.
+  let burnStars = 0;
+  let gelDiscount = 0;
+  let discountedFiat = amountFiat;
+  let discountedSol = typeof amountSol === 'number' ? amountSol : 0;
+  if (typeof burnStarsRaw === 'number' && burnStarsRaw > 0) {
+    if (method !== 'sol') {
+      return NextResponse.json({ error: 'Stars burn discount is only available for SOL-paid orders right now' }, { status: 400 });
+    }
+    if (currency !== 'GEL') {
+      return NextResponse.json({ error: 'Stars burn discount is only available for GEL-priced products right now' }, { status: 400 });
+    }
+    const balance = await getStarsBalance(walletAddress).catch(() => 0);
+    const v = validateBurn({ priceGEL: amountFiat, stars: burnStarsRaw, balance });
+    if (!v.ok) {
+      return NextResponse.json({ error: v.reason }, { status: 400 });
+    }
+    burnStars = burnStarsRaw;
+    gelDiscount = v.gelDiscount;
+    discountedFiat = Math.max(0, amountFiat - gelDiscount);
+    if (typeof amountSol === 'number' && amountFiat > 0) {
+      // Scale SOL proportionally — the client computed amountSol against the
+      // pre-discount price; divide by the same ratio to keep the SOL payment
+      // honest.
+      discountedSol = Number(((amountSol * discountedFiat) / amountFiat).toFixed(6));
+    }
+  }
+  // Cap burn helper for parity with /api/stars/burn — the validation above is
+  // already strict, this is just a defensive belt+suspenders.
+  void computeMaxBurn; void starsToGEL;
 
   // STARS PAYMENT: verify on-chain balance against pending+paid stars orders, then mark paid immediately.
   if (method === 'stars') {
@@ -149,10 +187,12 @@ export async function POST(req: NextRequest) {
       privyId, walletAddress, productId, productName,
       productImage: productImage ?? null, dealerId,
       paymentMethod: 'sol',
-      amountSol: amountSol as number,
+      amountSol: discountedSol,
       amountStars: 0,
-      amountFiat,
+      amountFiat: discountedFiat,
       currency,
+      burnStars,
+      gelDiscount,
       paymentReference: referenceStr,
       status: 'pending',
       shippingName: (s.name as string).trim(),
@@ -168,7 +208,7 @@ export async function POST(req: NextRequest) {
 
   const url = encodeURL({
     recipient,
-    amount: new BigNumber(amountSol as number),
+    amount: new BigNumber(discountedSol),
     reference,
     label: productName,
     memo: order.id,
@@ -180,9 +220,12 @@ export async function POST(req: NextRequest) {
     paymentMethod: 'sol',
     reference: referenceStr,
     url: url.toString(),
-    amountSol,
-    amountFiat,
+    amountSol: discountedSol,
+    amountFiat: discountedFiat,
     currency,
+    burnStars,
+    gelDiscount,
+    requiresBurn: burnStars > 0,
     status: 'pending',
   });
 }
