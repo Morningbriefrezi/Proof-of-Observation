@@ -206,15 +206,15 @@ export default function HomePage() {
         <div className="relative max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-[1.1fr_1fr] gap-10 md:gap-15 items-center">
           <div>
             <h1 className="text-[36px] md:text-[72px] font-extrabold leading-[1.05] md:leading-[1] tracking-[-0.025em] text-white mb-5 md:mb-8">
-              Know where{' '}
+              Find every{' '}
               <span className="bg-gradient-to-r from-[#B07FE8] to-[#38F0FF] bg-clip-text text-transparent">
-                every planet is
-              </span>{' '}
-              &mdash; and earn rewards for finding them.
+                planet
+              </span>
+              . Earn rewards.
             </h1>
 
             <p className="text-[15px] md:text-[18px] leading-[1.65] text-[#9BA3B4] mb-7 md:mb-9 max-w-[480px]">
-              Real-time planet and deep-sky positions from your exact location. Photograph what you find, earn Stars, redeem them for telescopes from Bresser, Levenhuk, and Celestron.
+              Real-time sky positions from your location. Photograph what you find, redeem Stars for telescopes.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 max-w-[460px]">

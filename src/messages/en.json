@@ -23,10 +23,10 @@
   },
   "home": {
     "hero": {
-      "headlineLead": "Know where",
-      "headlineAccent": "every planet is",
-      "headlineTrail": "— and earn rewards for finding them.",
-      "subtitle": "Real-time planet and deep-sky positions from your exact location. Photograph what you find, earn Stars, redeem them for telescopes from Bresser, Levenhuk, and Celestron.",
+      "headlineLead": "Find every",
+      "headlineAccent": "planet",
+      "headlineTrail": ". Earn rewards.",
+      "subtitle": "Real-time sky positions from your location. Photograph what you find, redeem Stars for telescopes.",
       "ctaPrimary": "Start observing",
       "ctaSecondary": "See tonight's sky",
       "stats": {
