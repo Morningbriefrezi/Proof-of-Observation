@@ -518,6 +518,10 @@ export function SkyMap({
           const angleRad = ((c.az - liveOffset) * Math.PI) / 180;
           const lx = CX + (R + 14) * Math.sin(angleRad);
           const ly = CY - (R + 14) * Math.cos(angleRad);
+          // Highlight whichever cardinal is currently nearest the user's
+          // facing direction so the rotating dome reads as "you are here."
+          const distFromTop = Math.abs(((c.az - liveOffset + 540) % 360) - 180);
+          const isFacing = isLive && distFromTop > 135;
           return (
             <text
               key={c.dir}
@@ -529,7 +533,7 @@ export function SkyMap({
               fontSize="13"
               fontFamily="var(--mono)"
               letterSpacing="0.16em"
-              className={`sky-map__cardinal${c.dir === 'N' ? ' sky-map__cardinal--primary' : ''}`}
+              className={`sky-map__cardinal${isFacing ? ' sky-map__cardinal--facing' : ''}${c.dir === 'N' ? ' sky-map__cardinal--primary' : ''}`}
             >
               {c.dir}
             </text>
@@ -546,13 +550,15 @@ export function SkyMap({
 
         {/* User-aim reticle: where the phone is currently pointing. The
             target glyph sits at its own (az, alt) — when the user aims
-            correctly, the two visually merge. */}
+            correctly, the two visually merge. Scanning state drives a
+            soft breathing pulse; lock state freezes it green. */}
         {userAim && (
           <UserAimReticle
             x={userAim.x}
             y={userAim.y}
             below={userAim.belowHorizon}
             locked={confirmedLock}
+            scanning={!confirmedLock && !insideLockCone}
           />
         )}
 
@@ -612,9 +618,14 @@ export function SkyMap({
         )}
         {active && proximity != null && (
           <span className={`sky-map__aim-pill${confirmedLock ? ' is-locked' : insideLockCone ? ' is-acquiring' : ''}`}>
-            {confirmedLock
-              ? t('onTarget')
-              : `${Math.round(proximity)}° ${t('away')}`}
+            {confirmedLock ? (
+              <span className="sky-map__aim-pill-lock">{t('onTarget')}</span>
+            ) : (
+              <>
+                <strong className="sky-map__aim-pill-deg">{Math.round(proximity)}°</strong>
+                <span className="sky-map__aim-pill-suffix">{t('away')}</span>
+              </>
+            )}
           </span>
         )}
       </div>
@@ -806,7 +817,8 @@ function HoldArc({ x, y, progress }: { x: number; y: number; progress: number })
 /**
  * Soft line connecting the user's reticle to the active target. Length is
  * the screen distance; opacity fades as the user closes in so it gets out
- * of the way once the two markers visually merge.
+ * of the way once the two markers visually merge. The dash pattern flows
+ * via CSS so the user perceives motion toward the target.
  */
 function AimGuide({
   from,
@@ -821,10 +833,9 @@ function AimGuide({
   const dy = to.y - from.y;
   const len = Math.hypot(dx, dy);
   if (len < 4) return null;
-  // Fade the guide as the user gets close — it's most useful far from target.
   const opacity = Math.max(0.12, Math.min(0.55, proximity / 60));
   return (
-    <g pointerEvents="none">
+    <g pointerEvents="none" className="sky-map__aim-guide">
       <line
         x1={from.x}
         y1={from.y}
@@ -845,11 +856,13 @@ function UserAimReticle({
   y,
   below,
   locked,
+  scanning,
 }: {
   x: number;
   y: number;
   below: boolean;
   locked: boolean;
+  scanning: boolean;
 }) {
   if (below) {
     return (
@@ -870,15 +883,23 @@ function UserAimReticle({
   }
   const r = 5.5;
   const tickLen = 5;
-  const stroke = locked ? '#7ed4a8' : 'rgba(255,255,255,0.85)';
+  // Stroke + fill come from CSS so we can transition the color smoothly
+  // when the lock state flips, instead of jumping. The animation is also
+  // CSS-controlled — see .sky-map__user-aim styles.
   return (
-    <g pointerEvents="none" className={`sky-map__user-aim${locked ? ' is-locked' : ''}`}>
-      <circle cx={x} cy={y} r={r} fill="none" stroke={stroke} strokeWidth={1.2} />
-      <circle cx={x} cy={y} r={1.4} fill={stroke} />
-      <line x1={x} y1={y - r - 1} x2={x} y2={y - r - 1 - tickLen} stroke={stroke} strokeWidth={1.2} />
-      <line x1={x} y1={y + r + 1} x2={x} y2={y + r + 1 + tickLen} stroke={stroke} strokeWidth={1.2} />
-      <line x1={x - r - 1} y1={y} x2={x - r - 1 - tickLen} y2={y} stroke={stroke} strokeWidth={1.2} />
-      <line x1={x + r + 1} y1={y} x2={x + r + 1 + tickLen} y2={y} stroke={stroke} strokeWidth={1.2} />
+    <g
+      pointerEvents="none"
+      transform={`translate(${x} ${y})`}
+      className={`sky-map__user-aim${locked ? ' is-locked' : scanning ? ' is-scanning' : ''}`}
+    >
+      <g className="sky-map__user-aim-pulse">
+        <circle cx={0} cy={0} r={r} fill="none" strokeWidth={1.2} />
+        <circle cx={0} cy={0} r={1.4} />
+        <line x1={0} y1={-r - 1} x2={0} y2={-r - 1 - tickLen} strokeWidth={1.2} />
+        <line x1={0} y1={r + 1} x2={0} y2={r + 1 + tickLen} strokeWidth={1.2} />
+        <line x1={-r - 1} y1={0} x2={-r - 1 - tickLen} y2={0} strokeWidth={1.2} />
+        <line x1={r + 1} y1={0} x2={r + 1 + tickLen} y2={0} strokeWidth={1.2} />
+      </g>
     </g>
   );
 }

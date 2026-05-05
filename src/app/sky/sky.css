@@ -1045,40 +1045,101 @@
   border-color: rgba(255, 209, 102, 0.35);
   color: rgba(255, 209, 102, 0.95);
   display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 12px;
 }
-.sky-map__aim-axis {
-  display: inline-flex;
-  align-items: center;
-  letter-spacing: 0.16em;
+.sky-map__aim-pill-deg {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-feature-settings: 'tnum' 1;
+  color: var(--text);
+  transition: color 220ms ease;
 }
-.sky-map__aim-axis + .sky-map__aim-axis {
-  padding-left: 8px;
-  border-left: 1px solid rgba(255, 209, 102, 0.25);
+.sky-map__aim-pill-suffix {
+  font-size: 9.5px;
+  letter-spacing: 0.20em;
+  color: rgba(255, 255, 255, 0.55);
+}
+.sky-map__aim-pill-lock {
+  font-size: 10px;
+  letter-spacing: 0.20em;
+}
+
+/* === User-aim reticle — CSS-driven so the lock-state color transitions
+   smoothly and the scanning pulse runs without re-rendering React. The
+   stroke + fill apply inside the animated pulse group; the outer <g> is
+   positioned via SVG `transform` and stays still. === */
+.sky-map__user-aim circle,
+.sky-map__user-aim line {
+  stroke: rgba(255, 255, 255, 0.85);
+  fill: none;
+  transition: stroke 240ms ease, fill 240ms ease;
+}
+.sky-map__user-aim circle[r="1.4"] {
+  fill: rgba(255, 255, 255, 0.85);
 }
 .sky-map__user-aim.is-locked circle,
 .sky-map__user-aim.is-locked line {
-  filter: drop-shadow(0 0 4px rgba(120, 220, 170, 0.6));
+  stroke: #7ed4a8;
+}
+.sky-map__user-aim.is-locked circle[r="1.4"] {
+  fill: #7ed4a8;
+}
+.sky-map__user-aim-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.sky-map__user-aim.is-scanning .sky-map__user-aim-pulse {
+  animation: skymapReticleBreathe 2.4s ease-in-out infinite;
+}
+@keyframes skymapReticleBreathe {
+  0%, 100% { transform: scale(1);    opacity: 0.95; }
+  50%      { transform: scale(1.08); opacity: 0.72; }
 }
 
-/* Star-hop trail — flowing dashes from anchor to target. */
-.sky-map__hop-trail line {
+/* Star-hop trail + aim guide — flowing dashes pull the eye toward the
+   target. Same keyframe; the aim guide is shorter so the rhythm reads
+   on both. */
+.sky-map__hop-trail line,
+.sky-map__aim-guide line {
   animation: skymapHopFlow 1.6s linear infinite;
 }
 @keyframes skymapHopFlow {
   from { stroke-dashoffset: 0; }
   to   { stroke-dashoffset: -14; }
 }
+
 .sky-map__aim-pill.is-acquiring {
   border-color: rgba(255, 209, 102, 0.55);
   background: rgba(255, 209, 102, 0.08);
-  color: rgba(255, 220, 140, 1);
+}
+.sky-map__aim-pill.is-acquiring .sky-map__aim-pill-deg {
+  color: #ffd870;
 }
 .sky-map__aim-pill.is-locked {
   border-color: rgba(120, 220, 170, 0.60);
   background: rgba(120, 220, 170, 0.10);
   color: #7ed4a8;
+}
+.sky-map__aim-pill.is-locked .sky-map__aim-pill-deg,
+.sky-map__aim-pill.is-locked .sky-map__aim-pill-lock {
+  color: #7ed4a8;
+}
+
+/* Cardinal letter — the one nearest the user's facing direction
+   brightens, so the rotating dome reads as "you are here." */
+.sky-map__cardinal {
+  fill: rgba(255, 255, 255, 0.55);
+  transition: fill 220ms ease;
+}
+.sky-map__cardinal--primary {
+  fill: rgba(255, 255, 255, 0.78);
+}
+.sky-map__cardinal--facing {
+  fill: var(--text);
 }
 
 /* Compass-accuracy banner — slides in below the dome when iOS reports
@@ -2325,8 +2386,9 @@
      the dome and isn't actionable for naked-eye targeting. */
   .sky-map__alt-label { display: none; }
   /* Dim side cardinals so North reads as primary on a small screen. */
-  .sky-map__cardinal { opacity: 0.5; }
-  .sky-map__cardinal--primary { opacity: 0.95; }
+  .sky-map__cardinal { fill: rgba(255, 255, 255, 0.45); }
+  .sky-map__cardinal--primary { fill: rgba(255, 255, 255, 0.78); }
+  .sky-map__cardinal--facing { fill: var(--text); }
 
   /* Body table sits below the dome — drop the desktop split's sticky
      offsets and let it stretch full width. */

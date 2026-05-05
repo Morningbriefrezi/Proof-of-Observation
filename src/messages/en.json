@@ -323,11 +323,11 @@
           "tip": "Look up after midnight. Let your eyes adapt for 20 minutes — no phone screens."
         },
         "mars_saturn_conj": {
-          "body": "Mars and Saturn pass within half a degree of each other — close enough to share a low-power telescope view.",
-          "peak": "Just after sunset",
-          "moon": "Waning gibbous — rises late",
+          "body": "Mars and Saturn slide within a quarter-degree of each other — close enough to fit in one low-power eyepiece view.",
+          "peak": "Pre-dawn May 12, low in the east",
+          "moon": "Waning crescent — barely interferes",
           "gear": "Binoculars or any telescope",
-          "tip": "Look low in the southwest at twilight. Mars is the redder dot."
+          "tip": "Get up an hour before sunrise. Find a clear eastern horizon — Mars is the redder dot, Saturn the steady gold. Both ride low, so an unobstructed view matters."
         },
         "perseids": {
           "body": "The classic summer shower — up to 100 meteors per hour, often with bright fireballs that linger.",
@@ -338,14 +338,14 @@
         },
         "solar_eclipse_aug12": {
           "body": "Totality crosses Iceland and northern Spain. Outside the path you'll see a deep partial — protective filters required.",
-          "peak": "Mid-afternoon Europe time",
+          "peak": "17:46 UTC — early evening in Europe",
           "moon": "New Moon — the eclipsing body",
           "gear": "Solar filters mandatory",
           "tip": "Never look directly without certified eclipse glasses. Project the image with a pinhole if you don't have filters."
         },
         "saturn_opp": {
-          "body": "Saturn rises at sunset and shines all night, brightest and largest of the year. The rings are wide open.",
-          "peak": "All night, transits at midnight",
+          "body": "Saturn rises at sunset and shines all night, brightest and biggest of the year. The rings, edge-on in 2025, are now tilted about 8° — gradually reopening.",
+          "peak": "All night, highest near midnight",
           "moon": "Near new — clean dark sky",
           "gear": "Telescope (any size)",
           "tip": "Even a 60mm scope shows the rings clearly. Wait until Saturn is 30°+ above the horizon for the steadiest view."
@@ -415,6 +415,7 @@
       "found": "Found {object}",
       "almostThere": "Almost on {object} — hold steady",
       "panTo": "Pan {deg}° toward {object}",
+      "panToward": "toward {object}",
       "panAround": "Pan around to see the planets",
       "liftPhone": "Lift your phone toward the sky",
       "openAr": "View in AR",

@@ -275,25 +275,33 @@ export function ARFinder({
   const headingActive = heading != null && altitude != null;
   const poorAccuracy = headingActive && (accuracy == null || accuracy > POOR_ACCURACY_DEG);
 
-  let hint: string;
+  // Bottom hint is structured (primary cue + optional secondary) so the
+  // mobile layout can render the angle as a big mono number with the
+  // verbal direction as a quieter line beneath it.
+  let hint: { primary: string; secondary?: string; tone?: 'normal' | 'lock' };
   if (!headingActive) {
-    hint = headingStatus === 'denied'
-      ? t('denied.body')
-      : headingStatus === 'unavailable'
-        ? t('fallbacks.noSensors')
-        : t('liftPhone');
+    if (headingStatus === 'denied') {
+      hint = { primary: t('denied.title'), secondary: t('denied.body') };
+    } else if (headingStatus === 'unavailable') {
+      hint = { primary: t('fallbacks.noSensors') };
+    } else {
+      hint = { primary: t('liftPhone') };
+    }
   } else if (activeBody && activeRow) {
     if (confirmedLock) {
-      hint = t('found', { object: activeBody.name });
+      hint = { primary: t('found', { object: activeBody.name }), tone: 'lock' };
     } else if (activeRow.onScreen) {
-      hint = t('almostThere', { object: activeBody.name });
+      hint = { primary: t('almostThere', { object: activeBody.name }) };
     } else {
-      hint = t('panTo', { object: activeBody.name, deg: Math.round(activeRow.sep) });
+      hint = {
+        primary: `${Math.round(activeRow.sep)}°`,
+        secondary: t('panToward', { object: activeBody.name }),
+      };
     }
   } else if ((altitude ?? 0) < 30) {
-    hint = t('liftPhone');
+    hint = { primary: t('liftPhone') };
   } else {
-    hint = t('panAround');
+    hint = { primary: t('panAround') };
   }
 
   const constellationSegments = useMemo(() => {
@@ -483,7 +491,12 @@ export function ARFinder({
         </div>
       </div>
 
-      <div className="ar-bottom-hint">{hint}</div>
+      <div className={`ar-bottom-hint${hint.tone === 'lock' ? ' is-locked' : ''}${hint.secondary ? ' has-secondary' : ''}`}>
+        <span className="ar-bottom-hint__primary">{hint.primary}</span>
+        {hint.secondary && (
+          <span className="ar-bottom-hint__secondary">{hint.secondary}</span>
+        )}
+      </div>
 
       {poorAccuracy && (
         <div className="ar-accuracy-banner" role="status">
