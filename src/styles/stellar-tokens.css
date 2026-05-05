@@ -5537,3 +5537,48 @@
   color: rgba(255, 255, 255, 0.32);
 }
 
+/* === Mobile-only: compact, pill/button-style hero strips === */
+@media (max-width: 640px) {
+  .missions-page .mis-stats-bar { gap: 8px; margin-bottom: 10px; }
+  .missions-page .mis-stats-title { font-size: 19px; }
+  .missions-page .mis-stats-left { gap: 6px; }
+  .missions-page .mis-stats-meta {
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 999px;
+    font-size: 9.5px;
+  }
+  .missions-page .mis-stats-right { gap: 6px; }
+
+  .missions-page .mis-lineup { padding: 10px 12px 12px; gap: 8px; }
+  .missions-page .mis-lineup-head {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+  .missions-page .mis-lineup-status,
+  .missions-page .mis-lineup-loc {
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 999px;
+  }
+  .missions-page .mis-lineup-empty {
+    padding: 8px 12px;
+    gap: 0;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.04);
+    border-radius: 999px;
+    flex-direction: row;
+    justify-content: center;
+  }
+  .missions-page .mis-lineup-empty-title {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.75);
+  }
+  .missions-page .mis-lineup-empty-sub { display: none; }
+}
+
