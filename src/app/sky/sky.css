@@ -1624,43 +1624,6 @@
   flex-shrink: 0;
 }
 
-.target-picker__auto {
-  appearance: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  min-height: 36px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  cursor: pointer;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
-  flex-shrink: 0;
-}
-.target-picker__auto:hover { color: var(--text); border-color: var(--border-strong); }
-.target-picker__auto-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: var(--text-dim);
-  transition: background 120ms ease;
-}
-.target-picker__auto.is-on {
-  color: var(--seafoam);
-  border-color: rgba(94, 234, 212, 0.35);
-  background: rgba(94, 234, 212, 0.06);
-}
-.target-picker__auto.is-on .target-picker__auto-dot {
-  background: var(--seafoam);
-  box-shadow: 0 0 8px rgba(94, 234, 212, 0.6);
-}
-
 /* ================================================================
    === Hint card — fist diagram extension                       ===
    ================================================================ */
@@ -2146,106 +2109,128 @@
   /* Tighter shell so we can fit the dome above the fold. */
   .sky-v3 .sky-v3__container {
     padding: 12px 14px 80px;
-    gap: 16px;
+    gap: 14px;
   }
 
-  /* Reorder so the visual anchor (dome chart) sits right under the live
-     status strip — the user opens the page and immediately sees the sky.
-     Lede / picker / tables / forecast follow below. Elements without an
-     explicit order keep their default 0 and stay in DOM order, which
-     means the LocationFallbackBanner / fallback / error / tour banners
-     remain at the very top where they belong. */
-  .sky-v3 .sky-v3__container > .sky-strip { order: 1; }
-  .sky-v3 .sky-v3__container > .sky-v3__split { order: 2; }
-  .sky-v3 .sky-v3__container > .sky-v3__lede { order: 3; }
-  .sky-v3 .sky-v3__container > .target-picker { order: 4; }
-  .sky-v3 .sky-v3__container > .sky-v3__skeleton { order: 5; }
-  .sky-v3 .sky-v3__container > .sky-v3__active { order: 6; }
-  .sky-v3 .sky-v3__container > .sky-v3__horizon { order: 7; }
-  .sky-v3 .sky-v3__container > .sky-v3__extended { order: 8; }
+  /* Map first (edge-to-edge hero), then chip row, then filters, then cards.
+     Elements without explicit order stay in DOM flow above (location
+     fallback / error / tour banners). */
+  .sky-v3 .sky-v3__container > .sky-v3__split { order: 1; }
+  .sky-v3 .sky-v3__container > .sky-strip { order: 2; }
+  .sky-v3 .sky-v3__container > .target-filters { order: 3; }
+  .sky-v3 .sky-v3__container > .sky-v3__lede { order: 4; }
+  .sky-v3 .sky-v3__container > .target-picker { order: 5; }
+  .sky-v3 .sky-v3__container > .sky-v3__skeleton { order: 6; }
+  .sky-v3 .sky-v3__container > .sky-v3__active { order: 7; }
+  .sky-v3 .sky-v3__container > .target-below { order: 8; }
+  .sky-v3 .sky-v3__container > .forecast7 { order: 9; }
+  .sky-v3 .sky-v3__container > .sky-v3__horizon { order: 10; }
+  .sky-v3 .sky-v3__container > .sky-v3__extended { order: 11; }
 
-  /* === Live status strip — dense, two-row band.
-     Row 1: location · sky phase · moon.
-     Row 2: clouds (2-col span) · local time.
-     Note: the existing @760px block above hides ::before separators and
-     sets border-lefts on children 2 and 4 — we extend that approach to
-     a 3-column first row. === */
+  /* === Live state — chip-button row below the map. Each segment becomes
+     a tappable-looking pill; labels and time are dropped to keep this
+     to four chips that read at a glance. === */
   .sky-strip {
-    padding: 10px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0;
     margin: 0;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 0;
+    border-top: none;
+    border-bottom: none;
     border-radius: 0;
+    grid-template-columns: none;
   }
-  .sky-strip__segment { padding: 2px 10px; border-left: none; }
-  .sky-strip__label { font-size: 9px; margin-bottom: 4px; letter-spacing: 0.16em; }
-  .sky-strip__value { font-size: 12.5px; line-height: 1.2; }
-  .sky-strip__time { font-size: 14px; }
-  .sky-strip__sub { font-size: 10px; margin-top: 2px; }
-  .sky-strip__cloud-bar { width: 48px; height: 3px; margin-top: 6px; }
+  .sky-strip__segment {
+    flex: 1 1 calc(50% - 3px);
+    min-width: 0;
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .sky-strip__segment + .sky-strip__segment::before { display: none; }
+  .sky-strip__label { display: none; }
+  .sky-strip__value {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.2;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  .sky-strip__sub {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.50);
+    margin-top: 0;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .sky-strip__cloud-bar { display: none; }
   .sky-strip__moon-row { gap: 6px; }
   .sky-strip__moon-row svg { width: 14px; height: 14px; }
-  /* First row dividers between location/sky/moon. */
-  .sky-strip__segment:nth-child(2),
-  .sky-strip__segment:nth-child(3) { border-left: 1px solid var(--border); }
-  /* Second row: clouds spans the first two columns, time owns the third.
-     Both get a top divider so the row reads as a separate band. The
-     border-left: none on clouds overrides the older @760px rule above
-     that would otherwise leave a vertical hairline mid-row. */
-  .sky-strip__segment:nth-child(4) {
-    grid-column: 1 / span 2;
-    border-top: 1px solid var(--border);
-    border-left: none;
-    padding-top: 10px;
-    margin-top: 8px;
-  }
-  .sky-strip__segment:nth-child(5) {
-    grid-column: 3 / span 1;
-    border-top: 1px solid var(--border);
-    border-left: 1px solid var(--border);
-    padding-top: 10px;
-    margin-top: 8px;
-  }
+  /* Drop the time segment — phone OS already shows it. */
+  .sky-strip__segment:nth-child(5) { display: none; }
 
-  /* === Dome card — give it a real frame on mobile so it reads as the
-     hero element and the rim labels (N/E/S/W) don't crash into edges. === */
+  /* === Dome map — full-bleed sky view, no rounded card frame. === */
   .sky-v3__map-wrap {
-    width: 100%;
-    max-width: 360px;
-    margin: 0 auto;
-    padding: 14px 12px 10px;
-    border-radius: 18px;
-    border: 1px solid var(--border);
+    width: calc(100% + 28px);
+    max-width: none;
+    margin: 0 -14px;
+    padding: 0;
+    border-radius: 0;
+    border: none;
     background:
-      radial-gradient(ellipse at 50% -10%, rgba(56, 240, 255, 0.06), rgba(7, 11, 20, 0) 60%),
-      linear-gradient(180deg, rgba(13, 26, 61, 0.55), rgba(4, 8, 20, 0.55));
+      radial-gradient(ellipse at 50% 100%, rgba(56, 240, 255, 0.05), rgba(2, 6, 15, 0) 65%),
+      linear-gradient(180deg, #050a18 0%, #02060f 100%);
+    aspect-ratio: 1 / 1;
+    max-height: 70vh;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    overflow: hidden;
+    position: relative;
   }
-  .sky-map { max-width: 320px; margin: 0 auto; }
-  .sky-v3__map-caption {
-    margin-top: 6px;
-    font-size: 9.5px;
-    color: rgba(255, 255, 255, 0.42);
+  .sky-map {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    margin: 0;
+    aspect-ratio: auto;
   }
+  .sky-map__svg {
+    width: 100%;
+    height: 100%;
+  }
+  /* Hide the round rim border so the sky reads as edge-to-edge. */
+  .sky-map__rim { display: none; }
+  .sky-v3__map-caption { display: none; }
 
   /* Body table sits below the dome — drop the desktop split's sticky
      offsets and let it stretch full width. */
-  .sky-v3__split { gap: 14px; }
+  .sky-v3__split { gap: 12px; }
   .sky-v3__table-wrap { margin-top: 2px; }
 
   /* === HUD pills — reflowed so calibrate/facing on the left and the
-     aim pill on the right never overlap, no matter how long aim text
-     gets ("Turn 120° right · Tilt 40° up"). === */
+     aim pill on the right never overlap. === */
   .sky-map__hud {
     flex-wrap: wrap;
     gap: 6px;
-    top: 6px;
-    left: 6px;
-    right: 6px;
+    top: 10px;
+    left: 10px;
+    right: 10px;
   }
   .sky-map__calibrate,
   .sky-map__facing,
   .sky-map__aim-pill {
-    padding: 4px 9px;
+    padding: 5px 10px;
     font-size: 9.5px;
     letter-spacing: 0.12em;
     border-radius: 999px;
@@ -2257,6 +2242,8 @@
     justify-content: flex-end;
   }
   .sky-map__facing-label { letter-spacing: 0.14em; }
+  /* Hide nudge controls on mobile — clutter; calibrate covers it. */
+  .sky-map__nudge { display: none; }
 
   /* === Lede header — title + verdict + AR button, tight stack. === */
   .sky-v3__lede {
@@ -2287,27 +2274,48 @@
     border-radius: 14px;
   }
 
-  /* === Tier tabs — single row, horizontal scroll. The 4-tab wrap on
-     phones (HARD jumping to a second row) is the biggest visual mess
-     in the screenshot. === */
+  /* === Tier filter row — solid pressable buttons, no longer transparent
+     blends. ALL/EASY/MEDIUM/HARD now read as real controls. === */
+  .target-filters { padding: 0; margin: 0; }
   .target-picker { gap: 8px; }
   .target-picker__tiers {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
     flex-wrap: nowrap;
-    overflow-x: auto;
-    padding: 12px 2px 4px;
-    margin-bottom: 0;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
+    overflow-x: visible;
+    border-top: none;
+    padding: 0;
+    margin: 0;
   }
   .target-picker__tiers::-webkit-scrollbar { display: none; }
   .target-tier {
-    padding: 6px 11px;
-    font-size: 9.5px;
-    letter-spacing: 0.16em;
+    flex: none;
+    width: 100%;
+    justify-content: center;
+    padding: 10px 8px;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    border-radius: 12px;
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.78);
+    min-height: 40px;
   }
+  .target-tier.is-active {
+    background: rgba(255, 209, 102, 0.18);
+    border-color: rgba(255, 209, 102, 0.65);
+    color: var(--terracotta);
+  }
+  .target-tier--easy.is-active   { background: rgba(120, 220, 170, 0.18); border-color: rgba(120, 220, 170, 0.65); color: #7ed4a8; }
+  .target-tier--medium.is-active { background: rgba(255, 209, 102, 0.18); border-color: rgba(255, 209, 102, 0.65); color: #ffd166; }
+  .target-tier--hard.is-active   { background: rgba(220, 130, 130, 0.18); border-color: rgba(220, 130, 130, 0.65); color: #e89797; }
   .target-tier__count {
     font-size: 9.5px;
     padding: 1px 5px;
+  }
+  .target-tier.is-active .target-tier__count {
+    background: rgba(0, 0, 0, 0.25);
   }
 
   .target-picker__label {
@@ -2323,12 +2331,6 @@
   }
   .target-chip__alt,
   .target-chip__rises { font-size: 9.5px; }
-  .target-picker__auto {
-    padding: 7px 11px;
-    font-size: 9.5px;
-    letter-spacing: 0.16em;
-    min-height: 32px;
-  }
 
   /* === Section labels (LOOKING AROUND, EXTENDED FORECAST). === */
   .sky-v3__section-head { padding-top: 12px; margin-bottom: 8px; }

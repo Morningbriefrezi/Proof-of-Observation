@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { CatalogDifficulty } from '@/lib/sky/catalog';
 import { getTargetPhoto } from '@/lib/sky/target-photos';
@@ -11,8 +11,6 @@ interface TargetPickerProps {
   objects: SkyObject[];
   activeId: ObjectId | null;
   onSelect: (id: ObjectId) => void;
-  autoRotate: boolean;
-  onToggleAuto: () => void;
 }
 
 export type TierFilter = 'all' | CatalogDifficulty;
@@ -33,8 +31,6 @@ export function TargetPicker({
   objects,
   activeId,
   onSelect,
-  autoRotate,
-  onToggleAuto,
 }: TargetPickerProps) {
   const t = useTranslations('sky.picker');
   const [tier, setTier] = useState<TierFilter>('all');
@@ -79,16 +75,6 @@ export function TargetPicker({
     return counts;
   }, [objects]);
 
-  // AUTO mode: every 30s, re-pick the highest visible target in current tier.
-  useEffect(() => {
-    if (!autoRotate) return;
-    if (sorted.visible.length === 0) return;
-    const pickHighest = () => onSelect(sorted.visible[0].id);
-    pickHighest();
-    const id = setInterval(pickHighest, 30_000);
-    return () => clearInterval(id);
-  }, [autoRotate, sorted.visible, onSelect]);
-
   return (
     <div className="target-picker">
       <div className="target-picker__row-top">
@@ -114,16 +100,6 @@ export function TargetPicker({
             );
           })}
         </div>
-        <button
-          type="button"
-          onClick={onToggleAuto}
-          className={`target-picker__auto${autoRotate ? ' is-on' : ''}`}
-          aria-pressed={autoRotate}
-          title={t('autoToggle')}
-        >
-          <span className="target-picker__auto-dot" />
-          {t('auto')}
-        </button>
       </div>
 
       <div className="target-picker__label">
@@ -157,16 +133,12 @@ interface TargetFiltersProps {
   objects: SkyObject[];
   tier: TierFilter;
   onTierChange: (tier: TierFilter) => void;
-  autoRotate: boolean;
-  onToggleAuto: () => void;
 }
 
 export function TargetFilters({
   objects,
   tier,
   onTierChange,
-  autoRotate,
-  onToggleAuto,
 }: TargetFiltersProps) {
   const t = useTranslations('sky.picker');
   const counts = useMemo(() => {
@@ -200,16 +172,6 @@ export function TargetFilters({
           );
         })}
       </div>
-      <button
-        type="button"
-        onClick={onToggleAuto}
-        className={`target-picker__auto${autoRotate ? ' is-on' : ''}`}
-        aria-pressed={autoRotate}
-        title={t('autoToggle')}
-      >
-        <span className="target-picker__auto-dot" />
-        {t('auto')}
-      </button>
     </div>
   );
 }
@@ -219,7 +181,6 @@ interface TargetVisibleGridProps {
   tier: TierFilter;
   activeId: ObjectId | null;
   onSelect: (id: ObjectId) => void;
-  autoRotate: boolean;
 }
 
 export function TargetVisibleGrid({
@@ -227,7 +188,6 @@ export function TargetVisibleGrid({
   tier,
   activeId,
   onSelect,
-  autoRotate,
 }: TargetVisibleGridProps) {
   const t = useTranslations('sky.picker');
   const visible = useMemo(() => {
@@ -243,14 +203,6 @@ export function TargetVisibleGrid({
       return b.altitude - a.altitude;
     });
   }, [objects, tier]);
-
-  useEffect(() => {
-    if (!autoRotate || visible.length === 0) return;
-    const pickHighest = () => onSelect(visible[0].id);
-    pickHighest();
-    const id = setInterval(pickHighest, 30_000);
-    return () => clearInterval(id);
-  }, [autoRotate, visible, onSelect]);
 
   return (
     <section className="target-visible">

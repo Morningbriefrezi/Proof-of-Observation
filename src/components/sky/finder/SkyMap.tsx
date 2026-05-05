@@ -308,7 +308,7 @@ export function SkyMap({
         <line x1={CX} y1={CY - R} x2={CX} y2={CY + R} stroke="rgba(255,255,255,0.04)" strokeWidth={0.5} />
         <line x1={CX - R} y1={CY} x2={CX + R} y2={CY} stroke="rgba(255,255,255,0.04)" strokeWidth={0.5} />
 
-        <circle cx={CX} cy={CY} r={R} fill="none" stroke="rgba(255,255,255,0.20)" strokeWidth={1} />
+        <circle cx={CX} cy={CY} r={R} fill="none" stroke="rgba(255,255,255,0.20)" strokeWidth={1} className="sky-map__rim" />
 
         {/* Constellation stick figures + bright stars (drawn under the
             bodies so the planet glyphs sit on top). Visible by default,

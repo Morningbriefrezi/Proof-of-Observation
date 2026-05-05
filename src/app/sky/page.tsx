@@ -50,7 +50,6 @@ export default function SkyPage() {
   const [finderLoading, setFinderLoading] = useState(true);
   const [finderError, setFinderError] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<ObjectId | null>(null);
-  const [autoRotate, setAutoRotate] = useState(false);
   const [tier, setTier] = useState<TierFilter>('all');
 
   const fetchFinder = useCallback(async () => {
@@ -158,8 +157,7 @@ export default function SkyPage() {
 
   const handleSelect = useCallback((id: ObjectId) => {
     setActiveId(id);
-    if (autoRotate) setAutoRotate(false);
-  }, [autoRotate]);
+  }, []);
 
   const fallbackUsed =
     location.source === 'default' &&
@@ -198,14 +196,12 @@ export default function SkyPage() {
 
         {showTour && <FinderTour onDismiss={dismissTour} />}
 
-        {/* === Difficulty + AUTO filters (centered above the split) === */}
+        {/* === Difficulty filters (centered above the split) === */}
         {finder && !finderError && (
           <TargetFilters
             objects={finder.objects}
             tier={tier}
             onTierChange={setTier}
-            autoRotate={autoRotate}
-            onToggleAuto={() => setAutoRotate((v) => !v)}
           />
         )}
 
@@ -243,7 +239,6 @@ export default function SkyPage() {
                 tier={tier}
                 activeId={activeId}
                 onSelect={handleSelect}
-                autoRotate={autoRotate}
               />
             </section>
 
