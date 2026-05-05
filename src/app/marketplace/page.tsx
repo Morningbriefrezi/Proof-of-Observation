@@ -2,7 +2,6 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { usePrivy } from '@privy-io/react-auth';
 import { useStellarUser } from '@/hooks/useStellarUser';
 import { useStarsBalance } from '@/hooks/useStarsBalance';
 import { useAppState } from '@/hooks/useAppState';
@@ -40,17 +39,10 @@ const SECTION_COPY: Record<string, { label: string; sub: string; color: string }
   all:          { label: 'All',         sub: 'All gear · sorted by difficulty', color: 'var(--seafoam)' },
 };
 
-type RedeemTier = { stars: number; reward: string; detail: string; apiTier: string };
-
-const REDEEM_TIERS: RedeemTier[] = [
-  { stars: 250,  reward: '10% off any telescope',   detail: 'Universal',          apiTier: '10% Telescope Discount' },
-  { stars: 500,  reward: 'Free Moon Lamp',          detail: 'worth 85 GEL',       apiTier: 'Free Moon Lamp' },
-  { stars: 1000, reward: '20% off premium',         detail: 'Bresser, Celestron', apiTier: '20% Telescope Discount' },
-];
+type Tab = 'shop' | 'star-shop';
 
 export default function MarketplacePage() {
   const router = useRouter();
-  const { getAccessToken } = usePrivy();
   const { authenticated, address: stellarAddress } = useStellarUser();
   const { state } = useAppState();
   const { location } = useLocation();
@@ -59,17 +51,19 @@ export default function MarketplacePage() {
   const balance = starsBalance ?? 0;
 
   const [authOpen, setAuthOpen] = useState(false);
+  const [tab, setTab] = useState<Tab>('shop');
   const [filter, setFilter] = useState<CategoryFilter>('all');
   const [difficulty, setDifficulty] = useState<DifficultyFilter>('all');
-  const [revealedCodes, setRevealedCodes] = useState<Record<string, string>>({});
-  const [claiming, setClaiming] = useState<Record<string, boolean>>({});
 
   const dealers = useMemo(() => getDealersByRegion(location.region), [location.region]);
   const showDealer = dealers.length > 1;
-  const allProducts = useMemo(() => {
+  const regionProducts = useMemo(() => {
     const list = getProductsByRegion(location.region);
     return list.length > 0 ? list : GLOBAL_FALLBACK;
   }, [location.region]);
+  // §5A: separate the Stars-only shop tier from the regular SOL/Stars dual-priced inventory.
+  const allProducts = useMemo(() => regionProducts.filter(p => p.kind !== 'stars-only'), [regionProducts]);
+  const starShopProducts = useMemo(() => regionProducts.filter(p => p.kind === 'stars-only'), [regionProducts]);
   const getDealerName = useCallback(
     (id: string): string => dealers.find(d => d.id === id)?.name ?? id,
     [dealers],
@@ -126,29 +120,6 @@ export default function MarketplacePage() {
     return groups;
   }, [visible, featured, filter, difficulty]);
 
-  async function handleRedeem(tier: RedeemTier) {
-    if (!authenticated) { setAuthOpen(true); return; }
-    if (!address) return;
-    setClaiming(prev => ({ ...prev, [tier.apiTier]: true }));
-    try {
-      const token = await getAccessToken().catch(() => null);
-      const res = await fetch('/api/redeem-code', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ tier: tier.apiTier, walletAddress: address }),
-      });
-      if (!res.ok) return;
-      const { code } = await res.json();
-      navigator.clipboard.writeText(code).catch(() => {});
-      setRevealedCodes(prev => ({ ...prev, [tier.apiTier]: code }));
-    } finally {
-      setClaiming(prev => ({ ...prev, [tier.apiTier]: false }));
-    }
-  }
-
   return (
     <PageContainer variant="wide" className="font-mono py-5 animate-page-enter">
       <div className="marketplace-page-bg overflow-hidden">
@@ -186,66 +157,58 @@ export default function MarketplacePage() {
             </div>
           </header>
 
-          <div className="flex md:grid md:grid-cols-3 gap-[6px] mb-[18px] overflow-x-auto -mx-1 px-1 md:mx-0 md:px-0 [-webkit-overflow-scrolling:touch]">
-            {REDEEM_TIERS.map(tier => {
-              const code     = revealedCodes[tier.apiTier];
-              const unlocked = balance >= tier.stars;
-              const pct      = Math.min(100, Math.round((balance / tier.stars) * 100));
-              const remain   = Math.max(0, tier.stars - balance);
-              const isClaim  = !!claiming[tier.apiTier];
-              const l2 = unlocked ? `${tier.detail} · earned` : `${pct}% · ${remain.toLocaleString()} to go`;
+          {/* §5: Marketplace ↔ Star Shop tab toggle */}
+          <div
+            className="flex items-center gap-1 p-1 mb-[18px] rounded-full self-start"
+            style={{ background: 'rgba(255,255,255,0.015)', border: '0.5px solid rgba(232,230,221,0.06)' }}
+          >
+            {([
+              { key: 'shop',      label: 'Marketplace', count: allProducts.length },
+              { key: 'star-shop', label: 'Star Shop',   count: starShopProducts.length },
+            ] as const).map(t => {
+              const active = tab === t.key;
               return (
-                <div
-                  key={tier.apiTier}
-                  className="flex items-center gap-2.5 px-3 py-[10px] rounded-lg min-w-[220px] md:min-w-[180px] flex-shrink-0 md:flex-shrink"
-                  style={{
-                    background: unlocked ? 'rgba(255, 209, 102,0.04)' : 'rgba(255,255,255,0.015)',
-                    border: unlocked ? '0.5px solid rgba(255, 209, 102,0.4)' : '0.5px solid rgba(232,230,221,0.08)',
-                  }}
+                <button
+                  key={t.key}
+                  onClick={() => setTab(t.key)}
+                  className="px-[14px] py-[7px] text-[11px] tracking-[0.12em] uppercase rounded-full whitespace-nowrap transition-colors"
+                  style={
+                    active
+                      ? { background: 'rgba(94, 234, 212,0.12)', color: 'var(--seafoam)', fontWeight: 600 }
+                      : { color: 'rgba(232,230,221,0.65)' }
+                  }
                 >
-                  <span className="flex items-baseline whitespace-nowrap text-[14px] font-semibold tracking-[0.02em] text-[var(--terracotta)]">
-                    <span className="text-[11px] opacity-70 mr-[3px]">✦</span>
-                    {tier.stars}
-                  </span>
-                  <div className="flex flex-col flex-1 min-w-0">
-                    <span className="text-[12px] text-[#E8E6DD] truncate">{tier.reward}</span>
-                    <span className="text-[10px] tracking-[0.1em] uppercase text-[rgba(232,230,221,0.65)] truncate">{l2}</span>
-                    <div className="h-[2px] bg-[rgba(232,230,221,0.08)] rounded-[1px] overflow-hidden mt-[3px]">
-                      <div
-                        className="h-full bg-[var(--terracotta)] rounded-[1px]"
-                        style={{ width: `${pct}%`, boxShadow: unlocked ? '0 0 6px rgba(255, 209, 102,0.8)' : undefined }}
-                      />
-                    </div>
-                  </div>
-                  {code ? (
-                    <span
-                      className="text-[10px] tracking-[0.12em] font-semibold px-[10px] py-[5px] rounded-full"
-                      style={{ background: 'rgba(255, 209, 102,0.1)', border: '0.5px solid rgba(255, 209, 102,0.4)', color: 'var(--terracotta)' }}
-                    >
-                      {code}
-                    </span>
-                  ) : unlocked ? (
-                    <button
-                      onClick={() => handleRedeem(tier)}
-                      disabled={isClaim}
-                      className="text-[10px] tracking-[0.16em] uppercase font-medium px-[10px] py-[5px] rounded-full transition-opacity disabled:opacity-60"
-                      style={{ background: 'rgba(94, 234, 212,0.12)', border: '0.5px solid rgba(94, 234, 212,0.5)', color: 'var(--seafoam)' }}
-                    >
-                      {isClaim ? '…' : 'Redeem'}
-                    </button>
-                  ) : (
-                    <span
-                      className="text-[10px] tracking-[0.16em] uppercase font-medium px-[10px] py-[5px] rounded-full whitespace-nowrap"
-                      style={{ border: '0.5px solid rgba(232,230,221,0.18)', color: 'rgba(232,230,221,0.55)' }}
-                    >
-                      Locked
-                    </span>
-                  )}
-                </div>
+                  {t.label}
+                  <span className="ml-1.5 opacity-60">{t.count}</span>
+                </button>
               );
             })}
           </div>
 
+          {/* Redeem at Astroman till — burn Stars for a one-time POS code */}
+          <button
+            onClick={() => {
+              if (!authenticated) { setAuthOpen(true); return; }
+              router.push('/profile?redeem=open');
+            }}
+            className="flex items-center justify-between gap-3 px-4 py-3 mb-[18px] rounded-lg w-full text-left"
+            style={{
+              background: 'rgba(255, 209, 102,0.06)',
+              border: '0.5px solid rgba(255, 209, 102,0.3)',
+            }}
+          >
+            <div className="flex flex-col">
+              <span className="text-[11px] tracking-[0.18em] uppercase font-semibold text-[var(--terracotta)]">
+                Redeem at Astroman till
+              </span>
+              <span className="text-[12px] text-[rgba(232,230,221,0.7)] mt-0.5">
+                Burn Stars for a one-time code · 100 Stars = 1 ₾ store credit · Tbilisi store
+              </span>
+            </div>
+            <span aria-hidden className="text-[var(--terracotta)] text-lg">→</span>
+          </button>
+
+          {tab === 'shop' && (
           <div
             className="flex items-center gap-[4px] p-[5px] rounded-full mb-[18px] overflow-x-auto"
             style={{ background: 'rgba(255,255,255,0.015)', border: '0.5px solid rgba(232,230,221,0.06)' }}
@@ -290,36 +253,66 @@ export default function MarketplacePage() {
               );
             })}
           </div>
+          )}
 
-          {featured && (
+          {tab === 'shop' && featured && (
             <FeaturedProduct product={featured} dealerName={showDealer ? getDealerName(featured.dealerId) : ''} />
           )}
 
-          {sections.length === 0 ? (
-            <p className="text-center text-[12px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.7)] py-12">
-              No items match these filters
-            </p>
-          ) : (
-            sections.map(sec => (
-              <section key={sec.key} className="mb-7">
-                <div className="flex items-baseline gap-3 mb-[10px] pb-2 border-b border-[rgba(232,230,221,0.1)]">
-                  <span className="text-[10px] tracking-[0.24em] uppercase font-semibold" style={{ color: sec.color }}>
-                    {sec.label}
-                  </span>
-                  <span className="text-[11px] tracking-[0.1em] uppercase text-[rgba(232,230,221,0.65)]">
-                    {sec.sub}
-                  </span>
-                  <span className="ml-auto text-[10px] tracking-[0.16em] uppercase text-[rgba(232,230,221,0.6)]">
-                    {sec.items.length} {sec.items.length === 1 ? 'item' : 'items'}
-                  </span>
-                </div>
+          {tab === 'shop' && (
+            sections.length === 0 ? (
+              <p className="text-center text-[12px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.7)] py-12">
+                No items match these filters
+              </p>
+            ) : (
+              sections.map(sec => (
+                <section key={sec.key} className="mb-7">
+                  <div className="flex items-baseline gap-3 mb-[10px] pb-2 border-b border-[rgba(232,230,221,0.1)]">
+                    <span className="text-[10px] tracking-[0.24em] uppercase font-semibold" style={{ color: sec.color }}>
+                      {sec.label}
+                    </span>
+                    <span className="text-[11px] tracking-[0.1em] uppercase text-[rgba(232,230,221,0.65)]">
+                      {sec.sub}
+                    </span>
+                    <span className="ml-auto text-[10px] tracking-[0.16em] uppercase text-[rgba(232,230,221,0.6)]">
+                      {sec.items.length} {sec.items.length === 1 ? 'item' : 'items'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-[8px]">
+                    {sec.items.map(p => (
+                      <ProductCard key={p.id} product={p} dealerName={showDealer ? getDealerName(p.dealerId) : ''} />
+                    ))}
+                  </div>
+                </section>
+              ))
+            )
+          )}
+
+          {tab === 'star-shop' && (
+            <section className="mb-7">
+              <div className="flex items-baseline gap-3 mb-[10px] pb-2 border-b border-[rgba(232,230,221,0.1)]">
+                <span className="text-[10px] tracking-[0.24em] uppercase font-semibold" style={{ color: 'var(--seafoam)' }}>
+                  Star Shop
+                </span>
+                <span className="text-[11px] tracking-[0.1em] uppercase text-[rgba(232,230,221,0.65)]">
+                  Stars-only · pickup or shipping from Astroman
+                </span>
+                <span className="ml-auto text-[10px] tracking-[0.16em] uppercase text-[rgba(232,230,221,0.6)]">
+                  {starShopProducts.length} {starShopProducts.length === 1 ? 'item' : 'items'}
+                </span>
+              </div>
+              {starShopProducts.length === 0 ? (
+                <p className="text-center text-[12px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.7)] py-12">
+                  No Stars-only items in this region yet
+                </p>
+              ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-[8px]">
-                  {sec.items.map(p => (
+                  {starShopProducts.map(p => (
                     <ProductCard key={p.id} product={p} dealerName={showDealer ? getDealerName(p.dealerId) : ''} />
                   ))}
                 </div>
-              </section>
-            ))
+              )}
+            </section>
           )}
         </div>
       </div>

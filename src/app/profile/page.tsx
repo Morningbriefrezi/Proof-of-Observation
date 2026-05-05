@@ -5,7 +5,7 @@ import { useStellarUser } from '@/hooks/useStellarUser';
 import { useStellarAuth } from '@/hooks/useStellarAuth';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useTranslations } from 'next-intl';
-import { useState, useEffect, type CSSProperties } from 'react';
+import { Suspense, useState, useEffect, type CSSProperties } from 'react';
 import {
   Copy, Check, ExternalLink, Telescope, User, ChevronRight,
   Bell, Moon, LogOut, X, Camera, Package, Trash2,
@@ -23,6 +23,8 @@ import MyActiveBets from '@/components/markets/MyActiveBets';
 import { Avatar } from '@/lib/avatars';
 import { AvatarPicker } from '@/components/profile/AvatarPicker';
 import { UsernameEditor } from '@/components/profile/UsernameEditor';
+import AstromanRedeemModal from '@/components/profile/AstromanRedeemModal';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useProfile } from '@/hooks/useProfile';
 
 interface OrderRow {
@@ -110,6 +112,14 @@ const SEE_ALL_STYLE: CSSProperties = {
 };
 
 export default function ProfilePage() {
+  return (
+    <Suspense fallback={null}>
+      <ProfilePageContent />
+    </Suspense>
+  );
+}
+
+function ProfilePageContent() {
   const t = useTranslations('profile');
   const { user, getAccessToken } = usePrivy();
   const { authenticated, address: stellarAddress } = useStellarUser();
@@ -118,6 +128,18 @@ export default function ProfilePage() {
   const [discoveryToDelete, setDiscoveryToDelete] = useState<string | null>(null);
   const { profile, saving, update } = useProfile();
   const [authOpen, setAuthOpen] = useState(false);
+  const [redeemOpen, setRedeemOpen] = useState(false);
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Auto-open the redeem modal when arriving from the marketplace CTA.
+  useEffect(() => {
+    if (searchParams?.get('redeem') === 'open' && authenticated) {
+      setRedeemOpen(true);
+      router.replace('/profile');
+    }
+  }, [searchParams, authenticated, router]);
 
   const [starsBalance, setStarsBalance] = useState<number>(0);
   const [lifetimeEarned, setLifetimeEarned] = useState<number>(0);
@@ -475,6 +497,38 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        {/* §5B: Redeem at Astroman till */}
+        <button
+          onClick={() => setRedeemOpen(true)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            padding: '14px 16px',
+            background: 'rgba(255,209,102,0.06)',
+            border: '0.5px solid rgba(255,209,102,0.3)',
+            borderRadius: 'var(--stl-r-md)',
+            cursor: 'pointer',
+            textAlign: 'left',
+            width: '100%',
+          }}
+        >
+          <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <span style={{
+              fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600,
+              textTransform: 'uppercase', letterSpacing: '0.14em',
+              color: 'var(--terracotta)',
+            }}>
+              Redeem at Astroman till
+            </span>
+            <span style={{ fontSize: 12, color: 'var(--stl-text-muted)' }}>
+              Burn Stars for store credit · 100 Stars = 1 ₾ · 7-day code
+            </span>
+          </span>
+          <span aria-hidden style={{ color: 'var(--terracotta)', fontSize: 16 }}>→</span>
+        </button>
+
         {/* MY ACTIVE BETS */}
         <section>
           <MyActiveBets variant="compact" title="My active bets" />
@@ -823,6 +877,13 @@ export default function ProfilePage() {
         </div>
 
       </PageContainer>
+
+      <AstromanRedeemModal
+        open={redeemOpen}
+        onClose={() => setRedeemOpen(false)}
+        walletAddress={address}
+        balance={starsBalance}
+      />
     </PageTransition>
   );
 }

@@ -31,6 +31,13 @@ export interface Product {
   specs?: Record<string, string>
   beginner?: boolean
   skillLevel?: 'beginner' | 'intermediate' | 'advanced'
+  /**
+   * 'stars-only' marks an item that is sold exclusively in the in-app Star
+   * Shop — the user pays with the Stars SPL token, no SOL / fiat. Default
+   * (undefined) means the item shows in the regular SOL / Stars dual-price
+   * marketplace.
+   */
+  kind?: 'stars-only'
 }
 
 const DEALERS: Dealer[] = [
@@ -1048,6 +1055,80 @@ const PRODUCTS: Product[] = [
     specs: { aperture: '50mm', focal: '600mm', mount: 'Manual Alt-Az' },
     beginner: true,
     skillLevel: 'beginner' as const,
+  },
+
+  // ─── Star Shop (Stars-only inventory) ──────────────────────────────────────
+  // §5A: in-app shop tier where users spend the Stars SPL token — no SOL / fiat.
+  // priceStars is the source of truth; price is set to 0 and not displayed.
+  {
+    id: 'star-shop-patch',
+    dealerId: 'astroman',
+    kind: 'stars-only',
+    name: 'Astroman Embroidered Patch',
+    price: 0,
+    currency: 'GEL',
+    currencySymbol: '₾',
+    starsPrice: 1000,
+    category: 'accessory',
+    description: 'Iron-on cloth patch — the Astroman logo. Pickup at the Tbilisi store or shipped to anywhere in Georgia.',
+    image: 'https://astroman.ge/wp-content/uploads/2024/08/Telescope.jpg',
+    externalUrl: 'https://astroman.ge',
+  },
+  {
+    id: 'star-shop-redlight',
+    dealerId: 'astroman',
+    kind: 'stars-only',
+    name: 'Red-Light Astronomer Flashlight',
+    price: 0,
+    currency: 'GEL',
+    currencySymbol: '₾',
+    starsPrice: 3000,
+    category: 'accessory',
+    description: 'Dim red-LED flashlight that preserves dark adaptation. Essential for star charts under the night sky.',
+    image: 'https://astroman.ge/wp-content/uploads/2022/09/%E1%83%90%E1%83%93%E1%83%90%E1%83%9E%E1%83%A2%E1%83%94%E1%83%A0%E1%83%98.jpg',
+    externalUrl: 'https://astroman.ge',
+  },
+  {
+    id: 'star-shop-laser',
+    dealerId: 'astroman',
+    kind: 'stars-only',
+    name: 'Green Astronomy Laser Pointer',
+    price: 0,
+    currency: 'GEL',
+    currencySymbol: '₾',
+    starsPrice: 5000,
+    category: 'accessory',
+    description: 'Green-beam laser pointer for sky tours — point out planets and constellations to anyone next to you.',
+    image: 'https://astroman.ge/wp-content/uploads/2022/09/%E1%83%90%E1%83%93%E1%83%90%E1%83%9E%E1%83%A2%E1%83%94%E1%83%A0%E1%83%98.jpg',
+    externalUrl: 'https://astroman.ge',
+  },
+  {
+    id: 'star-shop-planisphere',
+    dealerId: 'astroman',
+    kind: 'stars-only',
+    name: 'Planisphere (40°N rotating star chart)',
+    price: 0,
+    currency: 'GEL',
+    currencySymbol: '₾',
+    starsPrice: 8000,
+    category: 'accessory',
+    description: 'Rotating star map calibrated for 40°N — find what is visible right now from Tbilisi or anywhere on the same latitude.',
+    image: 'https://astroman.ge/wp-content/uploads/2022/09/-%E1%83%A1%E1%83%90%E1%83%9C%E1%83%90%E1%83%97%E1%83%98-3D--jpg.webp',
+    externalUrl: 'https://astroman.ge',
+  },
+  {
+    id: 'star-shop-eyepiece-kit',
+    dealerId: 'astroman',
+    kind: 'stars-only',
+    name: '4-Piece Plossl Eyepiece Kit',
+    price: 0,
+    currency: 'GEL',
+    currencySymbol: '₾',
+    starsPrice: 15000,
+    category: 'eyepiece',
+    description: 'Set of four 1.25" Plossl eyepieces (32mm / 17mm / 10mm / 6mm). Covers wide-field to high-power planetary work.',
+    image: 'https://astroman.ge/wp-content/uploads/2022/09/%E1%83%90%E1%83%93%E1%83%90%E1%83%9E%E1%83%A2%E1%83%94%E1%83%A0%E1%83%98.jpg',
+    externalUrl: 'https://astroman.ge',
   },
 ]
 
