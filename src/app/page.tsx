@@ -158,6 +158,196 @@ function StarSparkle({ className = 'w-3 h-3' }: { className?: string }) {
   );
 }
 
+/* ─── How It Works: phone-frame mockups ───────────────────────────── */
+
+function PhoneFrame({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative mx-auto w-[230px] md:w-[260px] aspect-[9/19.5] rounded-[38px] bg-[#05070D] p-[6px] shadow-[0_30px_70px_-20px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.06)]">
+      <div className="absolute -inset-[1px] rounded-[39px] ring-1 ring-white/[0.04] pointer-events-none" />
+      <div className="relative h-full w-full rounded-[32px] bg-gradient-to-b from-[#0B0E17] to-[#0F1424] overflow-hidden">
+        <div className="absolute top-1.5 left-1/2 -translate-x-1/2 h-[20px] w-[78px] rounded-full bg-black z-20" />
+        <div className="flex items-center justify-between px-5 pt-2 text-[9px] font-mono text-white/50 relative z-10">
+          <span>9:41</span>
+          <span className="flex items-center gap-1">
+            <span className="w-2.5 h-1 rounded-[1px] bg-white/40" />
+            <span className="w-3 h-1.5 rounded-[1px] border border-white/40" />
+          </span>
+        </div>
+        <div className="px-3 pt-6 pb-4 h-full">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function HowStep({
+  title,
+  caption,
+  screen,
+}: {
+  title: string;
+  caption: string;
+  screen: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center text-center">
+      {screen}
+      <div className="mt-7 md:mt-8 text-white text-[18px] md:text-[20px] font-semibold tracking-[-0.01em]">
+        {title}
+      </div>
+      <div className="mt-2 text-[#9BA3B4] text-[13.5px] md:text-[14.5px] leading-[1.55] max-w-[260px]">
+        {caption}
+      </div>
+    </div>
+  );
+}
+
+function SigninScreen() {
+  return (
+    <PhoneFrame>
+      <div className="flex flex-col items-center pt-6">
+        <div className="w-9 h-9 rounded-full bg-[#FFD166]/15 border border-[#FFD166]/30 flex items-center justify-center">
+          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="#FFD166" strokeWidth="1.8">
+            <circle cx="12" cy="12" r="3" />
+            <ellipse cx="12" cy="12" rx="10" ry="4" />
+          </svg>
+        </div>
+        <div className="mt-3 text-white text-[12px] font-semibold tracking-wide">STELLAR</div>
+        <div className="mt-5 text-white text-[13px] font-medium">Sign in</div>
+        <div className="mt-1 text-white/50 text-[10px]">Wallet appears silently</div>
+
+        <div className="mt-5 w-full bg-white/[0.04] border border-white/10 rounded-[10px] px-3 py-2.5 flex items-center gap-2">
+          <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="#9BA3B4" strokeWidth="1.6">
+            <rect x="3" y="5" width="18" height="14" rx="2" />
+            <path d="M3 7l9 6 9-6" />
+          </svg>
+          <span className="text-white/80 text-[10.5px]">rezi@astroman.ge</span>
+        </div>
+
+        <div className="mt-2 w-full rounded-[10px] bg-[#FFD166] text-[#0B0E17] text-[11px] font-bold py-2.5 text-center">
+          Continue
+        </div>
+
+        <div className="mt-4 w-full rounded-[10px] border border-[#14B8A6]/25 bg-[#14B8A6]/[0.06] px-3 py-2 flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#14B8A6] animate-pulse" />
+          <span className="text-[#5EEAD4] text-[9.5px] font-mono uppercase tracking-wider">
+            Wallet ready
+          </span>
+        </div>
+
+        <div className="mt-2 text-white/35 text-[9px]">No seed phrase. No extension.</div>
+      </div>
+    </PhoneFrame>
+  );
+}
+
+function ShootScreen() {
+  return (
+    <PhoneFrame>
+      <div className="flex flex-col pt-3">
+        <div className="flex items-center justify-between">
+          <span className="text-white/60 text-[10px] font-mono uppercase tracking-wider">Tonight</span>
+          <span className="flex items-center gap-1 text-[#5EEAD4] text-[9px] font-mono uppercase tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#14B8A6]" /> Clear
+          </span>
+        </div>
+
+        <div className="mt-2 relative aspect-square w-full rounded-[14px] overflow-hidden bg-gradient-to-br from-[#0F1424] via-[#1A1F3A] to-[#0B0E17]">
+          {[
+            { l: '14%', t: '22%', s: 1.5 },
+            { l: '70%', t: '18%', s: 1 },
+            { l: '32%', t: '60%', s: 1.2 },
+            { l: '80%', t: '70%', s: 0.9 },
+            { l: '50%', t: '40%', s: 0.8 },
+            { l: '22%', t: '80%', s: 1 },
+            { l: '60%', t: '85%', s: 0.9 },
+          ].map((s, i) => (
+            <span
+              key={i}
+              className="absolute rounded-full bg-white/80"
+              style={{ left: s.l, top: s.t, width: s.s * 2, height: s.s * 2 }}
+            />
+          ))}
+          <div
+            className="absolute rounded-full"
+            style={{
+              left: '46%',
+              top: '44%',
+              width: 28,
+              height: 28,
+              background:
+                'radial-gradient(circle, rgba(255,209,102,0.85) 0%, rgba(255,209,102,0.25) 60%, transparent 100%)',
+            }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-full border border-[#FFD166]/60" />
+            <div className="absolute w-20 h-20 rounded-full border border-[#FFD166]/25" />
+          </div>
+          <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/50 text-[#FFD166] text-[8.5px] font-mono uppercase tracking-wider">
+            Jupiter · 38°
+          </div>
+        </div>
+
+        <div className="mt-3 rounded-[10px] bg-white/[0.04] border border-white/10 p-2.5">
+          <div className="flex items-center justify-between text-[9px] font-mono uppercase tracking-wider text-white/50">
+            <span>Sky</span><span>Moon</span><span>Seeing</span>
+          </div>
+          <div className="mt-1 flex items-center justify-between text-[10.5px] text-white">
+            <span>Clear</span><span>14%</span><span>Good</span>
+          </div>
+        </div>
+
+        <div className="mt-3 mx-auto w-12 h-12 rounded-full bg-white border-[3px] border-[#FFD166] shadow-[0_0_0_3px_rgba(255,209,102,0.2)]" />
+      </div>
+    </PhoneFrame>
+  );
+}
+
+function RedeemScreen() {
+  return (
+    <PhoneFrame>
+      <div className="flex flex-col pt-3">
+        <div className="text-white/60 text-[10px] font-mono uppercase tracking-wider">Your Stars</div>
+        <div className="mt-1 flex items-baseline gap-1.5">
+          <span className="text-white text-[28px] font-bold leading-none">2,840</span>
+          <StarSparkle className="w-3.5 h-3.5" />
+        </div>
+        <div className="mt-1 flex items-center gap-1.5 text-[#5EEAD4] text-[9.5px] font-mono">
+          <svg viewBox="0 0 12 12" className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="M2 8l3-3 2 2 3-4" />
+          </svg>
+          +120 this week
+        </div>
+
+        <div className="mt-4 text-white/60 text-[9.5px] font-mono uppercase tracking-wider">
+          Redeem at Astroman
+        </div>
+
+        <div className="mt-2 rounded-[12px] bg-white/[0.04] border border-white/10 overflow-hidden">
+          <div className="aspect-[16/10] bg-gradient-to-br from-[#1A1F3A] to-[#0B0E17] relative flex items-center justify-center">
+            <svg viewBox="0 0 64 40" className="w-20 h-12" fill="none" stroke="#FFD166" strokeWidth="1.4" strokeLinecap="round">
+              <rect x="6" y="14" width="40" height="8" rx="1" />
+              <rect x="44" y="11" width="14" height="14" rx="1" />
+              <path d="M26 22v8M18 30h16" />
+              <circle cx="51" cy="18" r="1.2" fill="#FFD166" />
+            </svg>
+          </div>
+          <div className="px-2.5 py-2">
+            <div className="text-white text-[11px] font-medium leading-tight">Celestron AstroMaster</div>
+            <div className="mt-1 flex items-center justify-between">
+              <span className="text-[#FFD166] text-[10.5px] font-mono">2,400 ★</span>
+              <span className="text-white/40 text-[9px] line-through font-mono">₾ 480</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-2 rounded-[10px] bg-[#FFD166] text-[#0B0E17] text-[11px] font-bold py-2 text-center">
+          Redeem
+        </div>
+      </div>
+    </PhoneFrame>
+  );
+}
+
 export default function HomePage() {
   return (
     <div className="bg-[#0A1735] text-white -mt-14 pt-14 overflow-x-hidden">
@@ -239,23 +429,116 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* hero stats */}
-        <div className="relative max-w-[1200px] mx-auto mt-12 md:mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10 text-center">
-          <div>
-            <div className="text-[28px] md:text-[48px] font-bold leading-none mb-1.5 md:mb-2 bg-gradient-to-r from-[#B07FE8] to-[#38F0FF] bg-clip-text text-transparent">7</div>
-            <div className="text-[12px] md:text-[14px] font-medium text-[#9BA3B4]">Sky missions</div>
+        {/* brand partners — backed by Astroman + 30K customers */}
+        <div className="relative max-w-[1200px] mx-auto mt-14 md:mt-24">
+          {/* header row: eyebrow + 30K stat + partner count */}
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 md:gap-10 mb-7 md:mb-9 pb-6 md:pb-8 border-b border-white/[0.07]">
+            <div className="max-w-[640px]">
+              <div className="text-[10.5px] md:text-[11px] uppercase tracking-[0.22em] text-[#9BA3B4] mb-3">
+                Backed by Georgia&apos;s largest astronomy retailer
+              </div>
+              <div className="flex items-baseline gap-3 md:gap-4">
+                <span className="font-mono text-[36px] md:text-[56px] font-bold leading-none text-white tracking-tight tabular-nums">30,000+</span>
+                <span className="text-[15px] md:text-[18px] text-[#9BA3B4] leading-tight pb-1">
+                  Astroman customers
+                </span>
+              </div>
+              <div className="text-[13px] md:text-[14px] text-[#6B7385] mt-2.5 leading-[1.55]">
+                Eight years of trust on astroman.ge. Redeem Stars for real gear from the brands they already buy.
+              </div>
+            </div>
+
+            <div className="flex md:flex-col md:items-end gap-3 md:gap-1.5 md:text-right">
+              <div className="text-[10.5px] md:text-[11px] uppercase tracking-[0.22em] text-[#9BA3B4] order-2 md:order-1">
+                Brand partners
+              </div>
+              <div className="font-mono text-[28px] md:text-[40px] font-bold leading-none text-white tabular-nums order-1 md:order-2">
+                04
+              </div>
+            </div>
           </div>
-          <div>
-            <div className="text-[28px] md:text-[48px] font-bold leading-none mb-1.5 md:mb-2 text-[#FFD166]">Real-time</div>
-            <div className="text-[12px] md:text-[14px] font-medium text-[#9BA3B4]">Planet positions</div>
+
+          {/* logo wall */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-y-8 md:gap-y-0">
+            {/* Astroman — serif, observatory feel */}
+            <div className="flex items-center justify-center md:border-r md:border-white/[0.06] md:px-4 py-4 md:py-3 group">
+              <span
+                className="text-white/65 group-hover:text-white transition-colors duration-300 leading-none whitespace-nowrap"
+                style={{
+                  fontFamily: '"Source Serif 4", Georgia, serif',
+                  fontSize: 'clamp(20px, 2.4vw, 26px)',
+                  fontWeight: 600,
+                  letterSpacing: '0.18em',
+                }}
+              >
+                ASTROMAN
+              </span>
+            </div>
+
+            {/* Bresser — bold engineering wordmark with star mark */}
+            <div className="flex items-center justify-center md:border-r md:border-white/[0.06] md:px-4 py-4 md:py-3 group">
+              <span
+                className="inline-flex items-baseline gap-1.5 text-white/65 group-hover:text-white transition-colors duration-300 leading-none whitespace-nowrap"
+                style={{
+                  fontFamily: '"Public Sans", system-ui, sans-serif',
+                  fontSize: 'clamp(20px, 2.4vw, 26px)',
+                  fontWeight: 800,
+                  letterSpacing: '-0.01em',
+                }}
+              >
+                BRESSER
+                <svg
+                  viewBox="0 0 12 12"
+                  className="w-[9px] h-[9px] md:w-[11px] md:h-[11px] self-start mt-[3px]"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M6 0l1.5 4.2L12 4.6l-3.5 2.9L9.7 12 6 9.4 2.3 12l1.2-4.5L0 4.6l4.5-.4z" />
+                </svg>
+              </span>
+            </div>
+
+            {/* Celestron — dynamic italic */}
+            <div className="flex items-center justify-center md:border-r md:border-white/[0.06] md:px-4 py-4 md:py-3 group">
+              <span
+                className="text-white/65 group-hover:text-white transition-colors duration-300 leading-none whitespace-nowrap"
+                style={{
+                  fontFamily: '"Public Sans", system-ui, sans-serif',
+                  fontSize: 'clamp(20px, 2.4vw, 26px)',
+                  fontWeight: 800,
+                  fontStyle: 'italic',
+                  letterSpacing: '-0.015em',
+                }}
+              >
+                CELESTRON
+              </span>
+            </div>
+
+            {/* Levenhuk — wide tracking modern geometric */}
+            <div className="flex items-center justify-center md:px-4 py-4 md:py-3 group">
+              <span
+                className="text-white/65 group-hover:text-white transition-colors duration-300 leading-none whitespace-nowrap"
+                style={{
+                  fontFamily: '"Public Sans", system-ui, sans-serif',
+                  fontSize: 'clamp(20px, 2.4vw, 26px)',
+                  fontWeight: 300,
+                  letterSpacing: '0.24em',
+                }}
+              >
+                LEVENHUK
+              </span>
+            </div>
           </div>
-          <div>
-            <div className="text-[28px] md:text-[48px] font-bold leading-none mb-1.5 md:mb-2 bg-gradient-to-r from-[#B07FE8] to-[#38F0FF] bg-clip-text text-transparent">3 brands</div>
-            <div className="text-[12px] md:text-[14px] font-medium text-[#9BA3B4]">Bresser · Levenhuk · Celestron</div>
-          </div>
-          <div>
-            <div className="text-[28px] md:text-[48px] font-bold leading-none mb-1.5 md:mb-2 text-[#FFD166]">Free</div>
-            <div className="text-[12px] md:text-[14px] font-medium text-[#9BA3B4]">No wallet needed</div>
+
+          {/* footer note */}
+          <div className="mt-7 md:mt-9 pt-5 md:pt-6 border-t border-white/[0.07] flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4">
+            <div className="text-[12px] md:text-[13px] text-[#6B7385] tracking-[0.01em]">
+              Official retail partners · stocked at Astroman Tbilisi
+            </div>
+            <div className="flex items-center gap-2 text-[11px] md:text-[12px] text-[#9BA3B4] uppercase tracking-[0.18em]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FFD166]" aria-hidden="true" />
+              Live inventory
+            </div>
           </div>
         </div>
       </section>
@@ -265,43 +548,27 @@ export default function HomePage() {
          ============================================================ */}
       <section className="px-4 md:px-8 py-14 md:py-[120px]">
         <div className="max-w-[1200px] mx-auto">
-          <div className="text-center mb-16 md:mb-20">
+          <div className="text-center mb-12 md:mb-20">
             <Eyebrow>Get Started</Eyebrow>
             <SectionTitle>How It Works</SectionTitle>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr] gap-4 md:gap-0 items-stretch">
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-6 md:p-12 text-center">
-              <div className="text-[#FFD166] text-[28px] md:text-[40px] font-bold leading-none mb-4 md:mb-7">01</div>
-              <div className="text-white text-[18px] md:text-[22px] font-bold mb-3 md:mb-4">Sign in with email</div>
-              <div className="text-[#9BA3B4] text-[14px] md:text-[15px] leading-[1.6]">
-                Privy creates a Solana wallet silently. No seed phrase, no extension, no setup needed.
-              </div>
-            </div>
-            <div className="flex items-center justify-center px-0 md:px-6 rotate-90 md:rotate-0">
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14M13 6l6 6-6 6" />
-              </svg>
-            </div>
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-6 md:p-12 text-center">
-              <div className="text-[#FFD166] text-[28px] md:text-[40px] font-bold leading-none mb-4 md:mb-7">02</div>
-              <div className="text-white text-[18px] md:text-[22px] font-bold mb-3 md:mb-4">Photograph the sky</div>
-              <div className="text-[#9BA3B4] text-[14px] md:text-[15px] leading-[1.6]">
-                Point your phone — or telescope, or DSLR — at the night. Open-Meteo verifies sky conditions. NFT attestation minted to your wallet, gasless.
-              </div>
-            </div>
-            <div className="flex items-center justify-center px-0 md:px-6 rotate-90 md:rotate-0">
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14M13 6l6 6-6 6" />
-              </svg>
-            </div>
-            <div className="bg-[#11172A] border border-white/[0.06] rounded-[18px] p-6 md:p-12 text-center">
-              <div className="text-[#FFD166] text-[28px] md:text-[40px] font-bold leading-none mb-4 md:mb-7">03</div>
-              <div className="text-white text-[18px] md:text-[22px] font-bold mb-3 md:mb-4">Earn Stars, redeem real optics</div>
-              <div className="text-[#9BA3B4] text-[14px] md:text-[15px] leading-[1.6]">
-                Each verified observation earns Stars. Redeem them at Astroman for telescopes, binoculars, and accessories — Bresser, Levenhuk, Celestron.
-              </div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-6">
+            <HowStep
+              title="Sign in"
+              caption="Email login. Wallet appears silently."
+              screen={<SigninScreen />}
+            />
+            <HowStep
+              title="Shoot the sky"
+              caption="Phone, DSLR, or telescope. We verify the night."
+              screen={<ShootScreen />}
+            />
+            <HowStep
+              title="Earn &amp; redeem"
+              caption="Stars for every observation. Spend at Astroman."
+              screen={<RedeemScreen />}
+            />
           </div>
         </div>
       </section>
