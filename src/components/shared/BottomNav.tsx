@@ -2,19 +2,26 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CloudSun, Satellite, User, TrendingUp, Home } from 'lucide-react';
+import { CloudSun, LayoutGrid, TrendingUp, Home, User } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { useDisplayProfile } from '@/hooks/useDisplayProfile';
+import { avatarById } from '@/lib/avatars';
 
-const TABS: { href: string; label: string; icon: LucideIcon }[] = [
-  { href: '/sky',      label: 'Sky',      icon: CloudSun },
-  { href: '/missions', label: 'Missions', icon: Satellite },
-  { href: '/',         label: 'Home',     icon: Home },
-  { href: '/markets',  label: 'Markets',  icon: TrendingUp },
-  { href: '/profile',  label: 'Profile',  icon: User },
+type Tab = { href: string; label: string; icon: LucideIcon | 'profile' };
+
+const TABS: Tab[] = [
+  { href: '/hub',      label: 'Hub',     icon: LayoutGrid },
+  { href: '/sky',      label: 'Sky',     icon: CloudSun },
+  { href: '/',         label: 'Home',    icon: Home },
+  { href: '/markets',  label: 'Markets', icon: TrendingUp },
+  { href: '/profile',  label: 'Profile', icon: 'profile' },
 ];
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { authenticated, initials, avatarId } = useDisplayProfile();
+  const avatarDef = avatarId ? avatarById(avatarId) : null;
+  const showAvatarIcon = avatarDef && avatarDef.id !== 'initial';
 
   return (
     <nav
@@ -34,7 +41,8 @@ export default function BottomNav() {
       >
         {TABS.map(tab => {
           const isActive = tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);
-          const Icon = tab.icon;
+          const isProfile = tab.icon === 'profile';
+          const Icon = isProfile ? null : (tab.icon as LucideIcon);
 
           return (
             <Link
@@ -85,15 +93,69 @@ export default function BottomNav() {
                     }}
                   />
                 )}
-                <Icon
-                  size={22}
-                  strokeWidth={isActive ? 2.2 : 1.7}
-                  color={isActive ? 'var(--stl-gold)' : 'rgba(255,255,255,0.42)'}
-                  style={{
-                    filter: isActive ? 'drop-shadow(0 0 6px rgba(255, 209, 102,0.45))' : 'none',
-                    transition: 'color 0.2s ease, filter 0.2s ease',
-                  }}
-                />
+                {isProfile ? (
+                  authenticated && showAvatarIcon && avatarDef ? (
+                    <span
+                      style={{
+                        width: 26,
+                        height: 26,
+                        borderRadius: 9999,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                        background: 'linear-gradient(135deg, #534AB7, #7F77DD)',
+                        border: isActive ? '1.5px solid rgba(255,209,102,0.6)' : '1.5px solid rgba(255,255,255,0.15)',
+                        filter: isActive ? 'drop-shadow(0 0 6px rgba(255, 209, 102,0.45))' : 'none',
+                        transition: 'border-color 0.2s ease, filter 0.2s ease',
+                      }}
+                    >
+                      <avatarDef.Icon size={18} tint={avatarDef.tint} />
+                    </span>
+                  ) : authenticated && initials ? (
+                    <span
+                      style={{
+                        width: 26,
+                        height: 26,
+                        borderRadius: 9999,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'linear-gradient(135deg, #534AB7, #7F77DD)',
+                        border: isActive ? '1.5px solid rgba(255,209,102,0.6)' : '1.5px solid rgba(255,255,255,0.15)',
+                        color: 'white',
+                        fontSize: 10,
+                        fontWeight: 500,
+                        letterSpacing: '0.02em',
+                        lineHeight: 1,
+                        filter: isActive ? 'drop-shadow(0 0 6px rgba(255, 209, 102,0.45))' : 'none',
+                        transition: 'border-color 0.2s ease, filter 0.2s ease',
+                      }}
+                    >
+                      {initials}
+                    </span>
+                  ) : (
+                    <User
+                      size={22}
+                      strokeWidth={isActive ? 2.2 : 1.7}
+                      color={isActive ? 'var(--stl-gold)' : 'rgba(255,255,255,0.42)'}
+                      style={{
+                        filter: isActive ? 'drop-shadow(0 0 6px rgba(255, 209, 102,0.45))' : 'none',
+                        transition: 'color 0.2s ease, filter 0.2s ease',
+                      }}
+                    />
+                  )
+                ) : Icon ? (
+                  <Icon
+                    size={22}
+                    strokeWidth={isActive ? 2.2 : 1.7}
+                    color={isActive ? 'var(--stl-gold)' : 'rgba(255,255,255,0.42)'}
+                    style={{
+                      filter: isActive ? 'drop-shadow(0 0 6px rgba(255, 209, 102,0.45))' : 'none',
+                      transition: 'color 0.2s ease, filter 0.2s ease',
+                    }}
+                  />
+                ) : null}
               </div>
 
               <span
