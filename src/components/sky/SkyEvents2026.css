@@ -1,0 +1,355 @@
+/* === Sky Events 2026 ============================================== */
+
+.ev {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.06);
+  overflow: hidden;
+}
+
+.ev__head {
+  display: flex;
+  flex-direction: column;
+}
+.ev__eyebrow {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.42);
+  margin: 0 0 6px;
+}
+.ev__title {
+  font-family: var(--font-display, 'Source Serif 4', serif);
+  font-size: 22px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--text);
+}
+.ev__sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+  max-width: 46ch;
+}
+
+/* === Mobile rail ================================================= */
+.ev__rail {
+  list-style: none;
+  margin: 0;
+  padding: 4px 18px 4px;
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  /* Bleed the rail beyond the card padding so cards can scroll edge-to-edge. */
+  margin-left: -18px;
+  margin-right: -18px;
+}
+.ev__rail::-webkit-scrollbar { height: 0; }
+
+.ev__cell {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+}
+
+.ev__card {
+  width: 220px;
+  height: 220px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  background: rgba(11,24,48,0.65);
+  border: 1px solid rgba(255,255,255,0.07);
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+.ev__card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.16);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.30);
+}
+.ev__art {
+  flex: 1 1 auto;
+  width: 100%;
+  position: relative;
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(255,255,255,0.04), transparent 60%),
+    linear-gradient(180deg, #0E1B36 0%, #0A1735 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ev-art {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.ev-art--lg { min-height: 200px; }
+
+.ev__caption {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.025);
+}
+.ev__date {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--terracotta);
+}
+.ev__name {
+  font-family: var(--font-display, 'Source Serif 4', serif);
+  font-size: 15px;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+/* === Animations ================================================== */
+
+/* Lunar eclipse — Moon drifts L→R, switching from normal to blood-red */
+.ev-le__moon {
+  animation: ev-le-translate 7s ease-in-out infinite;
+}
+@keyframes ev-le-translate {
+  0%   { transform: translate(20px, 0); }
+  50%  { transform: translate(100px, 0); }
+  100% { transform: translate(180px, 0); }
+}
+.ev-le__pre  { animation: ev-le-fadeOut 7s ease-in-out infinite; }
+.ev-le__blood { opacity: 0; animation: ev-le-fadeIn 7s ease-in-out infinite; }
+@keyframes ev-le-fadeOut {
+  0%, 30%   { opacity: 1; }
+  45%, 65%  { opacity: 0; }
+  85%, 100% { opacity: 1; }
+}
+@keyframes ev-le-fadeIn {
+  0%, 30%   { opacity: 0; }
+  45%, 65%  { opacity: 1; }
+  85%, 100% { opacity: 0; }
+}
+
+/* Solar eclipse — Moon disc occulting Sun */
+.ev-se__moon {
+  animation: ev-se-occult 6s ease-in-out infinite;
+}
+@keyframes ev-se-occult {
+  0%   { transform: translate(-58px, 0); }
+  50%  { transform: translate(0, 0); }
+  100% { transform: translate(58px, 0); }
+}
+.ev-se__corona {
+  opacity: 0;
+  animation: ev-se-corona 6s ease-in-out infinite;
+}
+@keyframes ev-se-corona {
+  0%, 30%, 70%, 100% { opacity: 0; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+/* Meteor shower — diagonal streaks */
+.ev-ms__streak {
+  opacity: 0;
+  animation: ev-ms-fall 1.8s linear infinite;
+}
+@keyframes ev-ms-fall {
+  0%   { opacity: 0; transform: translate(-30px, -30px); }
+  20%  { opacity: 1; }
+  90%  { opacity: 0.4; }
+  100% { opacity: 0; transform: translate(120px, 120px); }
+}
+
+/* Saturn opposition — gentle pulse, slight tilt */
+.ev-op__saturn {
+  transform-origin: 100px 60px;
+  animation: ev-op-tilt 6s ease-in-out infinite;
+}
+@keyframes ev-op-tilt {
+  0%, 100% { transform: translate(100px, 60px) rotate(-6deg) scale(0.95); filter: brightness(0.9); }
+  50%      { transform: translate(100px, 60px) rotate(6deg) scale(1.05); filter: brightness(1.15); }
+}
+
+/* Conjunction — two planets approach + drift */
+.ev-cj__a {
+  animation: ev-cj-a 5s ease-in-out infinite;
+}
+.ev-cj__b {
+  animation: ev-cj-b 5s ease-in-out infinite;
+}
+@keyframes ev-cj-a {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(50px, 0); }
+}
+@keyframes ev-cj-b {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(-48px, 0); }
+}
+
+/* === Reduce motion =============================================== */
+@media (prefers-reduced-motion: reduce) {
+  .ev-le__moon,
+  .ev-le__pre,
+  .ev-le__blood,
+  .ev-se__moon,
+  .ev-se__corona,
+  .ev-ms__streak,
+  .ev-op__saturn,
+  .ev-cj__a,
+  .ev-cj__b {
+    animation: none !important;
+  }
+  .ev-le__blood { opacity: 0.5; }
+}
+
+/* === Sheet (modal-ish) =========================================== */
+.ev__sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 12, 28, 0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: ev-fade-in 200ms ease;
+}
+@keyframes ev-fade-in { from { opacity: 0; } to { opacity: 1; } }
+.ev__sheet {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  background: linear-gradient(180deg, #142446 0%, #0A1735 100%);
+  border-top: 1px solid rgba(255,255,255,0.10);
+  border-radius: 18px 18px 0 0;
+  padding: 18px 18px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: ev-slide-up 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes ev-slide-up {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.ev__sheet-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: var(--text);
+  cursor: pointer;
+}
+.ev__sheet-art {
+  height: 200px;
+  border-radius: 12px;
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(255,255,255,0.04), transparent 60%),
+    linear-gradient(180deg, #0E1B36 0%, #0A1735 100%);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.ev__sheet-eyebrow {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--terracotta);
+  margin: 4px 0 0;
+}
+.ev__sheet-title {
+  font-family: var(--font-display, 'Source Serif 4', serif);
+  font-size: 24px;
+  line-height: 1.15;
+  margin: 0;
+  color: var(--text);
+}
+.ev__sheet-body {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255,255,255,0.70);
+  max-width: 56ch;
+}
+.ev__sheet-meta {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.ev__sheet-meta li {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 10px;
+  align-items: baseline;
+  padding: 6px 0;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.ev__sheet-meta li:first-child { border-top: none; }
+.ev__sheet-key {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.42);
+}
+.ev__sheet-val {
+  font-size: 13px;
+  color: var(--text);
+}
+.ev__sheet-tip {
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255,209,102,0.07);
+  border: 1px solid rgba(255,209,102,0.18);
+  font-size: 13px;
+  color: rgba(255,237,200,0.9);
+}
+
+/* === Web layout =================================================== */
+@media (min-width: 760px) {
+  .ev__title { font-size: 26px; }
+  .ev__rail {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    overflow: visible;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
+  }
+  .ev__card {
+    width: 100%;
+    height: 240px;
+  }
+  .ev__sheet-backdrop {
+    align-items: center;
+  }
+  .ev__sheet {
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.10);
+    margin: 24px;
+  }
+}

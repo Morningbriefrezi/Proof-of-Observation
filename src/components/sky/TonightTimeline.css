@@ -1,0 +1,190 @@
+/* === Tonight Timeline (drag-to-scrub) ============================== */
+
+.tl {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 16px;
+  background:
+    radial-gradient(120% 80% at 100% 0%, rgba(94,234,212,0.04), transparent 60%),
+    rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.tl__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.tl__eyebrow {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.42);
+  margin: 0 0 6px;
+}
+.tl__title {
+  font-family: var(--font-display, 'Source Serif 4', serif);
+  font-size: 22px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin: 0;
+}
+.tl__sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+  max-width: 42ch;
+}
+
+.tl__windowChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 11px;
+  color: rgba(255,255,255,0.78);
+  white-space: nowrap;
+}
+.tl__windowDash { color: rgba(255,255,255,0.40); }
+
+.tl__stage {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.tl__svg {
+  width: 100%;
+  height: auto;
+  background: rgba(11,24,48,0.45);
+  border-radius: 12px;
+  touch-action: none;
+  cursor: ew-resize;
+  user-select: none;
+}
+
+.tl__nowPanel {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tl__nowTime {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 26px;
+  letter-spacing: 0.02em;
+  color: var(--terracotta);
+  line-height: 1;
+}
+.tl__nowLabel {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.40);
+}
+.tl__noneUp {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: rgba(255,255,255,0.50);
+}
+.tl__nowList {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tl__nowItem {
+  display: grid;
+  grid-template-columns: 8px 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+}
+.tl__nowDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+.tl__nowName {
+  font-size: 13px;
+  color: var(--text);
+}
+.tl__nowAlt {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 11px;
+  color: rgba(255,255,255,0.62);
+}
+.tl__nowPeak {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(255,209,102,0.18);
+  color: var(--terracotta);
+}
+
+.tl__legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.42);
+}
+.tl__legendDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.tl__legendDot--snap {
+  background: var(--terracotta);
+}
+
+.tl__skeleton {
+  height: 240px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  background-size: 200% 100%;
+  animation: tl-shimmer 1.6s ease-in-out infinite;
+}
+@keyframes tl-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+.tl__empty {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+}
+
+@media (min-width: 760px) {
+  .tl__stage {
+    grid-template-columns: minmax(0, 1fr) 240px;
+    align-items: stretch;
+  }
+  .tl__title { font-size: 26px; }
+}

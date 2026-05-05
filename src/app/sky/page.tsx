@@ -23,6 +23,9 @@ import {
   type TierFilter,
 } from '@/components/sky/finder/TargetPicker';
 import { SevenDayForecast } from '@/components/sky/forecast/SevenDayForecast';
+import { PointIdentify } from '@/components/sky/PointIdentify';
+import { TonightTimeline } from '@/components/sky/TonightTimeline';
+import { SkyEvents2026 } from '@/components/sky/SkyEvents2026';
 import type { FinderResponse, ObjectId, SkyObject } from '@/components/sky/finder/types';
 import './sky.css';
 
@@ -271,6 +274,21 @@ export default function SkyPage() {
             )}
           </>
         )}
+
+        {/* === Reverse compass: identify whatever the phone is aimed at === */}
+        {finder && !finderError && (
+          <PointIdentify
+            objects={finder.objects}
+            observerLat={location.lat}
+            observerLon={location.lon}
+          />
+        )}
+
+        {/* === Tonight Timeline: drag-to-scrub through tonight's dark window === */}
+        <TonightTimeline lat={location.lat} lon={location.lon} />
+
+        {/* === Year-in-the-sky 2026 events rail === */}
+        <SkyEvents2026 />
 
         {/* === 7-day sky forecast === */}
         <SevenDayForecast

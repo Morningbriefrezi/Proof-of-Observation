@@ -250,6 +250,115 @@
       "fetchFailed": "Couldn't load tonight's sky data.",
       "retry": "Retry"
     },
+    "pointId": {
+      "aria": "Point and identify what you're aiming at",
+      "eyebrow": "Reverse compass",
+      "title": "Point & Identify",
+      "subtitle": "Lift your phone toward any patch of sky. We'll tell you what's there.",
+      "enable": "Enable",
+      "placeholder": "Tap Enable, then aim the back of your phone at the sky.",
+      "aimingAt": "Aiming",
+      "empty": "Looking into empty sky.",
+      "emptyHint": "Pan slowly — the closest bright body will appear here.",
+      "away": "away",
+      "identified": "Identified",
+      "azimuth": "Bearing",
+      "altitude": "Altitude",
+      "nearby": "Also nearby",
+      "kind": {
+        "planet": "Planet",
+        "moon": "Moon",
+        "sun": "Sun",
+        "star": "Star",
+        "dso": "Deep sky"
+      }
+    },
+    "timeline": {
+      "aria": "Tonight's drag-to-scrub timeline",
+      "eyebrow": "Tonight at a glance",
+      "title": "Drag through the night",
+      "subtitle": "See exactly when each body climbs and peaks. Snaps to peak times.",
+      "atThisMoment": "At this moment",
+      "noneUp": "Nothing above the horizon at this time.",
+      "peak": "Peak",
+      "noWindow": "No astronomical dark window tonight.",
+      "error": "Couldn't load the timeline.",
+      "chartAria": "Altitude curves over the night, drag to pick a time",
+      "legend": {
+        "scrub": "Drag the chart to pick a time",
+        "snap": "Magnetic snap to peaks"
+      }
+    },
+    "events": {
+      "aria": "Sky events of 2026",
+      "eyebrow": "Year in the sky",
+      "title": "2026's biggest sky events",
+      "subtitle": "Mark your calendar. Tap any card to see how to observe.",
+      "close": "Close",
+      "peak": "Peak",
+      "moon": "Moon",
+      "gear": "Gear",
+      "names": {
+        "lunar_eclipse_mar3": "Total Lunar Eclipse",
+        "lyrids": "Lyrid Meteor Shower",
+        "mars_saturn_conj": "Mars meets Saturn",
+        "perseids": "Perseid Meteor Shower",
+        "solar_eclipse_aug12": "Total Solar Eclipse",
+        "saturn_opp": "Saturn at Opposition",
+        "geminids": "Geminid Meteor Shower"
+      },
+      "details": {
+        "lunar_eclipse_mar3": {
+          "body": "The full Moon slides through Earth's shadow and turns deep copper-red — a slow, two-hour spectacle.",
+          "peak": "Mid-eclipse around 11:33 UTC",
+          "moon": "Full Moon — the show itself",
+          "gear": "Naked eye is best",
+          "tip": "No filters needed. Find a clear view east — start watching as the Moon enters Earth's umbra."
+        },
+        "lyrids": {
+          "body": "A reliable spring shower with 15–20 meteors per hour. Bright, fast streaks radiate from Lyra.",
+          "peak": "Pre-dawn April 23",
+          "moon": "Waning crescent — dark skies",
+          "gear": "Naked eye, lounge chair",
+          "tip": "Look up after midnight. Let your eyes adapt for 20 minutes — no phone screens."
+        },
+        "mars_saturn_conj": {
+          "body": "Mars and Saturn pass within half a degree of each other — close enough to share a low-power telescope view.",
+          "peak": "Just after sunset",
+          "moon": "Waning gibbous — rises late",
+          "gear": "Binoculars or any telescope",
+          "tip": "Look low in the southwest at twilight. Mars is the redder dot."
+        },
+        "perseids": {
+          "body": "The classic summer shower — up to 100 meteors per hour, often with bright fireballs that linger.",
+          "peak": "Pre-dawn August 13",
+          "moon": "New Moon — perfect dark sky",
+          "gear": "Naked eye",
+          "tip": "Get out of city light. Lie back, face northeast, and just watch — no equipment needed."
+        },
+        "solar_eclipse_aug12": {
+          "body": "Totality crosses Iceland and northern Spain. Outside the path you'll see a deep partial — protective filters required.",
+          "peak": "Mid-afternoon Europe time",
+          "moon": "New Moon — the eclipsing body",
+          "gear": "Solar filters mandatory",
+          "tip": "Never look directly without certified eclipse glasses. Project the image with a pinhole if you don't have filters."
+        },
+        "saturn_opp": {
+          "body": "Saturn rises at sunset and shines all night, brightest and largest of the year. The rings are wide open.",
+          "peak": "All night, transits at midnight",
+          "moon": "Near new — clean dark sky",
+          "gear": "Telescope (any size)",
+          "tip": "Even a 60mm scope shows the rings clearly. Wait until Saturn is 30°+ above the horizon for the steadiest view."
+        },
+        "geminids": {
+          "body": "The strongest shower of the year — slow, multicoloured meteors at up to 120 per hour.",
+          "peak": "Pre-dawn December 14",
+          "moon": "First quarter — sets by midnight",
+          "gear": "Naked eye, warm clothes",
+          "tip": "Late-night to dawn is best. Wait for the Moon to set and then look anywhere overhead."
+        }
+      }
+    },
     "header": {
       "eyebrow": "Live sky",
       "title": "Tonight",

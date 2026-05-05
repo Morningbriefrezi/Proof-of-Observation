@@ -2903,7 +2903,10 @@
   .sky-v3 .sky-v3__container > .sky-v3__split--finder > .target-visible { order: 4; }
   .sky-v3 .sky-v3__container > .target-below { order: 5; }
   .sky-v3 .sky-v3__container > .sky-v3__active { order: 6; }
-  .sky-v3 .sky-v3__container > .forecast7 { order: 7; }
+  .sky-v3 .sky-v3__container > .point-id { order: 7; }
+  .sky-v3 .sky-v3__container > .tl { order: 8; }
+  .sky-v3 .sky-v3__container > .ev { order: 9; }
+  .sky-v3 .sky-v3__container > .forecast7 { order: 10; }
 
   /* Drop the "Local Time" pill on mobile and let Clouds stretch the
      full width of the second strip row so we don't leave a gap. */
