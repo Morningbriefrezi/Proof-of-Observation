@@ -51,23 +51,23 @@ export default function FeaturedProduct({ product, dealerName }: Props) {
 
   return (
     <div
-      className="relative grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-[14px] mb-[22px] p-4 rounded-xl overflow-hidden md:max-w-[760px] md:mx-auto"
+      className="relative flex flex-col gap-[14px] p-[18px] rounded-xl overflow-hidden transition-all hover:scale-[1.01]"
       style={{
-        border: '0.5px solid rgba(255, 209, 102,0.2)',
+        border: '0.5px solid rgba(255, 209, 102,0.25)',
         background:
-          'radial-gradient(ellipse 80% 100% at 0% 50%, rgba(255, 209, 102,0.06) 0%, transparent 60%), rgba(255,255,255,0.01)',
+          'radial-gradient(ellipse 80% 100% at 0% 50%, rgba(255, 209, 102,0.08) 0%, transparent 60%), rgba(255,255,255,0.01)',
       }}
     >
-      <span className="absolute top-3 right-[14px] text-[9px] tracking-[0.3em] font-semibold text-[rgba(255, 209, 102,0.5)]">
+      <span className="absolute top-[14px] right-[16px] text-[10px] tracking-[0.3em] font-semibold text-[rgba(255, 209, 102,0.6)]">
         FEATURED
       </span>
 
       <div
         className="relative rounded-lg overflow-hidden"
         style={{
-          aspectRatio: '1.1',
+          aspectRatio: '1.25',
           background:
-            'radial-gradient(ellipse at 50% 50%, rgba(255, 209, 102,0.05) 0%, transparent 70%), linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)',
+            'radial-gradient(ellipse at 50% 50%, rgba(255, 209, 102,0.06) 0%, transparent 70%), linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)',
           border: '0.5px solid rgba(232,230,221,0.05)',
         }}
       >
@@ -76,82 +76,80 @@ export default function FeaturedProduct({ product, dealerName }: Props) {
             src={product.image}
             alt={product.name}
             fill
-            sizes="(max-width: 768px) 100vw, 380px"
-            style={{ objectFit: 'contain', padding: '18px' }}
+            sizes="(max-width: 1024px) 100vw, 460px"
+            style={{ objectFit: 'contain', padding: '22px' }}
             unoptimized
             priority
           />
         )}
       </div>
 
-      <div className="flex flex-col justify-between py-1">
-        <div>
-          <p className="text-[9px] tracking-[0.24em] uppercase font-semibold text-[var(--terracotta)] mb-[6px]">Editor&rsquo;s Pick</p>
-          <h2 className="text-[20px] font-semibold leading-[1.15] tracking-[-0.01em] text-[#E8E6DD] mb-[4px]">
-            {product.name}
-          </h2>
-          {meta && (
-            <p className="text-[11px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.7)] mb-3">{meta}</p>
-          )}
+      <div className="flex flex-col">
+        <p className="text-[10px] tracking-[0.26em] uppercase font-semibold text-[var(--terracotta)] mb-[8px]">Editor&rsquo;s Pick</p>
+        <h2 className="text-[22px] font-semibold leading-[1.15] tracking-[-0.01em] text-[#E8E6DD] mb-[6px]">
+          {product.name}
+        </h2>
+        {meta && (
+          <p className="text-[12px] tracking-[0.14em] uppercase text-[rgba(232,230,221,0.72)] mb-[14px]">{meta}</p>
+        )}
 
-          {rows.length > 0 ? (
-            <div
-              className="grid grid-cols-2 gap-x-[14px] gap-y-[6px] py-[10px] mb-[14px]"
-              style={{
-                borderTop: '0.5px solid rgba(232,230,221,0.1)',
-                borderBottom: '0.5px solid rgba(232,230,221,0.1)',
-              }}
-            >
-              {rows.map(r => (
-                <div key={r.key} className="flex justify-between gap-2">
-                  <span className="text-[11px] tracking-[0.1em] uppercase text-[rgba(232,230,221,0.65)]">{r.key}</span>
-                  <span className="text-[11px] font-medium text-[#E8E6DD] truncate">{r.value}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p
-              className="text-[12px] leading-[1.4] text-[rgba(232,230,221,0.8)] py-[10px] mb-[14px] line-clamp-3"
-              style={{
-                borderTop: '0.5px solid rgba(232,230,221,0.1)',
-                borderBottom: '0.5px solid rgba(232,230,221,0.1)',
-              }}
-            >
-              {product.description}
-            </p>
-          )}
-        </div>
+        {rows.length > 0 ? (
+          <div
+            className="grid grid-cols-2 gap-x-[16px] gap-y-[8px] py-[12px] mb-[16px]"
+            style={{
+              borderTop: '0.5px solid rgba(232,230,221,0.1)',
+              borderBottom: '0.5px solid rgba(232,230,221,0.1)',
+            }}
+          >
+            {rows.map(r => (
+              <div key={r.key} className="flex justify-between gap-2">
+                <span className="text-[12px] tracking-[0.1em] uppercase text-[rgba(232,230,221,0.65)]">{r.key}</span>
+                <span className="text-[12px] font-medium text-[#E8E6DD] truncate">{r.value}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p
+            className="text-[13px] leading-[1.5] text-[rgba(232,230,221,0.82)] py-[12px] mb-[16px] line-clamp-3"
+            style={{
+              borderTop: '0.5px solid rgba(232,230,221,0.1)',
+              borderBottom: '0.5px solid rgba(232,230,221,0.1)',
+            }}
+          >
+            {product.description}
+          </p>
+        )}
 
-        <div className="flex justify-between items-end gap-3">
-          <div className="flex flex-col gap-[5px]">
-            <p className="text-[24px] font-bold leading-none tracking-[-0.01em] text-[var(--terracotta)]">
+        <div className="flex flex-wrap justify-between items-end gap-3">
+          <div className="flex flex-col gap-[6px]">
+            <p className="text-[28px] font-bold leading-none tracking-[-0.01em] text-[var(--terracotta)] transition-all hover:scale-[1.06] hover:text-[#FFE08A] origin-left cursor-default">
               {formatPrice(product)}
             </p>
             {solAmount !== null && (
-              <p className="text-[11px] tracking-[0.14em] uppercase font-medium text-[rgba(232,230,221,0.85)]">
+              <p className="text-[12px] tracking-[0.14em] uppercase font-medium text-[rgba(232,230,221,0.85)]">
                 ≈ <span className="text-[#E8E6DD]">{formatSol(solAmount)}</span> SOL
               </p>
             )}
-            <p className="inline-flex items-center gap-[5px] text-[11px] tracking-[0.14em] uppercase font-semibold text-[var(--seafoam)]">
-              <span className="text-[13px] leading-none">✦</span>
+            <p className="inline-flex items-center gap-[5px] text-[12px] tracking-[0.14em] uppercase font-semibold text-[var(--seafoam)] transition-all hover:scale-[1.06] origin-left cursor-default">
+              <span className="text-[14px] leading-none">✦</span>
               {product.starsPrice.toLocaleString()} stars
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2 justify-end">
+          <div className="flex flex-wrap items-center gap-[8px] justify-end">
             <a
               href={product.externalUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[var(--terracotta)] text-[#1a1208] px-[18px] py-[9px] rounded-full text-[11px] font-bold tracking-[0.18em] uppercase hover:opacity-90 transition-opacity"
+              className="bg-[var(--terracotta)] text-[#1a1208] px-[20px] py-[10px] rounded-full text-[12px] font-bold tracking-[0.18em] uppercase transition-all hover:scale-[1.06] hover:brightness-110"
             >
               View
             </a>
             <Link
               href={`/marketplace/checkout?id=${encodeURIComponent(product.id)}&mode=sol`}
-              className="px-[14px] py-[9px] rounded-full text-[11px] font-semibold tracking-[0.18em] uppercase transition-colors"
+              className="px-[16px] py-[10px] rounded-full text-[12px] font-semibold tracking-[0.18em] uppercase transition-all hover:scale-[1.06]"
               style={{
-                background: 'rgba(255, 209, 102, 0.10)',
-                border: '0.5px solid rgba(255, 209, 102, 0.45)',
+                background: 'rgba(255, 209, 102, 0.12)',
+                border: '1px solid rgba(255, 209, 102, 0.5)',
                 color: 'var(--terracotta)',
               }}
             >
@@ -159,10 +157,10 @@ export default function FeaturedProduct({ product, dealerName }: Props) {
             </Link>
             <Link
               href={`/marketplace/checkout?id=${encodeURIComponent(product.id)}&mode=stars`}
-              className="px-[14px] py-[9px] rounded-full text-[11px] font-semibold tracking-[0.18em] uppercase transition-colors"
+              className="px-[16px] py-[10px] rounded-full text-[12px] font-semibold tracking-[0.18em] uppercase transition-all hover:scale-[1.06]"
               style={{
-                background: 'rgba(94, 234, 212, 0.10)',
-                border: '0.5px solid rgba(94, 234, 212, 0.45)',
+                background: 'rgba(94, 234, 212, 0.12)',
+                border: '1px solid rgba(94, 234, 212, 0.5)',
                 color: 'var(--seafoam)',
               }}
             >
