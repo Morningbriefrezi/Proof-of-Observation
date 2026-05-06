@@ -156,19 +156,16 @@ function LedgerStat({
   value,
   suffix,
   meta,
-  icon,
 }: {
   label: string;
   value: string;
   suffix?: string;
   meta: string;
-  icon: React.ReactNode;
 }) {
   return (
     <div className="px-3 md:px-6 py-6 md:py-8 flex flex-col items-center text-center">
-      <div className="flex items-center gap-1.5 text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-[#6B7385] font-mono">
-        <span className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FFD166] flex-none">{icon}</span>
-        <span>{label}</span>
+      <div className="text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-[#6B7385] font-mono">
+        {label}
       </div>
       <div className="mt-3 md:mt-4 flex items-baseline justify-center">
         <span className="font-mono text-[30px] md:text-[48px] font-bold leading-none text-white tabular-nums tracking-tight">
@@ -678,38 +675,19 @@ export default function HomePage() {
           <div className="grid grid-cols-3 md:divide-x md:divide-white/[0.06]">
             <LedgerStat
               label="Customers"
-              value="30,000"
+              value="65,000"
               suffix="+"
               meta="Across Georgia"
-              icon={
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4">
-                  <circle cx="6" cy="6" r="2.5" />
-                  <circle cx="11.5" cy="7" r="2" />
-                  <path d="M2 13c.5-2 2-3 4-3s3.5 1 4 3M10 13c.4-1.4 1.4-2.2 3-2.2s2.6.8 3 2.2" />
-                </svg>
-              }
             />
             <LedgerStat
               label="Years"
-              value="8"
-              meta="Since 2018"
-              icon={
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4">
-                  <rect x="2.5" y="3.5" width="11" height="10" rx="1" />
-                  <path d="M2.5 6.5h11M5.5 2v3M10.5 2v3" />
-                  <circle cx="8" cy="10" r="0.8" fill="currentColor" />
-                </svg>
-              }
+              value="7"
+              meta="Since 2019"
             />
             <LedgerStat
               label="Brands"
               value="04"
-              meta="Top optics"
-              icon={
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4">
-                  <path d="M8 1.5l1.8 4.4 4.7.4-3.6 3.1 1.1 4.6L8 11.6 3.9 14l1.1-4.6L1.5 6.3l4.7-.4z" />
-                </svg>
-              }
+              meta="Authorized dealer"
             />
           </div>
 
@@ -964,14 +942,14 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
             <div className="text-center md:text-left">
-              <div className="font-mono text-[28px] md:text-[36px] font-bold text-white tabular-nums leading-none">30K+</div>
+              <div className="font-mono text-[28px] md:text-[36px] font-bold text-white tabular-nums leading-none">65K+</div>
               <div className="text-white text-[14px] md:text-[15px] font-semibold mt-2.5">Astroman customers</div>
-              <div className="text-[#9BA3B4] text-[13px] md:text-[13.5px] leading-[1.55] mt-1">Eight years. Physical store in Tbilisi.</div>
+              <div className="text-[#9BA3B4] text-[13px] md:text-[13.5px] leading-[1.55] mt-1">Seven years. Physical store in Tbilisi.</div>
             </div>
             <div className="text-center md:text-left">
               <div className="font-mono text-[28px] md:text-[36px] font-bold text-white tabular-nums leading-none">3</div>
               <div className="text-white text-[14px] md:text-[15px] font-semibold mt-2.5">Brand partners</div>
-              <div className="text-[#9BA3B4] text-[13px] md:text-[13.5px] leading-[1.55] mt-1">Bresser, Celestron, Levenhuk. 20% rev-share.</div>
+              <div className="text-[#9BA3B4] text-[13px] md:text-[13.5px] leading-[1.55] mt-1">Authorized dealer for Bresser, Celestron, and Levenhuk.</div>
             </div>
             <div className="text-center md:text-left">
               <div className="font-mono text-[28px] md:text-[36px] font-bold text-white tabular-nums leading-none">0</div>
