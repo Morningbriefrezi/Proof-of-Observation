@@ -3,7 +3,6 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
-const AstraPopup = dynamic(() => import('./AstraPopup'), { ssr: false });
 const PullToRefresh = dynamic(() => import('./PullToRefresh'), { ssr: false });
 const OfflineBanner = dynamic(() => import('./OfflineBanner'), { ssr: false });
 
@@ -28,7 +27,6 @@ export default function DeferredGlobals() {
     <>
       <OfflineBanner />
       <PullToRefresh />
-      <AstraPopup />
     </>
   );
 }
