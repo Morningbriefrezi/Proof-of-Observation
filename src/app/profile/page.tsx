@@ -19,7 +19,6 @@ import Button from '@/components/shared/Button';
 import PageTransition from '@/components/ui/PageTransition';
 import PageContainer from '@/components/layout/PageContainer';
 import { Skeleton } from '@/components/ui/Skeleton';
-import MyActiveBets from '@/components/markets/MyActiveBets';
 import { Avatar } from '@/lib/avatars';
 import { AvatarPicker } from '@/components/profile/AvatarPicker';
 import { UsernameEditor } from '@/components/profile/UsernameEditor';
@@ -49,24 +48,49 @@ const ROW_STYLE: CSSProperties = {
   alignItems: 'center',
   gap: 12,
   padding: '14px 16px',
-  borderRadius: 'var(--stl-r-md)',
-  background: 'var(--stl-bg-surface)',
-  border: '1px solid var(--stl-border-regular)',
+  borderRadius: 14,
+  background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)',
+  border: '1px solid rgba(255,255,255,0.08)',
   textDecoration: 'none',
   transition: 'background 150ms ease, border-color 150ms ease',
   cursor: 'pointer',
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+  backdropFilter: 'blur(8px)',
+  WebkitBackdropFilter: 'blur(8px)',
 };
 
 const ICON_CHIP_STYLE: CSSProperties = {
-  width: 28,
-  height: 28,
-  borderRadius: 8,
-  background: 'var(--stl-bg-elevated)',
-  border: '1px solid var(--stl-border-regular)',
+  width: 30,
+  height: 30,
+  borderRadius: 9,
+  background: 'rgba(255,255,255,0.04)',
+  border: '1px solid rgba(255,255,255,0.08)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   flexShrink: 0,
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+};
+
+const GLASS_EMPTY_STYLE: CSSProperties = {
+  padding: '24px 16px',
+  textAlign: 'center',
+  background: 'linear-gradient(180deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.01) 100%)',
+  border: '1px solid rgba(255,255,255,0.07)',
+  borderRadius: 14,
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+  backdropFilter: 'blur(8px)',
+  WebkitBackdropFilter: 'blur(8px)',
+};
+
+const GLASS_LIST_STYLE: CSSProperties = {
+  background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)',
+  border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: 14,
+  overflow: 'hidden',
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -16px rgba(0,0,0,0.5)',
+  backdropFilter: 'blur(8px)',
+  WebkitBackdropFilter: 'blur(8px)',
 };
 
 const ROW_LABEL_STYLE: CSSProperties = {
@@ -274,26 +298,65 @@ function ProfilePageContent() {
     txId: m.txId ?? null,
   }));
 
-  const stats = [
+  const stats: Array<{
+    label: string;
+    value: string;
+    tone: 'gold' | 'dark' | 'green';
+    skeleton: boolean;
+  }> = [
     {
       label: t('lifetimeEarned'),
-      value: `✦ ${earnedDisplay.toLocaleString()}`,
-      color: 'var(--stl-gold)',
+      value: earnedDisplay.toLocaleString(),
+      tone: 'gold',
       skeleton: !profileLoaded,
     },
     {
       label: t('balance'),
-      value: `✦ ${balanceDisplay.toLocaleString()}`,
-      color: 'var(--stl-text-bright)',
+      value: balanceDisplay.toLocaleString(),
+      tone: 'dark',
       skeleton: !profileLoaded,
     },
     {
       label: t('lifetimeBurned'),
-      value: `✦ ${burnedDisplay.toLocaleString()}`,
-      color: 'var(--stl-green)',
+      value: burnedDisplay.toLocaleString(),
+      tone: 'green',
       skeleton: !profileLoaded,
     },
   ];
+
+  const STAT_TONES: Record<'gold' | 'dark' | 'green', {
+    background: string;
+    border: string;
+    boxShadow: string;
+    valueColor: string;
+    sparkColor: string;
+    labelColor: string;
+  }> = {
+    gold: {
+      background: 'linear-gradient(180deg, rgba(255,209,102,0.10) 0%, rgba(255,209,102,0.03) 100%)',
+      border: '1px solid rgba(255,209,102,0.28)',
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 24px -14px rgba(255,209,102,0.45)',
+      valueColor: '#FFD166',
+      sparkColor: '#FFD166',
+      labelColor: 'rgba(255,209,102,0.75)',
+    },
+    dark: {
+      background: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.015) 100%)',
+      border: '1px solid rgba(255,255,255,0.10)',
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 24px -14px rgba(0,0,0,0.55)',
+      valueColor: 'var(--stl-text-bright)',
+      sparkColor: 'var(--stl-text-bright)',
+      labelColor: 'var(--stl-text-dim)',
+    },
+    green: {
+      background: 'linear-gradient(180deg, rgba(56,240,255,0.08) 0%, rgba(56,240,255,0.02) 100%)',
+      border: '1px solid rgba(56,240,255,0.22)',
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 24px -14px rgba(56,240,255,0.30)',
+      valueColor: 'var(--stl-green)',
+      sparkColor: 'var(--stl-green)',
+      labelColor: 'rgba(94,234,212,0.7)',
+    },
+  };
 
   return (
     <PageTransition>
@@ -425,53 +488,66 @@ function ProfilePageContent() {
           </div>
         </div>
 
-        {/* STATS ROW */}
+        {/* STATS ROW — button-like glassy tiles */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-          {stats.map(s => (
-            <div
-              key={s.label}
-              style={{
-                background: 'var(--stl-bg-surface)',
-                border: '1px solid var(--stl-border-regular)',
-                borderRadius: 'var(--stl-r-md)',
-                padding: '14px 12px',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-              }}
-            >
-              <span style={{
-                fontFamily: 'var(--font-mono)', fontSize: 9.5, fontWeight: 500,
-                textTransform: 'uppercase', letterSpacing: '0.14em',
-                color: 'var(--stl-text-dim)', textAlign: 'center',
-              }}>
-                {s.label}
-              </span>
-              {s.skeleton ? (
-                <Skeleton className="w-16 h-6" />
-              ) : (
+          {stats.map(s => {
+            const tone = STAT_TONES[s.tone];
+            return (
+              <div
+                key={s.label}
+                style={{
+                  position: 'relative',
+                  background: tone.background,
+                  border: tone.border,
+                  borderRadius: 14,
+                  padding: '14px 10px 13px',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
+                  boxShadow: tone.boxShadow,
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)',
+                }}
+              >
                 <span style={{
-                  fontFamily: 'var(--font-mono)', fontSize: 22, fontWeight: 600,
-                  color: s.color,
-                  fontVariantNumeric: 'tabular-nums',
-                  letterSpacing: '-0.01em',
+                  fontFamily: 'var(--font-mono)', fontSize: 9.5, fontWeight: 600,
+                  textTransform: 'uppercase', letterSpacing: '0.16em',
+                  color: tone.labelColor, textAlign: 'center',
                 }}>
-                  {s.value}
+                  {s.label}
                 </span>
-              )}
-            </div>
-          ))}
+                {s.skeleton ? (
+                  <Skeleton className="w-16 h-6" />
+                ) : (
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'baseline', gap: 4,
+                    fontFamily: 'var(--font-mono)', fontSize: 21, fontWeight: 700,
+                    color: tone.valueColor,
+                    fontVariantNumeric: 'tabular-nums',
+                    letterSpacing: '-0.01em',
+                    lineHeight: 1,
+                  }}>
+                    <span style={{ fontSize: 13, color: tone.sparkColor, opacity: 0.9 }}>✦</span>
+                    {s.value}
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* RANK BAR */}
         <div style={{
-          background: 'var(--stl-bg-surface)',
-          border: '1px solid var(--stl-border-regular)',
-          borderRadius: 'var(--stl-r-md)',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: 14,
           padding: '14px 16px',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
         }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 9 }}>
             <span style={{
               fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600,
-              textTransform: 'uppercase', letterSpacing: '0.14em',
+              textTransform: 'uppercase', letterSpacing: '0.16em',
               color: 'var(--stl-text-bright)',
             }}>
               {rank.name}
@@ -485,163 +561,19 @@ function ProfilePageContent() {
             </span>
           </div>
           <div style={{
-            height: 3, borderRadius: 999, overflow: 'hidden',
-            background: 'var(--stl-bg-elevated)',
+            height: 4, borderRadius: 999, overflow: 'hidden',
+            background: 'rgba(0,0,0,0.35)',
+            boxShadow: 'inset 0 1px 1px rgba(0,0,0,0.4)',
           }}>
             <div style={{
               width: `${rankProgress}%`,
               height: '100%',
-              background: 'var(--terracotta)',
+              background: 'linear-gradient(90deg, #FFD166 0%, #FFB347 100%)',
+              boxShadow: '0 0 8px rgba(255,209,102,0.4)',
               transition: 'width 0.4s ease',
             }} />
           </div>
         </div>
-
-        {/* §5B: Redeem at Astroman till */}
-        <button
-          onClick={() => setRedeemOpen(true)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 12,
-            padding: '14px 16px',
-            background: 'rgba(255,209,102,0.06)',
-            border: '0.5px solid rgba(255,209,102,0.3)',
-            borderRadius: 'var(--stl-r-md)',
-            cursor: 'pointer',
-            textAlign: 'left',
-            width: '100%',
-          }}
-        >
-          <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <span style={{
-              fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600,
-              textTransform: 'uppercase', letterSpacing: '0.14em',
-              color: 'var(--terracotta)',
-            }}>
-              Redeem at Astroman till
-            </span>
-            <span style={{ fontSize: 12, color: 'var(--stl-text-muted)' }}>
-              Burn Stars for store credit · 100 Stars = 1 ₾ · 7-day code
-            </span>
-          </span>
-          <span aria-hidden style={{ color: 'var(--terracotta)', fontSize: 16 }}>→</span>
-        </button>
-
-        {/* MY ACTIVE BETS */}
-        <section>
-          <MyActiveBets variant="compact" title="My active bets" />
-        </section>
-
-        {/* MY PURCHASES */}
-        <section>
-          <div style={SECTION_HEADER_STYLE}>
-            <span style={KICKER_STYLE}>My purchases · {orderHistory.length}</span>
-            <Link href="/marketplace" style={SEE_ALL_STYLE}>
-              Shop <ChevronRight size={11} />
-            </Link>
-          </div>
-
-          {orderHistory.length === 0 ? (
-            <div style={{
-              padding: '20px 16px', textAlign: 'center',
-              background: 'var(--stl-bg-surface)',
-              border: '1px solid var(--stl-border-regular)',
-              borderRadius: 'var(--stl-r-md)',
-            }}>
-              <Package size={20} color="var(--stl-text-dim)" style={{ marginBottom: 6 }} />
-              <p style={{ fontSize: 12, color: 'var(--stl-text-dim)', margin: 0 }}>
-                No purchases yet
-              </p>
-            </div>
-          ) : (
-            <div style={{
-              background: 'var(--stl-bg-surface)',
-              border: '1px solid var(--stl-border-regular)',
-              borderRadius: 'var(--stl-r-md)',
-              overflow: 'hidden',
-            }}>
-              {orderHistory.map((o, i) => {
-                const date = new Date(o.createdAt);
-                const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                const isPaid = o.status === 'paid';
-                const isStars = o.paymentMethod === 'stars';
-                const fiatLabel = `${o.amountFiat % 1 !== 0 ? o.amountFiat.toFixed(2) : o.amountFiat.toLocaleString()} ${o.currency}`;
-                const payLabel = isStars
-                  ? `✦ ${(o.amountStars ?? 0).toLocaleString()}`
-                  : `${o.amountSol >= 1 ? o.amountSol.toFixed(3) : o.amountSol.toFixed(4)} SOL`;
-                return (
-                  <div
-                    key={o.id}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 12,
-                      padding: '12px 14px',
-                      borderBottom: i < orderHistory.length - 1 ? '1px solid var(--stl-border-regular)' : 'none',
-                    }}
-                  >
-                    <div style={{
-                      position: 'relative', width: 36, height: 36, borderRadius: 8,
-                      overflow: 'hidden', flexShrink: 0,
-                      background: 'var(--stl-bg-elevated)',
-                      border: '1px solid var(--stl-border-regular)',
-                    }}>
-                      {o.productImage ? (
-                        <Image src={o.productImage} alt={o.productName} fill style={{ objectFit: 'contain', padding: 4 }} unoptimized />
-                      ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                          <Package size={14} color="var(--stl-text-dim)" />
-                        </div>
-                      )}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{
-                        color: 'var(--stl-text-bright)', fontFamily: 'var(--font-display)',
-                        fontSize: 13, fontWeight: 500, margin: 0,
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      }}>
-                        {o.productName}
-                      </p>
-                      <p style={{
-                        color: 'var(--stl-text-dim)', fontFamily: 'var(--font-mono)',
-                        fontSize: 10.5, margin: '2px 0 0',
-                      }}>
-                        {dateStr} · {fiatLabel} · {payLabel}
-                      </p>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
-                      <span
-                        style={{
-                          padding: '3px 8px', borderRadius: 999,
-                          fontFamily: 'var(--font-mono)', fontSize: 9.5, fontWeight: 600,
-                          textTransform: 'uppercase', letterSpacing: '0.1em',
-                          background: 'var(--stl-bg-elevated)',
-                          border: `1px solid ${isPaid ? 'var(--stl-border-green)' : 'var(--stl-border-regular)'}`,
-                          color: isPaid ? 'var(--stl-green)' : 'var(--stl-gold)',
-                        }}
-                      >
-                        {isPaid ? 'Paid' : 'Pending'}
-                      </span>
-                      {o.signature && (
-                        <a
-                          href={`https://explorer.solana.com/tx/${o.signature}?cluster=${cluster}`}
-                          target="_blank" rel="noopener noreferrer"
-                          style={{
-                            color: 'var(--stl-text-dim)', fontFamily: 'var(--font-mono)',
-                            fontSize: 10, display: 'inline-flex', alignItems: 'center',
-                            gap: 3, textDecoration: 'none',
-                          }}
-                        >
-                          tx <ExternalLink size={9} />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
 
         {/* MY DISCOVERIES */}
         <section>
@@ -653,12 +585,7 @@ function ProfilePageContent() {
           </div>
 
           {photoDiscoveries.length === 0 ? (
-            <div style={{
-              padding: '20px 16px', textAlign: 'center',
-              background: 'var(--stl-bg-surface)',
-              border: '1px solid var(--stl-border-regular)',
-              borderRadius: 'var(--stl-r-md)',
-            }}>
+            <div style={GLASS_EMPTY_STYLE}>
               <Telescope size={20} color="var(--stl-text-dim)" style={{ marginBottom: 6 }} />
               <p style={{ fontSize: 12, color: 'var(--stl-text-dim)', margin: 0 }}>
                 Complete a mission with a photo to see your discoveries
@@ -672,12 +599,15 @@ function ProfilePageContent() {
                   <div
                     key={d.key}
                     style={{
-                      flexShrink: 0, width: 140,
-                      background: 'var(--stl-bg-surface)',
-                      border: '1px solid var(--stl-border-regular)',
-                      borderRadius: 'var(--stl-r-md)',
+                      flexShrink: 0, width: 144,
+                      background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: 14,
                       overflow: 'hidden', textAlign: 'left',
                       position: 'relative',
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 24px -16px rgba(0,0,0,0.5)',
+                      backdropFilter: 'blur(8px)',
+                      WebkitBackdropFilter: 'blur(8px)',
                     }}
                   >
                     <button
@@ -776,6 +706,105 @@ function ProfilePageContent() {
           )}
         </section>
 
+        {/* MY PURCHASES */}
+        <section>
+          <div style={SECTION_HEADER_STYLE}>
+            <span style={KICKER_STYLE}>My purchases · {orderHistory.length}</span>
+            <Link href="/marketplace" style={SEE_ALL_STYLE}>
+              Shop <ChevronRight size={11} />
+            </Link>
+          </div>
+
+          {orderHistory.length === 0 ? (
+            <div style={GLASS_EMPTY_STYLE}>
+              <Package size={20} color="var(--stl-text-dim)" style={{ marginBottom: 6 }} />
+              <p style={{ fontSize: 12, color: 'var(--stl-text-dim)', margin: 0 }}>
+                No purchases yet
+              </p>
+            </div>
+          ) : (
+            <div style={GLASS_LIST_STYLE}>
+              {orderHistory.map((o, i) => {
+                const date = new Date(o.createdAt);
+                const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const isPaid = o.status === 'paid';
+                const isStars = o.paymentMethod === 'stars';
+                const fiatLabel = `${o.amountFiat % 1 !== 0 ? o.amountFiat.toFixed(2) : o.amountFiat.toLocaleString()} ${o.currency}`;
+                const payLabel = isStars
+                  ? `✦ ${(o.amountStars ?? 0).toLocaleString()}`
+                  : `${o.amountSol >= 1 ? o.amountSol.toFixed(3) : o.amountSol.toFixed(4)} SOL`;
+                return (
+                  <div
+                    key={o.id}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 12,
+                      padding: '12px 14px',
+                      borderBottom: i < orderHistory.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                    }}
+                  >
+                    <div style={{
+                      position: 'relative', width: 36, height: 36, borderRadius: 8,
+                      overflow: 'hidden', flexShrink: 0,
+                      background: 'var(--stl-bg-elevated)',
+                      border: '1px solid var(--stl-border-regular)',
+                    }}>
+                      {o.productImage ? (
+                        <Image src={o.productImage} alt={o.productName} fill style={{ objectFit: 'contain', padding: 4 }} unoptimized />
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                          <Package size={14} color="var(--stl-text-dim)" />
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{
+                        color: 'var(--stl-text-bright)', fontFamily: 'var(--font-display)',
+                        fontSize: 13, fontWeight: 500, margin: 0,
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>
+                        {o.productName}
+                      </p>
+                      <p style={{
+                        color: 'var(--stl-text-dim)', fontFamily: 'var(--font-mono)',
+                        fontSize: 10.5, margin: '2px 0 0',
+                      }}>
+                        {dateStr} · {fiatLabel} · {payLabel}
+                      </p>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
+                      <span
+                        style={{
+                          padding: '3px 8px', borderRadius: 999,
+                          fontFamily: 'var(--font-mono)', fontSize: 9.5, fontWeight: 600,
+                          textTransform: 'uppercase', letterSpacing: '0.1em',
+                          background: 'var(--stl-bg-elevated)',
+                          border: `1px solid ${isPaid ? 'var(--stl-border-green)' : 'var(--stl-border-regular)'}`,
+                          color: isPaid ? 'var(--stl-green)' : 'var(--stl-gold)',
+                        }}
+                      >
+                        {isPaid ? 'Paid' : 'Pending'}
+                      </span>
+                      {o.signature && (
+                        <a
+                          href={`https://explorer.solana.com/tx/${o.signature}?cluster=${cluster}`}
+                          target="_blank" rel="noopener noreferrer"
+                          style={{
+                            color: 'var(--stl-text-dim)', fontFamily: 'var(--font-mono)',
+                            fontSize: 10, display: 'inline-flex', alignItems: 'center',
+                            gap: 3, textDecoration: 'none',
+                          }}
+                        >
+                          tx <ExternalLink size={9} />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
         {/* SETTINGS */}
         <section>
           <div style={SECTION_HEADER_STYLE}>
@@ -837,6 +866,48 @@ function ProfilePageContent() {
             </Link>
           </div>
         </section>
+
+        {/* REDEEM AT ASTROMAN — gold CTA, mirrors homepage primary button */}
+        <button
+          onClick={() => setRedeemOpen(true)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            padding: '16px 18px',
+            background: 'linear-gradient(180deg, rgba(255,209,102,0.16) 0%, rgba(255,209,102,0.05) 100%)',
+            border: '1px solid rgba(255,209,102,0.32)',
+            borderRadius: 14,
+            cursor: 'pointer',
+            textAlign: 'left',
+            width: '100%',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), 0 10px 30px -16px rgba(255,209,102,0.5)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            transition: 'transform 120ms ease, box-shadow 200ms ease',
+          }}
+        >
+          <span style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <span style={{
+              fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
+              textTransform: 'uppercase', letterSpacing: '0.16em',
+              color: '#FFD166',
+            }}>
+              Redeem at Astroman till
+            </span>
+            <span style={{ fontSize: 12, color: 'var(--stl-text-muted)' }}>
+              Burn Stars for store credit · 100 Stars = 1 ₾ · 7-day code
+            </span>
+          </span>
+          <span aria-hidden style={{
+            color: '#FFD166', fontSize: 18,
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            width: 28, height: 28, borderRadius: 999,
+            background: 'rgba(255,209,102,0.12)',
+            border: '1px solid rgba(255,209,102,0.28)',
+          }}>→</span>
+        </button>
 
         {/* SIGN OUT */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginTop: 4 }}>
