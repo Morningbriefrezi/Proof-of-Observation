@@ -64,13 +64,14 @@ export function UsernameEditor({ value, fallback, saving, onSave }: Props) {
           onClick={() => setEditing(true)}
           aria-label="Edit username"
           style={{
-            width: 26, height: 26, borderRadius: 6,
-            background: 'transparent', border: '1px solid var(--stl-border-regular)',
-            color: 'var(--stl-text-muted)', cursor: 'pointer',
+            width: 18, height: 18, borderRadius: 4,
+            background: 'transparent', border: 'none',
+            color: 'var(--stl-text-dim)', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+            opacity: 0.6,
           }}
         >
-          <Pencil size={12} />
+          <Pencil size={10} />
         </button>
       </div>
     );

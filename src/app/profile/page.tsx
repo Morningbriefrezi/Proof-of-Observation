@@ -289,14 +289,23 @@ function ProfilePageContent() {
   const rank = getRank(completed.length);
   const rankProgress = Math.min(100, (completed.length / Math.max(1, completed.length + 5)) * 100);
 
-  const photoDiscoveries = completed.filter(m => m.photo).map(m => ({
-    key: `m-${m.id}`,
-    id: m.id,
-    name: m.name,
-    photo: m.photo!,
-    date: m.timestamp,
-    txId: m.txId ?? null,
-  }));
+  // Match the discoveries page: include every non-gallery mission, generate
+  // the on-chain artwork as a fallback when the user didn't attach a photo.
+  const hiddenIds = new Set(state.hiddenObservationIds ?? []);
+  const photoDiscoveries = state.completedMissions
+    .filter(m => m.status !== 'gallery' && !hiddenIds.has(m.txId))
+    .map(m => {
+      const ts = new Date(m.timestamp).getTime();
+      const fallback = `/api/nft-image?target=${encodeURIComponent(m.name)}&ts=${ts}&lat=${m.latitude ?? 0}&lon=${m.longitude ?? 0}&cc=${m.sky?.cloudCover ?? 0}&stars=${m.stars ?? 0}`;
+      return {
+        key: `m-${m.id}-${m.txId}`,
+        id: m.id,
+        name: m.name,
+        photo: m.photo && m.photo.length > 0 ? m.photo : fallback,
+        date: m.timestamp,
+        txId: m.txId ?? null,
+      };
+    });
 
   const stats: Array<{
     label: string;
@@ -621,51 +630,21 @@ function ProfilePageContent() {
                       <div style={{ position: 'relative', width: '100%', height: 96 }}>
                         <Image src={d.photo} alt={d.name} fill style={{ objectFit: 'cover' }} unoptimized />
                       </div>
-                      <div style={{ padding: '10px 10px 10px' }}>
+                      <div style={{ padding: '10px 10px 11px' }}>
                         <p style={{
                           color: 'var(--stl-text-bright)',
                           fontFamily: 'var(--font-display)',
-                          fontSize: 12, fontWeight: 500, margin: '0 0 3px',
+                          fontSize: 12.5, fontWeight: 500, margin: '0 0 3px',
                           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                         }}>
                           {d.name}
                         </p>
                         <p style={{
                           color: 'var(--stl-text-dim)', fontFamily: 'var(--font-mono)',
-                          fontSize: 10, margin: '0 0 8px',
+                          fontSize: 10, margin: 0,
                         }}>
                           {new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         </p>
-                        {d.txId ? (
-                          <a
-                            href={`https://explorer.solana.com/tx/${d.txId}?cluster=${cluster}`}
-                            target="_blank" rel="noopener noreferrer"
-                            onClick={e => e.stopPropagation()}
-                            style={{
-                              display: 'inline-block', padding: '2px 8px', borderRadius: 999,
-                              background: 'var(--stl-bg-elevated)',
-                              border: '1px solid var(--stl-border-green)',
-                              color: 'var(--stl-green)', textDecoration: 'none',
-                              fontFamily: 'var(--font-mono)',
-                              textTransform: 'uppercase', letterSpacing: '0.08em',
-                              fontSize: 9.5, fontWeight: 600,
-                            }}
-                          >
-                            On-chain
-                          </a>
-                        ) : (
-                          <span style={{
-                            display: 'inline-block', padding: '2px 8px', borderRadius: 999,
-                            background: 'var(--stl-bg-elevated)',
-                            border: '1px solid var(--stl-border-regular)',
-                            color: 'var(--stl-text-dim)',
-                            fontFamily: 'var(--font-mono)',
-                            textTransform: 'uppercase', letterSpacing: '0.08em',
-                            fontSize: 9.5,
-                          }}>
-                            Local
-                          </span>
-                        )}
                       </div>
                     </button>
 
