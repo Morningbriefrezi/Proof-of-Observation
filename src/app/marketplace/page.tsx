@@ -100,37 +100,43 @@ export default function MarketplacePage() {
             ‹ Back
           </button>
 
-          {/* Header buttons — solid surfaces */}
+          {/* Header chips — display surfaces, same shape language as the filled CTAs but quieter */}
           <div className="flex flex-wrap items-center gap-[8px] mb-[20px]">
             <span
-              className="inline-flex items-center gap-[8px] px-[16px] py-[10px] rounded-md text-[13px] tracking-[0.18em] uppercase font-semibold cursor-default transition-all hover:brightness-110"
+              className="inline-flex items-center gap-[10px] px-[16px] py-[10px] rounded-lg text-[13px] tracking-[0.18em] uppercase font-semibold cursor-default"
               style={{
-                background: 'rgba(255, 209, 102, 0.16)',
-                border: '1px solid rgba(255, 209, 102, 0.40)',
+                background: 'rgba(15, 18, 28, 0.72)',
+                border: '1px solid rgba(255, 209, 102, 0.38)',
                 color: 'var(--terracotta)',
+                boxShadow: 'inset 0 1px 0 rgba(255, 209, 102, 0.08), 0 1px 0 rgba(0,0,0,0.25)',
               }}
             >
-              <span className="opacity-60 text-[11px]">04</span>
+              <span className="text-[10px] tracking-[0.22em] text-[rgba(255,209,102,0.55)]">04</span>
               <span>Marketplace</span>
             </span>
 
             <span
-              className="inline-flex items-center gap-[7px] px-[14px] py-[10px] rounded-md text-[12px] uppercase transition-all hover:brightness-110"
+              className="inline-flex items-center gap-[8px] px-[16px] py-[10px] rounded-lg text-[12px] uppercase cursor-default"
               style={{
-                background: 'rgba(94, 234, 212, 0.14)',
-                border: '1px solid rgba(94, 234, 212, 0.36)',
+                background: 'rgba(15, 18, 28, 0.72)',
+                border: '1px solid rgba(94, 234, 212, 0.38)',
+                boxShadow: 'inset 0 1px 0 rgba(94, 234, 212, 0.08), 0 1px 0 rgba(0,0,0,0.25)',
               }}
             >
-              <span className="tracking-[0.14em] text-[rgba(232,230,221,0.72)]">Balance</span>
-              <span className="font-semibold text-[var(--seafoam)]">{balance.toLocaleString()}</span>
-              <span className="text-[var(--seafoam)]">✦</span>
+              <span className="tracking-[0.16em] text-[rgba(232,230,221,0.6)] text-[10px]">Balance</span>
+              <span className="font-semibold text-[var(--seafoam)] tracking-[0.04em] text-[13px]">{balance.toLocaleString()}</span>
+              <span className="text-[var(--seafoam)] text-[12px]">✦</span>
             </span>
 
             <span
-              className="inline-flex items-center gap-[8px] px-[12px] py-[7px] rounded-md text-[12px] uppercase"
-              style={{ background: 'rgba(232,230,221,0.05)', border: '1px solid rgba(232,230,221,0.12)' }}
+              className="inline-flex items-center gap-[10px] pl-[14px] pr-[6px] py-[5px] rounded-lg"
+              style={{
+                background: 'rgba(15, 18, 28, 0.72)',
+                border: '1px solid rgba(232,230,221,0.16)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 0 rgba(0,0,0,0.25)',
+              }}
             >
-              <span className="tracking-[0.14em] text-[rgba(232,230,221,0.7)]">Region</span>
+              <span className="tracking-[0.16em] uppercase text-[rgba(232,230,221,0.6)] text-[10px]">Region</span>
               <LocationPicker compact />
             </span>
           </div>
