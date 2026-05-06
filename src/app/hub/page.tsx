@@ -8,30 +8,48 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import SearchModal from '@/components/shared/SearchModal';
-type HubItem = { href: string; label: string; icon: LucideIcon; comingSoon?: boolean };
+type HubItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  gradient: string;
+  comingSoon?: boolean;
+};
 type HubSection = { label: string; items: HubItem[] };
+
+const G = {
+  amber:   'linear-gradient(135deg, #FFB347 0%, #FF7E3F 100%)',
+  violet:  'linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%)',
+  fuchsia: 'linear-gradient(135deg, #D946EF 0%, #8B5CF6 100%)',
+  emerald: 'linear-gradient(135deg, #34D399 0%, #10B981 100%)',
+  blue:    'linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%)',
+  teal:    'linear-gradient(135deg, #2DD4BF 0%, #06B6D4 100%)',
+  rose:    'linear-gradient(135deg, #FB7185 0%, #E11D48 100%)',
+  orange:  'linear-gradient(135deg, #FB923C 0%, #EA580C 100%)',
+  indigo:  'linear-gradient(135deg, #818CF8 0%, #4F46E5 100%)',
+};
 
 const SECTIONS: HubSection[] = [
   {
     label: 'Explore',
     items: [
-      { href: '/sky',         label: 'Sky Watcher', icon: Sun },
-      { href: '/markets',     label: 'Markets',      icon: TrendingUp,   comingSoon: true },
-      { href: '/missions',    label: 'Missions',     icon: Target },
-      { href: '/chat',        label: 'ASTRA AI',     icon: MessageCircle },
-      { href: '/feed',        label: 'Feed',         icon: Sparkles },
-      { href: '/learn',       label: 'Learning',     icon: BookOpen },
-      { href: '/network',     label: 'Network',      icon: Globe,        comingSoon: true },
-      { href: '/leaderboard', label: 'Leaderboard',  icon: Trophy,       comingSoon: true },
-      { href: '/marketplace', label: 'Marketplace',  icon: ShoppingBag },
+      { href: '/sky',         label: 'Sky Watcher',  icon: Sun,           gradient: G.amber },
+      { href: '/markets',     label: 'Markets',      icon: TrendingUp,    gradient: G.emerald, comingSoon: true },
+      { href: '/missions',    label: 'Missions',     icon: Target,        gradient: G.violet },
+      { href: '/chat',        label: 'ASTRA AI',     icon: MessageCircle, gradient: G.fuchsia },
+      { href: '/feed',        label: 'Feed',         icon: Sparkles,      gradient: G.orange },
+      { href: '/learn',       label: 'Learning',     icon: BookOpen,      gradient: G.blue },
+      { href: '/network',     label: 'Network',      icon: Globe,         gradient: G.teal,    comingSoon: true },
+      { href: '/leaderboard', label: 'Leaderboard',  icon: Trophy,        gradient: G.amber,   comingSoon: true },
+      { href: '/marketplace', label: 'Marketplace',  icon: ShoppingBag,   gradient: G.indigo },
     ],
   },
   {
     label: 'You',
     items: [
-      { href: '/profile', label: 'Profile',      icon: User },
-      { href: '/club',    label: 'My telescope', icon: Telescope },
-      { href: '/nfts',    label: 'Discoveries',  icon: Gem },
+      { href: '/profile', label: 'Profile',      icon: User,      gradient: G.blue },
+      { href: '/club',    label: 'My telescope', icon: Telescope, gradient: G.violet },
+      { href: '/nfts',    label: 'Discoveries',  icon: Gem,       gradient: G.rose },
     ],
   },
 ];
@@ -93,8 +111,14 @@ export default function HubPage() {
                         Soon
                       </span>
                     )}
-                    <div className="w-10 h-10 rounded-lg bg-[#FFD166]/[0.08] border border-[#FFD166]/[0.16] flex items-center justify-center shrink-0">
-                      <Icon size={18} strokeWidth={1.8} color="#FFD166" />
+                    <div
+                      className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shrink-0"
+                      style={{
+                        background: item.gradient,
+                        boxShadow: '0 6px 16px -4px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.18)',
+                      }}
+                    >
+                      <Icon size={22} strokeWidth={2.2} color="#FFFFFF" />
                     </div>
                     <span className="text-[12px] sm:text-[13px] text-white font-medium leading-tight">
                       {item.label}
