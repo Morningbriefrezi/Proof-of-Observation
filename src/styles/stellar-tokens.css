@@ -5217,6 +5217,245 @@
   margin: 0;
 }
 
+/* === Info "i" dot — small but readable, used on event row + diff badge === */
+.mis-info-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  border: 0.5px solid rgba(255, 255, 255, 0.32);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  flex-shrink: 0;
+}
+.mis-info-dot:hover,
+.mis-info-dot:focus-visible {
+  background: rgba(94, 234, 212, 0.22);
+  border-color: rgba(94, 234, 212, 0.6);
+  outline: none;
+}
+
+/* === Telescope guide — image + numbered steps === */
+.mis-scope {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 18px;
+  background: var(--color-bg-card);
+  overflow: hidden;
+}
+@media (min-width: 720px) {
+  .mis-scope {
+    grid-template-columns: 360px 1fr;
+    gap: 0;
+  }
+}
+.mis-scope-photo {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 11;
+  background: #0B0E17;
+  overflow: hidden;
+}
+@media (min-width: 720px) {
+  .mis-scope-photo {
+    aspect-ratio: auto;
+    height: 100%;
+    min-height: 240px;
+  }
+}
+.mis-scope-photo img {
+  filter: saturate(0.92) contrast(1.04);
+}
+.mis-scope-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 55%, rgba(11, 14, 23, 0.55));
+  pointer-events: none;
+}
+.mis-scope-photo-label {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(11, 14, 23, 0.55);
+  border: 0.5px solid rgba(255, 255, 255, 0.18);
+  padding: 5px 9px;
+  border-radius: 999px;
+  backdrop-filter: blur(4px);
+}
+.mis-scope-steps {
+  list-style: none;
+  margin: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+@media (min-width: 720px) {
+  .mis-scope-steps {
+    padding: 20px 22px;
+    justify-content: center;
+  }
+}
+.mis-scope-step {
+  display: grid;
+  grid-template-columns: 22px 22px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+.mis-scope-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(94, 234, 212, 0.14);
+  border: 0.5px solid rgba(94, 234, 212, 0.4);
+  color: var(--color-accent-teal);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+.mis-scope-step-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: var(--mis-t2, rgba(255, 255, 255, 0.6));
+}
+.mis-scope-step-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.mis-scope-step-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mis-t1);
+  letter-spacing: -0.005em;
+}
+.mis-scope-step-body {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--mis-t2, rgba(255, 255, 255, 0.62));
+}
+
+/* === Rare events deck — once-a-year highlights === */
+.mis-rare-deck {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+@media (min-width: 640px) {
+  .mis-rare-deck {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.mis-rare-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px 56px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(20, 24, 38, 0.85), rgba(11, 14, 23, 0.85));
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.18s ease, transform 0.18s ease;
+}
+.mis-rare-card:hover {
+  border-color: rgba(94, 234, 212, 0.45);
+  transform: translateY(-1px);
+}
+.mis-rare-art {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: #0B0E17;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 0.5px solid rgba(255, 255, 255, 0.06);
+}
+.mis-rare-art--eclipse-solar { background: radial-gradient(circle at 60% 40%, rgba(242, 90, 26, 0.18), transparent 60%), #0B0E17; }
+.mis-rare-art--eclipse-lunar { background: radial-gradient(circle at 50% 50%, rgba(229, 75, 63, 0.18), transparent 60%), #0B0E17; }
+.mis-rare-art--comet         { background: radial-gradient(circle at 30% 70%, rgba(125, 211, 252, 0.18), transparent 60%), #0B0E17; }
+.mis-rare-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  line-height: 1;
+}
+.mis-rare-date-month {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--mis-t3, rgba(255, 255, 255, 0.55));
+  margin-bottom: 4px;
+}
+.mis-rare-date-day {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+.mis-rare-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.mis-rare-tag {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent-teal);
+}
+.mis-rare-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mis-rare-meta {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--mis-t3, rgba(255, 255, 255, 0.5));
+}
+
 /* === Elsewhere in Stellar — 2-col compact card grid === */
 .mis-explore-deck {
   display: grid;

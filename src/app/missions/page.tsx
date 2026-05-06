@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import Image from 'next/image';
 import { useAppState } from '@/hooks/useAppState';
 import { useStellarUser } from '@/hooks/useStellarUser';
 import { useVisibleInterval } from '@/hooks/useVisibleInterval';
@@ -17,19 +17,9 @@ import { PlanetViz } from '@/components/sky/PlanetViz';
 import QuizActive from '@/components/sky/QuizActive';
 import EventInfoSheet from '@/components/sky/EventInfoSheet';
 import DifficultyExplainer from '@/components/sky/DifficultyExplainer';
-import { getUpcomingEvents, type AstroEvent } from '@/lib/astro-events';
+import { getRareEvents, getUpcomingEvents, type AstroEvent } from '@/lib/astro-events';
 import type { QuizDef } from '@/lib/quizzes';
-import {
-  Snowflake,
-  Telescope as LcTelescope,
-  Crosshair,
-  Moon as LcMoon,
-  CloudSun,
-  TrendingUp,
-  BookOpen,
-  Users,
-  Sparkles,
-} from 'lucide-react';
+import { Snowflake, Telescope as LcTelescope, Crosshair, Moon as LcMoon } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 type DiffClass = 'easy' | 'med' | 'hard' | 'expert';
@@ -60,35 +50,10 @@ const GRID: GridEntry[] = [
 ];
 
 const TIPS: { title: string; body: string; Icon: LucideIcon }[] = [
-  {
-    title: 'Cool the optics',
-    body: 'Set up 30 min before observing. Warm glass blurs detail.',
-    Icon: Snowflake,
-  },
-  {
-    title: 'Start at low power',
-    body: 'Find the target with your widest eyepiece, then zoom in.',
-    Icon: LcTelescope,
-  },
-  {
-    title: 'Align by day',
-    body: 'Match finder to a distant tree. Saves 15 min at night.',
-    Icon: Crosshair,
-  },
-  {
-    title: 'Mind dark adaptation',
-    body: 'Eyes need 20–30 min. Use red light only.',
-    Icon: LcMoon,
-  },
-];
-
-const EXPLORE: { href: string; name: string; meta: string; desc: string; Icon: LucideIcon }[] = [
-  { href: '/sky',         name: 'Sky',      meta: 'Forecast',  desc: '7-day cloud, seeing, and transparency forecast for your location.', Icon: CloudSun },
-  { href: '/markets',     name: 'Markets',  meta: 'Stake',     desc: 'Weekly prediction markets on celestial events. Optional bonus layer.',          Icon: TrendingUp },
-  { href: '/learn',       name: 'Learning', meta: 'Articles',  desc: 'Field guides, equipment primers, and observing techniques.',        Icon: BookOpen },
-  { href: '/network',     name: 'Network',  meta: 'Community', desc: 'See where other Stellar observers are reporting from tonight.',     Icon: Users },
-  { href: '/marketplace', name: 'Shop',     meta: 'Gear',      desc: 'Telescopes, eyepieces, and accessories from verified dealers.',     Icon: LcTelescope },
-  { href: '/chat',        name: 'ASTRA AI', meta: 'Assistant', desc: 'Ask anything about the night sky or your equipment.',                Icon: Sparkles },
+  { title: 'Cool 30 min before',    body: 'Warm optics blur fine detail.',           Icon: Snowflake },
+  { title: 'Start at low power',    body: 'Find target wide. Then zoom in.',         Icon: LcTelescope },
+  { title: 'Align finder by day',   body: 'On a far tree. Saves 15 min at night.',   Icon: Crosshair },
+  { title: 'Dark-adapt 20 min',     body: 'Red light only. No phones.',              Icon: LcMoon },
 ];
 
 const LINEUP_KEYS = ['moon', 'jupiter', 'saturn', 'mars', 'venus', 'mercury'];
@@ -120,9 +85,12 @@ export default function MissionsPage() {
   const [now, setNow] = useState<Date>(() => new Date());
   const [activeQuiz, setActiveQuiz] = useState<QuizDef | null>(null);
   const [activeEvent, setActiveEvent] = useState<AstroEvent | null>(null);
+  const [activeEventAnchor, setActiveEventAnchor] = useState<DOMRect | null>(null);
   const [activeExplainer, setActiveExplainer] = useState<{ kind: 'mission' | 'event'; id: string; title: string; eventType?: string } | null>(null);
+  const [activeExplainerAnchor, setActiveExplainerAnchor] = useState<DOMRect | null>(null);
 
   const upcomingEvents = useMemo(() => getUpcomingEvents(new Date(), 30), []);
+  const rareEvents = useMemo(() => getRareEvents(new Date(), 5), []);
 
   useVisibleInterval(() => setNow(new Date()), 60_000);
 
@@ -338,7 +306,10 @@ export default function MissionsPage() {
                   above={altitude > 0}
                   rise={pos?.rise ?? null}
                   onStart={() => startMission(g.routeId)}
-                  onExplain={() => setActiveExplainer({ kind: 'mission', id: g.id, title: g.name })}
+                  onExplain={(rect) => {
+                    setActiveExplainerAnchor(rect);
+                    setActiveExplainer({ kind: 'mission', id: g.id, title: g.name });
+                  }}
                 />
               );
             })}
@@ -356,8 +327,35 @@ export default function MissionsPage() {
                 <EventRow
                   key={`${ev.date}-${ev.name}`}
                   event={ev}
-                  onOpen={() => setActiveEvent(ev)}
-                  onExplain={() => setActiveExplainer({ kind: 'event', id: ev.name, title: ev.name, eventType: ev.type })}
+                  onOpen={(rect) => {
+                    setActiveEventAnchor(rect);
+                    setActiveEvent(ev);
+                  }}
+                  onExplain={(rect) => {
+                    setActiveExplainerAnchor(rect);
+                    setActiveExplainer({ kind: 'event', id: ev.name, title: ev.name, eventType: ev.type });
+                  }}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {rareEvents.length > 0 && (
+          <section className="mis-section">
+            <div className="mis-section-head">
+              <h2 className="mis-section-title">Rare events in {new Date().getFullYear()}</h2>
+              <span className="mis-section-meta">{rareEvents.length} once-a-year</span>
+            </div>
+            <div className="mis-rare-deck">
+              {rareEvents.map(ev => (
+                <RareEventCard
+                  key={`${ev.date}-${ev.name}`}
+                  event={ev}
+                  onOpen={(rect) => {
+                    setActiveEventAnchor(rect);
+                    setActiveEvent(ev);
+                  }}
                 />
               ))}
             </div>
@@ -398,63 +396,168 @@ export default function MissionsPage() {
         <section className="mis-section">
           <div className="mis-section-head">
             <h2 className="mis-section-title">Using your telescope</h2>
-            <span className="mis-section-meta">Field-tested tips</span>
+            <span className="mis-section-meta">4 quick rules</span>
           </div>
-          <div className="mis-tips-deck">
-            {TIPS.map((tip, i) => {
-              const Icon = tip.Icon;
-              return (
-                <article key={tip.title} className="mis-tip-card">
-                  <span className="mis-tip-icon" aria-hidden>
-                    <Icon size={16} strokeWidth={1.6} />
-                  </span>
-                  <span className="mis-tip-num">{String(i + 1).padStart(2, '0')}</span>
-                  <h3 className="mis-tip-title">{tip.title}</h3>
-                  <p className="mis-tip-body">{tip.body}</p>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="mis-section">
-          <div className="mis-section-head">
-            <h2 className="mis-section-title">Elsewhere in Stellar</h2>
-            <span className="mis-section-meta">{EXPLORE.length} sections</span>
-          </div>
-          <div className="mis-explore-deck">
-            {EXPLORE.map((p) => {
-              const Icon = p.Icon;
-              return (
-                <Link key={p.href} href={p.href} className="mis-explore-card">
-                  <span className="mis-explore-icon" aria-hidden>
-                    <Icon size={22} strokeWidth={1.6} />
-                  </span>
-                  <span className="mis-explore-meta">{p.meta}</span>
-                  <span className="mis-explore-name">{p.name}</span>
-                  <span className="mis-explore-desc">{p.desc}</span>
-                </Link>
-              );
-            })}
-          </div>
+          <TelescopeGuide tips={TIPS} />
         </section>
       </div>
 
       <EventInfoSheet
         open={!!activeEvent}
         event={activeEvent}
-        onClose={() => setActiveEvent(null)}
+        anchorRect={activeEventAnchor}
+        onClose={() => { setActiveEvent(null); setActiveEventAnchor(null); }}
       />
 
       <DifficultyExplainer
         open={!!activeExplainer}
-        onClose={() => setActiveExplainer(null)}
+        anchorRect={activeExplainerAnchor}
+        onClose={() => { setActiveExplainer(null); setActiveExplainerAnchor(null); }}
         target={activeExplainer?.kind === 'mission' ? activeExplainer.id : undefined}
         eventType={activeExplainer?.kind === 'event' ? activeExplainer.eventType : undefined}
         title={activeExplainer?.title ?? ''}
         location={{ lat: location.lat, lon: location.lon }}
       />
     </div>
+  );
+}
+
+// ---- Telescope guide ----
+
+function TelescopeGuide({ tips }: { tips: { title: string; body: string; Icon: LucideIcon }[] }) {
+  return (
+    <div className="mis-scope">
+      <div className="mis-scope-photo">
+        <Image
+          src="/images/telescopes/refractor.jpg"
+          alt="70 mm refractor telescope"
+          fill
+          sizes="(max-width: 720px) 100vw, 360px"
+          style={{ objectFit: 'cover' }}
+          priority={false}
+        />
+        <span className="mis-scope-photo-label">70 mm refractor</span>
+      </div>
+      <ol className="mis-scope-steps">
+        {tips.map((tip, i) => {
+          const Icon = tip.Icon;
+          return (
+            <li key={tip.title} className="mis-scope-step">
+              <span className="mis-scope-step-num">{i + 1}</span>
+              <span className="mis-scope-step-icon" aria-hidden>
+                <Icon size={14} strokeWidth={1.7} />
+              </span>
+              <span className="mis-scope-step-text">
+                <span className="mis-scope-step-title">{tip.title}</span>
+                <span className="mis-scope-step-body">{tip.body}</span>
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+// ---- Rare event card ----
+
+function RareEventCard({
+  event,
+  onOpen,
+}: {
+  event: AstroEvent;
+  onOpen: (rect: DOMRect) => void;
+}) {
+  const days = daysFromToday(event.date);
+  const dateLabel = new Date(event.date + 'T12:00:00').toLocaleDateString(undefined, {
+    month: 'short', day: 'numeric',
+  });
+  const monthLabel = new Date(event.date + 'T12:00:00').toLocaleDateString(undefined, {
+    month: 'short',
+  }).toUpperCase();
+  const dayNum = new Date(event.date + 'T12:00:00').getDate();
+  const future = days >= 0;
+  const countdown = !future
+    ? 'past'
+    : days === 0
+      ? 'today'
+      : days === 1
+        ? 'tomorrow'
+        : days < 30
+          ? `in ${days}d`
+          : `in ${Math.round(days / 30)}mo`;
+
+  return (
+    <button
+      type="button"
+      onClick={(e) => onOpen((e.currentTarget as HTMLElement).getBoundingClientRect())}
+      className="mis-rare-card"
+      style={{ opacity: future ? 1 : 0.55 }}
+    >
+      <span className={`mis-rare-art mis-rare-art--${event.type}`} aria-hidden>
+        <RareEventArt type={event.type} />
+      </span>
+      <span className="mis-rare-date">
+        <span className="mis-rare-date-month">{monthLabel}</span>
+        <span className="mis-rare-date-day">{dayNum}</span>
+      </span>
+      <span className="mis-rare-info">
+        <span className="mis-rare-tag">{EVENT_TYPE_LABEL[event.type]}</span>
+        <span className="mis-rare-name">{event.name}</span>
+        <span className="mis-rare-meta">
+          {dateLabel} · {countdown}
+        </span>
+      </span>
+    </button>
+  );
+}
+
+function RareEventArt({ type }: { type: AstroEvent['type'] }) {
+  if (type === 'eclipse-solar') {
+    return (
+      <svg viewBox="0 0 64 64" width="100%" height="100%" aria-hidden>
+        <defs>
+          <radialGradient id="rareSun" cx="50%" cy="50%">
+            <stop offset="0%" stopColor="#FFB23A" />
+            <stop offset="80%" stopColor="#F25A1A" />
+            <stop offset="100%" stopColor="#9A2A0E" />
+          </radialGradient>
+        </defs>
+        <circle cx="32" cy="32" r="22" fill="url(#rareSun)" />
+        <circle cx="38" cy="30" r="20" fill="#0B0E17" />
+      </svg>
+    );
+  }
+  if (type === 'eclipse-lunar') {
+    return (
+      <svg viewBox="0 0 64 64" width="100%" height="100%" aria-hidden>
+        <defs>
+          <radialGradient id="rareMoon" cx="50%" cy="50%">
+            <stop offset="0%" stopColor="#E54B3F" />
+            <stop offset="80%" stopColor="#7A1F18" />
+            <stop offset="100%" stopColor="#2B0A07" />
+          </radialGradient>
+        </defs>
+        <circle cx="32" cy="32" r="22" fill="url(#rareMoon)" />
+        <circle cx="22" cy="26" r="2" fill="#000" opacity="0.35" />
+        <circle cx="40" cy="34" r="2.5" fill="#000" opacity="0.3" />
+        <circle cx="30" cy="40" r="1.8" fill="#000" opacity="0.4" />
+      </svg>
+    );
+  }
+  // comet
+  return (
+    <svg viewBox="0 0 64 64" width="100%" height="100%" aria-hidden>
+      <defs>
+        <linearGradient id="rareTail" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#7DD3FC" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#7DD3FC" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d="M52 12 L20 44" stroke="url(#rareTail)" strokeWidth="6" strokeLinecap="round" />
+      <circle cx="52" cy="12" r="6" fill="#FFFFFF" />
+      <circle cx="52" cy="12" r="3" fill="#7DD3FC" />
+    </svg>
   );
 }
 
@@ -484,7 +587,11 @@ function daysFromToday(dateStr: string): number {
   return Math.round((event.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-function EventRow({ event, onOpen, onExplain }: { event: AstroEvent; onOpen: () => void; onExplain?: () => void }) {
+function EventRow({ event, onOpen, onExplain }: {
+  event: AstroEvent;
+  onOpen: (rect: DOMRect) => void;
+  onExplain?: (rect: DOMRect) => void;
+}) {
   const days = daysFromToday(event.date);
   const dateLabel = new Date(event.date + 'T12:00:00').toLocaleDateString(undefined, {
     month: 'short', day: 'numeric',
@@ -492,7 +599,7 @@ function EventRow({ event, onOpen, onExplain }: { event: AstroEvent; onOpen: () 
   return (
     <button
       type="button"
-      onClick={onOpen}
+      onClick={(e) => onOpen((e.currentTarget as HTMLElement).getBoundingClientRect())}
       className="mis-event-row"
       style={{
         display: 'flex', alignItems: 'center', gap: 12,
@@ -542,24 +649,19 @@ function EventRow({ event, onOpen, onExplain }: { event: AstroEvent; onOpen: () 
           role="button"
           tabIndex={0}
           aria-label={`Why ${event.name} is hard`}
-          onClick={(e) => { e.stopPropagation(); onExplain(); }}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); onExplain(); } }}
-          style={{
-            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-            width: 18, height: 18, borderRadius: '50%',
-            marginLeft: 4,
-            background: 'rgba(255,255,255,0.06)',
-            border: '0.5px solid rgba(255,255,255,0.18)',
-            color: 'var(--stl-text-muted)',
-            fontFamily: 'var(--font-mono)', fontSize: 11,
-            cursor: 'pointer', lineHeight: 1,
+          onClick={(e) => { e.stopPropagation(); onExplain((e.currentTarget as HTMLElement).getBoundingClientRect()); }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.stopPropagation();
+              onExplain((e.currentTarget as HTMLElement).getBoundingClientRect());
+            }
           }}
+          className="mis-info-dot"
+          style={{ marginLeft: 4 }}
         >
           i
         </span>
-      ) : (
-        <span aria-hidden style={{ color: 'var(--stl-text-dim)', fontSize: 14, lineHeight: 1, marginLeft: 4 }}>i</span>
-      )}
+      ) : null}
     </button>
   );
 }
@@ -699,7 +801,7 @@ function MissionTile({
   above: boolean;
   rise: Date | null;
   onStart: () => void;
-  onExplain?: () => void;
+  onExplain?: (rect: DOMRect) => void;
 }) {
   const [showReminder, setShowReminder] = useState(false);
   const riseTxt = above ? null : fmtRiseClock(rise);
@@ -755,25 +857,10 @@ function MissionTile({
             {(entry.diff === 'hard' || entry.diff === 'expert') && onExplain && (
               <button
                 type="button"
-                onClick={(e) => { e.stopPropagation(); onExplain(); }}
+                onClick={(e) => { e.stopPropagation(); onExplain((e.currentTarget as HTMLElement).getBoundingClientRect()); }}
                 aria-label={`Why ${entry.name} is hard`}
-                className="mis-diff-info"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: 16,
-                  height: 16,
-                  marginLeft: 4,
-                  borderRadius: '50%',
-                  background: 'rgba(255,255,255,0.06)',
-                  border: '0.5px solid rgba(255,255,255,0.18)',
-                  color: 'var(--text-muted)',
-                  fontSize: 10,
-                  fontFamily: 'var(--font-mono)',
-                  cursor: 'pointer',
-                  lineHeight: 1,
-                }}
+                className="mis-info-dot"
+                style={{ marginLeft: 4 }}
               >
                 i
               </button>

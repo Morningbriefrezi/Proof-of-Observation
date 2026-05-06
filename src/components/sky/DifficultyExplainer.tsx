@@ -10,6 +10,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { getTonightDarkWindow } from '@/lib/dark-window';
+import AnchoredPanel from './AnchoredPanel';
 
 interface TargetRequirement {
   apertureMm: number;
@@ -122,10 +123,12 @@ interface Props {
   location?: { lat: number; lon: number } | null;
   /** Optional Bortle class for the user's location — show a warning if > 6. */
   bortle?: number | null;
+  /** When provided, render as a popover anchored to this rect. */
+  anchorRect?: DOMRect | null;
 }
 
 export default function DifficultyExplainer({
-  open, onClose, target, eventType, title, location, bortle,
+  open, onClose, target, eventType, title, location, bortle, anchorRect,
 }: Props) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const dragStartY = useRef<number | null>(null);
@@ -177,6 +180,75 @@ export default function DifficultyExplainer({
     dragStartY.current = null;
   }
 
+  const body = (
+    <>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--text-muted)] font-mono">
+            Why this is hard
+          </p>
+          <h3 className="text-text-primary text-base font-semibold mt-0.5" style={{ fontFamily: 'var(--font-serif)' }}>
+            {title}
+          </h3>
+        </div>
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="w-7 h-7 rounded-full flex items-center justify-center text-text-muted hover:text-text-primary"
+          style={{ background: 'rgba(255,255,255,0.05)' }}
+        >
+          <X size={13} />
+        </button>
+      </div>
+
+      <p className="text-text-primary text-sm leading-relaxed mt-2">{copy}</p>
+
+      <div className="grid grid-cols-2 gap-2 pt-2 mt-2 border-t border-[var(--border)]">
+        {aperture && (
+          <Stat label="Aperture" value={aperture} />
+        )}
+        {magnification && (
+          <Stat label="Magnification" value={magnification} />
+        )}
+        {window && (
+          <Stat label="Tonight's window" value={window} fullWidth />
+        )}
+        {bortleMax !== undefined && (
+          <Stat label="Best at Bortle" value={`≤ ${bortleMax}`} />
+        )}
+        {bortle !== undefined && bortle !== null && (
+          <Stat
+            label="Your sky"
+            value={`Bortle ${bortle}`}
+            tone={bortle > 6 ? 'warn' : bortle > (bortleMax ?? 9) ? 'warn' : 'ok'}
+          />
+        )}
+      </div>
+
+      {bortle !== undefined && bortle !== null && bortle > 6 && (
+        <p
+          className="text-xs leading-relaxed mt-2 px-3 py-2 rounded-md"
+          style={{
+            background: 'rgba(251, 113, 133, 0.06)',
+            border: '0.5px solid rgba(251, 113, 133, 0.3)',
+            color: 'var(--negative)',
+          }}
+        >
+          Your sky is too bright for this target. Drive 30–60 km out of town,
+          or pick a brighter target tonight.
+        </p>
+      )}
+    </>
+  );
+
+  if (anchorRect) {
+    return (
+      <AnchoredPanel open={open} anchorRect={anchorRect} onClose={onClose} ariaLabel={`Why ${title} is hard`}>
+        {body}
+      </AnchoredPanel>
+    );
+  }
+
   return (
     <div
       className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center"
@@ -199,63 +271,7 @@ export default function DifficultyExplainer({
       >
         {/* Drag handle (mobile) */}
         <div className="sm:hidden mx-auto mb-1 w-10 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.18)' }} />
-
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--text-muted)] font-mono">
-              Why this is hard
-            </p>
-            <h3 className="text-text-primary text-base font-semibold mt-0.5" style={{ fontFamily: 'var(--font-serif)' }}>
-              {title}
-            </h3>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            className="w-7 h-7 rounded-full flex items-center justify-center text-text-muted hover:text-text-primary"
-            style={{ background: 'rgba(255,255,255,0.05)' }}
-          >
-            <X size={13} />
-          </button>
-        </div>
-
-        <p className="text-text-primary text-sm leading-relaxed">{copy}</p>
-
-        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[var(--border)]">
-          {aperture && (
-            <Stat label="Aperture" value={aperture} />
-          )}
-          {magnification && (
-            <Stat label="Magnification" value={magnification} />
-          )}
-          {window && (
-            <Stat label="Tonight's window" value={window} fullWidth />
-          )}
-          {bortleMax !== undefined && (
-            <Stat label="Best at Bortle" value={`≤ ${bortleMax}`} />
-          )}
-          {bortle !== undefined && bortle !== null && (
-            <Stat
-              label="Your sky"
-              value={`Bortle ${bortle}`}
-              tone={bortle > 6 ? 'warn' : bortle > (bortleMax ?? 9) ? 'warn' : 'ok'}
-            />
-          )}
-        </div>
-
-        {bortle !== undefined && bortle !== null && bortle > 6 && (
-          <p
-            className="text-xs leading-relaxed mt-1 px-3 py-2 rounded-md"
-            style={{
-              background: 'rgba(251, 113, 133, 0.06)',
-              border: '0.5px solid rgba(251, 113, 133, 0.3)',
-              color: 'var(--negative)',
-            }}
-          >
-            Your sky is too bright for this target. Drive 30–60 km out of town,
-            or pick a brighter target tonight.
-          </p>
-        )}
+        {body}
       </div>
     </div>
   );

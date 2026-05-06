@@ -200,6 +200,21 @@ const EVENTS_2026: AstroEvent[] = [
   // the Jan 2026 outlook.
 ];
 
+/**
+ * Returns the rare, once-a-year events (eclipses, oppositions, comets) for the
+ * year of `fromDate`, sorted by date. These are the headline events worth
+ * planning trips for. Capped at `limit` to keep the section scannable.
+ */
+export function getRareEvents(fromDate: Date, limit = 5): AstroEvent[] {
+  const year = fromDate.getFullYear();
+  const RARE_TYPES: AstroEventType[] = ['eclipse-solar', 'eclipse-lunar', 'comet'];
+  return EVENTS_2026
+    .filter(e => RARE_TYPES.includes(e.type))
+    .filter(e => new Date(e.date + 'T12:00:00').getFullYear() === year)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, limit);
+}
+
 export function getUpcomingEvents(fromDate: Date, daysAhead = 30): AstroEvent[] {
   const from = fromDate.getTime();
   const cutoff = from + daysAhead * 24 * 60 * 60 * 1000;
