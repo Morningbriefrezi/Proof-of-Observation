@@ -4,12 +4,16 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 interface Props {
   open: boolean;
-  /** DOMRect of the trigger element. Panel positions itself near this rect. */
+  /**
+   * DOMRect of the trigger element. Used on desktop to place the popover near
+   * the click. Ignored on mobile, where the panel always docks to the bottom
+   * of the viewport so it stays close to the user's thumb.
+   */
   anchorRect: DOMRect | null;
   onClose: () => void;
   ariaLabel?: string;
   children: React.ReactNode;
-  /** Max width in px. Default 340. */
+  /** Max width in px for desktop popover. Default 340. */
   maxWidth?: number;
 }
 
@@ -21,6 +25,8 @@ interface Pos {
   arrowLeft: number;
 }
 
+const MOBILE_BREAKPOINT = 640;
+
 export default function AnchoredPanel({
   open,
   anchorRect,
@@ -31,9 +37,18 @@ export default function AnchoredPanel({
 }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<Pos | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const update = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [open]);
 
   useLayoutEffect(() => {
-    if (!open || !anchorRect) {
+    if (!open || !anchorRect || isMobile) {
       setPos(null);
       return;
     }
@@ -74,7 +89,7 @@ export default function AnchoredPanel({
       window.removeEventListener('resize', compute);
       window.removeEventListener('scroll', compute, true);
     };
-  }, [open, anchorRect, maxWidth]);
+  }, [open, anchorRect, maxWidth, isMobile]);
 
   useEffect(() => {
     if (!open) return;
@@ -85,10 +100,62 @@ export default function AnchoredPanel({
     return () => document.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
-  if (!open || !anchorRect) return null;
+  if (!open) return null;
 
   const panelBg = 'var(--canvas, #0E1320)';
   const panelBorder = '1px solid rgba(255,255,255,0.08)';
+
+  // Mobile: bottom sheet docked at bottom of viewport. Always visible near
+  // the user's thumb, regardless of scroll position or where the trigger
+  // is on the page.
+  if (isMobile) {
+    return (
+      <div
+        role="dialog"
+        aria-label={ariaLabel}
+        onClick={onClose}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 60,
+          background: 'rgba(7,11,20,0.55)',
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'center',
+        }}
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            width: '100%',
+            background: panelBg,
+            border: panelBorder,
+            borderTopLeftRadius: 18,
+            borderTopRightRadius: 18,
+            padding: '14px 16px 22px',
+            boxShadow: '0 -10px 32px rgba(0,0,0,0.5)',
+            maxHeight: '78vh',
+            overflowY: 'auto',
+          }}
+        >
+          <div
+            aria-hidden
+            style={{
+              width: 38,
+              height: 4,
+              borderRadius: 999,
+              background: 'rgba(255,255,255,0.18)',
+              margin: '0 auto 10px',
+            }}
+          />
+          {children}
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop: anchored popover near the click.
+  if (!anchorRect) return null;
 
   return (
     <div

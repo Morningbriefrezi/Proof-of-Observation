@@ -4632,25 +4632,35 @@
 .mis-prime {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px;
-  border-radius: 16px;
-  margin-bottom: 14px;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  margin-bottom: 12px;
   cursor: pointer;
   transition: border-color 0.2s ease, background 0.2s ease;
-  background: rgba(255, 255, 255, 0.045);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   text-align: left;
   width: 100%;
+  position: relative;
+}
+.mis-prime::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 14px; bottom: 14px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--terracotta);
+  opacity: 0.7;
 }
 .mis-prime:hover {
-  border-color: rgba(255, 209, 102, 0.25);
-  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 209, 102, 0.22);
+  background: rgba(255, 255, 255, 0.05);
 }
 .mis-prime-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   background: linear-gradient(160deg, #0B1022, var(--canvas));
   border: 1px solid var(--border);
   display: flex;
@@ -4668,43 +4678,58 @@
     radial-gradient(0.5px 0.5px at 70% 65%, rgba(255,255,255,0.4), transparent),
     radial-gradient(0.5px 0.5px at 55% 20%, rgba(255,255,255,0.3), transparent);
 }
-.mis-prime-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mis-prime-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
 .mis-prime-badge {
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 600;
   color: var(--terracotta);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.14em;
+  margin-bottom: 1px;
 }
 .mis-prime-name {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  color: rgba(255,255,255,0.92);
+  color: rgba(255,255,255,0.94);
   letter-spacing: -0.005em;
+  line-height: 1.2;
 }
 .mis-prime-desc {
   font-size: 11px;
-  color: rgba(255,255,255,0.4);
-  line-height: 1.4;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.35;
+  margin-top: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
 }
 .mis-prime-cta {
   flex-shrink: 0;
   font-family: var(--font-body);
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-weight: 600;
   color: var(--canvas);
   background: var(--terracotta);
   border: 0;
   border-radius: 999px;
-  padding: 9px 18px;
+  padding: 7px 13px;
   cursor: pointer;
   transition: filter 0.15s ease, transform 0.15s ease;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .mis-prime-cta:hover { filter: brightness(1.10); transform: translateY(-1px); }
 .mis-prime-cta:active { transform: translateY(0); filter: brightness(1.05); }
@@ -5741,10 +5766,13 @@
   .mis-stats-bar { gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
   .mis-skymap { height: 280px; border-radius: 10px; }
   .mis-skymap-label { font-size: 7px; }
-  .mis-prime { padding: 10px 12px; gap: 10px; }
-  .mis-prime-icon { width: 46px; height: 46px; border-radius: 10px; }
-  .mis-prime-name { font-size: 14px; }
-  .mis-prime-cta { padding: 7px 14px; font-size: 11px; }
+  .mis-prime { padding: 9px 10px 9px 12px; gap: 10px; border-radius: 12px; }
+  .mis-prime::before { top: 12px; bottom: 12px; }
+  .mis-prime-icon { width: 36px; height: 36px; border-radius: 9px; }
+  .mis-prime-name { font-size: 13px; }
+  .mis-prime-desc { font-size: 10.5px; }
+  .mis-prime-badge { font-size: 8.5px; }
+  .mis-prime-cta { padding: 6px 11px; font-size: 10.5px; }
   .mis-deck { grid-template-columns: 1fr 1fr; gap: 8px; }
   .mis-tile-sky { height: 100px; }
   .mis-tile-glow { width: 72px; height: 72px; }
@@ -5768,15 +5796,16 @@
 }
 .missions-page .mis-stats-right { justify-content: center; }
 
+/* Prime target stays horizontal/compact even on the centered missions layout. */
 .missions-page .mis-prime {
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  text-align: center;
-  gap: 10px;
+  text-align: left;
+  gap: 12px;
 }
 .missions-page .mis-prime-body {
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
 }
 
 .missions-page .mis-lineup-head {
