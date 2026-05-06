@@ -1,7 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useStellarUser } from '@/hooks/useStellarUser';
 import { useStarsBalance } from '@/hooks/useStarsBalance';
 import { useAppState } from '@/hooks/useAppState';
@@ -31,7 +30,6 @@ const DIFFICULTY_TONE: Record<Exclude<DifficultyFilter, 'all'>, { border: string
 };
 
 export default function MarketplacePage() {
-  const router = useRouter();
   const { address: stellarAddress } = useStellarUser();
   const { state } = useAppState();
   const { location } = useLocation();
@@ -41,6 +39,18 @@ export default function MarketplacePage() {
 
   const [filter, setFilter] = useState<CategoryFilter>('all');
   const [difficulty, setDifficulty] = useState<DifficultyFilter>('all');
+  const [solPerGEL, setSolPerGEL] = useState(0);
+  const [solPriceUsd, setSolPriceUsd] = useState(0);
+
+  useEffect(() => {
+    fetch('/api/price/sol')
+      .then(r => r.json())
+      .then(d => {
+        setSolPerGEL(d.solPerGEL ?? 0);
+        setSolPriceUsd(d.solPrice ?? 0);
+      })
+      .catch(() => {});
+  }, []);
 
   const dealers = useMemo(() => getDealersByRegion(location.region), [location.region]);
   const showDealer = dealers.length > 1;
@@ -92,57 +102,9 @@ export default function MarketplacePage() {
     <PageContainer variant="wide" className="font-mono py-5 animate-page-enter">
       <div className="marketplace-page-bg overflow-hidden">
         <div className="relative z-10">
-          <button
-            onClick={() => router.back()}
-            className="inline-flex items-center gap-[6px] text-[11px] tracking-[0.22em] uppercase text-[rgba(232,230,221,0.7)] hover:text-[#E8E6DD] transition-colors mb-[14px] px-[12px] py-[7px] rounded-md"
-            style={{ background: 'rgba(232,230,221,0.05)', border: '1px solid rgba(232,230,221,0.10)' }}
-          >
-            ‹ Back
-          </button>
-
-          {/* Header chips — display surfaces, same shape language as the filled CTAs but quieter */}
-          <div className="flex flex-wrap items-center gap-[8px] mb-[20px]">
-            <span
-              className="inline-flex items-center gap-[10px] px-[16px] py-[10px] rounded-lg text-[13px] tracking-[0.18em] uppercase font-semibold cursor-default"
-              style={{
-                background: 'rgba(15, 18, 28, 0.72)',
-                border: '1px solid rgba(255, 209, 102, 0.38)',
-                color: 'var(--terracotta)',
-                boxShadow: 'inset 0 1px 0 rgba(255, 209, 102, 0.08), 0 1px 0 rgba(0,0,0,0.25)',
-              }}
-            >
-              <span className="text-[10px] tracking-[0.22em] text-[rgba(255,209,102,0.55)]">04</span>
-              <span>Marketplace</span>
-            </span>
-
-            <span
-              className="inline-flex items-center gap-[8px] px-[16px] py-[10px] rounded-lg text-[12px] uppercase cursor-default"
-              style={{
-                background: 'rgba(15, 18, 28, 0.72)',
-                border: '1px solid rgba(94, 234, 212, 0.38)',
-                boxShadow: 'inset 0 1px 0 rgba(94, 234, 212, 0.08), 0 1px 0 rgba(0,0,0,0.25)',
-              }}
-            >
-              <span className="tracking-[0.16em] text-[rgba(232,230,221,0.6)] text-[10px]">Balance</span>
-              <span className="font-semibold text-[var(--seafoam)] tracking-[0.04em] text-[13px]">{balance.toLocaleString()}</span>
-              <span className="text-[var(--seafoam)] text-[12px]">✦</span>
-            </span>
-
-            <span
-              className="inline-flex items-center gap-[10px] pl-[14px] pr-[6px] py-[5px] rounded-lg"
-              style={{
-                background: 'rgba(15, 18, 28, 0.72)',
-                border: '1px solid rgba(232,230,221,0.16)',
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 0 rgba(0,0,0,0.25)',
-              }}
-            >
-              <span className="tracking-[0.16em] uppercase text-[rgba(232,230,221,0.6)] text-[10px]">Region</span>
-              <LocationPicker compact />
-            </span>
-          </div>
-
-          {/* Filter buttons — solid amber active, matching "Start observing" CTA */}
-          <div className="flex flex-wrap items-center gap-[8px] mb-[20px]">
+          {/* Filters left, Balance + Region pushed to the right edge */}
+          <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[10px] mb-[20px] justify-between">
+            <div className="flex flex-wrap items-center gap-[8px]">
             {CATEGORIES.map(c => {
               const active = filter === c.key;
               return (
@@ -207,6 +169,37 @@ export default function MarketplacePage() {
                 </button>
               );
             })}
+            </div>
+
+            {/* Balance + Region — right edge */}
+            <div className="flex flex-wrap items-center gap-[8px]">
+              <span
+                className="inline-flex items-center gap-[8px] px-[14px] py-[9px] rounded-lg text-[12px] uppercase cursor-default"
+                style={{
+                  background: 'rgba(15, 18, 28, 0.72)',
+                  border: '1px solid rgba(251, 146, 60, 0.42)',
+                  boxShadow: 'inset 0 1px 0 rgba(251, 146, 60, 0.10), 0 1px 0 rgba(0,0,0,0.25)',
+                }}
+              >
+                <span className="tracking-[0.16em] text-[rgba(232,230,221,0.6)] text-[10px]">Balance</span>
+                <span className="font-semibold tracking-[0.04em] text-[13px]" style={{ color: '#FB923C' }}>
+                  {balance.toLocaleString()}
+                </span>
+                <span style={{ color: '#FB923C' }} className="text-[12px]">★</span>
+              </span>
+
+              <span
+                className="inline-flex items-center gap-[10px] pl-[12px] pr-[5px] py-[4px] rounded-lg"
+                style={{
+                  background: 'rgba(15, 18, 28, 0.72)',
+                  border: '1px solid rgba(232,230,221,0.16)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 0 rgba(0,0,0,0.25)',
+                }}
+              >
+                <span className="tracking-[0.16em] uppercase text-[rgba(232,230,221,0.6)] text-[10px]">Region</span>
+                <LocationPicker compact />
+              </span>
+            </div>
           </div>
 
           {/* Featured + sidebar grid; overflow products span full width below */}
@@ -216,14 +209,14 @@ export default function MarketplacePage() {
                 <FeaturedProduct product={featured} dealerName={showDealer ? getDealerName(featured.dealerId) : ''} />
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-[12px] content-start">
                   {sidebarProducts.map(p => (
-                    <ProductCard key={p.id} product={p} dealerName={showDealer ? getDealerName(p.dealerId) : ''} />
+                    <ProductCard key={p.id} product={p} dealerName={showDealer ? getDealerName(p.dealerId) : ''} solPerGEL={solPerGEL} solPriceUsd={solPriceUsd} />
                   ))}
                 </div>
               </div>
               {overflowProducts.length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-[12px]">
                   {overflowProducts.map(p => (
-                    <ProductCard key={p.id} product={p} dealerName={showDealer ? getDealerName(p.dealerId) : ''} />
+                    <ProductCard key={p.id} product={p} dealerName={showDealer ? getDealerName(p.dealerId) : ''} solPerGEL={solPerGEL} solPriceUsd={solPriceUsd} />
                   ))}
                 </div>
               )}
@@ -233,7 +226,7 @@ export default function MarketplacePage() {
           ) : visible.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-[12px]">
               {visible.map(p => (
-                <ProductCard key={p.id} product={p} dealerName={showDealer ? getDealerName(p.dealerId) : ''} />
+                <ProductCard key={p.id} product={p} dealerName={showDealer ? getDealerName(p.dealerId) : ''} solPerGEL={solPerGEL} solPriceUsd={solPriceUsd} />
               ))}
             </div>
           ) : (

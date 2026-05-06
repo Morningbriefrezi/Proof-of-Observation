@@ -4,10 +4,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { Product } from '@/lib/dealers';
 
-const DIFFICULTY_TAG: Record<'beginner' | 'intermediate' | 'advanced', { bg: string; color: string; abbr: string }> = {
-  beginner:     { bg: 'rgba(94, 234, 212,0.14)',  color: 'var(--seafoam)',     abbr: 'Beg' },
-  intermediate: { bg: 'rgba(255, 209, 102,0.14)', color: 'var(--terracotta)', abbr: 'Mid' },
-  advanced:     { bg: 'rgba(255, 209, 102,0.14)', color: 'var(--terracotta)', abbr: 'Adv' },
+const STARS_ORANGE = '#FB923C';
+
+const DIFFICULTY_TAG: Record<'beginner' | 'intermediate' | 'advanced', { color: string; border: string; abbr: string }> = {
+  beginner:     { color: '#5EEAD4', border: 'rgba(94, 234, 212, 0.55)', abbr: 'Beg' },
+  intermediate: { color: '#FFD166', border: 'rgba(255, 209, 102, 0.55)', abbr: 'Mid' },
+  advanced:     { color: '#FB923C', border: 'rgba(251, 146, 60, 0.55)',  abbr: 'Adv' },
 };
 
 const formatPrice = (p: Product): string => {
@@ -15,15 +17,28 @@ const formatPrice = (p: Product): string => {
   return `${n} ${p.currency}`;
 };
 
+const formatSol = (sol: number): string => {
+  if (sol >= 10) return sol.toFixed(2);
+  if (sol >= 1)  return sol.toFixed(3);
+  return sol.toFixed(4);
+};
+
 interface Props {
   product: Product;
   dealerName: string;
+  solPerGEL?: number;
+  solPriceUsd?: number;
 }
 
-export default function ProductCard({ product, dealerName }: Props) {
+export default function ProductCard({ product, dealerName, solPerGEL = 0, solPriceUsd = 0 }: Props) {
   const tag = product.skillLevel ? DIFFICULTY_TAG[product.skillLevel] : null;
   const checkoutHref = (mode: 'sol' | 'stars') =>
     `/marketplace/checkout?id=${encodeURIComponent(product.id)}&mode=${mode}`;
+
+  const solAmount =
+    product.currency === 'GEL' && solPerGEL > 0 ? product.price * solPerGEL :
+    product.currency === 'USD' && solPriceUsd > 0 ? product.price / solPriceUsd :
+    null;
 
   return (
     <div
@@ -43,8 +58,13 @@ export default function ProductCard({ product, dealerName }: Props) {
     >
       {tag && (
         <span
-          className="absolute top-[10px] left-[10px] z-10 px-[8px] py-[3px] rounded-[4px] text-[9px] tracking-[0.18em] uppercase font-semibold"
-          style={{ background: tag.bg, color: tag.color, border: `1px solid ${tag.color === 'var(--seafoam)' ? 'rgba(94,234,212,0.35)' : 'rgba(255,209,102,0.35)'}` }}
+          className="absolute top-[10px] left-[10px] z-10 px-[8px] py-[3px] rounded-[4px] text-[9px] tracking-[0.18em] uppercase font-bold"
+          style={{
+            background: 'rgba(11, 14, 23, 0.92)',
+            color: tag.color,
+            border: `1px solid ${tag.border}`,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+          }}
         >
           {tag.abbr}
         </span>
@@ -81,14 +101,24 @@ export default function ProductCard({ product, dealerName }: Props) {
         </p>
       </a>
       <div
-        className="flex justify-between items-baseline pt-[8px] mb-[8px]"
+        className="flex justify-between items-end pt-[8px] mb-[8px] gap-[8px]"
         style={{ borderTop: '1px solid rgba(232,230,221,0.10)' }}
       >
-        <span className="text-[15px] font-semibold text-[var(--terracotta)] transition-colors group-hover:text-[#FFE08A]">
-          {formatPrice(product)}
-        </span>
-        <span className="text-[11px] tracking-[0.12em] uppercase font-semibold text-[var(--seafoam)]">
-          ✦ {product.starsPrice.toLocaleString()}
+        <div className="flex flex-col gap-[1px] min-w-0">
+          <span className="text-[15px] font-semibold text-[var(--terracotta)] transition-colors group-hover:text-[#FFE08A] leading-none">
+            {formatPrice(product)}
+          </span>
+          {solAmount !== null && (
+            <span className="text-[9px] tracking-[0.10em] uppercase text-[rgba(232,230,221,0.55)] leading-none mt-[3px]">
+              ≈ <span className="text-[rgba(232,230,221,0.85)]">{formatSol(solAmount)}</span> SOL
+            </span>
+          )}
+        </div>
+        <span
+          className="text-[11px] tracking-[0.10em] uppercase font-bold whitespace-nowrap"
+          style={{ color: STARS_ORANGE }}
+        >
+          ★ {product.starsPrice.toLocaleString()}
         </span>
       </div>
       <div className="flex gap-[5px]">
@@ -110,14 +140,14 @@ export default function ProductCard({ product, dealerName }: Props) {
           href={checkoutHref('stars')}
           className="flex-1 inline-flex items-center justify-center gap-[3px] px-[6px] py-[7px] rounded-lg text-[10px] tracking-[0.10em] uppercase font-bold whitespace-nowrap transition-[filter,transform] hover:brightness-110"
           style={{
-            background: 'var(--seafoam)',
-            border: '1px solid var(--seafoam)',
-            color: '#06231f',
-            boxShadow: '0 6px 18px -10px rgba(94, 234, 212, 0.55)',
+            background: STARS_ORANGE,
+            border: `1px solid ${STARS_ORANGE}`,
+            color: '#1a0e02',
+            boxShadow: '0 6px 18px -10px rgba(251, 146, 60, 0.55)',
           }}
           aria-label={`Redeem ${product.name} with stars`}
         >
-          <span aria-hidden className="text-[11px] leading-none">✦</span>
+          <span aria-hidden className="text-[12px] leading-none">★</span>
           <span>Stars</span>
         </Link>
       </div>

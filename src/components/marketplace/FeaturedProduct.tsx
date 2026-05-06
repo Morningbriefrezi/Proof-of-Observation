@@ -130,8 +130,11 @@ export default function FeaturedProduct({ product, dealerName }: Props) {
                 ≈ <span className="text-[#E8E6DD]">{formatSol(solAmount)}</span> SOL
               </p>
             )}
-            <p className="inline-flex items-center gap-[5px] text-[12px] tracking-[0.14em] uppercase font-semibold text-[var(--seafoam)] transition-all hover:scale-[1.06] origin-left cursor-default">
-              <span className="text-[14px] leading-none">✦</span>
+            <p
+              className="inline-flex items-center gap-[5px] text-[12px] tracking-[0.14em] uppercase font-semibold transition-all hover:scale-[1.06] origin-left cursor-default"
+              style={{ color: '#FB923C' }}
+            >
+              <span className="text-[14px] leading-none">★</span>
               {product.starsPrice.toLocaleString()} stars
             </p>
           </div>
@@ -166,13 +169,13 @@ export default function FeaturedProduct({ product, dealerName }: Props) {
               href={`/marketplace/checkout?id=${encodeURIComponent(product.id)}&mode=stars`}
               className="inline-flex items-center gap-[6px] px-[16px] py-[10px] rounded-lg text-[11px] font-bold tracking-[0.14em] uppercase whitespace-nowrap transition-[filter,transform] hover:brightness-110"
               style={{
-                background: 'var(--seafoam)',
-                border: '1px solid var(--seafoam)',
-                color: '#06231f',
-                boxShadow: '0 10px 28px -10px rgba(94, 234, 212, 0.55)',
+                background: '#FB923C',
+                border: '1px solid #FB923C',
+                color: '#1a0e02',
+                boxShadow: '0 10px 28px -10px rgba(251, 146, 60, 0.55)',
               }}
             >
-              <span aria-hidden className="text-[13px] leading-none">✦</span>
+              <span aria-hidden className="text-[14px] leading-none">★</span>
               <span>Pay Stars</span>
             </Link>
           </div>
