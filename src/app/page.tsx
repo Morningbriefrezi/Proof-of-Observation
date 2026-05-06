@@ -207,17 +207,33 @@ function HowStep({
 
 function PhonePic({ src, alt }: { src: string; alt: string }) {
   return (
-    <div className="relative mx-auto w-[230px] md:w-[260px] aspect-[884/1498] rounded-[28px] bg-[#05070D] p-[5px] shadow-[0_30px_70px_-20px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.06)]">
-      <div className="absolute -inset-[1px] rounded-[29px] ring-1 ring-white/[0.04] pointer-events-none" />
-      <div className="relative h-full w-full rounded-[24px] overflow-hidden bg-[#0B0E17]">
-        <Image
-          src={src}
-          alt={alt}
-          fill
-          sizes="(min-width: 768px) 260px, 230px"
-          loading="lazy"
-          className="object-cover"
-        />
+    <div className="relative mx-auto w-[230px] md:w-[260px] aspect-[884/1498]">
+      {/* Side buttons — left (volume up / down) */}
+      <div className="absolute left-[-2px] top-[19%] w-[2px] h-[26px] rounded-l-[1px] bg-[#0a0c12]" />
+      <div className="absolute left-[-2px] top-[26%] w-[2px] h-[42px] rounded-l-[1px] bg-[#0a0c12]" />
+      <div className="absolute left-[-2px] top-[34%] w-[2px] h-[42px] rounded-l-[1px] bg-[#0a0c12]" />
+      {/* Side button — right (power) */}
+      <div className="absolute right-[-2px] top-[25%] w-[2px] h-[58px] rounded-r-[1px] bg-[#0a0c12]" />
+
+      {/* Phone chassis */}
+      <div className="relative h-full w-full rounded-[40px] bg-gradient-to-br from-[#1a1d24] via-[#0d1016] to-[#06080d] p-[6px] shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.05)]">
+        {/* Inner bezel highlight */}
+        <div className="absolute inset-[2px] rounded-[38px] ring-1 ring-white/[0.06] pointer-events-none" />
+
+        {/* Screen */}
+        <div className="relative h-full w-full rounded-[34px] overflow-hidden bg-[#0B0E17]">
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            sizes="(min-width: 768px) 260px, 230px"
+            loading="lazy"
+            className="object-cover"
+          />
+
+          {/* Dynamic Island */}
+          <div className="absolute top-[7px] left-1/2 -translate-x-1/2 w-[68px] h-[18px] rounded-full bg-black ring-1 ring-white/[0.06] z-10" />
+        </div>
       </div>
     </div>
   );
