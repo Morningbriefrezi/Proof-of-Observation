@@ -104,8 +104,14 @@ export default function ClubPage() {
       <div className="max-w-lg mx-auto px-4 py-8">
         <BackButton />
         <Card className="p-6 mt-4 flex flex-col items-center gap-4 text-center">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255, 209, 102,0.08)', border: '1px solid rgba(255, 209, 102,0.15)' }}>
-            <Telescope size={26} className="text-[var(--terracotta)]" />
+          <div
+            className="w-14 h-14 rounded-full flex items-center justify-center"
+            style={{
+              background: 'linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%)',
+              boxShadow: '0 6px 16px -4px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.18)',
+            }}
+          >
+            <Telescope size={26} strokeWidth={2.2} color="#FFFFFF" />
           </div>
           <div>
             <h2 className="text-text-primary font-bold text-lg mb-1">Register Your Telescope</h2>
@@ -155,8 +161,14 @@ export default function ClubPage() {
           ) : null}
           <Card glow="cyan" className="p-6">
             <div className="flex items-center gap-4 mb-5">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255, 209, 102,0.08)', border: '1px solid rgba(255, 209, 102,0.2)' }}>
-                <Telescope size={22} className="text-[var(--terracotta)]" />
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{
+                  background: 'linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%)',
+                  boxShadow: '0 6px 16px -4px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.18)',
+                }}
+              >
+                <Telescope size={22} strokeWidth={2.2} color="#FFFFFF" />
               </div>
               <div>
                 <p className="text-text-primary font-bold">{telescope?.brand} {telescope?.model}</p>
@@ -185,8 +197,14 @@ export default function ClubPage() {
       <BackButton />
       <div className="mt-4">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255, 209, 102,0.08)', border: '1px solid rgba(255, 209, 102,0.15)' }}>
-            <Telescope size={20} className="text-[var(--terracotta)]" />
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{
+              background: 'linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%)',
+              boxShadow: '0 6px 16px -4px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.18)',
+            }}
+          >
+            <Telescope size={20} strokeWidth={2.2} color="#FFFFFF" />
           </div>
           <div>
             <h1 className="text-text-primary font-bold text-lg leading-tight">Register Your Telescope</h1>

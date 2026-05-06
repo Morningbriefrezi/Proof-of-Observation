@@ -19,8 +19,16 @@ import EventInfoSheet from '@/components/sky/EventInfoSheet';
 import DifficultyExplainer from '@/components/sky/DifficultyExplainer';
 import { getRareEvents, getUpcomingEvents, type AstroEvent } from '@/lib/astro-events';
 import type { QuizDef } from '@/lib/quizzes';
-import { Snowflake, Telescope as LcTelescope, Crosshair, Moon as LcMoon } from 'lucide-react';
+import { Snowflake, Telescope as LcTelescope, Crosshair, Moon as LcMoon, Sun, Star, Globe, Rocket } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+
+const HUB_GRADIENTS = {
+  amber:   'linear-gradient(135deg, #FFB347 0%, #FF7E3F 100%)',
+  violet:  'linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%)',
+  fuchsia: 'linear-gradient(135deg, #D946EF 0%, #8B5CF6 100%)',
+  teal:    'linear-gradient(135deg, #2DD4BF 0%, #06B6D4 100%)',
+  rose:    'linear-gradient(135deg, #FB7185 0%, #E11D48 100%)',
+} as const;
 
 type DiffClass = 'easy' | 'med' | 'hard' | 'expert';
 
@@ -60,18 +68,19 @@ const LINEUP_KEYS = ['moon', 'jupiter', 'saturn', 'mars', 'venus', 'mercury'];
 
 interface QuizUi {
   key: 'solar-system' | 'constellations' | 'telescopes' | 'universe' | 'space-exploration';
-  Icon: () => React.ReactElement;
+  Icon: LucideIcon;
+  gradient: string;
   reward: number;
   descEn: string;
   descKa: string;
 }
 
 const QUIZ_UI: Record<string, QuizUi> = {
-  'solar-system':      { key: 'solar-system',      Icon: SunIcon,       reward: 100, descEn: '10 questions · planets, moons, orbits',      descKa: '10 კითხვა · პლანეტები, მთვარეები, ორბიტები' },
-  'constellations':    { key: 'constellations',    Icon: StarIcon,      reward: 100, descEn: '10 questions · stars, myths, sky patterns',    descKa: '10 კითხვა · ვარსკვლავები, მითები, ცის ფიგურები' },
-  'telescopes':        { key: 'telescopes',        Icon: TelescopeIcon, reward: 100, descEn: '10 questions · optics, mounts, magnification', descKa: '10 კითხვა · ოპტიკა, სადგარები, გადიდება' },
-  'universe':          { key: 'universe',          Icon: DeepSkyIcon,   reward: 100, descEn: '10 questions · galaxies, cosmology, time',     descKa: '10 კითხვა · გალაქტიკები, კოსმოლოგია, დრო' },
-  'space-exploration': { key: 'space-exploration', Icon: RocketIcon,    reward: 100, descEn: '10 questions · missions, probes, astronauts',  descKa: '10 კითხვა · მისიები, ზონდები, ასტრონავტები' },
+  'solar-system':      { key: 'solar-system',      Icon: Sun,         gradient: HUB_GRADIENTS.amber,   reward: 100, descEn: '10 questions · planets, moons, orbits',      descKa: '10 კითხვა · პლანეტები, მთვარეები, ორბიტები' },
+  'constellations':    { key: 'constellations',    Icon: Star,        gradient: HUB_GRADIENTS.fuchsia, reward: 100, descEn: '10 questions · stars, myths, sky patterns',    descKa: '10 კითხვა · ვარსკვლავები, მითები, ცის ფიგურები' },
+  'telescopes':        { key: 'telescopes',        Icon: LcTelescope, gradient: HUB_GRADIENTS.violet,  reward: 100, descEn: '10 questions · optics, mounts, magnification', descKa: '10 კითხვა · ოპტიკა, სადგარები, გადიდება' },
+  'universe':          { key: 'universe',          Icon: Globe,       gradient: HUB_GRADIENTS.teal,    reward: 100, descEn: '10 questions · galaxies, cosmology, time',     descKa: '10 კითხვა · გალაქტიკები, კოსმოლოგია, დრო' },
+  'space-exploration': { key: 'space-exploration', Icon: Rocket,      gradient: HUB_GRADIENTS.rose,    reward: 100, descEn: '10 questions · missions, probes, astronauts',  descKa: '10 კითხვა · მისიები, ზონდები, ასტრონავტები' },
 };
 
 export default function MissionsPage() {
@@ -379,8 +388,8 @@ export default function MissionsPage() {
               return (
                 <QuizTile
                   key={quiz.id}
-                  variant={ui.key}
                   Icon={ui.Icon}
+                  gradient={ui.gradient}
                   title={title}
                   meta={desc}
                   reward={ui.reward}
@@ -923,8 +932,8 @@ function EquipIcon({ kind }: { kind: string }) {
 // ---- Quiz tile ----
 
 function QuizTile({
-  variant,
   Icon,
+  gradient,
   title,
   meta,
   reward,
@@ -932,8 +941,8 @@ function QuizTile({
   total,
   onClick,
 }: {
-  variant: string;
-  Icon: () => React.ReactElement;
+  Icon: LucideIcon;
+  gradient: string;
   title: string;
   meta: string;
   reward: number;
@@ -948,8 +957,14 @@ function QuizTile({
       <span className="mis-qtile-play" aria-hidden>
         <PlayIcon />
       </span>
-      <span className={`mis-qtile-icon ${variant}`}>
-        <Icon />
+      <span
+        className="mis-qtile-icon"
+        style={{
+          background: gradient,
+          boxShadow: '0 6px 16px -4px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.18)',
+        }}
+      >
+        <Icon size={22} strokeWidth={2.2} color="#FFFFFF" />
       </span>
       <span className="mis-qtile-name">{title}</span>
       <span className="mis-qtile-meta">{meta}</span>
@@ -979,49 +994,3 @@ function PlayIcon() {
   );
 }
 
-function SunIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="12" r="4.5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function StarIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M12 2l2.4 5.2L20 8.4l-4 4.1 1 5.8L12 15.4l-5 2.9 1-5.8-4-4.1 5.6-1.2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function TelescopeIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="9" r="5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M7 16l5 4 5-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M12 14v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function DeepSkyIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="12" r="3.5" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="12" cy="12" r="7" stroke="currentColor" strokeWidth="0.8" opacity="0.35" strokeDasharray="2 2" />
-      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="0.5" opacity="0.15" strokeDasharray="1.5 2.5" />
-    </svg>
-  );
-}
-
-function RocketIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M12 2c-2 4-3 8-3 12h6c0-4-1-8-3-12z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-      <path d="M9 14l-2 4h2M15 14l2 4h-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="12" cy="10" r="1.5" stroke="currentColor" strokeWidth="1" />
-    </svg>
-  );
-}

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useStellarUser } from '@/hooks/useStellarUser';
-import { Telescope } from 'lucide-react';
+import { Telescope, Trophy } from 'lucide-react';
 import BackButton from '@/components/shared/BackButton';
 import ComingSoonOverlay from '@/components/shared/ComingSoonOverlay';
 import { Card } from '@/components/ui/Card';
@@ -261,10 +261,13 @@ export default function LeaderboardPage() {
           style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
         >
           <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center"
-            style={{ background: 'rgba(255, 209, 102,0.08)', border: '1px solid rgba(255, 209, 102,0.15)' }}
+            className="w-14 h-14 rounded-full flex items-center justify-center"
+            style={{
+              background: 'linear-gradient(135deg, #FFB347 0%, #FF7E3F 100%)',
+              boxShadow: '0 6px 16px -4px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.18)',
+            }}
           >
-            <span style={{ fontSize: 28 }}>🏆</span>
+            <Trophy size={26} strokeWidth={2.2} color="#FFFFFF" />
           </div>
           <div>
             <p className="text-text-primary/80 font-semibold text-sm">Be the first on the board</p>

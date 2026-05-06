@@ -14,8 +14,17 @@ import TonightsBanner from '@/components/learn/TonightsBanner';
 import { PLANETS, DSO, CONSTELLATIONS, ALL_EVENTS, daysFromNow, type Locale } from '@/lib/learn-data';
 import {
   Globe, Sparkles, Brain, Camera, BookOpen, Telescope, Map, Search,
-  X, Star, Moon, Eye, ChevronDown, ChevronUp, Binoculars,
+  X, Star, Moon, Eye, ChevronDown, ChevronUp, Binoculars, Sun, Rocket,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+
+const QUIZ_HUB: Record<string, { Icon: LucideIcon; gradient: string }> = {
+  'solar-system':      { Icon: Sun,       gradient: 'linear-gradient(135deg, #FFB347 0%, #FF7E3F 100%)' },
+  'constellations':    { Icon: Star,      gradient: 'linear-gradient(135deg, #D946EF 0%, #8B5CF6 100%)' },
+  'telescopes':        { Icon: Telescope, gradient: 'linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%)' },
+  'universe':          { Icon: Globe,     gradient: 'linear-gradient(135deg, #2DD4BF 0%, #06B6D4 100%)' },
+  'space-exploration': { Icon: Rocket,    gradient: 'linear-gradient(135deg, #FB7185 0%, #E11D48 100%)' },
+};
 
 type Tab = 'planets' | 'deepsky' | 'quizzes' | 'guide' | 'telescopes' | 'astrophoto';
 type Planet = typeof PLANETS[number];
@@ -395,13 +404,20 @@ function QuizzesTab({ locale, onStart }: { locale: Locale; onStart: (q: QuizDef)
         const results = quizzes.filter(r => r.quizId === quiz.id);
         const best = results.length > 0 ? Math.max(...results.map(r => r.score)) : null;
         const bestStars = best !== null ? best * quiz.starsPerCorrect : null;
+        const hub = QUIZ_HUB[quiz.id];
+        const HubIcon = hub?.Icon ?? Sparkles;
 
         return (
           <div key={quiz.id} className="glass-card p-4">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
-                style={{ background: 'rgba(255, 209, 102,0.08)', border: '1px solid rgba(255, 209, 102,0.15)' }}>
-                {quiz.emoji}
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{
+                  background: hub?.gradient ?? 'linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%)',
+                  boxShadow: '0 6px 16px -4px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.18)',
+                }}
+              >
+                <HubIcon size={20} strokeWidth={2.2} color="#FFFFFF" />
               </div>
               <div className="flex-1">
                 <p className="text-text-primary font-semibold text-sm">{quiz.title[locale]}</p>
@@ -821,9 +837,14 @@ function AstraPromo({ locale }: { locale: Locale }) {
       style={{ background: 'linear-gradient(135deg, rgba(255, 209, 102,0.08), rgba(26,143,160,0.04))', border: '1px solid rgba(255, 209, 102,0.18)' }}
     >
       <div className="relative flex-shrink-0">
-        <div className="w-11 h-11 rounded-full flex items-center justify-center"
-          style={{ background: 'rgba(255, 209, 102,0.12)', border: '1px solid rgba(255, 209, 102,0.25)' }}>
-          <Sparkles size={18} color="var(--terracotta)" />
+        <div
+          className="w-11 h-11 rounded-full flex items-center justify-center"
+          style={{
+            background: 'linear-gradient(135deg, #D946EF 0%, #8B5CF6 100%)',
+            boxShadow: '0 6px 16px -4px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.18)',
+          }}
+        >
+          <Sparkles size={18} color="#FFFFFF" strokeWidth={2.2} />
         </div>
         <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[var(--seafoam)] border-2 border-[var(--canvas)]" />
       </div>
