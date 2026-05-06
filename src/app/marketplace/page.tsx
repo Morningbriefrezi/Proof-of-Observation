@@ -94,7 +94,7 @@ export default function MarketplacePage() {
     () => visible.filter(p => !featured || p.id !== featured.id),
     [visible, featured],
   );
-  const SIDEBAR_COUNT = 6;
+  const SIDEBAR_COUNT = 4;
   const sidebarProducts = remaining.slice(0, SIDEBAR_COUNT);
   const overflowProducts = remaining.slice(SIDEBAR_COUNT);
 
@@ -208,16 +208,16 @@ export default function MarketplacePage() {
           {/* Featured + sidebar grid; overflow products span full width below */}
           {featured && remaining.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,460px)_1fr] gap-[14px] items-start mb-[14px]">
+              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,460px)_1fr] gap-[16px] items-start mb-[16px]">
                 <FeaturedProduct product={featured} dealerName={showDealer ? getDealerName(featured.dealerId) : ''} />
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-[12px] content-start">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-[16px] content-start">
                   {sidebarProducts.map(p => (
                     <ProductCard key={p.id} product={p} dealerName={showDealer ? getDealerName(p.dealerId) : ''} solPerGEL={solPerGEL} solPriceUsd={solPriceUsd} />
                   ))}
                 </div>
               </div>
               {overflowProducts.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-[12px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[16px]">
                   {overflowProducts.map(p => (
                     <ProductCard key={p.id} product={p} dealerName={showDealer ? getDealerName(p.dealerId) : ''} solPerGEL={solPerGEL} solPriceUsd={solPriceUsd} />
                   ))}
@@ -227,7 +227,7 @@ export default function MarketplacePage() {
           ) : featured ? (
             <FeaturedProduct product={featured} dealerName={showDealer ? getDealerName(featured.dealerId) : ''} />
           ) : visible.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-[12px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[16px]">
               {visible.map(p => (
                 <ProductCard key={p.id} product={p} dealerName={showDealer ? getDealerName(p.dealerId) : ''} solPerGEL={solPerGEL} solPriceUsd={solPriceUsd} />
               ))}

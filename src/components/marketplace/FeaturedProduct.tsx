@@ -137,44 +137,43 @@ export default function FeaturedProduct({ product, dealerName }: Props) {
               {product.starsPrice.toLocaleString()} stars
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-[8px] justify-end">
+          <div className="flex flex-wrap items-center gap-[10px] justify-end">
             <a
               href={product.externalUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-[18px] py-[10px] rounded-lg text-[12px] font-bold tracking-[0.18em] uppercase transition-[filter,transform] hover:brightness-110"
+              className="px-[18px] py-[11px] rounded-[14px] text-[12px] font-medium tracking-[0.02em] transition-[background,border-color,transform] duration-150 hover:-translate-y-[1px]"
               style={{
-                background: 'transparent',
-                border: '1px solid rgba(232,230,221,0.22)',
-                color: '#E8E6DD',
+                background: '#161A28',
+                border: '1px solid rgba(255,255,255,0.10)',
+                color: 'rgba(255,255,255,0.92)',
               }}
             >
               View
             </a>
             <Link
               href={`/marketplace/checkout?id=${encodeURIComponent(product.id)}&mode=sol`}
-              className="inline-flex items-center gap-[6px] px-[16px] py-[10px] rounded-lg text-[11px] font-bold tracking-[0.14em] uppercase whitespace-nowrap transition-[filter,transform] hover:brightness-110"
+              className="inline-flex items-center gap-[8px] px-[20px] py-[11px] rounded-[14px] text-[13px] font-semibold tracking-[0.005em] whitespace-nowrap transition-[filter,transform,box-shadow] duration-150 hover:brightness-[1.08] hover:-translate-y-[1px]"
               style={{
-                background: 'var(--terracotta)',
-                border: '1px solid var(--terracotta)',
-                color: '#1a1208',
-                boxShadow: '0 10px 28px -10px rgba(255, 209, 102, 0.55)',
+                background: 'linear-gradient(135deg, #5B6CFF 0%, #8B5CF6 100%)',
+                border: 'none',
+                color: '#FFFFFF',
+                boxShadow: '0 8px 24px rgba(91, 108, 255, 0.28)',
               }}
             >
-              <span aria-hidden className="text-[13px] leading-none">◎</span>
+              <span aria-hidden className="text-[14px] leading-none">◎</span>
               <span>Pay SOL</span>
             </Link>
             <Link
               href={`/marketplace/checkout?id=${encodeURIComponent(product.id)}&mode=stars`}
-              className="inline-flex items-center gap-[6px] px-[16px] py-[10px] rounded-lg text-[11px] font-bold tracking-[0.14em] uppercase whitespace-nowrap transition-[filter,transform] hover:brightness-110"
+              className="inline-flex items-center gap-[8px] px-[20px] py-[11px] rounded-[14px] text-[13px] font-medium tracking-[0.02em] whitespace-nowrap transition-[background,border-color,transform] duration-150 hover:-translate-y-[1px]"
               style={{
-                background: '#A78BFA',
-                border: '1px solid #A78BFA',
-                color: '#150a2b',
-                boxShadow: '0 10px 28px -10px rgba(167, 139, 250, 0.55)',
+                background: '#161A28',
+                border: '1px solid rgba(255,255,255,0.10)',
+                color: 'rgba(255,255,255,0.92)',
               }}
             >
-              <span aria-hidden className="text-[14px] leading-none">★</span>
+              <span aria-hidden className="text-[14px] leading-none" style={{ color: '#A78BFA' }}>★</span>
               <span>Pay Stars</span>
             </Link>
           </div>
