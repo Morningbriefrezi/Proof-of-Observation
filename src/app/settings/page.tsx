@@ -19,11 +19,29 @@ const STARS_TO_GEL = 0.012; // 1 Star ≈ 0.012 GEL (100 Stars ≈ 1.2 GEL store
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: 28 }}>
-      <p style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px 4px' }}>
+    <div style={{ marginBottom: 22 }}>
+      <p style={{
+        color: 'var(--text-muted)',
+        fontFamily: 'var(--font-mono)',
+        fontSize: 10,
+        fontWeight: 600,
+        textTransform: 'uppercase',
+        letterSpacing: '0.18em',
+        margin: '0 0 10px 4px',
+      }}>
         {title}
       </p>
-      <div style={{ borderRadius: 18, overflow: 'hidden', background: 'var(--bg-card)', border: '1px solid var(--border-default)' }}>
+      <div style={{
+        borderRadius: 16,
+        overflow: 'hidden',
+        background:
+          'radial-gradient(ellipse 60% 100% at 0% 0%, rgba(167,139,250,0.06) 0%, transparent 60%), ' +
+          'linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%)',
+        border: '1px solid rgba(255,255,255,0.10)',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 28px -18px rgba(0,0,0,0.55)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+      }}>
         {children}
       </div>
     </div>
@@ -49,21 +67,36 @@ function Row({
     <div
       onClick={onClick}
       style={{
-        display: 'flex', alignItems: 'center', gap: 13, padding: '13px 16px',
-        borderBottom: last ? 'none' : '1px solid var(--border-subtle)',
+        display: 'flex', alignItems: 'center', gap: 13, padding: '14px 16px',
+        borderBottom: last ? 'none' : '1px solid rgba(255,255,255,0.06)',
         cursor: onClick || href ? 'pointer' : 'default',
         background: 'transparent',
         transition: 'background 0.15s',
       }}
-      onMouseEnter={e => { if (onClick || href) (e.currentTarget as HTMLElement).style.background = 'var(--bg-card-hover)'; }}
+      onMouseEnter={e => { if (onClick || href) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'; }}
       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
     >
-      <div style={{ width: 34, height: 34, borderRadius: 10, background: iconBg, border: `1px solid ${iconColor}33`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <div style={{
+        width: 36, height: 36, borderRadius: 10,
+        background: iconBg,
+        border: `1px solid ${iconColor}33`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+      }}>
         <span style={{ color: iconColor }}>{icon}</span>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ color: danger ? 'var(--error)' : 'var(--text-primary)', fontSize: 15, fontWeight: 500, margin: 0 }}>{label}</p>
-        {sublabel && <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: '1px 0 0' }}>{sublabel}</p>}
+        <p style={{
+          color: danger ? 'var(--error)' : 'var(--text-primary)',
+          fontFamily: 'var(--font-display)',
+          fontSize: 14, fontWeight: 500, margin: 0,
+          letterSpacing: '-0.005em',
+        }}>{label}</p>
+        {sublabel && <p style={{
+          color: 'var(--text-muted)',
+          fontFamily: 'var(--font-mono)',
+          fontSize: 11, margin: '2px 0 0',
+        }}>{sublabel}</p>}
       </div>
       {right && <div style={{ flexShrink: 0 }}>{right}</div>}
       {(onClick || href) && !right && <ChevronRight size={15} color="var(--text-muted)" />}
@@ -164,14 +197,31 @@ export default function SettingsPage() {
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 16px 48px' }}>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 0 24px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '18px 0 22px' }}>
         <button
           onClick={() => router.back()}
-          style={{ width: 34, height: 34, borderRadius: 10, background: 'var(--bg-card)', border: '1px solid var(--border-default)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+          aria-label="Back"
+          style={{
+            width: 36, height: 36, borderRadius: 10,
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.10)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+          }}
         >
           <ChevronLeft size={17} color="var(--text-secondary)" />
         </button>
-        <h1 style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: 19, margin: 0 }}>Settings</h1>
+        <h1 style={{
+          color: 'var(--text-primary)',
+          fontFamily: 'var(--font-serif)',
+          fontWeight: 500,
+          fontSize: 22,
+          margin: 0,
+          letterSpacing: '-0.01em',
+        }}>
+          Settings
+        </h1>
       </div>
 
       {/* ── ACCOUNT ── */}
@@ -241,33 +291,78 @@ export default function SettingsPage() {
       {/* ── STARS ── */}
       <Section title="Stars">
         <div style={{ padding: '16px 16px 18px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 18 }}>
             {[
               { value: `✦ ${totalStars.toLocaleString()}`, label: 'Balance', color: 'var(--stars)' },
               { value: `~${gelWorth} ₾`, label: 'Store Value', color: 'var(--success)' },
               { value: rank.name, label: rank.icon, color: 'var(--terracotta)' },
             ].map(s => (
-              <div key={s.label} style={{ borderRadius: 12, padding: '12px 8px', textAlign: 'center', background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                <p style={{ color: s.color, fontWeight: 800, fontSize: 15, margin: '0 0 2px', fontFamily: 'monospace' }}>{s.value}</p>
-                <p style={{ color: 'var(--text-muted)', fontSize: 10, margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: 1.3 }}>{s.label}</p>
+              <div key={s.label} style={{
+                borderRadius: 12,
+                padding: '12px 8px 11px',
+                textAlign: 'center',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+              }}>
+                <p style={{
+                  color: s.color, fontWeight: 700, fontSize: 16,
+                  margin: '0 0 4px',
+                  fontFamily: 'var(--font-mono)',
+                  fontVariantNumeric: 'tabular-nums',
+                  letterSpacing: '-0.01em',
+                  lineHeight: 1,
+                }}>{s.value}</p>
+                <p style={{
+                  color: 'var(--text-muted)', fontSize: 9.5, margin: 0,
+                  fontFamily: 'var(--font-mono)',
+                  textTransform: 'uppercase', letterSpacing: '0.14em',
+                  lineHeight: 1.3,
+                }}>{s.label}</p>
               </div>
             ))}
           </div>
 
           {/* Rank progress */}
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-              <span style={{ color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600 }}>{rank.icon} {rank.name}</span>
-              {rank.nextRank && <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{rank.nextRank} →</span>}
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 7 }}>
+              <span style={{
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-mono)',
+                fontSize: 11, fontWeight: 700,
+                textTransform: 'uppercase', letterSpacing: '0.16em',
+              }}>{rank.icon} {rank.name}</span>
+              {rank.nextRank && <span style={{
+                color: 'var(--text-muted)',
+                fontFamily: 'var(--font-mono)',
+                fontSize: 11,
+              }}>{rank.nextRank} →</span>}
             </div>
-            <div style={{ height: 6, borderRadius: 3, background: 'var(--border-default)', overflow: 'hidden' }}>
-              <div style={{ height: '100%', borderRadius: 3, width: `${Math.max(rank.progressPct, 4)}%`, background: 'linear-gradient(90deg, var(--terracotta), var(--terracotta))', transition: 'width 0.7s' }} />
+            <div style={{
+              height: 4, borderRadius: 999,
+              background: 'rgba(0,0,0,0.35)',
+              overflow: 'hidden',
+              boxShadow: 'inset 0 1px 1px rgba(0,0,0,0.4)',
+            }}>
+              <div style={{
+                height: '100%', borderRadius: 999,
+                width: `${Math.max(rank.progressPct, 4)}%`,
+                background: 'linear-gradient(90deg, #FFD166 0%, #FFB347 100%)',
+                boxShadow: '0 0 8px rgba(255,209,102,0.4)',
+                transition: 'width 0.7s',
+              }} />
             </div>
           </div>
 
           {/* SOL price info */}
           {solPrice > 0 && (
-            <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: 0, textAlign: 'center' }}>
+            <p style={{
+              color: 'var(--text-muted)',
+              fontFamily: 'var(--font-mono)',
+              fontSize: 10.5, margin: 0,
+              textAlign: 'center',
+              letterSpacing: '0.04em',
+            }}>
               SOL ${solPrice.toFixed(0)} · 100 Stars ≈ {(100 * STARS_TO_GEL).toFixed(2)} ₾ store credit
             </p>
           )}
@@ -294,22 +389,38 @@ export default function SettingsPage() {
           {[
             { code: 'en', label: 'English', flag: '🇺🇸' },
             { code: 'ka', label: 'ქართული', flag: '🇬🇪' },
-          ].map(l => (
-            <button
-              key={l.code}
-              onClick={() => switchLocale(l.code)}
-              style={{
-                flex: 1, padding: '12px 10px', borderRadius: 14, cursor: 'pointer',
-                background: locale === l.code ? 'var(--accent-dim)' : 'var(--bg-elevated)',
-                border: `2px solid ${locale === l.code ? 'var(--accent)' : 'var(--border-default)'}`,
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
-                transition: 'all 0.2s',
-              }}
-            >
-              <span style={{ fontSize: 22 }}>{l.flag}</span>
-              <span style={{ color: locale === l.code ? 'var(--accent)' : 'var(--text-secondary)', fontSize: 13, fontWeight: 600 }}>{l.label}</span>
-            </button>
-          ))}
+          ].map(l => {
+            const active = locale === l.code;
+            return (
+              <button
+                key={l.code}
+                onClick={() => switchLocale(l.code)}
+                style={{
+                  flex: 1, padding: '14px 10px',
+                  borderRadius: 14,
+                  cursor: 'pointer',
+                  background: active
+                    ? 'linear-gradient(180deg, rgba(255,209,102,0.16) 0%, rgba(255,209,102,0.04) 100%)'
+                    : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${active ? 'rgba(255,209,102,0.45)' : 'rgba(255,255,255,0.08)'}`,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                  transition: 'all 0.2s',
+                  boxShadow: active
+                    ? 'inset 0 1px 0 rgba(255,255,255,0.10), 0 8px 24px -14px rgba(255,209,102,0.45)'
+                    : 'inset 0 1px 0 rgba(255,255,255,0.05)',
+                }}
+              >
+                <span style={{ fontSize: 22 }}>{l.flag}</span>
+                <span style={{
+                  color: active ? 'var(--terracotta)' : 'var(--text-secondary)',
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  letterSpacing: '0.01em',
+                }}>{l.label}</span>
+              </button>
+            );
+          })}
         </div>
       </Section>
 

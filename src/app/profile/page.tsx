@@ -73,22 +73,26 @@ const ICON_CHIP_STYLE: CSSProperties = {
 };
 
 const GLASS_EMPTY_STYLE: CSSProperties = {
-  padding: '24px 16px',
+  padding: '28px 16px',
   textAlign: 'center',
-  background: 'linear-gradient(180deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.01) 100%)',
-  border: '1px solid rgba(255,255,255,0.07)',
-  borderRadius: 14,
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+  background:
+    'radial-gradient(ellipse 60% 100% at 50% 0%, rgba(167,139,250,0.05) 0%, transparent 60%), ' +
+    'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)',
+  border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: 16,
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
   backdropFilter: 'blur(8px)',
   WebkitBackdropFilter: 'blur(8px)',
 };
 
 const GLASS_LIST_STYLE: CSSProperties = {
-  background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: 14,
+  background:
+    'radial-gradient(ellipse 60% 100% at 0% 0%, rgba(167,139,250,0.06) 0%, transparent 60%), ' +
+    'linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%)',
+  border: '1px solid rgba(255,255,255,0.10)',
+  borderRadius: 16,
   overflow: 'hidden',
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -16px rgba(0,0,0,0.5)',
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 28px -18px rgba(0,0,0,0.55)',
   backdropFilter: 'blur(8px)',
   WebkitBackdropFilter: 'blur(8px)',
 };
@@ -232,11 +236,11 @@ function ProfilePageContent() {
         >
           <div style={{
             width: 56, height: 56, borderRadius: '50%', margin: '0 auto 16px',
-            background: 'var(--stl-bg-elevated)',
-            border: '1px solid var(--stl-border-regular)',
+            background: 'linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%)',
+            boxShadow: '0 6px 16px -4px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.18)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <User size={22} color="var(--stl-text-muted)" strokeWidth={1.5} />
+            <User size={22} color="#FFFFFF" strokeWidth={2.2} />
           </div>
           <h1
             style={{
@@ -424,81 +428,128 @@ function ProfilePageContent() {
           </div>
         )}
 
-        {/* HEADER */}
+        {/* HERO CARD — avatar + name + address + rank progress */}
         <div style={{
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          paddingTop: 16, paddingBottom: 16, gap: 10,
+          position: 'relative',
+          background:
+            'radial-gradient(ellipse 80% 100% at 0% 0%, rgba(167,139,250,0.10) 0%, transparent 60%), ' +
+            'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)',
+          border: '1px solid rgba(255,255,255,0.10)',
+          borderRadius: 18,
+          padding: '18px 16px',
+          display: 'flex', flexDirection: 'column', gap: 16,
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 12px 36px -20px rgba(91,108,255,0.35)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
         }}>
-          <button
-            onClick={() => setAvatarOpen(true)}
-            aria-label="Change avatar"
-            style={{
-              position: 'relative', width: 80, height: 80, padding: 0, border: 'none',
-              background: 'transparent', cursor: 'pointer', borderRadius: '50%',
-            }}
-          >
-            <Avatar avatarId={profile?.avatar} initial={initial} size={80} />
-            <span
-              aria-hidden
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <button
+              onClick={() => setAvatarOpen(true)}
+              aria-label="Change avatar"
               style={{
-                position: 'absolute', right: -2, bottom: -2,
-                width: 26, height: 26, borderRadius: '50%',
-                background: 'var(--stl-bg-elevated)',
-                border: '1px solid var(--stl-border-strong)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'var(--stl-gold)',
+                position: 'relative', width: 64, height: 64, padding: 0, border: 'none',
+                background: 'transparent', cursor: 'pointer', borderRadius: '50%',
+                flexShrink: 0,
               }}
             >
-              <Camera size={12} />
-            </span>
-          </button>
-
-          <div style={{
-            textAlign: 'center', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', gap: 8,
-            fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 500,
-          }}>
-            <UsernameEditor
-              value={profile?.username ?? null}
-              fallback={fallbackName}
-              saving={saving}
-              onSave={(next) => update({ username: next })}
-            />
-            {addrShort && (
-              <button
-                onClick={handleCopy}
+              <Avatar avatarId={profile?.avatar} initial={initial} size={64} />
+              <span
+                aria-hidden
                 style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  background: 'var(--stl-bg-surface)',
-                  border: '1px solid var(--stl-border-regular)',
-                  borderRadius: 999,
-                  padding: '6px 12px',
-                  cursor: 'pointer',
+                  position: 'absolute', right: -2, bottom: -2,
+                  width: 22, height: 22, borderRadius: '50%',
+                  background: 'var(--stl-bg-elevated)',
+                  border: '1px solid var(--stl-border-strong)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'var(--stl-gold)',
                 }}
               >
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--stl-text-muted)' }}>
-                  {addrShort}
-                </span>
-                {copied
-                  ? <Check size={12} color="var(--stl-green)" />
-                  : <Copy size={12} color="var(--stl-text-dim)" />
-                }
-                <a
-                  href={`https://explorer.solana.com/address/${address}?cluster=${cluster}`}
-                  target="_blank" rel="noopener noreferrer"
-                  onClick={e => e.stopPropagation()}
-                  aria-label="View on Solana Explorer"
-                  style={{ display: 'inline-flex', alignItems: 'center' }}
+                <Camera size={11} />
+              </span>
+            </button>
+
+            <div style={{
+              flex: 1, minWidth: 0,
+              display: 'flex', flexDirection: 'column', gap: 6,
+              fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 500,
+              alignItems: 'flex-start',
+            }}>
+              <UsernameEditor
+                value={profile?.username ?? null}
+                fallback={fallbackName}
+                saving={saving}
+                onSave={(next) => update({ username: next })}
+              />
+              {addrShort && (
+                <button
+                  onClick={handleCopy}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: 999,
+                    padding: '5px 11px',
+                    cursor: 'pointer',
+                    maxWidth: '100%',
+                  }}
                 >
-                  <ExternalLink size={12} color="var(--stl-text-dim)" />
-                </a>
-              </button>
-            )}
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--stl-text-muted)' }}>
+                    {addrShort}
+                  </span>
+                  {copied
+                    ? <Check size={12} color="var(--stl-green)" />
+                    : <Copy size={12} color="var(--stl-text-dim)" />
+                  }
+                  <a
+                    href={`https://explorer.solana.com/address/${address}?cluster=${cluster}`}
+                    target="_blank" rel="noopener noreferrer"
+                    onClick={e => e.stopPropagation()}
+                    aria-label="View on Solana Explorer"
+                    style={{ display: 'inline-flex', alignItems: 'center' }}
+                  >
+                    <ExternalLink size={12} color="var(--stl-text-dim)" />
+                  </a>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Rank progress — embedded in hero card */}
+          <div>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
+              <span style={{
+                fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
+                textTransform: 'uppercase', letterSpacing: '0.16em',
+                color: 'var(--stl-text-bright)',
+              }}>
+                {rank.name}
+              </span>
+              <span style={{
+                fontFamily: 'var(--font-mono)', fontSize: 11,
+                color: 'var(--stl-text-muted)',
+                fontVariantNumeric: 'tabular-nums',
+              }}>
+                {completed.length} missions
+              </span>
+            </div>
+            <div style={{
+              height: 4, borderRadius: 999, overflow: 'hidden',
+              background: 'rgba(0,0,0,0.35)',
+              boxShadow: 'inset 0 1px 1px rgba(0,0,0,0.4)',
+            }}>
+              <div style={{
+                width: `${rankProgress}%`,
+                height: '100%',
+                background: 'linear-gradient(90deg, #FFD166 0%, #FFB347 100%)',
+                boxShadow: '0 0 8px rgba(255,209,102,0.4)',
+                transition: 'width 0.4s ease',
+              }} />
+            </div>
           </div>
         </div>
 
         {/* STATS ROW — button-like glassy tiles */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
           {stats.map(s => {
             const tone = STAT_TONES[s.tone];
             return (
@@ -508,9 +559,9 @@ function ProfilePageContent() {
                   position: 'relative',
                   background: tone.background,
                   border: tone.border,
-                  borderRadius: 14,
-                  padding: '14px 10px 13px',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
+                  borderRadius: 16,
+                  padding: '16px 12px 14px',
+                  display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8,
                   boxShadow: tone.boxShadow,
                   backdropFilter: 'blur(8px)',
                   WebkitBackdropFilter: 'blur(8px)',
@@ -519,69 +570,28 @@ function ProfilePageContent() {
                 <span style={{
                   fontFamily: 'var(--font-mono)', fontSize: 9.5, fontWeight: 600,
                   textTransform: 'uppercase', letterSpacing: '0.16em',
-                  color: tone.labelColor, textAlign: 'center',
+                  color: tone.labelColor,
                 }}>
                   {s.label}
                 </span>
                 {s.skeleton ? (
-                  <Skeleton className="w-16 h-6" />
+                  <Skeleton className="w-16 h-7" />
                 ) : (
                   <span style={{
-                    display: 'inline-flex', alignItems: 'baseline', gap: 4,
-                    fontFamily: 'var(--font-mono)', fontSize: 21, fontWeight: 700,
+                    display: 'inline-flex', alignItems: 'baseline', gap: 5,
+                    fontFamily: 'var(--font-mono)', fontSize: 24, fontWeight: 700,
                     color: tone.valueColor,
                     fontVariantNumeric: 'tabular-nums',
-                    letterSpacing: '-0.01em',
+                    letterSpacing: '-0.02em',
                     lineHeight: 1,
                   }}>
-                    <span style={{ fontSize: 13, color: tone.sparkColor, opacity: 0.9 }}>✦</span>
+                    <span style={{ fontSize: 14, color: tone.sparkColor, opacity: 0.85 }}>✦</span>
                     {s.value}
                   </span>
                 )}
               </div>
             );
           })}
-        </div>
-
-        {/* RANK BAR */}
-        <div style={{
-          background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 14,
-          padding: '14px 16px',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 9 }}>
-            <span style={{
-              fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600,
-              textTransform: 'uppercase', letterSpacing: '0.16em',
-              color: 'var(--stl-text-bright)',
-            }}>
-              {rank.name}
-            </span>
-            <span style={{
-              fontFamily: 'var(--font-mono)', fontSize: 11,
-              color: 'var(--stl-text-muted)',
-              fontVariantNumeric: 'tabular-nums',
-            }}>
-              {completed.length} missions
-            </span>
-          </div>
-          <div style={{
-            height: 4, borderRadius: 999, overflow: 'hidden',
-            background: 'rgba(0,0,0,0.35)',
-            boxShadow: 'inset 0 1px 1px rgba(0,0,0,0.4)',
-          }}>
-            <div style={{
-              width: `${rankProgress}%`,
-              height: '100%',
-              background: 'linear-gradient(90deg, #FFD166 0%, #FFB347 100%)',
-              boxShadow: '0 0 8px rgba(255,209,102,0.4)',
-              transition: 'width 0.4s ease',
-            }} />
-          </div>
         </div>
 
         {/* MY DISCOVERIES */}
@@ -608,13 +618,15 @@ function ProfilePageContent() {
                   <div
                     key={d.key}
                     style={{
-                      flexShrink: 0, width: 144,
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: 14,
+                      flexShrink: 0, width: 152,
+                      background:
+                        'radial-gradient(ellipse 80% 100% at 100% 0%, rgba(167,139,250,0.06) 0%, transparent 60%), ' +
+                        'linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%)',
+                      border: '1px solid rgba(255,255,255,0.10)',
+                      borderRadius: 16,
                       overflow: 'hidden', textAlign: 'left',
                       position: 'relative',
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 24px -16px rgba(0,0,0,0.5)',
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 28px -18px rgba(0,0,0,0.55)',
                       backdropFilter: 'blur(8px)',
                       WebkitBackdropFilter: 'blur(8px)',
                     }}
@@ -627,14 +639,14 @@ function ProfilePageContent() {
                         background: 'transparent', cursor: 'pointer', textAlign: 'left',
                       }}
                     >
-                      <div style={{ position: 'relative', width: '100%', height: 96 }}>
+                      <div style={{ position: 'relative', width: '100%', height: 104 }}>
                         <Image src={d.photo} alt={d.name} fill style={{ objectFit: 'cover' }} unoptimized />
                       </div>
-                      <div style={{ padding: '10px 10px 11px' }}>
+                      <div style={{ padding: '11px 11px 12px' }}>
                         <p style={{
                           color: 'var(--stl-text-bright)',
                           fontFamily: 'var(--font-display)',
-                          fontSize: 12.5, fontWeight: 500, margin: '0 0 3px',
+                          fontSize: 13, fontWeight: 500, margin: '0 0 3px',
                           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                         }}>
                           {d.name}
@@ -784,7 +796,7 @@ function ProfilePageContent() {
           )}
         </section>
 
-        {/* SETTINGS */}
+        {/* SETTINGS — 2x2 tile grid + 1 wide row */}
         <section>
           <div style={SECTION_HEADER_STYLE}>
             <span style={KICKER_STYLE}>Settings</span>
@@ -792,58 +804,80 @@ function ProfilePageContent() {
               All settings <ChevronRight size={11} />
             </Link>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <Link href="/settings#notifications" style={ROW_STYLE}>
-              <div style={ICON_CHIP_STYLE}>
-                <Bell size={14} color="var(--stl-gold)" />
+          {(() => {
+            const TILE_BG =
+              'radial-gradient(ellipse 80% 100% at 0% 0%, rgba(167,139,250,0.08) 0%, transparent 60%), ' +
+              'linear-gradient(180deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%)';
+            const TILE_STYLE: CSSProperties = {
+              display: 'flex', flexDirection: 'column', gap: 10,
+              padding: '14px',
+              background: TILE_BG,
+              border: '1px solid rgba(255,255,255,0.10)',
+              borderRadius: 16,
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 28px -18px rgba(0,0,0,0.55)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              textDecoration: 'none',
+              cursor: 'pointer',
+              transition: 'border-color 150ms ease, transform 120ms ease',
+            };
+            const TILE_ICON_STYLE = (color: string): CSSProperties => ({
+              width: 36, height: 36, borderRadius: 10,
+              background: `${color}1A`,
+              border: `1px solid ${color}33`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            });
+            const TILE_LABEL: CSSProperties = {
+              color: 'var(--stl-text-bright)',
+              fontFamily: 'var(--font-display)',
+              fontSize: 13, fontWeight: 500, margin: 0,
+              lineHeight: 1.2,
+            };
+            const TILE_VALUE: CSSProperties = {
+              color: 'var(--stl-text-dim)',
+              fontFamily: 'var(--font-mono)',
+              fontSize: 10.5, margin: 0,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            };
+            const tiles = [
+              { href: '/settings#notifications', icon: Bell,        color: '#FFD166', label: 'Notifications', value: 'On' },
+              { href: '/settings#appearance',    icon: Moon,        color: '#A78BFA', label: 'Appearance',    value: 'Dark / Day' },
+              { href: '/settings#wallet',        icon: Wallet,      color: '#5EEAD4', label: 'Wallet',        value: addrShort ?? '—' },
+              { href: '/settings#privacy',       icon: ShieldCheck, color: '#5EEAD4', label: 'Privacy & Data', value: 'Manage' },
+            ];
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+                  {tiles.map(({ href, icon: Icon, color, label, value }) => (
+                    <Link key={href} href={href} style={TILE_STYLE}>
+                      <div style={TILE_ICON_STYLE(color)}>
+                        <Icon size={16} color={color} />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+                        <p style={TILE_LABEL}>{label}</p>
+                        <p style={TILE_VALUE}>{value}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+                <Link href="/settings#accounts" style={ROW_STYLE}>
+                  <div style={ICON_CHIP_STYLE}>
+                    <Mail size={14} color="var(--stl-text-bright)" />
+                  </div>
+                  <p style={ROW_LABEL_STYLE}>Connected accounts</p>
+                  <span style={{
+                    ...ROW_VALUE_STYLE,
+                    maxWidth: 140,
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>
+                    {email ?? '—'}
+                  </span>
+                  <ChevronRight size={14} color="var(--stl-text-dim)" />
+                </Link>
               </div>
-              <p style={ROW_LABEL_STYLE}>Notifications</p>
-              <span style={ROW_VALUE_STYLE}>On</span>
-              <ChevronRight size={14} color="var(--stl-text-dim)" />
-            </Link>
-
-            <Link href="/settings#appearance" style={ROW_STYLE}>
-              <div style={ICON_CHIP_STYLE}>
-                <Moon size={14} color="var(--stl-text-bright)" />
-              </div>
-              <p style={ROW_LABEL_STYLE}>Appearance</p>
-              <span style={ROW_VALUE_STYLE}>Dark / Day</span>
-              <ChevronRight size={14} color="var(--stl-text-dim)" />
-            </Link>
-
-            <Link href="/settings#wallet" style={ROW_STYLE}>
-              <div style={ICON_CHIP_STYLE}>
-                <Wallet size={14} color="var(--stl-text-bright)" />
-              </div>
-              <p style={ROW_LABEL_STYLE}>Wallet</p>
-              <span style={ROW_VALUE_STYLE}>{addrShort ?? '—'}</span>
-              <ChevronRight size={14} color="var(--stl-text-dim)" />
-            </Link>
-
-            <Link href="/settings#privacy" style={ROW_STYLE}>
-              <div style={ICON_CHIP_STYLE}>
-                <ShieldCheck size={14} color="var(--stl-green)" />
-              </div>
-              <p style={ROW_LABEL_STYLE}>Privacy & Data</p>
-              <span style={ROW_VALUE_STYLE}>Manage</span>
-              <ChevronRight size={14} color="var(--stl-text-dim)" />
-            </Link>
-
-            <Link href="/settings#accounts" style={ROW_STYLE}>
-              <div style={ICON_CHIP_STYLE}>
-                <Mail size={14} color="var(--stl-text-bright)" />
-              </div>
-              <p style={ROW_LABEL_STYLE}>Connected accounts</p>
-              <span style={{
-                ...ROW_VALUE_STYLE,
-                maxWidth: 140,
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              }}>
-                {email ?? '—'}
-              </span>
-              <ChevronRight size={14} color="var(--stl-text-dim)" />
-            </Link>
-          </div>
+            );
+          })()}
         </section>
 
         {/* REDEEM AT ASTROMAN — gold CTA, mirrors homepage primary button */}
