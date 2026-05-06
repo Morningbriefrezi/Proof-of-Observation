@@ -30,18 +30,15 @@ interface ARFinderProps {
   observerLon: number;
   /** Live compass heading from the parent's useDeviceHeading() — sharing
    *  the instance avoids a second iOS permission prompt and ensures the
-   *  AR view picks up wherever the dome left off. */
+   *  immersive view picks up wherever the dome left off. */
   heading: number | null;
   altitude: number | null;
   accuracy: number | null;
   headingStatus: HeadingStatus;
-  /** Pre-acquired camera stream from the launcher's user-gesture click.
-   *  Falls back to a starfield background when null. */
-  cameraStream: MediaStream | null;
-  /** When set, AR leads the user to this body — edge arrow when off-screen,
-   *  hold-to-lock when centered. */
+  /** When set, the view leads the user to this body — edge arrow when
+   *  off-screen, hold-to-lock when centered. */
   activeId: ObjectId | null;
-  /** Called when the user picks a different target from the in-AR picker. */
+  /** Called when the user picks a different target from the in-view picker. */
   onSelectActive: (id: ObjectId) => void;
   onClose: () => void;
 }
@@ -84,7 +81,6 @@ export function ARFinder({
   altitude,
   accuracy,
   headingStatus,
-  cameraStream,
   activeId,
   onSelectActive,
   onClose,
@@ -96,10 +92,8 @@ export function ARFinder({
     h: typeof window !== 'undefined' ? window.innerHeight : 640,
   });
 
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-
-  // Stars are computed once when AR opens. They drift ~0.25°/min — plenty
-  // accurate for a phone-AR session lasting a few minutes.
+  // Stars are computed once when the immersive view opens. They drift
+  // ~0.25°/min — plenty accurate for a session lasting a few minutes.
   const stars = useMemo<PositionedStar[]>(() => {
     return positionStars(observerLat, observerLon, new Date());
   }, [observerLat, observerLon]);
@@ -129,16 +123,6 @@ export function ARFinder({
       window.removeEventListener('orientationchange', onResize);
     };
   }, []);
-
-  // Wire the camera stream into the <video> element. The stream itself is
-  // created in the launcher click, then passed in — this keeps the camera
-  // permission request in the same user-gesture window as the open click.
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v || !cameraStream) return;
-    v.srcObject = cameraStream;
-    v.play().catch(() => { /* autoplay deferred */ });
-  }, [cameraStream]);
 
   const phoneAim = useMemo(() => ({
     azimuth: heading ?? 0,
@@ -335,17 +319,11 @@ export function ARFinder({
 
   return (
     <div className="ar-overlay" role="dialog" aria-modal="true" aria-label={t('title')}>
-      {cameraStream ? (
-        <video
-          ref={videoRef}
-          className="ar-overlay__camera"
-          autoPlay
-          playsInline
-          muted
-        />
-      ) : (
-        <div className="ar-overlay__starfield" />
-      )}
+      <div className="ar-overlay__starfield" aria-hidden="true">
+        <div className="ar-overlay__starfield-haze" />
+        <div className="ar-overlay__starfield-milkyway" />
+        <div className="ar-overlay__starfield-dust" />
+      </div>
 
       <svg
         className="ar-constellations"
@@ -461,12 +439,6 @@ export function ARFinder({
           <strong>{phoneAim.azimuth.toFixed(1)}°</strong>
         </div>
       </div>
-
-      {!cameraStream && (
-        <div className="ar-bottom-hint" style={{ bottom: 'auto', top: 70 }}>
-          {t('fallbacks.noCamera')}
-        </div>
-      )}
 
       <div className="ar-compass-strip" aria-hidden="true">
         <div className="ar-compass-strip__inner">

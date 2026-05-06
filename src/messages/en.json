@@ -396,19 +396,18 @@
       "upAllNight": "Up all night"
     },
     "ar": {
-      "title": "AR Sky",
-      "permissionBody": "Stellar will use your camera and motion sensors to overlay live planet positions on your sky.",
-      "permissionInstructions": "Hold your phone up and pan around — the Sun, Moon, and planets will appear in the right place.",
+      "title": "Immersive Sky",
+      "permissionBody": "Stellar uses your motion sensors to render the live night sky for your location.",
+      "permissionInstructions": "Hold your phone up and pan around — the Sun, Moon, planets, and constellations appear in the right place.",
       "permissionItems": {
-        "camera": "Camera (to show what's in front of you)",
         "motion": "Motion sensors (to track which way you face)",
         "location": "Location (already enabled)"
       },
-      "enable": "Enable AR",
+      "enable": "Enable Sky View",
       "cancel": "Cancel",
       "denied": {
         "title": "Permission denied",
-        "body": "Stellar needs camera and motion access to use AR.",
+        "body": "Stellar needs motion access to render the live sky.",
         "tryAgain": "Try again",
         "useHorizonInstead": "Back to horizon view"
       },
@@ -418,7 +417,7 @@
       "panToward": "toward {object}",
       "panAround": "Pan around to see the planets",
       "liftPhone": "Lift your phone toward the sky",
-      "openAr": "View in AR",
+      "openAr": "Immersive sky view",
       "poorAccuracy": "Compass uncertain — wave phone in a figure-8",
       "targetLabel": "Target",
       "targetEmpty": "Pick a target",
@@ -427,8 +426,7 @@
       "centeredOn": "Centered on",
       "off": "off",
       "fallbacks": {
-        "noCamera": "Camera unavailable — using starfield",
-        "noSensors": "AR works on a phone with motion sensors. On desktop, use the horizon view instead."
+        "noSensors": "Live sky works on a phone with motion sensors. On desktop, use the horizon view instead."
       },
       "close": "Close"
     },
@@ -571,7 +569,51 @@
       "page_2": "Best telescope for beginners? 🔭",
       "page_3": "Explain the Bortle scale",
       "page_4": "Why is the sky dark at night?"
+    },
+    "fieldBanner": {
+      "label": "Going off-grid?",
+      "body": "Get Astra Field Mode — runs on the phone, no signal needed.",
+      "cta": "Get Field Mode"
     }
+  },
+  "field": {
+    "back": "Back to Astra",
+    "eyebrow": "Stellar Field — Android preview",
+    "title": "Astra. On the phone. Offline.",
+    "lede": "Astronomers travel to dark-sky sites with no cell signal — exactly where the cloud AI fails. Field Mode runs Astra entirely on your phone, so the answers keep coming when the bars don't.",
+    "online": {
+      "label": "Online · this app",
+      "title": "Cloud Astra",
+      "body": "Claude API, fast, broad. Best for planning a session at home or in the car."
+    },
+    "offline": {
+      "label": "Offline · Field Mode",
+      "title": "On-device Astra",
+      "body": "Llama 3.2 1B + an astronomy RAG corpus, running on the phone. Free per call. Works in airplane mode."
+    },
+    "capabilities": {
+      "heading": "What runs on the phone",
+      "llm": {
+        "title": "Local LLM with RAG",
+        "body": "@qvac/llm-llamacpp + @qvac/embed-llamacpp. Llama 3.2 1B Q4_0 over 72 chunks of Messier, constellation, and telescope reference data. Cited answers, no server."
+      },
+      "whisper": {
+        "title": "Voice notes at the eyepiece",
+        "body": "@qvac/transcription-whispercpp. Press, speak the observation, release. Whisper transcribes locally and saves it as a structured record — even with the phone in airplane mode."
+      },
+      "background": {
+        "title": "Background sky checker",
+        "body": "While you're under the scope, a local QVAC loop watches planet positions and surfaces alerts ('Saturn is now above 30 degrees') without a server round-trip."
+      }
+    },
+    "cta": {
+      "title": "Field Mode preview",
+      "body": "Submitted to the Tether Frontier track of Colosseum 2026. Android only for now — iOS pending.",
+      "download": "Download APK",
+      "soon": "Available shortly",
+      "platform": "Android · physical device · ~700MB first-launch model download"
+    },
+    "credit": "Built with Tether QVAC · on-chain proof on Solana"
   },
   "marketplace": {
     "title": "Marketplace",

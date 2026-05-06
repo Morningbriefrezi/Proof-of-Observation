@@ -2,7 +2,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Camera } from 'lucide-react';
+import { Telescope } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useLocation } from '@/lib/location';
 import { useDeviceHeading } from '@/lib/sky/use-device-heading';
@@ -58,46 +58,17 @@ export default function SkyPage() {
   const [activeId, setActiveId] = useState<ObjectId | null>(null);
   const [tier, setTier] = useState<TierFilter>('all');
   const [arOpen, setArOpen] = useState(false);
-  const [arStream, setArStream] = useState<MediaStream | null>(null);
 
-  // Both motion AND camera permissions need a user-gesture chain on iOS.
-  // Firing them from the same click handler keeps the chain valid; awaiting
-  // one before the other works on iOS Safari as long as no async hop runs in
-  // between. setArOpen(true) is called immediately so the overlay appears
-  // even if the camera stream is still resolving.
-  const handleArOpen = useCallback(async () => {
-    if (compass.heading == null) {
-      // Fire iOS motion-permission prompt; on Android this is a no-op. We
-      // intentionally don't await the result — the camera permission below
-      // needs to remain in the same gesture window.
-      void compass.request();
-    }
+  // Immersive sky uses motion sensors only (no camera). Fire the iOS motion
+  // prompt on tap so the overlay opens already tracking the user's heading.
+  const handleArOpen = useCallback(() => {
+    if (compass.heading == null) void compass.request();
     setArOpen(true);
-    if (typeof navigator !== 'undefined' && navigator.mediaDevices?.getUserMedia) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'environment' } },
-          audio: false,
-        });
-        setArStream(stream);
-      } catch {
-        // Camera denied or unavailable — AR falls back to a starfield bg.
-      }
-    }
   }, [compass]);
 
   const handleArClose = useCallback(() => {
-    if (arStream) arStream.getTracks().forEach((t) => t.stop());
-    setArStream(null);
     setArOpen(false);
-  }, [arStream]);
-
-  // Stop camera on unmount in case the user navigates away while AR is open.
-  useEffect(() => {
-    return () => {
-      if (arStream) arStream.getTracks().forEach((t) => t.stop());
-    };
-  }, [arStream]);
+  }, []);
 
   const fetchFinder = useCallback(async () => {
     setFinderError(null);
@@ -273,37 +244,40 @@ export default function SkyPage() {
                   visibleCount={tableObjects.filter((o) => o.visible && o.id !== 'sun').length}
                   activeName={activeObject?.name ?? null}
                 />
-                <SkyMap
-                  objects={tableObjects}
-                  activeId={activeId}
-                  onSelect={handleSelect}
-                  heading={compass.heading}
-                  userAltitude={compass.altitude}
-                  headingStatus={compass.status}
-                  accuracy={compass.accuracy}
-                  onCalibrate={compass.request}
-                  calibrationOffset={compass.offset}
-                  onNudge={compass.nudge}
-                  onProximityChange={compass.setProximityDeg}
-                  constellationStars={constellationStars}
-                  constellationLines={CONSTELLATION_LINES}
-                  hopAnchor={hopAnchor ? {
-                    id: hopAnchor.id,
-                    name: hopAnchor.name,
-                    azimuth: hopAnchor.azimuth,
-                    altitude: hopAnchor.altitude,
-                  } : null}
-                />
-                {compass.status !== 'unavailable' && (
-                  <button
-                    type="button"
-                    className="sky-v3__ar-launch"
-                    onClick={handleArOpen}
-                  >
-                    <Camera size={14} />
-                    <span>{tAr('openAr')}</span>
-                  </button>
-                )}
+                <div className="sky-v3__map-stage">
+                  <SkyMap
+                    objects={tableObjects}
+                    activeId={activeId}
+                    onSelect={handleSelect}
+                    heading={compass.heading}
+                    userAltitude={compass.altitude}
+                    headingStatus={compass.status}
+                    accuracy={compass.accuracy}
+                    onCalibrate={compass.request}
+                    calibrationOffset={compass.offset}
+                    onNudge={compass.nudge}
+                    onProximityChange={compass.setProximityDeg}
+                    constellationStars={constellationStars}
+                    constellationLines={CONSTELLATION_LINES}
+                    hopAnchor={hopAnchor ? {
+                      id: hopAnchor.id,
+                      name: hopAnchor.name,
+                      azimuth: hopAnchor.azimuth,
+                      altitude: hopAnchor.altitude,
+                    } : null}
+                  />
+                  {compass.status !== 'unavailable' && (
+                    <button
+                      type="button"
+                      className="sky-v3__ar-launch"
+                      onClick={handleArOpen}
+                      aria-label={tAr('openAr')}
+                      title={tAr('openAr')}
+                    >
+                      <Telescope size={16} aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
               </div>
               <TargetVisibleGrid
                 objects={finder.objects}
@@ -357,7 +331,6 @@ export default function SkyPage() {
           altitude={compass.altitude}
           accuracy={compass.accuracy}
           headingStatus={compass.status}
-          cameraStream={arStream}
           activeId={activeId}
           onSelectActive={handleSelect}
           onClose={handleArClose}
