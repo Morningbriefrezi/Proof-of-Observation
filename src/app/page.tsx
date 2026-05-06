@@ -1,80 +1,18 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import type { ReactElement } from 'react';
-import { MISSIONS } from '@/lib/constants';
 import HeroSkyPanel from '@/components/home/HeroSkyPanelLazy';
 
-const HERO_MISSION_IDS = ['moon', 'jupiter', 'pleiades', 'orion', 'saturn', 'andromeda', 'crab'] as const;
-
-const MISSION_LABEL: Record<string, { name: string; meta: string }> = {
-  moon:      { name: 'The Moon',      meta: 'Naked eye · beginner' },
-  jupiter:   { name: 'Jupiter',       meta: 'Galilean moons' },
-  pleiades:  { name: 'Pleiades',      meta: 'Star cluster · easy' },
-  orion:     { name: 'Orion Nebula',  meta: 'Deep sky · medium' },
-  saturn:    { name: 'Saturn',        meta: 'Ring system' },
-  andromeda: { name: 'Andromeda',     meta: 'Deep sky · hard' },
-  crab:      { name: 'Crab Nebula',   meta: 'Supernova · expert' },
-};
-
-const MISSION_ICONS: Record<string, ReactElement> = {
-  moon: (
-    <path d="M22 16a8 8 0 11-12-7 6 6 0 0012 7z" />
-  ),
-  jupiter: (
-    <>
-      <circle cx="16" cy="16" r="9" />
-      <ellipse cx="16" cy="16" rx="14" ry="3" transform="rotate(-15 16 16)" />
-    </>
-  ),
-  pleiades: (
-    <>
-      <circle cx="10" cy="10" r="2" />
-      <circle cx="20" cy="8"  r="1.5" />
-      <circle cx="14" cy="14" r="1.5" />
-      <circle cx="22" cy="16" r="2" />
-      <circle cx="9"  cy="20" r="1.5" />
-      <circle cx="18" cy="22" r="1.5" />
-      <circle cx="24" cy="22" r="1" />
-    </>
-  ),
-  orion: (
-    <>
-      <path d="M4 16c4-8 12-10 16-6s2 12-4 14-12-4-12-8z" />
-      <circle cx="14" cy="14" r="2" />
-      <circle cx="20" cy="18" r="1.5" />
-    </>
-  ),
-  saturn: (
-    <>
-      <circle cx="16" cy="16" r="7" />
-      <ellipse cx="16" cy="16" rx="14" ry="4" transform="rotate(-20 16 16)" />
-    </>
-  ),
-  andromeda: (
-    <>
-      <ellipse cx="16" cy="16" rx="13" ry="5" transform="rotate(-25 16 16)" />
-      <ellipse cx="16" cy="16" rx="6"  ry="3" transform="rotate(-25 16 16)" />
-      <circle cx="16" cy="16" r="1.5" />
-    </>
-  ),
-  crab: (
-    <>
-      <path d="M6 16c2-6 8-9 12-7s5 9 0 13-12-1-12-6z" />
-      <path d="M10 12c2 1 4 0 5-2M22 14c-1 2-3 3-5 2" />
-    </>
-  ),
-};
-
-const HERO_MISSIONS = HERO_MISSION_IDS.map((id) => {
-  const m = MISSIONS.find((x) => x.id === id);
-  const label = MISSION_LABEL[id];
-  return {
-    id,
-    name: label.name,
-    meta: label.meta,
-    stars: m?.stars ?? 0,
-  };
-});
+// Mirrors src/app/missions/page.tsx GRID — keep the seven hero targets in the
+// same order as the missions deck so labels, equip and difficulty don't drift.
+const HERO_MISSIONS: { id: string; name: string; equip: string; diff: string; stars: number }[] = [
+  { id: 'moon',      name: 'The Moon',     equip: 'Naked eye',  diff: 'Easy',   stars: 50 },
+  { id: 'jupiter',   name: 'Jupiter',      equip: 'Telescope',  diff: 'Easy',   stars: 75 },
+  { id: 'pleiades',  name: 'Pleiades',     equip: 'Naked eye',  diff: 'Easy',   stars: 60 },
+  { id: 'saturn',    name: 'Saturn',       equip: 'Telescope',  diff: 'Medium', stars: 100 },
+  { id: 'orion',     name: 'Orion Nebula', equip: 'Telescope',  diff: 'Medium', stars: 100 },
+  { id: 'andromeda', name: 'Andromeda',    equip: 'Binoculars', diff: 'Hard',   stars: 175 },
+  { id: 'crab',      name: 'Crab Nebula',  equip: 'Telescope',  diff: 'Expert', stars: 250 },
+];
 
 const TILE_BRASS = 'bg-[rgba(255,209,102,0.08)] border-[rgba(255,209,102,0.2)]';
 const TILE_PURPLE = 'bg-[rgba(176,127,232,0.08)] border-[rgba(176,127,232,0.2)]';
@@ -263,150 +201,20 @@ function HowStep({
   );
 }
 
-function SigninScreen() {
+function PhonePic({ src, alt }: { src: string; alt: string }) {
   return (
-    <PhoneFrame>
-      <div className="flex flex-col items-center pt-6">
-        <div className="w-9 h-9 rounded-full bg-[#FFD166]/15 border border-[#FFD166]/30 flex items-center justify-center">
-          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="#FFD166" strokeWidth="1.8">
-            <circle cx="12" cy="12" r="3" />
-            <ellipse cx="12" cy="12" rx="10" ry="4" />
-          </svg>
-        </div>
-        <div className="mt-3 text-white text-[12px] font-semibold tracking-wide">STELLAR</div>
-        <div className="mt-5 text-white text-[13px] font-medium">Sign in</div>
-        <div className="mt-1 text-white/50 text-[10px]">Wallet appears silently</div>
-
-        <div className="mt-5 w-full bg-white/[0.04] border border-white/10 rounded-[10px] px-3 py-2.5 flex items-center gap-2">
-          <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="#9BA3B4" strokeWidth="1.6">
-            <rect x="3" y="5" width="18" height="14" rx="2" />
-            <path d="M3 7l9 6 9-6" />
-          </svg>
-          <span className="text-white/80 text-[10.5px]">rezi@astroman.ge</span>
-        </div>
-
-        <div className="mt-2 w-full rounded-[10px] bg-[#FFD166] text-[#0B0E17] text-[11px] font-bold py-2.5 text-center">
-          Continue
-        </div>
-
-        <div className="mt-4 w-full rounded-[10px] border border-[#14B8A6]/25 bg-[#14B8A6]/[0.06] px-3 py-2 flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#14B8A6] animate-pulse" />
-          <span className="text-[#5EEAD4] text-[9.5px] font-mono uppercase tracking-wider">
-            Wallet ready
-          </span>
-        </div>
-
-        <div className="mt-2 text-white/35 text-[9px]">No seed phrase. No extension.</div>
+    <div className="relative mx-auto w-[230px] md:w-[260px] aspect-[884/1498] rounded-[28px] bg-[#05070D] p-[5px] shadow-[0_30px_70px_-20px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.06)]">
+      <div className="absolute -inset-[1px] rounded-[29px] ring-1 ring-white/[0.04] pointer-events-none" />
+      <div className="relative h-full w-full rounded-[24px] overflow-hidden bg-[#0B0E17]">
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="(min-width: 768px) 260px, 230px"
+          className="object-cover"
+        />
       </div>
-    </PhoneFrame>
-  );
-}
-
-function ShootScreen() {
-  return (
-    <PhoneFrame>
-      <div className="flex flex-col pt-3">
-        <div className="flex items-center justify-between">
-          <span className="text-white/60 text-[10px] font-mono uppercase tracking-wider">Tonight</span>
-          <span className="flex items-center gap-1 text-[#5EEAD4] text-[9px] font-mono uppercase tracking-wider">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#14B8A6]" /> Clear
-          </span>
-        </div>
-
-        <div className="mt-2 relative aspect-square w-full rounded-[14px] overflow-hidden bg-gradient-to-br from-[#0F1424] via-[#1A1F3A] to-[#0B0E17]">
-          {[
-            { l: '14%', t: '22%', s: 1.5 },
-            { l: '70%', t: '18%', s: 1 },
-            { l: '32%', t: '60%', s: 1.2 },
-            { l: '80%', t: '70%', s: 0.9 },
-            { l: '50%', t: '40%', s: 0.8 },
-            { l: '22%', t: '80%', s: 1 },
-            { l: '60%', t: '85%', s: 0.9 },
-          ].map((s, i) => (
-            <span
-              key={i}
-              className="absolute rounded-full bg-white/80"
-              style={{ left: s.l, top: s.t, width: s.s * 2, height: s.s * 2 }}
-            />
-          ))}
-          <div
-            className="absolute rounded-full"
-            style={{
-              left: '46%',
-              top: '44%',
-              width: 28,
-              height: 28,
-              background:
-                'radial-gradient(circle, rgba(255,209,102,0.85) 0%, rgba(255,209,102,0.25) 60%, transparent 100%)',
-            }}
-          />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-14 h-14 rounded-full border border-[#FFD166]/60" />
-            <div className="absolute w-20 h-20 rounded-full border border-[#FFD166]/25" />
-          </div>
-          <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/50 text-[#FFD166] text-[8.5px] font-mono uppercase tracking-wider">
-            Jupiter · 38°
-          </div>
-        </div>
-
-        <div className="mt-3 rounded-[10px] bg-white/[0.04] border border-white/10 p-2.5">
-          <div className="flex items-center justify-between text-[9px] font-mono uppercase tracking-wider text-white/50">
-            <span>Sky</span><span>Moon</span><span>Seeing</span>
-          </div>
-          <div className="mt-1 flex items-center justify-between text-[10.5px] text-white">
-            <span>Clear</span><span>14%</span><span>Good</span>
-          </div>
-        </div>
-
-        <div className="mt-3 mx-auto w-12 h-12 rounded-full bg-white border-[3px] border-[#FFD166] shadow-[0_0_0_3px_rgba(255,209,102,0.2)]" />
-      </div>
-    </PhoneFrame>
-  );
-}
-
-function RedeemScreen() {
-  return (
-    <PhoneFrame>
-      <div className="flex flex-col pt-3">
-        <div className="text-white/60 text-[10px] font-mono uppercase tracking-wider">Your Stars</div>
-        <div className="mt-1 flex items-baseline gap-1.5">
-          <span className="text-white text-[28px] font-bold leading-none">2,840</span>
-          <StarSparkle className="w-3.5 h-3.5" />
-        </div>
-        <div className="mt-1 flex items-center gap-1.5 text-[#5EEAD4] text-[9.5px] font-mono">
-          <svg viewBox="0 0 12 12" className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="1.8">
-            <path d="M2 8l3-3 2 2 3-4" />
-          </svg>
-          +120 this week
-        </div>
-
-        <div className="mt-4 text-white/60 text-[9.5px] font-mono uppercase tracking-wider">
-          Redeem at Astroman
-        </div>
-
-        <div className="mt-2 rounded-[12px] bg-white/[0.04] border border-white/10 overflow-hidden">
-          <div className="aspect-[16/10] bg-gradient-to-br from-[#1A1F3A] to-[#0B0E17] relative flex items-center justify-center">
-            <svg viewBox="0 0 64 40" className="w-20 h-12" fill="none" stroke="#FFD166" strokeWidth="1.4" strokeLinecap="round">
-              <rect x="6" y="14" width="40" height="8" rx="1" />
-              <rect x="44" y="11" width="14" height="14" rx="1" />
-              <path d="M26 22v8M18 30h16" />
-              <circle cx="51" cy="18" r="1.2" fill="#FFD166" />
-            </svg>
-          </div>
-          <div className="px-2.5 py-2">
-            <div className="text-white text-[11px] font-medium leading-tight">Celestron AstroMaster</div>
-            <div className="mt-1 flex items-center justify-between">
-              <span className="text-[#FFD166] text-[10.5px] font-mono">2,400 ★</span>
-              <span className="text-white/40 text-[9px] line-through font-mono">₾ 480</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-2 rounded-[10px] bg-[#FFD166] text-[#0B0E17] text-[11px] font-bold py-2 text-center">
-          Redeem
-        </div>
-      </div>
-    </PhoneFrame>
+    </div>
   );
 }
 
@@ -747,18 +555,18 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-6">
             <HowStep
               title="Sign in"
-              caption="Email login. Wallet appears silently."
-              screen={<SigninScreen />}
+              caption="Email or Google. Wallet appears silently."
+              screen={<PhonePic src="/landing/login.png" alt="Sign in to Stellar" />}
             />
             <HowStep
-              title="Shoot the sky"
-              caption="Phone, DSLR, or telescope. We verify the night."
-              screen={<ShootScreen />}
+              title="Complete missions"
+              caption="Photograph each target. We verify the night."
+              screen={<PhonePic src="/landing/missions.png" alt="Tonight's mission: Jupiter" />}
             />
             <HowStep
-              title="Earn &amp; redeem"
-              caption="Stars for every observation. Spend at Astroman."
-              screen={<RedeemScreen />}
+              title="Earn rewards"
+              caption="Stars for every discovery. Spend at real shops."
+              screen={<PhonePic src="/landing/stars.png" alt="Your Stars and discoveries" />}
             />
           </div>
         </div>
@@ -788,20 +596,22 @@ export default function HomePage() {
             <div className="order-2 md:order-2">
               <ul className="divide-y divide-white/[0.06] border-y border-white/[0.06]">
                 {HERO_MISSIONS.map((m) => (
-                  <li key={m.id} className="flex items-center justify-between py-3 md:py-3.5">
-                    <div>
-                      <div className="text-white text-[15px] md:text-[16px] font-semibold">{m.name}</div>
-                      <div className="text-[#9BA3B4] text-[12px] md:text-[13px]">{m.meta}</div>
+                  <li key={m.id} className="flex items-center justify-between py-2 md:py-2.5">
+                    <div className="min-w-0">
+                      <div className="text-white text-[12px] md:text-[13px] font-semibold leading-tight">{m.name}</div>
+                      <div className="text-[#9BA3B4] text-[10px] md:text-[11px] font-mono uppercase tracking-[0.06em] mt-0.5">
+                        {m.equip} · {m.diff}
+                      </div>
                     </div>
-                    <div className="text-[#FFD166] font-mono text-[13px] md:text-[14px] inline-flex items-center gap-1.5">
-                      <StarSparkle />+{m.stars}
+                    <div className="text-[#FFD166] font-mono text-[10.5px] md:text-[11.5px] inline-flex items-center gap-1 tabular-nums">
+                      <StarSparkle className="w-2.5 h-2.5" />+{m.stars}
                     </div>
                   </li>
                 ))}
               </ul>
               <Link
                 href="/missions"
-                className="mt-5 md:mt-6 inline-flex items-center gap-2 text-[#FFD166] font-mono text-[13px] hover:gap-3 transition-all no-underline"
+                className="mt-4 md:mt-5 inline-flex items-center gap-2 text-[#FFD166] font-mono text-[11px] md:text-[12px] hover:gap-3 transition-all no-underline"
               >
                 All seven · free telescope →
               </Link>
