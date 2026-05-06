@@ -21,7 +21,7 @@ const SECTIONS: HubSection[] = [
       { href: '/chat',        label: 'ASTRA AI',     icon: MessageCircle },
       { href: '/feed',        label: 'Feed',         icon: Sparkles },
       { href: '/learn',       label: 'Learning',     icon: BookOpen },
-      { href: '/network',     label: 'Network',      icon: Globe },
+      { href: '/network',     label: 'Network',      icon: Globe,        comingSoon: true },
       { href: '/leaderboard', label: 'Leaderboard',  icon: Trophy,       comingSoon: true },
       { href: '/marketplace', label: 'Marketplace',  icon: ShoppingBag },
     ],
